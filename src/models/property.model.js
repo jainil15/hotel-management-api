@@ -1,10 +1,11 @@
 const mongoose = require("mongoose");
+const { z } = require("zod");
 const Schema = mongoose.Schema;
 
 const propertySchema = new Schema(
   {
     name: { type: String, required: true },
-    businessSummary: { type: String, required: false },
+    businessSummary: { type: String, required: true },
     address: { type: String, required: true },
     city: { type: String, required: true },
     state: { type: String, required: true },
@@ -17,5 +18,18 @@ const propertySchema = new Schema(
   { timestamps: true }
 );
 
+const PropertyValidationSchema = z.object({
+  name: z.string().min(3).max(255),
+  businessSummary: z.string(),
+  address: z.string(),
+  city: z.string(),
+  state: z.string(),
+  country: z.string(),
+  phone_number: z.string().min(10).max(10),
+  email: z.string().email(),
+  active: z.boolean(),
+  website: z.string().url(),
+});
+
 const Property = mongoose.model("Property", propertySchema);
-module.exports = Property;
+module.exports = { Property, PropertyValidationSchema };

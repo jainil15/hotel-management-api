@@ -18,6 +18,12 @@ const register = async (req, res) => {
         .status(400)
         .json({ error: result.error.flatten().fieldErrors });
     }
+
+    // check if user already exists
+    const existingUser = await userService.getByEmail(user.email);
+    if (existingUser) {
+      return res.status(400).json({ error: { email: "Email already exists" } });
+    }
     // create user
     await userService.create(user);
     return res.status(200).json({ result: { user: user } });
@@ -103,6 +109,7 @@ const logout = async (req, res) => {
   }
 };
 
+// Get User
 const getUser = async (req, res) => {
   const { iat, exp, ...user } = req.user;
   try {
