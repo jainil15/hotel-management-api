@@ -1,0 +1,66 @@
+stages:
+  - create-env-file
+  - build-push-image
+  - deploy-to-testing
+
+variables:
+  IMAGE_TAG: $CI_COMMIT_SHORT_SHA
+  IMAGE_NAME: $CI_REGISTRY_IMAGE
+  PORT: 8000
+  FOLDER_NAME: "onelyk-nodejs-backend"
+
+create-env-file:
+  environment: testing
+  stage: create-env-file
+  image: ubuntu:22.04
+  script:
+    - chmod +x set_env.sh
+    - ./set_env.sh
+  artifacts:
+    paths:
+      - .env
+    expire_in: 30 min
+
+build-image: # Build stage triggers for all push on every branch for testing
+  environment: testing
+  stage: build-push-image
+  image: docker:24.0.5
+  services:
+    - docker:24.0.5-dind
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - echo "Building image"
+    - docker compose build
+    - docker images
+    - echo "Pushing image"
+    - docker compose push
+
+# Deploy to ec2 instance for testing
+deploy to testing:
+  image: ubuntu:22.04
+  # rules:
+  #   - if: $CI_COMMIT_BRANCH == "testing"
+  stage: deploy-to-testing
+  environment: testing
+  before_script:
+    - apt-get update -y && apt-get install openssh-client -y
+    - mkdir ~/.ssh
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+  
+  script:
+    - scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ./docker-compose.yml ./.env $SSH_USER@$SSH_HOST:~/$FOLDER_NAME/
+    - ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa $SSH_USER@$SSH_HOST "
+      cd $FOLDER_NAME &&
+      sudo docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY &&
+      sudo docker compose down --volumes &&
+      sudo docker compose pull &&
+      sudo docker compose up -d &&
+      sudo docker system prune -a -f &&
+      sudo docker compose ps
+      "
+
+  after_script:
+    - rm -rf ~/.ssh/id_rsa
+    - ls ~/.ssh/
