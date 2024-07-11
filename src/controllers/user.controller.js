@@ -20,7 +20,7 @@ const register = async (req, res) => {
     }
     // create user
     await userService.create(user);
-    return res.status(200).json({ result: "User created successfully" });
+    return res.status(200).json({ result: { user: user } });
   } catch (e) {
     console.error(e);
     return res.status(500).json({ error: { server: "Internal server error" } });
@@ -75,7 +75,7 @@ const login = async (req, res) => {
         sameSite: "None",
       });
       // return user and access token
-      req.user = _user;
+      // req.user = _user;
       return res
         .status(200)
         .json({ result: { user: _user, accessToken: accessToken } });
