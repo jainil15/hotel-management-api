@@ -10,7 +10,7 @@ const propertySchema = new Schema(
     city: { type: String, required: true },
     state: { type: String, required: true },
     country: { type: String, required: true },
-    phone_number: { type: String, required: true },
+    phoneNumber: { type: String, required: true },
     email: { type: String, required: true },
     active: { type: Boolean, required: true },
     website: { type: String, required: true },
@@ -25,11 +25,14 @@ const PropertyValidationSchema = z.object({
   city: z.string(),
   state: z.string(),
   country: z.string(),
-  phone_number: z.string().min(10).max(10),
+  phoneNumber: z.string().min(10).max(10),
   email: z.string().email(),
   active: z.boolean(),
   website: z.string().url(),
 });
 
 const Property = mongoose.model("Property", propertySchema);
+Property.init().then(() => {
+  console.log("Initialzed Property Model");
+});
 module.exports = { Property, PropertyValidationSchema };

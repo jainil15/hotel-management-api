@@ -1,8 +1,10 @@
 const { UserValidationSchema, User } = require("../models/user.model");
 const userService = require("../services/user.service");
 const authService = require("../services/auth.service");
+const propertyAccessService = require("../services/propertyAccess.service");
 const { generateAccessToken } = require("../utils/generateToken");
 const { z } = require("zod");
+const cookieOptions = require("../configs/cookie.config");
 
 // Registering new User
 const register = async (req, res) => {
@@ -25,8 +27,27 @@ const register = async (req, res) => {
       return res.status(400).json({ error: { email: "Email already exists" } });
     }
     // create user
-    await userService.create(user);
-    return res.status(200).json({ result: { user: user } });
+    const newUser = await userService.create({...user, role: "admin"});
+    const session = await authService.createSession({
+      email: newUser.email,
+      valid: true,
+    });
+    const { password_hash, ..._user } = newUser._doc;
+    const accessToken = generateAccessToken(
+      _user,
+      "1d",
+      process.env.ACCESS_TOKEN_SECRET
+    );
+    const refreshToken = generateAccessToken(
+      { ..._user, sessionId: session._id },
+      "15d",
+      process.env.REFRESH_TOKEN_SECRET
+    );
+    // set refresh token in cookie
+    res.cookie("refreshToken", refreshToken, cookieOptions);
+    return res
+      .status(200)
+      .json({ result: { user: user, accessToken: accessToken } });
   } catch (e) {
     console.error(e);
     return res.status(500).json({ error: { server: "Internal server error" } });
@@ -46,7 +67,6 @@ const login = async (req, res) => {
         password: z.string().min(1),
       })
       .safeParse({ email, password });
-
     // validation errors
     if (!result.success) {
       return res
@@ -66,7 +86,7 @@ const login = async (req, res) => {
       const { password_hash, ..._user } = user._doc;
       const accessToken = generateAccessToken(
         _user,
-        "1h",
+        "1d",
         process.env.ACCESS_TOKEN_SECRET
       );
       const refreshToken = generateAccessToken(
@@ -75,11 +95,7 @@ const login = async (req, res) => {
         process.env.REFRESH_TOKEN_SECRET
       );
       // set refresh token in cookie
-      res.cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "None",
-      });
+      res.cookie("refreshToken", refreshToken, cookieOptions);
       // return user and access token
       // req.user = _user;
       return res
@@ -121,4 +137,28 @@ const getUser = async (req, res) => {
   }
 };
 
-module.exports = { register, login, logout, getUser };
+// Create user
+const create = async (req, res) => {
+  try {
+    const user = req.body;
+    const propertyId = req.params.propertyId;
+    const result = UserValidationSchema.safeParse(user);
+    if (!result.success) {
+      return res
+        .status(400)
+        .json({ error: result.error.flatten().fieldErrors });
+    }
+    const newUser = await userService.create(user);
+    const newPropertyAccess = await propertyAccessService.create(
+      propertyId,
+      newUser._id
+    );
+    return res.status(200).json({ result: { user: newUser } });
+  } catch (e) {
+    return res
+      .status(500)
+      .json({ error: { server: "Internal server error" + e } });
+  }
+};
+
+module.exports = { register, login, logout, getUser, create };

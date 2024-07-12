@@ -46,16 +46,15 @@ const getAccessToken = async (req, res) => {
     // Generate access token
     const accessToken = generateAccessToken(
       { ...rest },
-      "1h",
+      "1d",
       process.env.ACCESS_TOKEN_SECRET
     );
     // Send response
     return res.status(200).json({
-      result: {
+      result: { 
         accessToken: accessToken,
       },
     });
-    
   } catch (e) {
     return res
       .status(500)

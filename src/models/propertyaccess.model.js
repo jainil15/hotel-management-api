@@ -12,6 +12,6 @@ const propertyAccessSchema = new Schema(
   },
   { timestamps: true }
 );
-
+propertyAccessSchema.index({ userId: 1, propertyId: 1 }, { unique: true });
 const PropertyAccess = mongoose.model("PropertyAccess", propertyAccessSchema);
 module.exports = PropertyAccess;

@@ -19,7 +19,7 @@ const create = async (_user) => {
 
     // Create user
     const user = new User({ ..._user, password_hash: hashedPassword });
-    await user.save();
+    return await user.save();
   } catch (e) {
     throw new Error("Error creating user" + e);
   }
