@@ -8,7 +8,8 @@ const create = async (propertyId, guestId, status) => {
       status: status,
       flag: true,
     });
-    return newGuestStatus;
+    const savedGuestStatus = await newGuestStatus.save();
+    return savedGuestStatus;
   } catch (e) {
     throw new Error("Error creating guest" + e);
   }

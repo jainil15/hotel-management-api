@@ -31,7 +31,7 @@ const Guest = mongoose.model("Guest", guestSchema);
 const GuestValidationScehma = z.object({
   propertyId: z.string(),
   phoneNumber: z.string().min(10).max(10),
-  countryCode: z.string().min(2).max(2),
+  countryCode: z.string(),
   source: z.string(),
   checkIn: z
     .string()

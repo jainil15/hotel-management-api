@@ -1,6 +1,7 @@
 const { GuestValidationScehma } = require("../models/guest.model");
 const guestService = require("../services/guest.service");
 const guestStatusService = require("../services/guestStatus.service");
+
 const getAll = async (req, res) => {
   try {
     const guests = await guestService.getAll(req.params.propertyId);
