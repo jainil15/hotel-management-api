@@ -1,0 +1,617 @@
+openapi: 3.1.0
+x-stoplight:
+  id: qwywpxxlzuzxl
+info:
+  title: Onelyk Swagger UI
+  version: '1.0'
+  summary: Onelyk Api
+  description: Onelyk Api
+servers:
+  - url: 'http://localhost:8000'
+    description: local
+  - url: 'https://8l4qkmp2-8000.inc1.devtunnels.ms'
+    description: dev
+paths:
+  /user/register:
+    post:
+      summary: User Registration
+      operationId: regiester-user
+      responses:
+        '200':
+          $ref: '#/components/responses/Register'
+        '400':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+      requestBody:
+        $ref: '#/components/requestBodies/Register'
+      description: Register new user
+      x-stoplight:
+        id: 7xhk6wcrsm2m3
+      parameters: []
+      x-internal: false
+      tags:
+        - User
+    parameters: []
+  /user/login:
+    post:
+      summary: User Login
+      tags:
+        - User
+      responses:
+        '200':
+          $ref: '#/components/responses/Login'
+        '500':
+          $ref: '#/components/responses/Error'
+      operationId: login-user
+      x-stoplight:
+        id: 8m90dlv0xc09x
+      requestBody:
+        $ref: '#/components/requestBodies/Login'
+  /auth/accessToken:
+    get:
+      summary: Request AccessToken
+      responses: {}
+      operationId: get-auth-accesstoken
+      x-stoplight:
+        id: 91ttdhzlaulzl
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: email
+          description: User's email
+        - schema:
+            type: string
+          in: cookie
+          name: refreshToken
+          description: Valid Refresh token
+      tags:
+        - Auth
+    parameters: []
+  /auth/verifyOtp:
+    post:
+      summary: Verify OTP
+      responses:
+        '200':
+          $ref: '#/components/responses/Login'
+        '500':
+          $ref: '#/components/responses/Error'
+      operationId: post-auth-verifyOtp
+      x-stoplight:
+        id: 2mys6pc0tw9tn
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - otp
+              properties:
+                email:
+                  type: string
+                  x-stoplight:
+                    id: inlz8rtznw2gd
+                otp:
+                  type: string
+                  x-stoplight:
+                    id: r2d7ubmexnlzc
+      tags:
+        - Auth
+  /user/logout:
+    post:
+      summary: User Logout
+      tags:
+        - User
+      responses:
+        '200':
+          description: OK
+          content: {}
+      operationId: post-user-logout
+      x-stoplight:
+        id: rl0dfsy0rxz57
+  /user:
+    get:
+      summary: Get User
+      tags:
+        - User
+      responses: {}
+      operationId: get-user
+      x-stoplight:
+        id: ztlhlwiajutbr
+      security:
+        - Bearer: []
+  '/user/{propertyId}':
+    parameters:
+      - schema:
+          type: string
+        name: propertyId
+        in: path
+        required: true
+    post:
+      summary: Create User for the property
+      tags:
+        - User
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: object
+                    x-stoplight:
+                      id: fusg7lw48la28
+                    properties:
+                      user:
+                        $ref: '#/components/schemas/UserWithoutPassword'
+                        x-stoplight:
+                          id: mw7wcx4pdlt50
+      operationId: post-user-propertyId
+      x-stoplight:
+        id: 1y5tk14msv6o7
+      security:
+        - Bearer: []
+      requestBody:
+        $ref: '#/components/requestBodies/User'
+  /property:
+    post:
+      summary: Create property (Property Onboarding)
+      tags:
+        - Property
+      responses:
+        '200':
+          $ref: '#/components/responses/PropertyResponse'
+        4XX:
+          $ref: '#/components/responses/Error'
+        5XX:
+          $ref: '#/components/responses/Error'
+      operationId: Create-Property
+      x-stoplight:
+        id: ryjalcd5tmwuq
+      security:
+        - Bearer: []
+      requestBody:
+        $ref: '#/components/requestBodies/CreateProperty'
+    get:
+      summary: Get all properties associated with user
+      tags:
+        - Property
+      responses: {}
+      operationId: get-all-property-of-user
+      x-stoplight:
+        id: u96bywly9mqg4
+      security:
+        - Bearer: []
+components:
+  schemas:
+    User:
+      title: User
+      type: object
+      x-stoplight:
+        id: 5dg2siga24c7w
+      x-internal: false
+      required:
+        - id
+        - firstName
+        - lastName
+        - email
+        - password_hash
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the given user.
+          x-stoplight:
+            id: cs6bvaybzvuev
+        firstName:
+          type: string
+          x-stoplight:
+            id: p58mbyd0dw49x
+        lastName:
+          type: string
+          x-stoplight:
+            id: h05y8uq3y9r56
+        email:
+          type: string
+          format: email
+          x-stoplight:
+            id: nmt96os2w7uss
+        password_hash:
+          type: string
+          x-stoplight:
+            id: cvqu8wa7bx4ns
+        createdAt:
+          type: string
+          x-stoplight:
+            id: 2ukwtpuosgiw2
+        updatedAt:
+          type: string
+          x-stoplight:
+            id: mpyezhommga9e
+    UserWithoutPassword:
+      title: UserWithoutPassword
+      x-stoplight:
+        id: ei4byjohzee93
+      type: object
+      required:
+        - _id
+        - firstName
+        - lastName
+        - role
+        - email
+        - active
+        - createdAt
+        - updatedAt
+        - __v
+        - phoneNumber
+      properties:
+        _id:
+          type: string
+          x-stoplight:
+            id: gohzxvaj3vvp8
+        firstName:
+          type: string
+          x-stoplight:
+            id: qrmj9880mzzls
+        lastName:
+          type: string
+          x-stoplight:
+            id: 1e4lpve2v7yxt
+        role:
+          type: string
+          x-stoplight:
+            id: 5uepi7y0dnuw4
+        email:
+          type: string
+          x-stoplight:
+            id: ys5dn6hfkwzv5
+        active:
+          type: boolean
+          x-stoplight:
+            id: 63k9klrukwmy0
+        createdAt:
+          type: string
+          x-stoplight:
+            id: q2a1eoclhqubx
+          format: date-time
+        updatedAt:
+          type: string
+          x-stoplight:
+            id: uxzsvqnfapod2
+          format: date-time
+        __v:
+          type: integer
+          x-stoplight:
+            id: 74h3y0npjisdo
+        phoneNumber:
+          type: string
+          x-stoplight:
+            id: asmx1af0fxhrn
+      description: ''
+    Property:
+      type: object
+      x-examples:
+        Example 1:
+          _id: String
+          name: String
+          email: String
+          phoneNumber: String
+          website: String
+          about: String
+          logoUrl: String
+          coverUrl: String
+          country: String
+          state: String
+          city: String
+          address: String
+          countryCode: String
+          active: Boolean
+          __v: Number
+          createdAt: Date
+          updatedAt: Date
+      required:
+        - _id
+        - name
+        - email
+        - phoneNumber
+        - website
+        - about
+        - logoUrl
+        - coverUrl
+        - country
+        - state
+        - city
+        - address
+        - countryCode
+        - active
+        - __v
+        - createdAt
+        - updatedAt
+      properties:
+        _id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        phoneNumber:
+          type: string
+        website:
+          type: string
+        about:
+          type: string
+        logoUrl:
+          type: string
+        coverUrl:
+          type: string
+        country:
+          type: string
+        state:
+          type: string
+        city:
+          type: string
+        address:
+          type: string
+        countryCode:
+          type: string
+        active:
+          type: boolean
+        __v:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+  securitySchemes:
+    Bearer:
+      type: http
+      scheme: bearer
+  requestBodies:
+    Register:
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - firstName
+              - lastName
+              - password
+              - email
+              - phoneNumber
+            properties:
+              firstName:
+                type: string
+                x-stoplight:
+                  id: t74ng1fmgfprp
+              lastName:
+                type: string
+                x-stoplight:
+                  id: 1ank8gtz32nbd
+              password:
+                type: string
+                x-stoplight:
+                  id: lzf7jpfpki1jt
+              email:
+                type: string
+                x-stoplight:
+                  id: v26sqcth975yu
+              phoneNumber:
+                type: string
+                x-stoplight:
+                  id: cdsekjly8cvk3
+      description: Register Request
+    Login:
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - email
+              - password
+            properties:
+              email:
+                type: string
+                x-stoplight:
+                  id: xc87f810xeu91
+              password:
+                type: string
+                x-stoplight:
+                  id: bj7vqbzwu059u
+      description: User Login request
+    User:
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - firstName
+              - lastName
+              - password
+              - role
+              - email
+              - phoneNumber
+            properties:
+              firstName:
+                type: string
+                x-stoplight:
+                  id: u7qqzz39473az
+              lastName:
+                type: string
+                x-stoplight:
+                  id: 0c5qz3apuyb88
+              password:
+                type: string
+                x-stoplight:
+                  id: incwcqb35ezq0
+              role:
+                type: string
+                x-stoplight:
+                  id: wisv3cyjuhom1
+              active:
+                type: string
+                x-stoplight:
+                  id: 2vehxlnkx5vc8
+              email:
+                type: string
+                x-stoplight:
+                  id: 9igrtk1vlb2fo
+              phoneNumber:
+                type: string
+                x-stoplight:
+                  id: vt2grtcr0louo
+      description: User create
+    CreateProperty:
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            x-examples:
+              Example 1:
+                _id: String
+                name: String
+                email: String
+                phoneNumber: String
+                website: String
+                about: String
+                logoUrl: String
+                coverUrl: String
+                country: String
+                state: String
+                city: String
+                address: String
+                countryCode: String
+                active: Boolean
+                __v: Number
+                createdAt: Date
+                updatedAt: Date
+            required:
+              - name
+              - email
+              - phoneNumber
+              - website
+              - about
+              - logo
+              - cover
+              - country
+              - state
+              - city
+              - address
+              - countryCode
+            properties:
+              name:
+                type: string
+              email:
+                type: string
+              phoneNumber:
+                type: string
+              website:
+                type: string
+              about:
+                type: string
+              logo:
+                type: string
+                x-stoplight:
+                  id: asfs1cpbkf7v4
+                format: binary
+              cover:
+                type: string
+                x-stoplight:
+                  id: 44drsy80ont2v
+                format: binary
+              country:
+                type: string
+              state:
+                type: string
+              city:
+                type: string
+              address:
+                type: string
+              countryCode:
+                type: string
+      description: Create property Request
+  responses:
+    Login:
+      description: Example response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              result:
+                x-stoplight:
+                  id: cn6arwxgkipsq
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/UserWithoutPassword'
+                    x-stoplight:
+                      id: tx2oe7mwhw59e
+                  accessToken:
+                    type: string
+                    x-stoplight:
+                      id: kn1w394ufgv0s
+      headers: {}
+    Register:
+      description: "{\r\n    \"result\": {\r\n        \"Email\": \"Email Sent\"\r\n    }\r\n}"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              result:
+                type: object
+                x-stoplight:
+                  id: cvu5fj231nefn
+                properties:
+                  message:
+                    type: string
+                    x-stoplight:
+                      id: 24dudrs50p4gu
+    Error:
+      description: "{\r\n    \"error\": {\r\n        \"server\": \"Internal Server Error\"\r\n    }\r\n}"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: object
+                x-stoplight:
+                  id: evqhzeygpybsg
+    User:
+      description: Example response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserWithoutPassword'
+    PropertyResponse:
+      description: "{\r\n    \"result\": {\r\n        \"property\": {\r\n            \r\n        }\r\n    }\r\n}"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              result:
+                type: object
+                x-stoplight:
+                  id: 0m1uu7p7l7gzk
+                properties:
+                  property:
+                    $ref: '#/components/schemas/Property'
+                    x-stoplight:
+                      id: i0xybth7ewga5
+    GetAllPropertyResponse:
+      description: Example response
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Property'
