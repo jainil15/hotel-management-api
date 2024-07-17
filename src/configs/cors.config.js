@@ -5,7 +5,7 @@ const corsOptions = {
   credentials: true,
 };
 
-const allowList = [process.env.FRONTEND_URL, "https://cors-test.codehappy.dev"];
+const allowList = [process.env.FRONTEND_URL, "https://testhotel.onelyk.com", "http://localhost:3000"];
 
 let corsOptionsDelegate = (req, callback) => {
   let corsOptions;
