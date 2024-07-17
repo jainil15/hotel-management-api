@@ -18,7 +18,10 @@ const create = async (_user) => {
     // console.log(salt);
 
     // Create user
-    const user = new User({ ..._user, password_hash: hashedPassword });
+    const user = new User({
+      ..._user,
+      password_hash: hashedPassword,
+    });
     return await user.save();
   } catch (e) {
     throw new Error("Error creating user" + e);

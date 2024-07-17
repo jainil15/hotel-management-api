@@ -1,7 +1,10 @@
 const userService = require("../services/user.service");
 const authService = require("../services/auth.service");
+const optService = require("../services/otp.service");
 const { generateAccessToken } = require("../utils/generateToken");
 const { z } = require("zod");
+const { User } = require("../models/user.model");
+const cookieOptions = require("../configs/cookie.config");
 
 // Get access token
 const getAccessToken = async (req, res) => {
@@ -42,7 +45,7 @@ const getAccessToken = async (req, res) => {
     }
     // Extract payload
     const { __exp, sessionId, iat, exp, ...rest } = decoded;
-    console.log(rest);
+
     // Generate access token
     const accessToken = generateAccessToken(
       { ...rest },
@@ -51,7 +54,7 @@ const getAccessToken = async (req, res) => {
     );
     // Send response
     return res.status(200).json({
-      result: { 
+      result: {
         accessToken: accessToken,
       },
     });
@@ -62,4 +65,30 @@ const getAccessToken = async (req, res) => {
   }
 };
 
-module.exports = { getAccessToken };
+const verifyOtp = async (req, res) => {
+  try {
+    console.log("verifyOtp");
+    const { email, otp } = req.body;
+    const newOtp = await optService.verify(email, otp);
+    if (newOtp == null) {
+      return res.status(401).json({ error: "Invalid OTP" });
+    }
+    const { user } = newOtp;
+    const newUser = new User(user);
+    await newUser.save();
+    
+    const { password_hash, ..._user } = newUser._doc;
+    
+    // return user and access token
+    // req.user = _user;
+    return res
+      .status(200)
+      .json({ result: { user: _user } });
+  } catch (e) {
+    return res
+      .status(500)
+      .json({ error: { server: "Internal server error" + e } });
+  }
+};
+
+module.exports = { getAccessToken, verifyOtp };

@@ -11,10 +11,20 @@ const {
   checkPropertyAccess,
   checkPermissions,
 } = require("../middlewares/propertyaccess.middleware");
-
+const multer = require("multer");
 const router = Router();
+const upload = multer();
+router.post(
+  "/",
+  authenticateToken,
+  checkPermissions("admin"),
+  upload.fields([
+    { name: "logo", maxCount: 1 },
+    { name: "cover", maxCount: 1 },
+  ]),
+  create
+);
 
-router.post("/", authenticateToken, checkPermissions("admin"), create);
 router.get("/", authenticateToken, getAll);
 router.get("/:propertyId", authenticateToken, checkPropertyAccess, getById);
 router.put("/:propertyId", authenticateToken, checkPropertyAccess, update);

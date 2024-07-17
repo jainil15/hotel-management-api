@@ -3,12 +3,12 @@ const PropertyAccess = require("../models/propertyaccess.model");
 const checkPropertyAccess = async (req, res, next) => {
   try {
     // Check if the user has access to the property
-    // console.log(req.params.propertyId, req.user._id);
+    
     const propertyAccess = await PropertyAccess.findOne({
       userId: req.user._id,
       propertyId: req.params.propertyId,
     });
-    console.log(propertyAccess);
+    
 
     if (!propertyAccess) {
       return res.status(403).json({ error: { auth: "Router Not Accessible" } });
@@ -37,4 +37,27 @@ const checkPermissions = (requiredFeatures) => {
     }
   };
 };
-module.exports = { checkPropertyAccess, checkPermissions };
+
+const checkPropertyAccessSocket = async (socket, next) => {
+  try {
+    
+    // Check if the user has access to the property
+    const propertyAccess = await PropertyAccess.findOne({
+      userId: socket.user._id,
+      propertyId: socket.handshake.query.propertyId
+    });
+    
+    if (!propertyAccess) {
+      return next(new Error("Router Not Accessible"));
+    }
+    next();
+  } catch (e) {
+    return next(new Error("Internal server error"));
+  }
+};
+
+module.exports = {
+  checkPropertyAccess,
+  checkPermissions,
+  checkPropertyAccessSocket,
+};

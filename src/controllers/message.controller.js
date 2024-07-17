@@ -19,7 +19,7 @@ const sendsms = async (req, res) => {
         .status(400)
         .json({ error: result.error.flatten().fieldErrors });
     }
-
+    // TODO: Move code to service
     const guest = await Guest.findById(req.params.guestId);
     const property = await Property.findById(req.params.propertyId);
     // TODO: status callback to check if message was sent
@@ -36,7 +36,7 @@ const sendsms = async (req, res) => {
       senderId: req.params.propertyId,
       receiverId: req.params.guestId,
     });
-    console.log(sentMessage);
+    console.log("MESSAGE CONTROLLER: " + sentMessage);
     res.status(200).json({ result: { message: newMessage } });
   } catch (e) {
     res.status(500).json({ error: { server: "Internal Server Error" + e } });
@@ -45,10 +45,11 @@ const sendsms = async (req, res) => {
 
 const incomingMessage = async (req, res) => {
   try {
-    console.log(req.body);
+    console.log("MESSAGE CONTROLLER: " + req.body);
     // console.log(req.body.formData);
     // console.log(req);
     const twiml = new MessagingResponse();
+    // TODO: Move code to service
     const property = await Property.findOne({
       phoneNumber: req.body.To.substring(req.body.To.length - 10),
     });
@@ -56,8 +57,7 @@ const incomingMessage = async (req, res) => {
       phoneNumber: req.body.From.substring(req.body.To.length - 10),
       propertyId: property._id,
     });
-    console.log(property);
-    console.log(guest);
+
     const newMessage = new Message({
       guestId: guest._id,
       propertyId: property._id,
@@ -80,7 +80,6 @@ const incomingMessage = async (req, res) => {
 
 const errorLogging = async (req, res) => {
   try {
-    console.log(req.body);
     return res.status(200).json({ result: { message: "Error received" } });
   } catch (e) {
     return res
@@ -101,3 +100,5 @@ const status = async (req, res) => {
 };
 
 module.exports = { sendsms, incomingMessage, errorLogging, status };
+
+

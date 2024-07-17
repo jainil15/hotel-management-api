@@ -3,7 +3,6 @@ const propertyService = require("../services/property.service");
 const create = async (req, res) => {
   try {
     const property = req.body;
-
     const result = PropertyValidationSchema.safeParse(property);
     // validation errors
     if (!result.success) {
@@ -12,7 +11,7 @@ const create = async (req, res) => {
         .json({ error: result.error.flatten().fieldErrors });
     }
 
-    const newProperty = await propertyService.create(property, req.user);
+    const newProperty = await propertyService.create(property, req.files, req.user);
     return res.status(200).json({ result: { property: newProperty } });
   } catch (e) {
     return res

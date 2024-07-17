@@ -21,4 +21,29 @@ const authenticateToken = async (req, res, next) => {
     return res.status(500).json({ error: { server: "Internal server error" } });
   }
 };
-module.exports = { authenticateToken };
+
+const authenticateTokenSocket = async (socket, next) => {
+  try {
+    // Get the token from the handshake headers
+    const authHeader = socket.handshake.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1];
+
+    if (token == null) {
+      return next(new Error("Authorization Missing"));
+    }
+
+    // Verify the token
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
+      if (err) {
+        return next(new Error("Forbidden"));
+      }
+
+      socket.user = user;
+      next();
+    });
+  } catch (e) {
+    next(new Error("Internal server error"));
+  }
+};
+
+module.exports = { authenticateToken, authenticateTokenSocket };

@@ -15,7 +15,5 @@ const guestStatusSchema = new Schema(
   { timestamps: true }
 );
 
-
-
 const GuestStatus = mongoose.model("GuestStatus", guestStatusSchema);
 module.exports = GuestStatus;

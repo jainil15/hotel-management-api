@@ -1,4 +1,4 @@
-const { Message } = require("twilio/lib/twiml/MessagingResponse");
+const { Message } = require("../models/message.model");
 
 const create = async (message) => {
   try {
@@ -12,7 +12,7 @@ const create = async (message) => {
   }
 };
 
-const get = async (propertyId, guestId) => {
+const getAll = async (propertyId, guestId) => {
   try {
     const messages = await Message.find({
       propertyId: propertyId,
@@ -40,4 +40,4 @@ const getById = async (messageId, propertyId, guestId) => {
   }
 };
 
-module.exports = { create, get, getById };
+module.exports = { create, getAll, getById };

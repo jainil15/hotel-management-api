@@ -12,4 +12,5 @@ const messageTemplateSchema = new Schema(
 );
 
 const MessageTemplate = mongoose.model("MessageTemplate", messageTemplateSchema);
+
 module.exports = MessageTemplate;

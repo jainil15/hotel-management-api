@@ -62,7 +62,7 @@ const decodeRefreshToken = async (refreshToken) => {
       refreshToken,
       process.env.REFRESH_TOKEN_SECRET
     );
-    console.log(decoded);
+    // console.log(decoded);
     return decoded;
   } catch (e) {
     throw new Error("Error verifying refresh token" + e);

@@ -5,7 +5,12 @@ const propertyAccessService = require("../services/propertyAccess.service");
 const { generateAccessToken } = require("../utils/generateToken");
 const { z } = require("zod");
 const cookieOptions = require("../configs/cookie.config");
-
+const { Otp } = require("../models/otp.model");
+const sendOtp = require("../utils/sendOtp");
+const bcrypt = require("bcrypt");
+const { generateOtp } = require("../utils/generateOtp");
+const otpService = require("../services/otp.service");
+const { default: mongoose } = require("mongoose");
 // Registering new User
 const register = async (req, res) => {
   try {
@@ -26,28 +31,19 @@ const register = async (req, res) => {
     if (existingUser) {
       return res.status(400).json({ error: { email: "Email already exists" } });
     }
-    // create user
-    const newUser = await userService.create({...user, role: "admin"});
-    const session = await authService.createSession({
-      email: newUser.email,
-      valid: true,
+    const saltRounds = 10;
+    const salt = await bcrypt.genSalt(saltRounds);
+    // console.log(_user);
+    const hashedPassword = await bcrypt.hash(user.password, salt);
+    const otp = generateOtp();
+    const newOtp = otpService.create({
+      email: user.email,
+      otp: otp,
+      user: { ...user, role: "admin", password_hash: hashedPassword },
     });
-    const { password_hash, ..._user } = newUser._doc;
-    const accessToken = generateAccessToken(
-      _user,
-      "1d",
-      process.env.ACCESS_TOKEN_SECRET
-    );
-    const refreshToken = generateAccessToken(
-      { ..._user, sessionId: session._id },
-      "15d",
-      process.env.REFRESH_TOKEN_SECRET
-    );
-    // set refresh token in cookie
-    res.cookie("refreshToken", refreshToken, cookieOptions);
-    return res
-      .status(200)
-      .json({ result: { user: user, accessToken: accessToken } });
+    const sentMail = await sendOtp(user.email, otp);
+    return res.status(200).json({ result: { message: "Email Sent" } });
+    // send otp to user email
   } catch (e) {
     console.error(e);
     return res.status(500).json({ error: { server: "Internal server error" } });
