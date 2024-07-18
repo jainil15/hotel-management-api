@@ -1,5 +1,12 @@
+const e = require("cors");
 const mongoose = require("mongoose");
 const { z } = require("zod");
+const {
+  nocountrycodephoneregex,
+  countrycoderegex,
+} = require("../constants/regex.constant");
+const checkImageType = require("../utils/checkType");
+const { MAX_FILE_SIZE } = require("../constants/file.constant");
 const Schema = mongoose.Schema;
 
 const propertySchema = new Schema(
@@ -25,17 +32,47 @@ const propertySchema = new Schema(
   { timestamps: true }
 );
 
+propertySchema.index({ email: 1 }, { unique: true });
+
 const PropertyValidationSchema = z.object({
   name: z.string().min(3).max(255),
   email: z.string().email(),
-  phoneNumber: z.string().min(10).max(10),
+  phoneNumber: z.string().refine((val) => nocountrycodephoneregex.test(val), {
+    message: "Invalid phone number format",
+  }),
+  countryCode: z.string().refine((val) => countrycoderegex.test(val), {
+    message: "Invalid country code format",
+  }),
+  logo: z
+    .array(
+      z
+        .any()
+        .refine((val) => val.size < MAX_FILE_SIZE, {
+          message: "File size too large",
+        })
+        .refine((val) => checkImageType(val.mimetype), {
+          message: "Invalid file type",
+        })
+    )
+    .length(1),
+  cover: z
+    .array(
+      z
+        .any()
+        .refine((val) => val.size < MAX_FILE_SIZE, {
+          message: "File size too large",
+        })
+        .refine((val) => checkImageType(val.mimetype), {
+          message: "Invalid file type",
+        })
+    )
+    .length(1),
   website: z.string().url(),
   about: z.string().min(3),
   country: z.string().min(1),
   state: z.string().min(1),
   city: z.string().min(1),
   address: z.string().min(3),
-  countryCode: z.string().min(1),
 });
 
 const Property = mongoose.model("Property", propertySchema);

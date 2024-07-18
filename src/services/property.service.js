@@ -7,19 +7,18 @@ const { awsS3Config, awsConfig } = require("../configs/aws.config");
 const fs = require("fs");
 const { TwilioAccount } = require("../models/twilioAccount.model");
 const twilio = require("twilio");
+const { Setting } = require("../models/setting.model");
 require("dotenv").config();
 
-const accountSid = process.env.TWILIO_ACCOUNT_SID_2;
-const authToken = process.env.TWILIO_AUTH_TOKEN_2;
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
 const twilioClient = require("twilio")(accountSid, authToken);
 
-const create = async (property, files, user) => {
+const create = async (property, files, user, setting) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    if (!files || files.logo.length === 0 || files.cover.length === 0) {
-      throw new Error("Missing files");
-    }
+    
     const logo = files.logo[0];
     const cover = files.cover[0];
 
@@ -42,6 +41,14 @@ const create = async (property, files, user) => {
     savedProperty.coverUrl = coverUrl;
     await savedProperty.save();
 
+    // save Settings
+    const newSetting = new Setting({
+      propertyId: savedProperty._id,
+      ...setting,
+    });
+    await newSetting.save({ session });
+
+    // Upload to s3
     const client = new S3Client(awsS3Config);
     const logoCommand = new PutObjectCommand({
       Bucket: process.env.S3_IMAGES_BUCKET_NAME,
@@ -55,31 +62,7 @@ const create = async (property, files, user) => {
     });
     await client.send(logoCommand);
     await client.send(coverCommand);
-
-    // Twilio
-    const twilioPropertySubaccount =
-      await twilioClient.api.v2010.accounts.create({
-        friendlyName: savedProperty.name,
-      });
-
-    console.log(twilioPropertySubaccount);
-    const newTwilioAccount = new TwilioAccount({
-      propertyId: savedProperty._id,
-      authToken: twilioPropertySubaccount.authToken,
-      sid: twilioPropertySubaccount.sid,
-      dateCreated: twilioPropertySubaccount.dateCreated,
-      dateUpdated: twilioPropertySubaccount.dateUpdated,
-      friendlyName: twilioPropertySubaccount.friendlyName,
-      ownerAccountSid: twilioPropertySubaccount.ownerAccountSid,
-      status: twilioPropertySubaccount.status,
-    });
-    await newTwilioAccount.save({ session });
-
-    const twilioSubaccountClient = twilio({
-      accountSid: twilioPropertySubaccount.sid,
-      authToken: twilioPropertySubaccount.authToken,
-    });
-
+    
     await session.commitTransaction();
     session.endSession();
     return savedProperty;
@@ -140,4 +123,15 @@ const getById = async (propertyId) => {
   }
 };
 
-module.exports = { create, getAll, update, remove, getById };
+const getByEmail = async (email) => {
+  try {
+    const property = await Property.findOne({
+      email: email,
+    });
+    
+    return property;
+  } catch (e) {
+    throw new Error("Error getting property by email");
+  }
+};
+module.exports = { create, getAll, update, remove, getById, getByEmail };

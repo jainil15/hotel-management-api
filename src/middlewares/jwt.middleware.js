@@ -12,7 +12,7 @@ const authenticateToken = async (req, res, next) => {
     // Verify the token
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
       if (err) {
-        return res.status(401).json({ error: { auth: "Forbidden" } });
+        return res.status(401).json({ error: { auth: "Unauthorized" } });
       }
       req.user = user;
       next();
@@ -35,7 +35,7 @@ const authenticateTokenSocket = async (socket, next) => {
     // Verify the token
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
       if (err) {
-        return next(new Error("Forbidden"));
+        return next(new Error("Unauthorized"));
       }
 
       socket.user = user;

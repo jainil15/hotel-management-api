@@ -1,17 +1,62 @@
 const { PropertyValidationSchema } = require("../models/property.model");
+const { SettingValidationSchema } = require("../models/setting.model");
 const propertyService = require("../services/property.service");
+const checkImageType = require("../utils/checkType");
+
 const create = async (req, res) => {
   try {
-    const property = req.body;
-    const result = PropertyValidationSchema.safeParse(property);
-    // validation errors
-    if (!result.success) {
-      return res
-        .status(400)
-        .json({ error: result.error.flatten().fieldErrors });
-    }
+    const {
+      standardCheckinTime,
+      standardCheckoutTime,
+      timezone,
+      defaultNewDayTime,
+      ...property
+    } = req.body;
 
-    const newProperty = await propertyService.create(property, req.files, req.user);
+    // console.log(property, standardCheckinTime, standardCheckoutTime, timezone, defaultNewDayTime);
+
+    // validation errors
+
+    const result = PropertyValidationSchema.safeParse({
+      ...property,
+      logo: req.files.logo,
+      cover: req.files.cover,
+    });
+    const settingResult = SettingValidationSchema.safeParse({
+      standardCheckinTime,
+      standardCheckoutTime,
+      timezone,
+      defaultNewDayTime,
+    });
+    // validation errors
+    if (!result.success || !settingResult.success) {
+      return res.status(400).json({
+        error: {
+          ...result?.error?.flatten().fieldErrors,
+          ...settingResult?.error?.flatten().fieldErrors,
+        },
+      });
+    }
+    
+    
+
+    // check if email already exists
+    const oldProperty = await propertyService.getByEmail(property.email);
+    if (oldProperty) {
+      return res.status(400).json({
+        error: {
+          email: "Email already exists",
+        },
+      });
+    }
+    // create new property
+    const newProperty = await propertyService.create(
+      property,
+      req.files,
+      req.user,
+      settingResult.data
+    );
+
     return res.status(200).json({ result: { property: newProperty } });
   } catch (e) {
     return res

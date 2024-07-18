@@ -76,19 +76,21 @@ const verifyOtp = async (req, res) => {
     const { user } = newOtp;
     const newUser = new User(user);
     await newUser.save();
-    
+
     const { password_hash, ..._user } = newUser._doc;
-    
+
     // return user and access token
     // req.user = _user;
-    return res
-      .status(200)
-      .json({ result: { user: _user } });
+    return res.status(200).json({ result: { user: _user } });
   } catch (e) {
     return res
       .status(500)
       .json({ error: { server: "Internal server error" + e } });
   }
 };
+const resendOtp = async (req, res) =>{
+  const {email} = req.body;
+  const otp = await optService.getByEmail(email);
 
-module.exports = { getAccessToken, verifyOtp };
+}
+  (module.exports = { getAccessToken, verifyOtp });

@@ -43,4 +43,4 @@ const verify = async (email, otp) => {
   }
 };
 
-module.exports = { create, update, verify };
+module.exports = { create, update, verify, getByEmail };

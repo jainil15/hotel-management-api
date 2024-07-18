@@ -11,9 +11,11 @@ const bcrypt = require("bcrypt");
 const { generateOtp } = require("../utils/generateOtp");
 const otpService = require("../services/otp.service");
 const { default: mongoose } = require("mongoose");
+const logger = require("../configs/winston.config");
 // Registering new User
 const register = async (req, res) => {
   try {
+    
     // get user detail from body
     const user = req.body;
     // validate user details
@@ -29,7 +31,7 @@ const register = async (req, res) => {
     // check if user already exists
     const existingUser = await userService.getByEmail(user.email);
     if (existingUser) {
-      return res.status(400).json({ error: { email: "Email already exists" } });
+      return res.status(409).json({ error: { email: "Email already exists" } });
     }
     const saltRounds = 10;
     const salt = await bcrypt.genSalt(saltRounds);

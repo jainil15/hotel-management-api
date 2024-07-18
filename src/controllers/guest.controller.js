@@ -29,7 +29,7 @@ const create = async (req, res) => {
       currentStatus
     );
     if (!newGuest || !newGuestStatus) {
-      return res.status(400).json({ error: { guest: "Error creating guest" } });
+      return res.status(500).json({ error: { guest: "Error creating guest" } });
     }
     return res
       .status(200)

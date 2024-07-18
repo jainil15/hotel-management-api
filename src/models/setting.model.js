@@ -1,21 +1,50 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
+const { z } = require("zod");
+const { timeregex, timezoneregex } = require("../constants/regex.constant");
 
 const settingSchema = new Schema(
   {
     propertyId: { type: Schema.Types.ObjectId, required: true },
-    timeZone: { type: String, required: true },
-    defaultCheckinTime: { type: String, required: true },
-    defaultCheckoutTime: { type: String, required: true },
-    automaticNewDay: { type: Boolean, required: true },
-    defaultNewDayTime: { type: Date, required: true },
-    manualNewDay: { type: Date, required: true },
-    automateMessageOnStatusUpdate: { type: Boolean, required: true },
-    automateEarlyCheckinMessage: { type: String, required: true },
-    automateLateCheckoutMessage: { type: String, required: true },
+    timezone: { type: String, required: true },
+    standardCheckinTime: { type: String, required: true },
+    standardCheckoutTime: { type: String, required: true },
+    automaticNewDay: { type: Boolean, default: true },
+    defaultNewDayTime: { type: String, required: true },
+    manualNewDay: { type: Date },
+    automateMessageOnStatusUpdate: { type: Boolean },
+    automateEarlyCheckinMessage: { type: String },
+    automateLateCheckoutMessage: { type: String },
   },
   { timeseries: true }
 );
 
+const SettingValidationSchema = z.object({
+  timezone: z.string().refine((val) => timezoneregex.test(val), {
+    message: "Invalid timezone format",
+  }),
+  standardCheckinTime: z
+    .string()
+    .refine((val) => timeregex.test(val) && isNaN(new Date(val).getTime), {
+      message: "Invalid time format",
+    }),
+  standardCheckoutTime: z
+    .string()
+    .refine((val) => timeregex.test(val) && isNaN(new Date(val).getTime), {
+      message: "Invalid time format",
+    }),
+  automaticNewDay: z.boolean().optional(),
+  defaultNewDayTime: z
+    .string()
+    .refine((val) => timeregex.test(val) && isNaN(new Date(val).getTime), {
+      message: "Invalid time format",
+    }),
+  manualNewDay: z.date().optional(),
+  automateMessageOnStatusUpdate: z.boolean().optional(),
+  automateEarlyCheckinMessage: z.string().optional(),
+  automateLateCheckoutMessage: z.string().optional(),
+});
+
 const Setting = mongoose.model("Setting", settingSchema);
-module.exports = Setting;
+
+module.exports = { Setting, SettingValidationSchema };

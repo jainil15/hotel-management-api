@@ -11,6 +11,7 @@ const authRoutes = require("./src/routes/auth.route");
 const propertyRoutes = require("./src/routes/property.route");
 const guestRoutes = require("./src/routes/guest.route");
 const messageRoutes = require("./src/routes/message.route");
+const twilioRoutes = require("./src/routes/twilio.route");
 
 // Socket imports
 const guestSocket = require("./src/sockets/guest.socket");
@@ -41,11 +42,15 @@ const yaml = require("yamljs");
 // Sockets import
 const messageSocket = require("./src/sockets/message.socket");
 
+const { errorMiddleware } = require("./src/middlewares/error.middleware");
+const logger = require("./src/configs/winston.config");
+
 // Setup
 const PORT = process.env.PORT || 8000;
 Connect();
 const app = express();
 const specs = yaml.load("./api/v1/swagger.yaml");
+
 app.use(
   "/api-docs",
   swaggerUi.serve,
@@ -53,7 +58,6 @@ app.use(
     explorer: true,
   })
 );
-
 
 // Middlewares
 app.use(express.json());
@@ -66,15 +70,31 @@ app.use(
 );
 app.use(cors(corsOptionsDelegate));
 
+app.use((req, res, next) => {
+  const initialUrl = req.url;
+  logger.info(`${req.method} ${req.url}`);
+  res.on("finish", () => {
+    if (res.statusCode >= 400 && res.statusCode < 500) {
+      logger.error(`${res.statusCode} ${initialUrl}`);
+    } else if (res.statusCode >= 500) {
+      logger.error(`${res.statusCode} ${initialUrl}`);
+    } else {
+      logger.info(`${res.statusCode} ${initialUrl}`);
+    }
+  });
+  next();
+});
+
 // Routers
 app.use("/user", userRoutes);
 app.use("/auth", authRoutes);
 app.use("/property", propertyRoutes);
 app.use("/guest", authenticateToken, guestRoutes);
 app.use("/message", messageRoutes);
+app.use("/twilio", twilioRoutes);
 
 // Health Check
-app.get("/health", (req, res) => {
+app.get("/health", (req, res, next) => {
   return res.status(200).json({ message: "Server is running." });
 });
 

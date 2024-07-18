@@ -100,5 +100,3 @@ const status = async (req, res) => {
 };
 
 module.exports = { sendsms, incomingMessage, errorLogging, status };
-
-

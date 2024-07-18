@@ -1,8 +1,11 @@
 const mongoose = require("mongoose");
 const { z } = require("zod");
+const {
+  datetimeregex,
+  nocountrycodephoneregex,
+  countrycoderegex,
+} = require("../constants/regex.constant");
 const Schema = mongoose.Schema;
-
-const datetimeregex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
 
 const guestSchema = new Schema(
   {
@@ -30,8 +33,12 @@ const Guest = mongoose.model("Guest", guestSchema);
 
 const GuestValidationScehma = z.object({
   propertyId: z.string(),
-  phoneNumber: z.string().min(10).max(10),
-  countryCode: z.string(),
+  phoneNumber: z.string().refine((val) => nocountrycodephoneregex.test(val), {
+    message: "Invalid phone number format",
+  }),
+  countryCode: z.string().refine((val) => countrycoderegex.test(val), {
+    message: "Invalid country code format",
+  }),
   source: z.string(),
   checkIn: z
     .string()
