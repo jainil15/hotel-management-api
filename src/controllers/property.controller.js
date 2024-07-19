@@ -15,7 +15,6 @@ const create = async (req, res) => {
 
     
     // validation errors
-
     const result = PropertyValidationSchema.safeParse({
       ...property,
       logo: req.files.logo,

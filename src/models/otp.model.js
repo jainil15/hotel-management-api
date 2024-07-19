@@ -1,4 +1,5 @@
 const { default: mongoose } = require("mongoose");
+const logger = require("../configs/winston.config");
 
 const otpSchema = new mongoose.Schema(
   {
@@ -23,7 +24,7 @@ const otpSchema = new mongoose.Schema(
 otpSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 600 });
 const Otp = mongoose.model("Otp", otpSchema);
 Otp.init().then(() => {
-  console.log("Initialzed Otp Model");
+  logger.info("Initialzed Otp Model");
 });
 
 module.exports = { Otp };

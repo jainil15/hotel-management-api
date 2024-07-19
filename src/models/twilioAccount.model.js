@@ -4,6 +4,7 @@ const {
   nocountrycodephoneregex,
   countrycoderegex,
 } = require("../constants/regex.constant");
+const logger = require("../configs/winston.config");
 const Schema = mongoose.Schema;
 
 const twilioAccountSchema = new Schema({
@@ -44,6 +45,6 @@ const TwilioValidationSchema = z.object({
 });
 const TwilioAccount = mongoose.model("TwilioAccount", twilioAccountSchema);
 TwilioAccount.init().then(() => {
-  console.log("Initialzed TwilioAccount Model");
+  logger.info("Initialzed TwilioAccount Model");
 });
 module.exports = { TwilioAccount };

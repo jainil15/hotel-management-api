@@ -5,6 +5,7 @@ const {
   nocountrycodephoneregex,
   countrycoderegex,
 } = require("../constants/regex.constant");
+const logger = require("../configs/winston.config");
 const Schema = mongoose.Schema;
 
 const guestSchema = new Schema(
@@ -58,6 +59,6 @@ const GuestValidationScehma = z.object({
   active: z.boolean().optional(),
 });
 Guest.init().then(() => {
-  console.log("Initialzed Guest Model");
+  logger.info("Initialzed Guest Model");
 });
 module.exports = { Guest, GuestValidationScehma };

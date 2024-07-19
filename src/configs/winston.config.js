@@ -20,18 +20,25 @@ const logger = winston.createLogger({
     // - Write all logs with importance level of `error` or less to `error.log`
     // - Write all logs with importance level of `info` or less to `combined.log`
     //
+
     new transports.File({
       filename: "logs/error.log",
       level: "error",
       format: format.combine(format.uncolorize(), format.json()),
     }),
-    new transports.File({
-      filename: "logs/combined.log",
-      format: format.combine(format.uncolorize(), format.json()),
-    }),
+
     new transports.Console(),
   ],
 });
+
+if (process.env.NODE_ENV === "production") {
+  logger.add(
+    new transports.File({
+      filename: "logs/combined.log",
+      format: format.combine(format.uncolorize(), format.json()),
+    })
+  );
+}
 
 //
 // If we're not in production then log to the `console` with the format:

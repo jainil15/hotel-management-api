@@ -7,6 +7,7 @@ const {
 } = require("../constants/regex.constant");
 const checkImageType = require("../utils/checkType");
 const { MAX_FILE_SIZE } = require("../constants/file.constant");
+const logger = require("../configs/winston.config");
 const Schema = mongoose.Schema;
 
 const propertySchema = new Schema(
@@ -77,6 +78,6 @@ const PropertyValidationSchema = z.object({
 
 const Property = mongoose.model("Property", propertySchema);
 Property.init().then(() => {
-  console.log("Initialzed Property Model");
+  logger.info("Initialzed Property Model");
 });
 module.exports = { Property, PropertyValidationSchema };

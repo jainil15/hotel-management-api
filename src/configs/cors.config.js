@@ -13,6 +13,7 @@ const allowList = [
   "http://localhost:3000",
   "https://4ckpq2tm-3000.inc1.devtunnels.ms",
   "https://8l4qkmp2-8000.inc1.devtunnels.ms",
+  "https://jainil.stoplight.io"
 ];
 
 let corsOptionsDelegate = (req, callback) => {

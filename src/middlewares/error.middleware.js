@@ -1,6 +1,6 @@
 const errorMiddleware = async (req, res, next) => {
     res.on("", () => {
-        console.log(res.statusCode);
+        logger.info(res.statusCode);
     });
     // const errStatus = err.statusCode || 500;
     // const errMsg = err.message || "Something went wrong";
