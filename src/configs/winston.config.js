@@ -25,6 +25,10 @@ const logger = winston.createLogger({
       level: "error",
       format: format.combine(format.uncolorize(), format.json()),
     }),
+    new transports.File({
+      filename: "logs/combined.log",
+      format: format.combine(format.uncolorize(), format.json()),
+    }),
     new transports.Console(),
   ],
 });

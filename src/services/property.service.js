@@ -18,7 +18,6 @@ const create = async (property, files, user, setting) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    
     const logo = files.logo[0];
     const cover = files.cover[0];
 
@@ -62,7 +61,7 @@ const create = async (property, files, user, setting) => {
     });
     await client.send(logoCommand);
     await client.send(coverCommand);
-    
+
     await session.commitTransaction();
     session.endSession();
     return savedProperty;
@@ -128,7 +127,7 @@ const getByEmail = async (email) => {
     const property = await Property.findOne({
       email: email,
     });
-    
+
     return property;
   } catch (e) {
     throw new Error("Error getting property by email");

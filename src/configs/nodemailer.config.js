@@ -1,5 +1,5 @@
 require("dotenv").config();
-const nodemailerConfigOtptions = {
+const nodemailerConfigOptions = {
   host: "smtp.zoho.com",
   port: 465,
   secure: true,
@@ -9,4 +9,4 @@ const nodemailerConfigOtptions = {
   },
 };
 
-module.exports = nodemailerConfigOtptions;
+module.exports = nodemailerConfigOptions;

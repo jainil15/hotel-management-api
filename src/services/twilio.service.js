@@ -56,8 +56,7 @@ const buyPhoneNumber = async (propertyId, phoneNumber) => {
       statusCallbackMethod: "POST",
       statusCallback: process.env.TWILIO_STATUS_CALLBACK,
     });
-    
-    
+
     // Transfer phone number to subaccount
     console.log(incomingPhoneNumber);
     const response = twilioClient

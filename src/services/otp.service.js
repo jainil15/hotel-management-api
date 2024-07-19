@@ -17,11 +17,10 @@ const getByEmail = async (email) => {
   try {
     const otp = await Otp.findOne({ "user.email": email });
     return otp;
-  }
-  catch (e) {
+  } catch (e) {
     throw new Error("Error getting otp by email");
   }
-}
+};
 const update = async (otp) => {
   try {
     const updatedOtp = await Otp.findByIdAndUpdate(otp._id, otp, { new: true });

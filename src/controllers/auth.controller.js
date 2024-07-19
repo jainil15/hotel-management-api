@@ -5,6 +5,8 @@ const { generateAccessToken } = require("../utils/generateToken");
 const { z } = require("zod");
 const { User } = require("../models/user.model");
 const cookieOptions = require("../configs/cookie.config");
+const { generateOtp } = require("../utils/generateOtp");
+const sendOtp = require("../utils/sendOtp");
 
 // Get access token
 const getAccessToken = async (req, res) => {
@@ -69,6 +71,18 @@ const verifyOtp = async (req, res) => {
   try {
     console.log("verifyOtp");
     const { email, otp } = req.body;
+    const result = z
+      .object({
+        email: z.string().email(),
+        otp: z.string(),
+      })
+      .safeParse(req.body);
+    if (!result.success) {
+      return res
+        .status(400)
+        .json({ error: result.error.flatten().fieldErrors });
+    }
+
     const newOtp = await optService.verify(email, otp);
     if (newOtp == null) {
       return res.status(401).json({ error: "Invalid OTP" });
@@ -88,9 +102,34 @@ const verifyOtp = async (req, res) => {
       .json({ error: { server: "Internal server error" + e } });
   }
 };
-const resendOtp = async (req, res) =>{
-  const {email} = req.body;
-  const otp = await optService.getByEmail(email);
-
-}
-  (module.exports = { getAccessToken, verifyOtp });
+const resendOtp = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const result = z
+      .object({
+        email: z.string().email(),
+      })
+      .safeParse(req.body);
+    if (!result.success) {
+      return res
+        .status(400)
+        .json({ error: result.error.flatten().fieldErrors });
+    }
+    const otp = await optService.getByEmail(email);
+    if (!otp) {
+      return res.status(500).json({ error: { email: "Email not found" } });
+    }
+    const otpValue = generateOtp();
+    otp.otp = otpValue;
+    otp.expiresAt = Date.now();
+    otp.deleteOne();
+    const sentMail = await sendOtp(otp.user.email, otpValue);
+    await otp.save();
+    return res.status(200).json({ result: { message: "Email Sent" } });
+  } catch (e) {
+    return res
+      .status(500)
+      .json({ error: { server: "Internal server error" + e } });
+  }
+};
+module.exports = { getAccessToken, verifyOtp, resendOtp };

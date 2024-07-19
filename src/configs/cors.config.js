@@ -7,6 +7,8 @@ const corsOptions = {
 
 const allowList = [
   process.env.FRONTEND_URL,
+  "https://onelyk.com",
+  "https://www.onelyk.com",
   "https://testhotel.onelyk.com",
   "http://localhost:3000",
   "https://4ckpq2tm-3000.inc1.devtunnels.ms",

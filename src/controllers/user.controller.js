@@ -15,7 +15,6 @@ const logger = require("../configs/winston.config");
 // Registering new User
 const register = async (req, res) => {
   try {
-    
     // get user detail from body
     const user = req.body;
     // validate user details
@@ -47,8 +46,9 @@ const register = async (req, res) => {
     return res.status(200).json({ result: { message: "Email Sent" } });
     // send otp to user email
   } catch (e) {
-    console.error(e);
-    return res.status(500).json({ error: { server: "Internal server error" } });
+    return res
+      .status(500)
+      .json({ error: { server: "Internal server error" + e } });
   }
 };
 

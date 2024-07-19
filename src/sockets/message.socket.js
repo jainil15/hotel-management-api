@@ -30,14 +30,10 @@ module.exports = (io, socket) => {
 
   const getAllMessages = async (payload) => {
     const { propertyId } = socket.handshake.query;
-    const messages = await messageService.getAll(
-      propertyId,
-      payload.guestId
-    );
+    const messages = await messageService.getAll(propertyId, payload.guestId);
     io.emit("message:getAll", messages);
   };
 
   socket.on("message:send", sendsms);
   socket.on("message:getAll", getAllMessages);
 };
-

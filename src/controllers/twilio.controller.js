@@ -2,6 +2,8 @@ const { z } = require("zod");
 const twilioService = require("../services/twilio.service");
 const querystring = require("querystring");
 const { phoneregex } = require("../constants/regex.constant");
+const { TwilioAccount } = require("../models/twilioAccount.model");
+const { Property } = require("../models/property.model");
 
 const getPhoneNumbers = async (req, res) => {
   try {
@@ -24,6 +26,21 @@ const buyPhoneNumber = async (req, res) => {
     const propertyId = req.params.propertyId;
     const phoneNumber = req.body.phoneNumber;
     console.log(phoneregex.test(phoneNumber));
+    const property = await Property.findById(propertyId);
+    if (!property) {
+      throw new Error("Property not found");
+    }
+    // Check if property exists
+    const twilioAccount = await TwilioAccount.findOne({
+      propertyId: propertyId,
+    });
+    if (!twilioAccount) {
+      throw new Error("Twilio Account not found");
+    }
+    // Check if Twilio Account already has a phone number
+    if (twilioAccount.phoneNumber) {
+      throw new Error("Twilio Account already has a phone number");
+    }
     const result = z
       .object({
         phoneNumber: z.string().refine((val) => phoneregex.test(val), {

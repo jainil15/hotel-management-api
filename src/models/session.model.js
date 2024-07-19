@@ -6,7 +6,7 @@ const sessionSchema = new Schema(
     email: { type: String, required: true, unique: true },
     valid: { type: Boolean, required: true },
   },
-  {timestamps: true }
+  { timestamps: true }
 );
 
 const Session = mongoose.model("Session", sessionSchema);

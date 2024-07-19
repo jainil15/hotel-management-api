@@ -20,9 +20,7 @@ const settingSchema = new Schema(
 );
 
 const SettingValidationSchema = z.object({
-  timezone: z.string().refine((val) => timezoneregex.test(val), {
-    message: "Invalid timezone format",
-  }),
+  timezone: z.string(),
   standardCheckinTime: z
     .string()
     .refine((val) => timeregex.test(val) && isNaN(new Date(val).getTime), {

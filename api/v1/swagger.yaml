@@ -3,13 +3,13 @@ x-stoplight:
   id: qwywpxxlzuzxl
 info:
   title: Onelyk Swagger UI
-  version: '1.0'
+  version: "1.0"
   summary: Onelyk Api
   description: Onelyk Api
 servers:
-  - url: 'http://localhost:8000'
+  - url: "http://localhost:8000"
     description: local
-  - url: 'https://8l4qkmp2-8000.inc1.devtunnels.ms'
+  - url: "https://8l4qkmp2-8000.inc1.devtunnels.ms"
     description: dev
 paths:
   /user/register:
@@ -17,14 +17,14 @@ paths:
       summary: User Registration
       operationId: regiester-user
       responses:
-        '200':
-          $ref: '#/components/responses/Register'
-        '400':
-          $ref: '#/components/responses/Error'
-        '500':
-          $ref: '#/components/responses/Error'
+        "200":
+          $ref: "#/components/responses/Register"
+        "400":
+          $ref: "#/components/responses/Error"
+        "500":
+          $ref: "#/components/responses/Error"
       requestBody:
-        $ref: '#/components/requestBodies/Register'
+        $ref: "#/components/requestBodies/Register"
       description: Register new user
       x-stoplight:
         id: 7xhk6wcrsm2m3
@@ -39,15 +39,15 @@ paths:
       tags:
         - User
       responses:
-        '200':
-          $ref: '#/components/responses/Login'
-        '500':
-          $ref: '#/components/responses/Error'
+        "200":
+          $ref: "#/components/responses/Login"
+        "500":
+          $ref: "#/components/responses/Error"
       operationId: login-user
       x-stoplight:
         id: 8m90dlv0xc09x
       requestBody:
-        $ref: '#/components/requestBodies/Login'
+        $ref: "#/components/requestBodies/Login"
   /auth/accessToken:
     get:
       summary: Request AccessToken
@@ -68,15 +68,16 @@ paths:
           description: Valid Refresh token
       tags:
         - Auth
+      description: ""
     parameters: []
   /auth/verifyOtp:
     post:
       summary: Verify OTP
       responses:
-        '200':
-          $ref: '#/components/responses/Login'
-        '500':
-          $ref: '#/components/responses/Error'
+        "200":
+          $ref: "#/components/responses/Login"
+        "500":
+          $ref: "#/components/responses/Error"
       operationId: post-auth-verifyOtp
       x-stoplight:
         id: 2mys6pc0tw9tn
@@ -105,7 +106,7 @@ paths:
       tags:
         - User
       responses:
-        '200':
+        "200":
           description: OK
           content: {}
       operationId: post-user-logout
@@ -122,7 +123,7 @@ paths:
         id: ztlhlwiajutbr
       security:
         - Bearer: []
-  '/user/{propertyId}':
+  "/user/{propertyId}":
     parameters:
       - schema:
           type: string
@@ -134,7 +135,7 @@ paths:
       tags:
         - User
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -147,7 +148,7 @@ paths:
                       id: fusg7lw48la28
                     properties:
                       user:
-                        $ref: '#/components/schemas/UserWithoutPassword'
+                        $ref: "#/components/schemas/UserWithoutPassword"
                         x-stoplight:
                           id: mw7wcx4pdlt50
       operationId: post-user-propertyId
@@ -156,26 +157,26 @@ paths:
       security:
         - Bearer: []
       requestBody:
-        $ref: '#/components/requestBodies/User'
+        $ref: "#/components/requestBodies/User"
   /property:
     post:
       summary: Create property (Property Onboarding)
       tags:
         - Property
       responses:
-        '200':
-          $ref: '#/components/responses/PropertyResponse'
+        "200":
+          $ref: "#/components/responses/PropertyResponse"
         4XX:
-          $ref: '#/components/responses/Error'
+          $ref: "#/components/responses/Error"
         5XX:
-          $ref: '#/components/responses/Error'
+          $ref: "#/components/responses/Error"
       operationId: Create-Property
       x-stoplight:
         id: ryjalcd5tmwuq
       security:
         - Bearer: []
       requestBody:
-        $ref: '#/components/requestBodies/CreateProperty'
+        $ref: "#/components/requestBodies/CreateProperty"
     get:
       summary: Get all properties associated with user
       tags:
@@ -202,7 +203,7 @@ paths:
           name: country
       tags:
         - Twilio
-  '/twilio/{propertyId}/buyPhoneNumber':
+  "/twilio/{propertyId}/buyPhoneNumber":
     parameters:
       - schema:
           type: string
@@ -214,7 +215,7 @@ paths:
       tags:
         - Twilio
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -237,7 +238,7 @@ paths:
       operationId: post-twilio-propertyId-buyPhoneNumber
       x-stoplight:
         id: r0xyiornttr0a
-      description: ''
+      description: ""
       requestBody:
         content:
           application/json:
@@ -252,7 +253,7 @@ paths:
                     id: c4sii266sgyvi
       security:
         - Bearer: []
-  '/twilio/{propertyId}/createSubaccount':
+  "/twilio/{propertyId}/createSubaccount":
     parameters:
       - schema:
           type: string
@@ -264,7 +265,7 @@ paths:
       tags:
         - Twilio
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -289,6 +290,40 @@ paths:
         id: 49qo0ggfuutup
       security:
         - Bearer: []
+  /auth/resendOtp:
+    post:
+      summary: Resend Otp
+      tags:
+        - Auth
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - message
+                properties:
+                  message:
+                    type: string
+                    x-stoplight:
+                      id: vto8qb7anp03i
+      operationId: post-auth-resendOtp
+      x-stoplight:
+        id: ht3kaidetgy0b
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  x-stoplight:
+                    id: pu7lb5p9iip1t
 components:
   schemas:
     User:
@@ -395,7 +430,7 @@ components:
           type: string
           x-stoplight:
             id: asmx1af0fxhrn
-      description: ''
+      description: ""
     Property:
       type: object
       x-examples:
@@ -678,7 +713,7 @@ components:
                 type: object
                 properties:
                   user:
-                    $ref: '#/components/schemas/UserWithoutPassword'
+                    $ref: "#/components/schemas/UserWithoutPassword"
                     x-stoplight:
                       id: tx2oe7mwhw59e
                   accessToken:
@@ -718,7 +753,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/UserWithoutPassword'
+            $ref: "#/components/schemas/UserWithoutPassword"
     PropertyResponse:
       description: "{\r\n    \"result\": {\r\n        \"property\": {\r\n            \r\n        }\r\n    }\r\n}"
       content:
@@ -732,7 +767,7 @@ components:
                   id: 0m1uu7p7l7gzk
                 properties:
                   property:
-                    $ref: '#/components/schemas/Property'
+                    $ref: "#/components/schemas/Property"
                     x-stoplight:
                       id: i0xybth7ewga5
     GetAllPropertyResponse:
@@ -742,7 +777,8 @@ components:
           schema:
             type: object
             properties:
-              '':
+              "":
                 type: string
                 x-stoplight:
                   id: l1ju0k5o5khvd
+  

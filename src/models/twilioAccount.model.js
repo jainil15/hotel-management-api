@@ -1,6 +1,9 @@
 const mongoose = require("mongoose");
 const { z } = require("zod");
-const { nocountrycodephoneregex, countrycoderegex } = require("../constants/regex.constant");
+const {
+  nocountrycodephoneregex,
+  countrycoderegex,
+} = require("../constants/regex.constant");
 const Schema = mongoose.Schema;
 
 const twilioAccountSchema = new Schema({

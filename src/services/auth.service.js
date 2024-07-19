@@ -69,4 +69,9 @@ const decodeRefreshToken = async (refreshToken) => {
   }
 };
 
-module.exports = { createSession, getSession, decodeRefreshToken, deleteSession };
+module.exports = {
+  createSession,
+  getSession,
+  decodeRefreshToken,
+  deleteSession,
+};

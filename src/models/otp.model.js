@@ -15,13 +15,12 @@ const otpSchema = new mongoose.Schema(
     expiresAt: {
       type: Date,
       required: true,
-      default: Date.now(),
-      expires: 300,
+      default: Date.now() + 600,
     },
   },
   { timestamps: true }
 );
-
+otpSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 600 });
 const Otp = mongoose.model("Otp", otpSchema);
 Otp.init().then(() => {
   console.log("Initialzed Otp Model");
