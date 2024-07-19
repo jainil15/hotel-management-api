@@ -13,9 +13,8 @@ const create = async (_user) => {
     // Hash password
     const saltRounds = 10;
     const salt = await bcrypt.genSalt(saltRounds);
-    // console.log(_user);
+
     const hashedPassword = await bcrypt.hash(_user.password, salt);
-    // console.log(salt);
 
     // Create user
     const user = new User({

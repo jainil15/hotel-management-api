@@ -25,7 +25,7 @@ const buyPhoneNumber = async (req, res) => {
   try {
     const propertyId = req.params.propertyId;
     const phoneNumber = req.body.phoneNumber;
-    console.log(phoneregex.test(phoneNumber));
+    
     const property = await Property.findById(propertyId);
     if (!property) {
       throw new Error("Property not found");
@@ -57,7 +57,7 @@ const buyPhoneNumber = async (req, res) => {
       propertyId,
       phoneNumber
     );
-    console.log(boughtPhoneNumber);
+    
     return res
       .status(200)
       .json({ result: { message: "Successfully bought phonenumber" } });

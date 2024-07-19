@@ -69,7 +69,7 @@ const getAccessToken = async (req, res) => {
 
 const verifyOtp = async (req, res) => {
   try {
-    console.log("verifyOtp");
+    
     const { email, otp } = req.body;
     const result = z
       .object({

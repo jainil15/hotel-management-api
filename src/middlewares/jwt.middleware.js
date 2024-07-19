@@ -6,9 +6,9 @@ const authenticateToken = async (req, res, next) => {
     const authHeader = req.headers["authorization"];
     const token = authHeader && authHeader.split(" ")[1];
     // || req.cookie?.refreshToken == null
-    console.log(token);
+    
     if (token == null) {
-      console.log("here");
+      
       return res.status(401).json({ error: { auth: "Authorization Missing" } });
     }
     // Verify the token

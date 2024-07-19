@@ -36,7 +36,7 @@ const sendsms = async (req, res) => {
       senderId: req.params.propertyId,
       receiverId: req.params.guestId,
     });
-    console.log("MESSAGE CONTROLLER: " + sentMessage);
+    
     res.status(200).json({ result: { message: newMessage } });
   } catch (e) {
     res.status(500).json({ error: { server: "Internal Server Error" + e } });
@@ -45,9 +45,8 @@ const sendsms = async (req, res) => {
 
 const incomingMessage = async (req, res) => {
   try {
-    console.log("MESSAGE CONTROLLER: " + req.body);
-    // console.log(req.body.formData);
-    // console.log(req);
+    
+    
     const twiml = new MessagingResponse();
     // TODO: Move code to service
     const property = await Property.findOne({
@@ -90,7 +89,7 @@ const errorLogging = async (req, res) => {
 
 const status = async (req, res) => {
   try {
-    console.log(req.body);
+    
     return res.status(200).json({ result: { message: "Status received" } });
   } catch (e) {
     return res

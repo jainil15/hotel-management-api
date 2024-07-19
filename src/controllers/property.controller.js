@@ -13,8 +13,7 @@ const create = async (req, res) => {
       ...property
     } = req.body;
 
-    // console.log(property, standardCheckinTime, standardCheckoutTime, timezone, defaultNewDayTime);
-
+    
     // validation errors
 
     const result = PropertyValidationSchema.safeParse({

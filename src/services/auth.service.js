@@ -23,7 +23,7 @@ const createSession = async (user) => {
 // Get a session by email
 const getSession = async (email) => {
   try {
-    // console.log(email);
+    
     // Find the session by email
     const existingSession = await Session.findOne({ email: email });
     // If session does not exist, throw an error
@@ -62,7 +62,7 @@ const decodeRefreshToken = async (refreshToken) => {
       refreshToken,
       process.env.REFRESH_TOKEN_SECRET
     );
-    // console.log(decoded);
+    
     return decoded;
   } catch (e) {
     throw new Error("Error verifying refresh token" + e);

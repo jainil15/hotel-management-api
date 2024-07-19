@@ -58,7 +58,7 @@ const buyPhoneNumber = async (propertyId, phoneNumber) => {
     });
 
     // Transfer phone number to subaccount
-    console.log(incomingPhoneNumber);
+    
     const response = twilioClient
       .incomingPhoneNumbers(incomingPhoneNumber.sid)
       .update({ accountSid: twilioAccount.sid });

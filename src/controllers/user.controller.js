@@ -34,7 +34,7 @@ const register = async (req, res) => {
     }
     const saltRounds = 10;
     const salt = await bcrypt.genSalt(saltRounds);
-    // console.log(_user);
+    
     const hashedPassword = await bcrypt.hash(user.password, salt);
     const otp = generateOtp();
     const newOtp = otpService.create({
