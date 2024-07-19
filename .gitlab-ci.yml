@@ -39,8 +39,8 @@ build-image: # Build stage triggers for all push on every branch for testing
 # Deploy to ec2 instance for testing
 deploy to testing:
   image: ubuntu:22.04
-  # rules:
-  #   - if: $CI_COMMIT_BRANCH == "testing"
+  rules:
+    - if: $CI_COMMIT_BRANCH == "testing"
   stage: deploy-to-testing
   environment: testing
   before_script:
