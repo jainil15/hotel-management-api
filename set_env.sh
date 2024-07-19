@@ -28,7 +28,7 @@ echo NODEMAILER_EMAIL_PASSWORD=$NODEMAILER_EMAIL_PASSWORD >> .env
 
 # Node environment
 echo NODE_ENV=$NODE_ENV >> .env
- 
+
 # AWS credentials
 echo AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID >> .env
 echo AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY >> .env
