@@ -35,7 +35,7 @@ const create = async (req, res) => {
         },
       });
     }
-
+    
     // check if email already exists
     const oldProperty = await propertyService.getByEmail(property.email);
     if (oldProperty) {
