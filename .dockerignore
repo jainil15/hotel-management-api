@@ -1,3 +1,8 @@
 node_modules
 .vscode
 .git
+.idea
+logs
+.gitignore
+.gitlab-ci.yml
+README.md

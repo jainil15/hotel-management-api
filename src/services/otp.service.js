@@ -1,17 +1,13 @@
 const { Otp } = require("../models/otp.model");
 
 const create = async (otp) => {
-  try {
-    const oldOtp = await getByEmail(otp.user.email);
-    if (oldOtp) {
-      await oldOtp.deleteOne();
-    }
-    const newOtp = new Otp(otp);
-    const savedOtp = await newOtp.save();
-    return savedOtp;
-  } catch (e) {
-    throw new Error("Error creating otp");
+  const oldOtp = await getByEmail(otp.user.email);
+  if (oldOtp) {
+    await oldOtp.deleteOne();
   }
+  const newOtp = new Otp(otp);
+  const savedOtp = await newOtp.save();
+  return savedOtp;
 };
 const getByEmail = async (email) => {
   try {

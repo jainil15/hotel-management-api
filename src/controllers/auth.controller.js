@@ -29,21 +29,25 @@ const getAccessToken = async (req, res) => {
     const refreshToken = req.cookies["refreshToken"];
     // Check if refresh token exists
     if (!refreshToken) {
-      return res.status(401).json({ error: "Refresh token does not exist" });
+      return res
+        .status(401)
+        .json({ error: { auth: "Refresh token does not exist" } });
     }
     // Check if session exists
     if (!session) {
-      return res.status(401).json({ error: "Session does not exist" });
+      return res
+        .status(401)
+        .json({ error: { auth: "Session does not exist" } });
     }
     // Check if session is valid
     if (!session.valid) {
-      return res.status(401).json({ error: "Session is not valid" });
+      return res.status(401).json({ error: { auth: "Session is not valid" } });
     }
     // Decode refresh token
     const decoded = await authService.decodeRefreshToken(refreshToken);
     // Check if email matches
     if (decoded.email !== req.query.email) {
-      return res.status(401).json({ error: "Email does not match" });
+      return res.status(401).json({ error: { auth: "Email does not match" } });
     }
     // Extract payload
     const { __exp, sessionId, iat, exp, ...rest } = decoded;
@@ -52,7 +56,7 @@ const getAccessToken = async (req, res) => {
     const accessToken = generateAccessToken(
       { ...rest },
       "1d",
-      process.env.ACCESS_TOKEN_SECRET
+      process.env.ACCESS_TOKEN_SECRET,
     );
     // Send response
     return res.status(200).json({
@@ -69,7 +73,6 @@ const getAccessToken = async (req, res) => {
 
 const verifyOtp = async (req, res) => {
   try {
-    
     const { email, otp } = req.body;
     const result = z
       .object({

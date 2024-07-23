@@ -25,7 +25,7 @@ const buyPhoneNumber = async (req, res) => {
   try {
     const propertyId = req.params.propertyId;
     const phoneNumber = req.body.phoneNumber;
-    
+
     const property = await Property.findById(propertyId);
     if (!property) {
       throw new Error("Property not found");
@@ -55,9 +55,10 @@ const buyPhoneNumber = async (req, res) => {
     }
     const boughtPhoneNumber = await twilioService.buyPhoneNumber(
       propertyId,
-      phoneNumber
+      phoneNumber,
+      req.user,
     );
-    
+
     return res
       .status(200)
       .json({ result: { message: "Successfully bought phonenumber" } });
@@ -87,4 +88,25 @@ const createSubaccount = async (req, res) => {
   }
 };
 
-module.exports = { getPhoneNumbers, buyPhoneNumber, createSubaccount };
+const getTollFreeVerificationStatus = async (req, res) => {
+  try {
+    const propertyId = req.params.propertyId;
+
+    const tollFreeVerificationStatus =
+      await twilioService.getTollFreeVerificationStatus(propertyId);
+    return res
+      .status(200)
+      .json({ result: { status: tollFreeVerificationStatus } });
+  } catch (e) {
+    return res
+      .status(500)
+      .json({ error: { server: "Internal server error" + e } });
+  }
+};
+
+module.exports = {
+  getPhoneNumbers,
+  buyPhoneNumber,
+  createSubaccount,
+  getTollFreeVerificationStatus,
+};

@@ -7,19 +7,23 @@ const {
 const logger = require("../configs/winston.config");
 const Schema = mongoose.Schema;
 
-const twilioAccountSchema = new Schema({
-  propertyId: { type: Schema.Types.ObjectId, required: true },
-  sid: { type: String, required: true },
-  authToken: { type: String, required: true },
-  dateCreated: { type: Date, required: true },
-  dateUpdated: { type: Date, required: true },
-  friendlyName: { type: String, required: true },
-  ownerAccountSid: { type: String, required: true },
-  status: { type: String, required: true },
-  phoneNumber: { type: String },
-  countryCode: { type: String },
-  phoneNumberSid: { type: String },
-});
+const twilioAccountSchema = new Schema(
+  {
+    propertyId: { type: Schema.Types.ObjectId, required: true },
+    sid: { type: String, required: true },
+    authToken: { type: String, required: true },
+    dateCreated: { type: Date, required: true },
+    dateUpdated: { type: Date, required: true },
+    friendlyName: { type: String, required: true },
+    ownerAccountSid: { type: String, required: true },
+    status: { type: String, required: true },
+    phoneNumber: { type: String },
+    countryCode: { type: String },
+    phoneNumberSid: { type: String },
+    tollfreeVerificationSid: { type: String },
+  },
+  { timestamps: true }
+);
 const TwilioValidationSchema = z.object({
   propertyId: z.string(),
   sid: z.string(),

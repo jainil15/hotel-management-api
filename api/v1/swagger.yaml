@@ -3,55 +3,57 @@ x-stoplight:
   id: qwywpxxlzuzxl
 info:
   title: Onelyk Swagger UI
-  version: "1.0"
+  version: '1.0'
   summary: Onelyk Api
   description: Onelyk Api
 servers:
-  - url: "http://localhost:8000"
+  - url: 'http://localhost:8000'
     description: local
-  - url: "https://8l4qkmp2-8000.inc1.devtunnels.ms"
+  - url: 'https://8l4qkmp2-8000.inc1.devtunnels.ms'
     description: dev
+  - url: 'http://localhost:3000'
+    description: backup
 paths:
   /user/register:
     post:
       summary: User Registration
       operationId: regiester-user
       responses:
-        "200":
-          $ref: "#/components/responses/Register"
-        "400":
-          $ref: "#/components/responses/Error"
-        "500":
-          $ref: "#/components/responses/Error"
+        '200':
+          $ref: '#/components/responses/Register'
+        '400':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
       requestBody:
-        $ref: "#/components/requestBodies/Register"
+        $ref: '#/components/requestBodies/Register'
       description: Register new user
       x-stoplight:
         id: 7xhk6wcrsm2m3
-      parameters: []
+      parameters: [ ]
       x-internal: false
       tags:
         - User
-    parameters: []
+    parameters: [ ]
   /user/login:
     post:
       summary: User Login
       tags:
         - User
       responses:
-        "200":
-          $ref: "#/components/responses/Login"
-        "500":
-          $ref: "#/components/responses/Error"
+        '200':
+          $ref: '#/components/responses/Login'
+        '500':
+          $ref: '#/components/responses/Error'
       operationId: login-user
       x-stoplight:
         id: 8m90dlv0xc09x
       requestBody:
-        $ref: "#/components/requestBodies/Login"
+        $ref: '#/components/requestBodies/Login'
   /auth/accessToken:
     get:
       summary: Request AccessToken
-      responses: {}
+      responses: { }
       operationId: get-auth-accesstoken
       x-stoplight:
         id: 91ttdhzlaulzl
@@ -68,16 +70,16 @@ paths:
           description: Valid Refresh token
       tags:
         - Auth
-      description: ""
-    parameters: []
+      description: ''
+    parameters: [ ]
   /auth/verifyOtp:
     post:
       summary: Verify OTP
       responses:
-        "200":
-          $ref: "#/components/responses/Login"
-        "500":
-          $ref: "#/components/responses/Error"
+        '200':
+          $ref: '#/components/responses/Login'
+        '500':
+          $ref: '#/components/responses/Error'
       operationId: post-auth-verifyOtp
       x-stoplight:
         id: 2mys6pc0tw9tn
@@ -106,9 +108,9 @@ paths:
       tags:
         - User
       responses:
-        "200":
+        '200':
           description: OK
-          content: {}
+          content: { }
       operationId: post-user-logout
       x-stoplight:
         id: rl0dfsy0rxz57
@@ -117,85 +119,67 @@ paths:
       summary: Get User
       tags:
         - User
-      responses: {}
+      responses: { }
       operationId: get-user
       x-stoplight:
         id: ztlhlwiajutbr
       security:
-        - Bearer: []
-  "/user/{propertyId}":
+        - Bearer: [ ]
+  '/user/{propertyId}':
     parameters:
       - schema:
           type: string
         name: propertyId
         in: path
         required: true
-    post:
-      summary: Create User for the property
+    get:
+      summary: Get users by property id
+      responses: { }
+      operationId: get-user-propertyId
+      x-stoplight:
+        id: 5ttcw4oqj3x6z
+      security:
+        - Bearer: [ ]
       tags:
         - User
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  result:
-                    type: object
-                    x-stoplight:
-                      id: fusg7lw48la28
-                    properties:
-                      user:
-                        $ref: "#/components/schemas/UserWithoutPassword"
-                        x-stoplight:
-                          id: mw7wcx4pdlt50
-      operationId: post-user-propertyId
-      x-stoplight:
-        id: 1y5tk14msv6o7
-      security:
-        - Bearer: []
-      requestBody:
-        $ref: "#/components/requestBodies/User"
   /property:
     post:
       summary: Create property (Property Onboarding)
       tags:
         - Property
       responses:
-        "200":
-          $ref: "#/components/responses/PropertyResponse"
+        '200':
+          $ref: '#/components/responses/PropertyResponse'
         4XX:
-          $ref: "#/components/responses/Error"
+          $ref: '#/components/responses/Error'
         5XX:
-          $ref: "#/components/responses/Error"
+          $ref: '#/components/responses/Error'
       operationId: Create-Property
       x-stoplight:
         id: ryjalcd5tmwuq
       security:
-        - Bearer: []
+        - Bearer: [ ]
       requestBody:
-        $ref: "#/components/requestBodies/CreateProperty"
+        $ref: '#/components/requestBodies/CreateProperty'
     get:
       summary: Get all properties associated with user
       tags:
         - Property
-      responses: {}
+      responses: { }
       operationId: get-all-property-of-user
       x-stoplight:
         id: u96bywly9mqg4
       security:
-        - Bearer: []
+        - Bearer: [ ]
   /twilio/phoneNumbers:
     get:
       summary: Get Available Phone Numbers list
-      responses: {}
+      responses: { }
       operationId: get-twilio-phoneNumbers
       x-stoplight:
         id: kbqsty6fg7exx
       security:
-        - Bearer: []
+        - Bearer: [ ]
       parameters:
         - schema:
             type: string
@@ -203,7 +187,7 @@ paths:
           name: country
       tags:
         - Twilio
-  "/twilio/{propertyId}/buyPhoneNumber":
+  '/twilio/{propertyId}/buyPhoneNumber':
     parameters:
       - schema:
           type: string
@@ -215,7 +199,7 @@ paths:
       tags:
         - Twilio
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -238,7 +222,7 @@ paths:
       operationId: post-twilio-propertyId-buyPhoneNumber
       x-stoplight:
         id: r0xyiornttr0a
-      description: ""
+      description: ''
       requestBody:
         content:
           application/json:
@@ -252,8 +236,8 @@ paths:
                   x-stoplight:
                     id: c4sii266sgyvi
       security:
-        - Bearer: []
-  "/twilio/{propertyId}/createSubaccount":
+        - Bearer: [ ]
+  '/twilio/{propertyId}/createSubaccount':
     parameters:
       - schema:
           type: string
@@ -265,7 +249,7 @@ paths:
       tags:
         - Twilio
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -289,15 +273,16 @@ paths:
       x-stoplight:
         id: 49qo0ggfuutup
       security:
-        - Bearer: []
+        - Bearer: [ ]
   /auth/resendOtp:
     post:
       summary: Resend Otp
       tags:
         - Auth
       responses:
-        "200":
-          description: OK
+        '200':
+          description: Email Sent
+          headers: { }
           content:
             application/json:
               schema:
@@ -308,10 +293,10 @@ paths:
                   message:
                     type: string
                     x-stoplight:
-                      id: vto8qb7anp03i
+                      id: bufkcslp1clep
       operationId: post-auth-resendOtp
       x-stoplight:
-        id: ht3kaidetgy0b
+        id: vnabujuuggkfj
       requestBody:
         content:
           application/json:
@@ -323,7 +308,281 @@ paths:
                 email:
                   type: string
                   x-stoplight:
-                    id: pu7lb5p9iip1t
+                    id: b35muo8oajf1m
+  '/property/{propertyId}':
+    parameters:
+      - schema:
+          type: string
+        name: propertyId
+        in: path
+        required: true
+    get:
+      summary: Get Property by PropertyId
+      tags:
+        - Property
+      responses:
+        '200':
+          $ref: '#/components/responses/PropertyResponse'
+      operationId: get-property-propertyId
+      x-stoplight:
+        id: jqjeu1hs5q8ry
+      security:
+        - Bearer: [ ]
+  /country:
+    get:
+      summary: Get all countries
+      tags:
+        - Country
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: object
+                    properties:
+                      countries:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                            iso2:
+                              type: string
+      operationId: get-country
+      x-stoplight:
+        id: eahvalgj8q15t
+  '/country/{country}/states':
+    parameters:
+      - schema:
+          type: string
+        name: country
+        in: path
+        required: true
+        description: ISO2 code
+    get:
+      summary: Get all states of the country
+      tags:
+        - Country
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: object
+                    properties:
+                      states:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                            state_code:
+                              type: string
+      operationId: get-country-countryId-states
+      x-stoplight:
+        id: yewamkjrance5
+  '/country/{country}/timezones':
+    parameters:
+      - schema:
+          type: string
+        name: country
+        in: path
+        required: true
+        description: ISO2 code
+    get:
+      summary: Get all timezones of a country
+      tags:
+        - Country
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: object
+                    properties:
+                      timezones:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            zoneName:
+                              type: string
+                            gmtOffset:
+                              type: integer
+                            gmtOffsetName:
+                              type: string
+                            abbreviation:
+                              type: string
+                            tzName:
+                              type: string
+      operationId: get-country-countryId-timezone
+      x-stoplight:
+        id: cr2z17dg4genl
+  '/country/{country}/{zipcode}':
+    parameters:
+      - schema:
+          type: string
+        name: zipcode
+        in: path
+        required: true
+        description: zip/postal code
+      - schema:
+          type: string
+        name: country
+        in: path
+        required: true
+        description: ISO2 code
+    get:
+      summary: Get location based on zipcode
+      tags:
+        - Country
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: object
+                    properties:
+                      zipcodes:
+                        type: object
+                        properties:
+                          country_code:
+                            type: string
+                          zipcode:
+                            type: string
+                          place:
+                            type: string
+                          state:
+                            type: string
+                          state_code:
+                            type: string
+                          province:
+                            type: string
+                          province_code:
+                            type: string
+                          community:
+                            type: string
+                          community_code:
+                            type: string
+                          latitude:
+                            type: string
+                          longitude:
+                            type: string
+                x-examples:
+                  Example 1:
+                    result:
+                      zipcodes:
+                        country_code: US
+                        zipcode: '84765'
+                        place: Santa Clara
+                        state: Utah
+                        state_code: UT
+                        province: Washington
+                        province_code: '053'
+                        community: ''
+                        community_code: ''
+                        latitude: '37.1282'
+                        longitude: '-113.676'
+      operationId: get-country-countrycode-zipcode
+      x-stoplight:
+        id: rt0gmfe39ejzk
+  '/country/{country}/{state}/cities':
+    parameters:
+      - schema:
+          type: string
+        name: country
+        in: path
+        required: true
+        description: ISO2 code
+      - schema:
+          type: string
+        name: state
+        in: path
+        required: true
+        description: State code
+    get:
+      summary: Get cities based on state and country
+      tags:
+        - Country
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: object
+                    properties:
+                      cities:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                            name:
+                              type: string
+                            latitude:
+                              type: string
+                            longitude:
+                              type: string
+              examples: { }
+      operationId: get-country-country-state-cities
+      x-stoplight:
+        id: z3giqx0o6pq65
+  '/twilio/{propertyId}/tollFreeVerificationStatus':
+    parameters:
+      - schema:
+          type: string
+        name: propertyId
+        in: path
+        required: true
+    get:
+      summary: Get toll free verification status
+      tags:
+        - Twilio
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: object
+                    x-stoplight:
+                      id: 3iuhwnftn55dz
+                    properties:
+                      status:
+                        type: string
+                        x-stoplight:
+                          id: 4aqy1y8chykq8
+      operationId: get-twilio-propertyId-tollfreeVerificationStatus
+      x-stoplight:
+        id: es0glpjzixbxx
+      security:
+        - Bearer: [ ]
 components:
   schemas:
     User:
@@ -430,46 +689,28 @@ components:
           type: string
           x-stoplight:
             id: asmx1af0fxhrn
-      description: ""
+      description: ''
     Property:
       type: object
       x-examples:
         Example 1:
-          _id: String
-          name: String
-          email: String
-          phoneNumber: String
-          website: String
-          about: String
-          logoUrl: String
-          coverUrl: String
-          country: String
-          state: String
-          city: String
-          address: String
-          countryCode: String
-          active: Boolean
-          __v: Number
-          createdAt: Date
-          updatedAt: Date
-      required:
-        - _id
-        - name
-        - email
-        - phoneNumber
-        - website
-        - about
-        - logoUrl
-        - coverUrl
-        - country
-        - state
-        - city
-        - address
-        - countryCode
-        - active
-        - __v
-        - createdAt
-        - updatedAt
+          _id: 6698ccbc3bfa38a274593d9b
+          name: Onelyk Test Property
+          email: jainilpatel145@gmail.com
+          phoneNumber: '1234567890'
+          website: 'https://www.onelyk.com'
+          about: This is a onelyk test property
+          country: United States
+          state: New York
+          city: New York
+          address: 55 Street
+          countryCode: '+1'
+          active: true
+          createdAt: '2024-07-18T08:05:16.703Z'
+          updatedAt: '2024-07-18T08:05:16.735Z'
+          __v: 0
+          coverUrl: 'https://onelyk-images-bucket.s3.amazonaws.com/property/6698ccbc3bfa38a274593d9b/cover/cover.jpg'
+          logoUrl: 'https://onelyk-images-bucket.s3.amazonaws.com/property/6698ccbc3bfa38a274593d9b/logo/logo.jpg'
       properties:
         _id:
           type: string
@@ -483,10 +724,6 @@ components:
           type: string
         about:
           type: string
-        logoUrl:
-          type: string
-        coverUrl:
-          type: string
         country:
           type: string
         state:
@@ -499,14 +736,20 @@ components:
           type: string
         active:
           type: boolean
-        __v:
-          type: integer
         createdAt:
           type: string
-          format: date-time
         updatedAt:
           type: string
-          format: date-time
+        __v:
+          type: integer
+        coverUrl:
+          type: string
+        logoUrl:
+          type: string
+        zipcode:
+          type: string
+          x-stoplight:
+            id: odk128ck94ppg
   securitySchemes:
     Bearer:
       type: http
@@ -562,6 +805,11 @@ components:
                 type: string
                 x-stoplight:
                   id: bj7vqbzwu059u
+          examples:
+            Example 1:
+              value:
+                email: jainil1235@gmail.com
+                password: '123456'
       description: User Login request
     User:
       content:
@@ -646,6 +894,7 @@ components:
               - standardCheckoutTime
               - timezone
               - defaultNewDayTime
+              - zipcode
             properties:
               name:
                 type: string
@@ -693,15 +942,20 @@ components:
                 type: string
                 x-stoplight:
                   id: 3nmhpf9z8g4q7
+              zipcode:
+                type: string
+                x-stoplight:
+                  id: w9poyxlogsn0q
       description: Create property Request
     PhoneNumber:
       content:
         application/json:
           schema:
             type: object
+      description: ''
   responses:
     Login:
-      description: Example response
+      description: Login response
       content:
         application/json:
           schema:
@@ -713,16 +967,16 @@ components:
                 type: object
                 properties:
                   user:
-                    $ref: "#/components/schemas/UserWithoutPassword"
+                    $ref: '#/components/schemas/UserWithoutPassword'
                     x-stoplight:
                       id: tx2oe7mwhw59e
                   accessToken:
                     type: string
                     x-stoplight:
                       id: kn1w394ufgv0s
-      headers: {}
+      headers: { }
     Register:
-      description: "{\r\n    \"result\": {\r\n        \"Email\": \"Email Sent\"\r\n    }\r\n}"
+      description: Register response
       content:
         application/json:
           schema:
@@ -738,7 +992,7 @@ components:
                     x-stoplight:
                       id: 24dudrs50p4gu
     Error:
-      description: "{\r\n    \"error\": {\r\n        \"server\": \"Internal Server Error\"\r\n    }\r\n}"
+      description: Standard error response
       content:
         application/json:
           schema:
@@ -749,13 +1003,13 @@ components:
                 x-stoplight:
                   id: evqhzeygpybsg
     User:
-      description: Example response
+      description: User response
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/UserWithoutPassword"
+            $ref: '#/components/schemas/UserWithoutPassword'
     PropertyResponse:
-      description: "{\r\n    \"result\": {\r\n        \"property\": {\r\n            \r\n        }\r\n    }\r\n}"
+      description: Property Response
       content:
         application/json:
           schema:
@@ -763,22 +1017,52 @@ components:
             properties:
               result:
                 type: object
-                x-stoplight:
-                  id: 0m1uu7p7l7gzk
                 properties:
                   property:
-                    $ref: "#/components/schemas/Property"
-                    x-stoplight:
-                      id: i0xybth7ewga5
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                      name:
+                        type: string
+                      email:
+                        type: string
+                      phoneNumber:
+                        type: string
+                      website:
+                        type: string
+                      about:
+                        type: string
+                      country:
+                        type: string
+                      state:
+                        type: string
+                      city:
+                        type: string
+                      address:
+                        type: string
+                      countryCode:
+                        type: string
+                      active:
+                        type: boolean
+                      createdAt:
+                        type: string
+                      updatedAt:
+                        type: string
+                      __v:
+                        type: integer
+                      coverUrl:
+                        type: string
+                      logoUrl:
+                        type: string
     GetAllPropertyResponse:
-      description: Example response
+      description: All property response
       content:
         application/json:
           schema:
             type: object
             properties:
-              "":
+              '':
                 type: string
                 x-stoplight:
                   id: l1ju0k5o5khvd
-  
