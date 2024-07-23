@@ -31,7 +31,7 @@ const propertySchema = new Schema(
 
     active: { type: Boolean, default: true },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 propertySchema.index({ email: 1 }, { unique: true });
@@ -55,7 +55,7 @@ const PropertyValidationSchema = z
           })
           .refine((val) => checkImageType(val.mimetype), {
             message: "Invalid file type",
-          })
+          }),
       )
       .length(1),
     cover: z
@@ -67,7 +67,7 @@ const PropertyValidationSchema = z
           })
           .refine((val) => checkImageType(val.mimetype), {
             message: "Invalid file type",
-          })
+          }),
       )
       .length(1),
     website: z.string().url(),
@@ -85,6 +85,6 @@ const PropertyValidationSchema = z
 
 const Property = mongoose.model("Property", propertySchema);
 Property.init().then(() => {
-  logger.info("Initialzed Property Model");
+  logger.info("Initialized Property Model");
 });
 module.exports = { Property, PropertyValidationSchema };

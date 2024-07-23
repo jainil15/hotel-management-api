@@ -13,7 +13,10 @@ const {
   checkPermissions,
 } = require("../middlewares/propertyaccess.middleware");
 
+// Twilio Routes
+// Get Phone Numbers
 router.get("/phoneNumbers", authenticateToken, getPhoneNumbers);
+
 router.post(
   "/:propertyId/createSubaccount",
   authenticateToken,
@@ -21,6 +24,7 @@ router.post(
   checkPermissions("admin"),
   createSubaccount,
 );
+
 router.post(
   "/:propertyId/buyPhoneNumber",
   authenticateToken,

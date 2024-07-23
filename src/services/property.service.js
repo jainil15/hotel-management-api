@@ -90,7 +90,7 @@ const update = async (property, propertyId) => {
     const updatedProperty = await Property.findByIdAndUpdate(
       propertyId,
       property,
-      { new: true }
+      { new: true },
     );
     return updatedProperty;
   } catch (e) {
@@ -133,4 +133,5 @@ const getByEmail = async (email) => {
     throw new Error("Error getting property by email");
   }
 };
+
 module.exports = { create, getAll, update, remove, getById, getByEmail };

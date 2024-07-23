@@ -17,6 +17,6 @@ const ExtraUserDetails = mongoose.model(
   extraUserDetailsSchema,
 );
 ExtraUserDetails.init().then(() => {
-  logger.info("ExtraUserDetails initialized");
+  logger.info("Initialized ExtraUserDetails Model");
 });
 module.exports = ExtraUserDetails;

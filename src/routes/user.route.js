@@ -15,10 +15,12 @@ const { errorMiddleware } = require("../middlewares/error.middleware");
 
 const router = Router();
 
+// Auth Routes
 router.post("/register", register);
 router.post("/login", login);
 router.post("/logout", authenticateToken, logout);
 
+// Get User
 router.get("/", authenticateToken, getUser);
 
 // User Routes
@@ -27,7 +29,7 @@ router.post(
   authenticateToken,
   checkPropertyAccess,
   checkPermissions("admin"),
-  create
+  create,
 );
 
 module.exports = router;

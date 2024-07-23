@@ -1,64 +1,44 @@
 const { Guest } = require("../models/guest.model");
 
 const create = async (guest, propertyId) => {
-  try {
-    const newGuest = new Guest({ ...guest, propertyId: propertyId });
-    const savedGuest = await newGuest.save();
-    return savedGuest;
-  } catch (e) {
-    throw new Error("Error creating guest" + e);
-  }
+  const newGuest = new Guest({ ...guest, propertyId: propertyId });
+  const savedGuest = await newGuest.save();
+  return savedGuest;
 };
 
 const getAll = async (propertyId) => {
-  try {
-    const guests = await Guest.find({ propertyId: propertyId });
-    return guests;
-  } catch (e) {
-    throw new Error("Error getting guests" + e);
-  }
+  const guests = await Guest.find({ propertyId: propertyId });
+  return guests;
 };
 
 const getById = async (guestId, propertyId) => {
-  try {
-    const guest = await Guest.findOne({ _id: guestId, propertyId: propertyId });
-    if (!guest) {
-      throw new Error("Guest not found");
-    }
-    return guest;
-  } catch (e) {
-    throw new Error("Error getting guest" + e);
+  const guest = await Guest.findOne({ _id: guestId, propertyId: propertyId });
+  if (!guest) {
+    throw new Error("Guest not found");
   }
+  return guest;
 };
 
 const update = async (guest, propertyId) => {
-  try {
-    const updatedGuest = await Guest.findOneAndUpdate({
-      ...guest,
-      propertyId: propertyId,
-    });
-    if (!updatedGuest) {
-      throw new Error("Guest not found");
-    }
-    return updatedGuest;
-  } catch (e) {
-    throw new Error("Error updating guest" + e);
+  const updatedGuest = await Guest.findOneAndUpdate({
+    ...guest,
+    propertyId: propertyId,
+  });
+  if (!updatedGuest) {
+    throw new Error("Guest not found");
   }
+  return updatedGuest;
 };
 
 const remove = async (guestId, propertyId) => {
-  try {
-    const removedGuest = await Guest.findOneAndDelete({
-      _id: guestId,
-      propertyId: propertyId,
-    });
-    if (!removedGuest) {
-      throw new Error("Guest not found");
-    }
-    return removedGuest;
-  } catch (e) {
-    throw new Error("Error deleting guest " + e);
+  const removedGuest = await Guest.findOneAndDelete({
+    _id: guestId,
+    propertyId: propertyId,
+  });
+  if (!removedGuest) {
+    throw new Error("Guest not found");
   }
+  return removedGuest;
 };
 
 module.exports = { create, getAll, getById, update, remove };

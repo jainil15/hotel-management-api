@@ -1,7 +1,6 @@
 module.exports = [
   {
     languageOptions: {
-
       sourceType: "commonjs"
     },
     rules: {

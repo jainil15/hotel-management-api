@@ -34,10 +34,10 @@ const register = async (req, res) => {
     }
     const saltRounds = 10;
     const salt = await bcrypt.genSalt(saltRounds);
-    
+
     const hashedPassword = await bcrypt.hash(user.password, salt);
     const otp = generateOtp();
-    const newOtp = otpService.create({
+    const newOtp = await otpService.create({
       email: user.email,
       otp: otp,
       user: { ...user, role: "admin", password_hash: hashedPassword },
@@ -85,12 +85,12 @@ const login = async (req, res) => {
       const accessToken = generateAccessToken(
         _user,
         "1d",
-        process.env.ACCESS_TOKEN_SECRET
+        process.env.ACCESS_TOKEN_SECRET,
       );
       const refreshToken = generateAccessToken(
         { ..._user, sessionId: session._id },
         "15d",
-        process.env.REFRESH_TOKEN_SECRET
+        process.env.REFRESH_TOKEN_SECRET,
       );
       // set refresh token in cookie
       res.cookie("refreshToken", refreshToken, cookieOptions);
@@ -149,7 +149,7 @@ const create = async (req, res) => {
     const newUser = await userService.create(user);
     const newPropertyAccess = await propertyAccessService.create(
       propertyId,
-      newUser._id
+      newUser._id,
     );
     return res.status(200).json({ result: { user: newUser } });
   } catch (e) {

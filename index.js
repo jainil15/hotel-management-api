@@ -13,6 +13,7 @@ const guestRoutes = require("./src/routes/guest.route");
 const messageRoutes = require("./src/routes/message.route");
 const twilioRoutes = require("./src/routes/twilio.route");
 const countryRoutes = require("./src/routes/country.route");
+const guestStatusRoutes = require("./src/routes/guestStatus.route");
 
 // Socket imports
 const guestSocket = require("./src/sockets/guest.socket");
@@ -45,10 +46,13 @@ const messageSocket = require("./src/sockets/message.socket");
 
 const { errorMiddleware } = require("./src/middlewares/error.middleware");
 const logger = require("./src/configs/winston.config");
+const { GUEST_STATUS } = require("./src/constants/guestStatus.contant");
 
 // Setup
 const PORT = process.env.PORT || 8000;
+
 Connect().then();
+
 const app = express();
 const specs = yaml.load("./api/v1/swagger.yaml");
 
@@ -57,7 +61,7 @@ app.use(
   swaggerUi.serve,
   swaggerUi.setup(specs, {
     explorer: true,
-  }),
+  })
 );
 
 // Middlewares
@@ -67,7 +71,7 @@ app.use(cookieParser());
 app.use(
   bodyParser.urlencoded({
     extended: true,
-  }),
+  })
 );
 app.use(cors(corsOptionsDelegate));
 
@@ -94,6 +98,8 @@ app.use("/guest", authenticateToken, guestRoutes);
 app.use("/message", messageRoutes);
 app.use("/twilio", twilioRoutes);
 app.use("/country", countryRoutes);
+app.use("/guestStatus", guestStatusRoutes);
+
 // Health Check
 app.get("/health", (req, res, next) => {
   return res.status(200).json({ message: "Server is running." });

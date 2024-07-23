@@ -1,25 +1,37 @@
-const GUEST_STATUS = {
-  RESERVATION_CONFIRMED: "Reservation Confirmed",
-  EARLY_CHECK_IN: "Early Check In",
-  CHECKED_IN: "Checked In",
-  CHECKED_OUT: "Checked Out",
-  LATE_CHECKED_OUT: "Late Checked Out",
-  REVIEW_SUBMITTED: "Review Submitted",
+const GUEST_CURRENT_STATUS = {
+  RESERVED: "Reservation Confirmed",
   IN_HOUSE: "In House",
+  CHECKED_OUT: "Checked Out",
 };
-const CHECK_IN_STATUS = {
-  PRE_ARRIVAL: "Pre Arrival",
-  EARLY_CHECK_IN: "Early Check In",
-  PENDING: "Pending",
+
+const EARLY_CHECK_IN_STATUS = {
+  NOT_REQUESTED: "Not Requested",
+  REQUESTED: "Requested",
+  DECLINED: "Declined",
+  ACCEPTED: "Accepted",
 };
+
+const LATE_CHECK_OUT_STATUS = {
+  NOT_REQUESTED: "Not Requested",
+  REQUESTED: "Requested",
+  DECLINED: "Declined",
+  ACCEPTED: "Accepted",
+};
+
 const RESERVATION_STATUS = {
-  PENDING: "Pending",
   CONFIRMED: "Confirmed",
   CANCELLED: "Cancelled",
 };
-const CHECK_OUT_STATUS = {
-  CHECKED_OUT: "Checked Out",
-  LATE_CHECKED_OUT: "Late Checked Out",
+
+const PRE_ARRIVAL_STATUS = {
+  APPLIED: "Applied",
+  NOT_APPLIED: "Not Applied",
 };
-const CHECKED_OUT = {};
-module.exports = { GUEST_STATUS, RESERVATION_STATUS, CHECK_IN_STATUS };
+
+module.exports = {
+  LATE_CHECK_OUT_STATUS,
+  EARLY_CHECK_IN_STATUS,
+  RESERVATION_STATUS,
+  GUEST_CURRENT_STATUS,
+  PRE_ARRIVAL_STATUS,
+};

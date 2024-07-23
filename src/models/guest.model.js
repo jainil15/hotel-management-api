@@ -27,7 +27,7 @@ const guestSchema = new Schema(
     email: { type: String },
     active: { type: Boolean, default: true },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 guestSchema.index({ propertyId: 1, phoneNumber: 1 }, { unique: true });
 const Guest = mongoose.model("Guest", guestSchema);
@@ -59,6 +59,6 @@ const GuestValidationScehma = z.object({
   active: z.boolean().optional(),
 });
 Guest.init().then(() => {
-  logger.info("Initialzed Guest Model");
+  logger.info("Initialized Guest Model");
 });
 module.exports = { Guest, GuestValidationScehma };

@@ -8,7 +8,6 @@ const Connect = async () => {
   } catch (error) {
     logger.error(error);
     process.exit(0);
-    // throw new Error("Error connecting to database");
   }
 };
 
