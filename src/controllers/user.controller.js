@@ -12,48 +12,63 @@ const { generateOtp } = require("../utils/generateOtp");
 const otpService = require("../services/otp.service");
 const { default: mongoose } = require("mongoose");
 const logger = require("../configs/winston.config");
+const {
+  ConflictError,
+  APIError,
+  ValidationError,
+  UnauthorizedError,
+  InternalServerError,
+} = require("../lib/CustomErrors");
+const { responseHandler } = require("../middlewares/response.middleware");
 // Registering new User
-const register = async (req, res) => {
+const register = async (req, res, next) => {
   try {
     // get user detail from body
     const user = req.body;
     // validate user details
     const result = UserValidationSchema.safeParse(user);
-
+    
     // validation errors
     if (!result.success) {
-      return res
-        .status(400)
-        .json({ error: result.error.flatten().fieldErrors });
+      throw new ValidationError(
+        "Validation Error",
+        result.error.flatten().fieldErrors
+      );
     }
-
+    
     // check if user already exists
     const existingUser = await userService.getByEmail(user.email);
     if (existingUser) {
-      return res.status(409).json({ error: { email: "Email already exists" } });
+      throw new ConflictError("Email already exists", {
+        email: ["Email already exists"],
+      });
     }
+    
     const saltRounds = 10;
     const salt = await bcrypt.genSalt(saltRounds);
 
     const hashedPassword = await bcrypt.hash(user.password, salt);
     const otp = generateOtp();
+    
     const newOtp = await otpService.create({
       email: user.email,
       otp: otp,
       user: { ...user, role: "admin", password_hash: hashedPassword },
     });
-    const sentMail = await sendOtp(user.email, otp);
-    return res.status(200).json({ result: { message: "Email Sent" } });
+    
+    const sentMail = sendOtp(user.email, otp);
+    return responseHandler(res, {}, 201, "Email Sent");
     // send otp to user email
   } catch (e) {
-    return res
-      .status(500)
-      .json({ error: { server: "Internal server error" + e } });
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError(e.message));
   }
 };
 
 // Login
-const login = async (req, res) => {
+const login = async (req, res, next) => {
   try {
     // get email and password from body
     const { email, password } = req.body;
@@ -67,9 +82,10 @@ const login = async (req, res) => {
       .safeParse({ email, password });
     // validation errors
     if (!result.success) {
-      return res
-        .status(400)
-        .json({ error: result.error.flatten().fieldErrors });
+      throw new ValidationError(
+        "Validation Error",
+        result.error.flatten().fieldErrors
+      );
     }
     // authenticate user with email and password
     const user = await userService.authenticate(email, password);
@@ -85,77 +101,88 @@ const login = async (req, res) => {
       const accessToken = generateAccessToken(
         _user,
         "1d",
-        process.env.ACCESS_TOKEN_SECRET,
+        process.env.ACCESS_TOKEN_SECRET
       );
       const refreshToken = generateAccessToken(
         { ..._user, sessionId: session._id },
         "15d",
-        process.env.REFRESH_TOKEN_SECRET,
+        process.env.REFRESH_TOKEN_SECRET
       );
       // set refresh token in cookie
       res.cookie("refreshToken", refreshToken, cookieOptions);
       // return user and access token
       // req.user = _user;
-      return res
-        .status(200)
-        .json({ result: { user: _user, accessToken: accessToken } });
+      return responseHandler(
+        res,
+        { user: _user, accessToken },
+        200,
+        "Login Successful"
+      );
     }
     // return error if user is not authenticated
-    return res.status(401).json({ error: { auth: "Invalid credentials" } });
+    throw new UnauthorizedError("Invalid email or password", {
+      email: ["Invalid email or password"],
+      password: ["Invalid email or password"],
+    });
   } catch (e) {
-    return res
-      .status(500)
-      .json({ error: { server: "Internal server error" + e } });
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError());
   }
 };
 
 // Logout
-const logout = async (req, res) => {
+const logout = async (req, res, next) => {
   try {
     // delete session and clear refresh token
     const session = await authService.deleteSession(req.user.email);
     res.clearCookie("refreshToken");
-    return res.status(200).json({ result: "Logged out successfully" });
+    return responseHandler(res, {}, 200, "Logout Successful");
   } catch (e) {
-    return res
-      .status(500)
-      .json({ error: { server: "Internal server error" + e } });
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError());
   }
 };
 
 // Get User
-const getUser = async (req, res) => {
+const getUser = async (req, res, next) => {
   const { iat, exp, ...user } = req.user;
   try {
-    return res.status(200).json({ result: user });
+    return responseHandler(res, { user }, 200, "User Found");
   } catch (e) {
-    return res
-      .status(500)
-      .json({ error: { server: "Internal server error" + e.message } });
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError());
   }
 };
 
 // Create user
-const create = async (req, res) => {
+const create = async (req, res, next) => {
   try {
     const user = req.body;
     const propertyId = req.params.propertyId;
     const result = UserValidationSchema.safeParse(user);
     if (!result.success) {
-      return res
-        .status(400)
-        .json({ error: result.error.flatten().fieldErrors });
+      throw new ValidationError(
+        "Validation Error",
+        result.error.flatten().fieldErrors
+      );
     }
     const newUser = await userService.create(user);
     const newPropertyAccess = await propertyAccessService.create(
       propertyId,
-      newUser._id,
+      newUser._id
     );
-    return res.status(200).json({ result: { user: newUser } });
+    return responseHandler(res, { user: newUser }, 201, "User Created");
   } catch (e) {
-    return res
-      .status(500)
-      .json({ error: { server: "Internal server error" + e } });
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError());
   }
 };
 

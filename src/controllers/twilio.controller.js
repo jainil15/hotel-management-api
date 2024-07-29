@@ -4,8 +4,17 @@ const querystring = require("querystring");
 const { phoneregex } = require("../constants/regex.constant");
 const { TwilioAccount } = require("../models/twilioAccount.model");
 const { Property } = require("../models/property.model");
+const { responseHandler } = require("../middlewares/response.middleware");
+const {
+  NotFoundError,
+  APIError,
+  ValidationError,
+  BadRequestError,
+  InternalServerError,
+  ConflictError,
+} = require("../lib/CustomErrors");
 
-const getPhoneNumbers = async (req, res) => {
+const getPhoneNumbers = async (req, res, next) => {
   try {
     const country = req.query.country;
     const allPhoneNumbers = await twilioService.getPhoneNumbers(country);
@@ -13,33 +22,36 @@ const getPhoneNumbers = async (req, res) => {
       phoneNumber: phoneNumber.phone_number,
       friendlyName: phoneNumber.friendly_name,
     }));
-    return res.status(200).json({ result: { phoneNumbers: phoneNumbers } });
+    return responseHandler(res, { phoneNumbers: phoneNumbers });
   } catch (e) {
-    return res
-      .status(500)
-      .json({ error: { server: "Internal server error" + e } });
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError());
   }
 };
 
-const buyPhoneNumber = async (req, res) => {
+const buyPhoneNumber = async (req, res, next) => {
   try {
     const propertyId = req.params.propertyId;
     const phoneNumber = req.body.phoneNumber;
 
     const property = await Property.findById(propertyId);
     if (!property) {
-      throw new Error("Property not found");
+      throw new NotFoundError("Property not found", {});
     }
     // Check if property exists
     const twilioAccount = await TwilioAccount.findOne({
       propertyId: propertyId,
     });
     if (!twilioAccount) {
-      throw new Error("Twilio Account not found");
+      throw new NotFoundError("Twilio Account not found", {});
     }
     // Check if Twilio Account already has a phone number
     if (twilioAccount.phoneNumber) {
-      throw new Error("Twilio Account already has a phone number");
+      throw new ConflictError("Twilio Account already has a phone number", {
+        phoneNumber: ["Twilio Account already has a phone number"],
+      });
     }
     const result = z
       .object({
@@ -49,58 +61,62 @@ const buyPhoneNumber = async (req, res) => {
       })
       .safeParse({ phoneNumber });
     if (!result.success) {
-      return res
-        .status(400)
-        .json({ error: result.error.flatten().fieldErrors });
+      throw new ValidationError(
+        "Validation Error",
+        result.error.flatten().fieldErrors
+      );
     }
     const boughtPhoneNumber = await twilioService.buyPhoneNumber(
       propertyId,
       phoneNumber,
-      req.user,
+      req.user
     );
 
-    return res
-      .status(200)
-      .json({ result: { message: "Successfully bought phonenumber" } });
+    return responseHandler(res, {}, 201, "Successfully bought phonenumber");
   } catch (e) {
-    return res
-      .status(500)
-      .json({ error: { server: "Internal server error" + e } });
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError());
   }
 };
 
-const createSubaccount = async (req, res) => {
+const createSubaccount = async (req, res, next) => {
   try {
     const propertyId = req.params.propertyId;
     if (!propertyId) {
-      return res
-        .status(400)
-        .json({ error: { propertyId: "PropertyId is required" } });
+      throw new BadRequestError("Property ID is required", {
+        propertyId: ["Property ID is required"],
+      });
     }
     const subaccount = await twilioService.createSubaccount(propertyId);
-    return res
-      .status(200)
-      .json({ result: { message: "Twilio subaccount Created" } });
+    return responseHandler(
+      res,
+      { subaccount },
+      201,
+      "Twilio subaccount Created"
+    );
   } catch (e) {
-    return res
-      .status(500)
-      .json({ error: { server: "Internal server error" + e } });
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError());
   }
 };
 
-const getTollFreeVerificationStatus = async (req, res) => {
+const getTollFreeVerificationStatus = async (req, res, next) => {
   try {
     const propertyId = req.params.propertyId;
 
     const tollFreeVerificationStatus =
       await twilioService.getTollFreeVerificationStatus(propertyId);
-    return res
-      .status(200)
-      .json({ result: { status: tollFreeVerificationStatus } });
+
+    return responseHandler(res, { tollFreeVerificationStatus });
   } catch (e) {
-    return res
-      .status(500)
-      .json({ error: { server: "Internal server error" + e } });
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError());
   }
 };
 

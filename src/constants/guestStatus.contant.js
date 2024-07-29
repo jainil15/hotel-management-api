@@ -1,5 +1,5 @@
 const GUEST_CURRENT_STATUS = {
-  RESERVED: "Reservation Confirmed",
+  RESERVED: "Reservation",
   IN_HOUSE: "In House",
   CHECKED_OUT: "Checked Out",
 };
@@ -24,10 +24,19 @@ const RESERVATION_STATUS = {
 };
 
 const PRE_ARRIVAL_STATUS = {
-  APPLIED: "Applied",
   NOT_APPLIED: "Not Applied",
+  APPLIED: "Applied",
 };
 
+const GUEST_REQUEST = {
+  RESERVATION: "Reservation Cancelled",
+  EARLY_CHECK_IN: "Early Check In",
+  LATE_CHECK_OUT: "Late Check Out",
+};
+const GUEST_CURRENT_ALLOWED_FLAG = {
+  RESERVATION_STATUS: ["Reservation cancelled"],
+  IN_HOUSE: ["Early Check In"],
+};
 module.exports = {
   LATE_CHECK_OUT_STATUS,
   EARLY_CHECK_IN_STATUS,

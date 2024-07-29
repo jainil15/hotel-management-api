@@ -1,5 +1,6 @@
 const nodemailer = require("nodemailer");
 const nodemailerConfigOptions = require("../configs/nodemailer.config");
+const logger = require("../configs/winston.config");
 require("dotenv").config();
 const generateTemplate = (otp) => {
   return `
@@ -44,6 +45,7 @@ const generateTemplate = (otp) => {
     `;
 };
 const sendOtp = async (email, otp) => {
+  const time = new Date()
   // send otp to user email
 
   const transporter = nodemailer.createTransport(nodemailerConfigOptions);
@@ -54,7 +56,7 @@ const sendOtp = async (email, otp) => {
     html: generateTemplate(otp),
   };
   const sentMail = await transporter.sendMail(mail);
-
+  logger.info(`[${Date.now() - time}ms] Email sent`);
   return sentMail;
 };
 

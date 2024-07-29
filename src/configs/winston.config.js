@@ -31,7 +31,7 @@ const logger = winston.createLogger({
   ],
 });
 
-if (process.env.NODE_ENV === "production") {
+if (process.env.NODE_ENV !== "production") {
   logger.add(
     new transports.File({
       filename: "logs/combined.log",

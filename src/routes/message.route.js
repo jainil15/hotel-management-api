@@ -22,7 +22,7 @@ router.post(
 );
 router.post("/incoming-message", incomingMessage);
 // router.post("/error-logging", incomingMessage);
-// router.post("/sendsmstest", async (req, res) => {
+// router.post("/sendsmstest", async (req, res, next) => {
 //   const twilioAccount = await TwilioAccount.findById("6698cccc3bfa38a274593da5");
 //   const twilioClient = twilio(
 //     process.env.TWILIO_ACCOUNT_SID,

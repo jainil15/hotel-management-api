@@ -9,6 +9,9 @@ const {
   GUEST_CURRENT_STATUS,
   PRE_ARRIVAL_STATUS,
 } = require("../constants/guestStatus.contant");
+const { dateValidation } = require("../utils/dateCompare");
+
+
 const guestStatusSchema = new Schema(
   {
     propertyId: {
@@ -44,7 +47,7 @@ const guestStatusSchema = new Schema(
     },
     // flag: { type: Boolean, required: true, default: false },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 guestStatusSchema.index({ guestId: 1 }, { unique: true });
@@ -54,9 +57,44 @@ const GuestStatusValidationSchema = z.object({
   guestId: z.string(),
   currentStatus: z.enum(Object.values(GUEST_CURRENT_STATUS)),
 });
+const CreateGuestStatusValidationSchema = z.object({
+  currentStatus: z.enum(Object.values(GUEST_CURRENT_STATUS)),
+  earlyCheckInStatus: z.enum(Object.values(EARLY_CHECK_IN_STATUS)).optional(),
+  lateCheckOutStatus: z.enum(Object.values(LATE_CHECK_OUT_STATUS)).optional(),
+  preArrivalStatus: z.enum(Object.values(PRE_ARRIVAL_STATUS)).optional(),
+  reservationStatus: z.enum(Object.values(RESERVATION_STATUS)).optional(),
+});
+const UpdateGuestStatusValidationSchema = z.object({
+  currentStatus: z.enum(Object.values(GUEST_CURRENT_STATUS)).optional(),
+  earlyCheckInStatus: z.enum(Object.values(EARLY_CHECK_IN_STATUS)).optional(),
+  lateCheckOutStatus: z.enum(Object.values(LATE_CHECK_OUT_STATUS)).optional(),
+  preArrivalStatus: z.enum(Object.values(PRE_ARRIVAL_STATUS)).optional(),
+  reservationStatus: z.enum(Object.values(RESERVATION_STATUS)).optional(),
+});
+
+const GetGuestFiltersValidationSchema = z.object({
+  checkIn: z.string().refine((date) => dateValidation(date)).optional(),
+  checkOut: z.string().refine((date) => dateValidation(date)).optional(),
+  currentStatus: z.enum(Object.values(GUEST_CURRENT_STATUS)).optional(),
+  name: z.string().optional(),
+})
 
 const GuestStatus = mongoose.model("GuestStatus", guestStatusSchema);
+
+/**
+ * @typedef {import("mongoose").Model<GuestStatus>} GuestStatus
+ * @typedef {typeof GuestStatus.schema.obj} GuestStatusType
+ */
+
+
 GuestStatus.init().then((GuestStatus) => {
   logger.info("Initialized Guest Status Model");
 });
-module.exports = { GuestStatus, GuestStatusValidationSchema };
+
+module.exports = {
+  GuestStatus,
+  GuestStatusValidationSchema,
+  CreateGuestStatusValidationSchema,
+  UpdateGuestStatusValidationSchema,
+  GetGuestFiltersValidationSchema
+};

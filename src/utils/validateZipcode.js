@@ -8,9 +8,9 @@ const validateZipcode = (country, state, zipcode) => {
     (z) =>
       z.zipcode === zipcode &&
       z.country_code === countryFile.find((c) => c.name === country)?.iso2 &&
-      z.state === state,
+      z.state === state
   );
-  console.log(zip);
+
   return zip;
 };
 

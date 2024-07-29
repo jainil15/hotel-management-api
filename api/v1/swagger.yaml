@@ -7,12 +7,12 @@ info:
   summary: Onelyk Api
   description: Onelyk Api
 servers:
-  - url: 'http://localhost:8000'
-    description: local
-  - url: 'https://8l4qkmp2-8000.inc1.devtunnels.ms'
-    description: dev
   - url: 'http://localhost:3000'
-    description: backup
+    description: Local
+  - url: 'https://mvx7d4vf-3000.inc1.devtunnels.ms'
+    description: Devtunnel
+  - url: 'https://testhotelapi.onelyk.com'
+    description: Testing (PROD)
 paths:
   /user/register:
     post:
@@ -30,11 +30,11 @@ paths:
       description: Register new user
       x-stoplight:
         id: 7xhk6wcrsm2m3
-      parameters: [ ]
+      parameters: []
       x-internal: false
       tags:
         - User
-    parameters: [ ]
+    parameters: []
   /user/login:
     post:
       summary: User Login
@@ -53,7 +53,7 @@ paths:
   /auth/accessToken:
     get:
       summary: Request AccessToken
-      responses: { }
+      responses: {}
       operationId: get-auth-accesstoken
       x-stoplight:
         id: 91ttdhzlaulzl
@@ -71,7 +71,7 @@ paths:
       tags:
         - Auth
       description: ''
-    parameters: [ ]
+    parameters: []
   /auth/verifyOtp:
     post:
       summary: Verify OTP
@@ -110,7 +110,7 @@ paths:
       responses:
         '200':
           description: OK
-          content: { }
+          content: {}
       operationId: post-user-logout
       x-stoplight:
         id: rl0dfsy0rxz57
@@ -119,12 +119,12 @@ paths:
       summary: Get User
       tags:
         - User
-      responses: { }
+      responses: {}
       operationId: get-user
       x-stoplight:
         id: ztlhlwiajutbr
       security:
-        - Bearer: [ ]
+        - Bearer: []
   '/user/{propertyId}':
     parameters:
       - schema:
@@ -132,14 +132,18 @@ paths:
         name: propertyId
         in: path
         required: true
-    get:
-      summary: Get users by property id
-      responses: { }
-      operationId: get-user-propertyId
+    post:
+      summary: Create User
+      responses:
+        '200':
+          $ref: '#/components/responses/User'
+      operationId: post-user-propertyId
       x-stoplight:
-        id: 5ttcw4oqj3x6z
+        id: jrjx090obmx3q
+      requestBody:
+        $ref: '#/components/requestBodies/User'
       security:
-        - Bearer: [ ]
+        - Bearer: []
       tags:
         - User
   /property:
@@ -158,28 +162,28 @@ paths:
       x-stoplight:
         id: ryjalcd5tmwuq
       security:
-        - Bearer: [ ]
+        - Bearer: []
       requestBody:
         $ref: '#/components/requestBodies/CreateProperty'
     get:
       summary: Get all properties associated with user
       tags:
         - Property
-      responses: { }
+      responses: {}
       operationId: get-all-property-of-user
       x-stoplight:
         id: u96bywly9mqg4
       security:
-        - Bearer: [ ]
+        - Bearer: []
   /twilio/phoneNumbers:
     get:
       summary: Get Available Phone Numbers list
-      responses: { }
+      responses: {}
       operationId: get-twilio-phoneNumbers
       x-stoplight:
         id: kbqsty6fg7exx
       security:
-        - Bearer: [ ]
+        - Bearer: []
       parameters:
         - schema:
             type: string
@@ -236,7 +240,7 @@ paths:
                   x-stoplight:
                     id: c4sii266sgyvi
       security:
-        - Bearer: [ ]
+        - Bearer: []
   '/twilio/{propertyId}/createSubaccount':
     parameters:
       - schema:
@@ -273,7 +277,7 @@ paths:
       x-stoplight:
         id: 49qo0ggfuutup
       security:
-        - Bearer: [ ]
+        - Bearer: []
   /auth/resendOtp:
     post:
       summary: Resend Otp
@@ -282,7 +286,7 @@ paths:
       responses:
         '200':
           description: Email Sent
-          headers: { }
+          headers: {}
           content:
             application/json:
               schema:
@@ -327,7 +331,7 @@ paths:
       x-stoplight:
         id: jqjeu1hs5q8ry
       security:
-        - Bearer: [ ]
+        - Bearer: []
   /country:
     get:
       summary: Get all countries
@@ -546,7 +550,7 @@ paths:
                               type: string
                             longitude:
                               type: string
-              examples: { }
+              examples: {}
       operationId: get-country-country-state-cities
       x-stoplight:
         id: z3giqx0o6pq65
@@ -582,7 +586,221 @@ paths:
       x-stoplight:
         id: es0glpjzixbxx
       security:
-        - Bearer: [ ]
+        - Bearer: []
+  '/guest/{propertyId}':
+    post:
+      summary: Create guest with Status
+      tags:
+        - Guest
+      responses:
+        '200':
+          $ref: '#/components/responses/CreateGuest'
+      operationId: post-guest-propertyId
+      x-stoplight:
+        id: vyo5rxdr47cse
+      security:
+        - Bearer: []
+      requestBody:
+        $ref: '#/components/requestBodies/CreateGuest'
+    parameters:
+      - schema:
+          type: string
+        name: propertyId
+        in: path
+        required: true
+    get:
+      summary: Get all guests with status
+      tags:
+        - Guest
+      responses: {}
+      operationId: get-guest-propertyId
+      x-stoplight:
+        id: scgy2wj2rtgn9
+      parameters:
+        - schema:
+            type: string
+            format: date
+          in: query
+          name: checkIn
+          description: checkIn date
+        - schema:
+            type: string
+            format: date
+          in: query
+          name: checkOut
+          description: checkOut date
+        - schema:
+            type: string
+            enum:
+              - In House
+              - Checked Out
+              - Reservation
+          in: query
+          name: currentStatus
+          description: current status
+        - schema:
+            type: string
+          in: query
+          name: name
+          description: Search by Name
+          allowEmptyValue: true
+      security:
+        - Bearer: []
+  '/guest/{propertyId}/{guestId}':
+    parameters:
+      - schema:
+          type: string
+        name: propertyId
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: guestId
+        in: path
+        required: true
+    put:
+      summary: Update guest with status
+      tags:
+        - Guest
+      responses:
+        '200':
+          $ref: '#/components/responses/CreateGuest'
+      operationId: put-guest-propertyId-guestId
+      x-stoplight:
+        id: 8qsp31nk6963h
+      requestBody:
+        $ref: '#/components/requestBodies/CreateGuest'
+      security:
+        - Bearer: []
+    get:
+      summary: Get Guest by Id with status
+      tags:
+        - Guest
+      responses:
+        '200':
+          $ref: '#/components/responses/CreateGuest'
+      operationId: get-guest-propertyId-guestId
+      x-stoplight:
+        id: wnosjabi6hyhh
+      security:
+        - Bearer: []
+  '/messageTemplate/{propertyId}':
+    parameters:
+      - schema:
+          type: string
+        name: propertyId
+        in: path
+        required: true
+    get:
+      summary: Get all message templates
+      tags:
+        - MessageTemplate
+      responses: {}
+      operationId: get-messageTemplate-propertyId
+      x-stoplight:
+        id: e0b6uci3sccc4
+      security:
+        - Bearer: []
+    post:
+      summary: Create message template
+      tags:
+        - MessageTemplate
+      responses:
+        '200':
+          $ref: '#/components/responses/CreateMessageTemplate'
+      operationId: post-messageTemplate-propertyId
+      x-stoplight:
+        id: g3ds5i6zexgku
+      security:
+        - Bearer: []
+      requestBody:
+        $ref: '#/components/requestBodies/CreateMessageTemplate'
+  '/messageTemplate/{propertyId}/{messageTemplateId}':
+    parameters:
+      - schema:
+          type: string
+        name: propertyId
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: messageTemplateId
+        in: path
+        required: true
+    get:
+      summary: Get message template
+      tags:
+        - MessageTemplate
+      responses: {}
+      operationId: get-messageTemplate-propertyId-messageTemplateId
+      x-stoplight:
+        id: oeymus6t9tc1d
+      security:
+        - Bearer: []
+    put:
+      summary: Update message template
+      tags:
+        - MessageTemplate
+      responses:
+        '200':
+          $ref: '#/components/responses/CreateMessageTemplate'
+      operationId: put-messageTemplate-propertyId-messageTemplateId
+      x-stoplight:
+        id: fg4p64kkk534l
+      security:
+        - Bearer: []
+      requestBody:
+        $ref: '#/components/requestBodies/CreateMessageTemplate'
+    delete:
+      summary: Delete message template
+      tags:
+        - MessageTemplate
+      responses:
+        '200':
+          description: OK
+      operationId: delete-messageTemplate-propertyId-messageTemplateId
+      x-stoplight:
+        id: uqjzynq8v29vm
+      security:
+        - Bearer: []
+  '/guestStatus/{propertyId}/{guestId}':
+    parameters:
+      - schema:
+          type: string
+        name: propertyId
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: guestId
+        in: path
+        required: true
+    get:
+      summary: Get guest status
+      tags:
+        - Guest Status
+      responses:
+        '200':
+          $ref: '#/components/responses/GuestStatus'
+      operationId: get-guestStatus-propertyId-guestId
+      x-stoplight:
+        id: 01sisp96036vu
+      security:
+        - Bearer: []
+    put:
+      summary: Update guest status
+      tags:
+        - Guest Status
+      responses:
+        '200':
+          $ref: '#/components/responses/GuestStatus'
+      operationId: put-guestStatus-propertyId-guestId
+      x-stoplight:
+        id: wdogp9jz9ub4g
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateGuestStatus'
+      security:
+        - Bearer: []
 components:
   schemas:
     User:
@@ -750,6 +968,121 @@ components:
           type: string
           x-stoplight:
             id: odk128ck94ppg
+    Guest:
+      type: object
+      x-examples:
+        Example 1:
+          _id: 669106a217122df7b4875582
+          propertyId: 669bb5387629e1fff5cb35a5
+          countryCode: '+1'
+          phoneNumber: '9191229133'
+          source: Source of the guest
+          checkIn: '2024-07-23T23:35:00.000Z'
+          checkOut: '2024-07-16T23:35:00.000Z'
+          confirmationNumber: '9325923593259325'
+          roomNumber: C-8
+          firstName: Jon
+          lastName: Doe
+          email: user@gmail.com
+          active: true
+          createdAt: '2024-07-12T10:34:10.279Z'
+          updatedAt: '2024-07-12T10:34:10.279Z'
+          __v: 0
+      examples:
+        - _id: 669106a217122df7b4875582
+          propertyId: 669bb5387629e1fff5cb35a5
+          countryCode: '+1'
+          phoneNumber: '9191229133'
+          source: Source of the guest
+          checkIn: '2024-07-23T23:35:00.000Z'
+          checkOut: '2024-07-16T23:35:00.000Z'
+          confirmationNumber: '9325923593259325'
+          roomNumber: C-8
+          firstName: Jon
+          lastName: Doe
+          email: user@gmail.com
+          active: true
+          createdAt: '2024-07-12T10:34:10.279Z'
+          updatedAt: '2024-07-12T10:34:10.279Z'
+          __v: 0
+      required:
+        - _id
+        - propertyId
+        - countryCode
+        - phoneNumber
+        - source
+        - checkIn
+        - checkOut
+        - confirmationNumber
+        - roomNumber
+      properties:
+        _id:
+          type: string
+        propertyId:
+          type: string
+        countryCode:
+          type: string
+        phoneNumber:
+          type: string
+        source:
+          type: string
+        checkIn:
+          type: string
+        checkOut:
+          type: string
+        confirmationNumber:
+          type: string
+        roomNumber:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        active:
+          type: boolean
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        __v:
+          type: integer
+    GuestStatus:
+      type: object
+      properties:
+        _id:
+          type: string
+        propertyId:
+          type: string
+        currentStatus:
+          type: string
+        lateCheckOutStatus:
+          type: string
+        earlyCheckInStatus:
+          type: string
+        reservationStatus:
+          type: string
+        preArrivalStatus:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        __v:
+          type: integer
+      x-examples:
+        Example 1:
+          _id: 669e9b4fecb5b6613114ed8e
+          propertyId: 669bb5387629e1fff5cb35a5
+          currentStatus: Reservation
+          lateCheckOutStatus: Not Requested
+          earlyCheckInStatus: Not Requested
+          reservationStatus: Confirmed
+          preArrivalStatus: Not Applied
+          createdAt: '2024-07-22T17:47:59.118Z'
+          updatedAt: '2024-07-22T17:47:59.118Z'
+          __v: 0
   securitySchemes:
     Bearer:
       type: http
@@ -953,6 +1286,190 @@ components:
           schema:
             type: object
       description: ''
+    CreateGuest:
+      content:
+        application/json:
+          schema:
+            type: object
+            x-examples:
+              Example 1:
+                _id: 669106a217122df7b4875582
+                propertyId: 669bb5387629e1fff5cb35a5
+                countryCode: '+1'
+                phoneNumber: '9191229133'
+                source: Source of the guest
+                checkIn: '2024-07-23T23:35:00.000Z'
+                checkOut: '2024-07-16T23:35:00.000Z'
+                confirmationNumber: '9325923593259325'
+                roomNumber: C-8
+                firstName: Jon
+                lastName: Doe
+                email: user@gmail.com
+                active: true
+                createdAt: '2024-07-12T10:34:10.279Z'
+                updatedAt: '2024-07-12T10:34:10.279Z'
+                __v: 0
+            properties:
+              countryCode:
+                type: string
+              phoneNumber:
+                type: string
+              source:
+                type: string
+              checkIn:
+                type: string
+                format: date-time
+              checkOut:
+                type: string
+                format: date-time
+              confirmationNumber:
+                type: string
+              roomNumber:
+                type: string
+              firstName:
+                type: string
+              lastName:
+                type: string
+              email:
+                type: string
+                format: email
+              status:
+                type: object
+                x-stoplight:
+                  id: f8c50pfro8kaj
+                properties:
+                  currentStatus:
+                    x-stoplight:
+                      id: j46el0lr9itcw
+                    enum:
+                      - Reservation
+                      - In House
+                      - Checked Out
+                  lateCheckOutStatus:
+                    x-stoplight:
+                      id: 7r77vexwajsud
+                    default: Not Requested
+                    enum:
+                      - Not Requested
+                      - Requested
+                      - Declined
+                      - Accepted
+                  earlyCheckInStatus:
+                    x-stoplight:
+                      id: tbw6mv80utbor
+                    enum:
+                      - Not Requested
+                      - Requested
+                      - Declined
+                      - Accepted
+                  reservationStatus:
+                    x-stoplight:
+                      id: ndo6278totp94
+                    default: Confirmed
+                    enum:
+                      - Confirmed
+                      - Cancelled
+                  preArrivalStatus:
+                    x-stoplight:
+                      id: dmmwkvav7cvxm
+                    default: Not Applied
+                    enum:
+                      - Not Applied
+                      - Applied
+          examples:
+            Example 1:
+              value:
+                countryCode: '+1'
+                phoneNumber: '1234567890'
+                source: Booking.com
+                checkIn: '2019-08-24T14:15:22Z'
+                checkOut: '2019-08-25T14:15:22Z'
+                confirmationNumber: '123456789012'
+                roomNumber: C-102
+                firstName: First
+                lastName: Last
+                email: firstlast123@guest.com
+                status:
+                  currentStatus: Reservation
+    CreateMessageTemplate:
+      content:
+        application/json:
+          schema:
+            type: object
+            x-examples:
+              Example 1:
+                _id:
+                  $oid: 66a4c9bb46f08b7942f00591
+                propertyId:
+                  $oid: 66a4c9b946f08b7942f0057c
+                status: currentStatus
+                statusValue: Checked Out
+                name: Checked Out
+                message: You are checked out
+                active: true
+                createdAt:
+                  $date: '2024-07-27T10:19:39.608Z'
+                updatedAt:
+                  $date: '2024-07-27T10:19:39.608Z'
+                __v: 0
+            required:
+              - name
+              - message
+            properties:
+              name:
+                type: string
+              message:
+                type: string
+              type:
+                type: string
+                x-stoplight:
+                  id: ok5koa354xwzw
+    UpdateGuestStatus:
+      content:
+        application/json:
+          schema:
+            type: object
+            x-stoplight:
+              id: mcfbml84daq1a
+            properties:
+              currentStatus:
+                x-stoplight:
+                  id: jt2v990rm57vz
+                enum:
+                  - Reservation
+                  - In House
+                  - Checked Out
+              lateCheckOutStatus:
+                x-stoplight:
+                  id: 9y5i2ve4elinr
+                default: Not Requested
+                enum:
+                  - Not Requested
+                  - Requested
+                  - Declined
+                  - Accepted
+              earlyCheckInStatus:
+                x-stoplight:
+                  id: 4muaziex84kl5
+                enum:
+                  - Not Requested
+                  - Requested
+                  - Declined
+                  - Accepted
+              reservationStatus:
+                x-stoplight:
+                  id: 20r1aawlva13w
+                default: Confirmed
+                enum:
+                  - Confirmed
+                  - Cancelled
+              preArrivalStatus:
+                x-stoplight:
+                  id: 5g3pr6xnbq3sg
+                default: Not Applied
+                enum:
+                  - Not Applied
+                  - Applied
   responses:
     Login:
       description: Login response
@@ -974,7 +1491,7 @@ components:
                     type: string
                     x-stoplight:
                       id: kn1w394ufgv0s
-      headers: { }
+      headers: {}
     Register:
       description: Register response
       content:
@@ -997,11 +1514,36 @@ components:
         application/json:
           schema:
             type: object
+            x-examples:
+              Example 1:
+                status: error
+                statusCode: 400
+                error:
+                  zipcode:
+                    - Zipcode not found
+                type: BAD_REQUEST
+                message: Invalid zip code
+                stack: ''
+            required:
+              - status
+              - statusCode
+              - error
+              - type
+              - message
+              - stack
             properties:
+              status:
+                type: string
+              statusCode:
+                type: integer
               error:
                 type: object
-                x-stoplight:
-                  id: evqhzeygpybsg
+              type:
+                type: string
+              message:
+                type: string
+              stack:
+                type: string
     User:
       description: User response
       content:
@@ -1066,3 +1608,165 @@ components:
                 type: string
                 x-stoplight:
                   id: l1ju0k5o5khvd
+    CreateGuest:
+      description: Example response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              result:
+                type: object
+                properties:
+                  guest:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                      propertyId:
+                        type: string
+                      countryCode:
+                        type: string
+                      phoneNumber:
+                        type: string
+                      source:
+                        type: string
+                      checkIn:
+                        type: string
+                      checkOut:
+                        type: string
+                      confirmationNumber:
+                        type: string
+                      roomNumber:
+                        type: string
+                      firstName:
+                        type: string
+                      lastName:
+                        type: string
+                      email:
+                        type: string
+                      active:
+                        type: boolean
+                      createdAt:
+                        type: string
+                      updatedAt:
+                        type: string
+                      __v:
+                        type: integer
+                      status:
+                        type: object
+                        properties:
+                          _id:
+                            type: string
+                          propertyId:
+                            type: string
+                          currentStatus:
+                            type: string
+                          lateCheckOutStatus:
+                            type: string
+                          earlyCheckInStatus:
+                            type: string
+                          reservationStatus:
+                            type: string
+                          preArrivalStatus:
+                            type: string
+                          createdAt:
+                            type: string
+                          updatedAt:
+                            type: string
+                          __v:
+                            type: integer
+            x-examples:
+              Example 1:
+                result:
+                  guest:
+                    _id: 669106a217122df7b4875582
+                    propertyId: 669bb5387629e1fff5cb35a5
+                    countryCode: '+1'
+                    phoneNumber: '9191229133'
+                    source: Source of the guest
+                    checkIn: '2024-07-23T23:35:00.000Z'
+                    checkOut: '2024-07-16T23:35:00.000Z'
+                    confirmationNumber: '9325923593259325'
+                    roomNumber: C-8
+                    firstName: Jon
+                    lastName: Doe
+                    email: user@gmail.com
+                    active: true
+                    createdAt: '2024-07-12T10:34:10.279Z'
+                    updatedAt: '2024-07-12T10:34:10.279Z'
+                    __v: 0
+                    status:
+                      _id: 669e9b4fecb5b6613114ed8e
+                      propertyId: 669bb5387629e1fff5cb35a5
+                      currentStatus: Reservation
+                      lateCheckOutStatus: Not Requested
+                      earlyCheckInStatus: Not Requested
+                      reservationStatus: Confirmed
+                      preArrivalStatus: Not Applied
+                      createdAt: '2024-07-22T17:47:59.118Z'
+                      updatedAt: '2024-07-22T17:47:59.118Z'
+                      __v: 0
+    CreateMessageTemplate:
+      description: Example response
+      content:
+        application/json:
+          schema:
+            type: object
+            x-examples:
+              Example 1:
+                _id:
+                  $oid: 66a4c9bb46f08b7942f00591
+                propertyId:
+                  $oid: 66a4c9b946f08b7942f0057c
+                status: currentStatus
+                statusValue: Checked Out
+                name: Checked Out
+                message: You are checked out
+                active: true
+                createdAt:
+                  $date: '2024-07-27T10:19:39.608Z'
+                updatedAt:
+                  $date: '2024-07-27T10:19:39.608Z'
+                __v: 0
+            properties:
+              _id:
+                type: string
+              propertyId:
+                type: string
+              name:
+                type: string
+              message:
+                type: string
+              active:
+                type: boolean
+              createdAt:
+                type: string
+              updatedAt:
+                type: string
+              __v:
+                type: integer
+              type:
+                type: string
+                x-stoplight:
+                  id: j2i9vm994dfbv
+    GuestStatus:
+      description: Example response
+      content:
+        application/json:
+          schema:
+            properties:
+              id:
+                type: string
+        text/html:
+          schema:
+            type: object
+            properties:
+              result:
+                $ref: '#/components/schemas/GuestStatus'
+                x-stoplight:
+                  id: 4ow7yqky33eyp
+              message:
+                type: string
+                x-stoplight:
+                  id: cepwgsmm864p1

@@ -1,84 +1,209 @@
-const { GuestValidationScehma } = require("../models/guest.model");
+const { default: mongoose } = require("mongoose");
+const {
+  CreateGuestValidationSchema,
+  UpdateGuestValidationSchema,
+} = require("../models/guest.model");
 const guestService = require("../services/guest.service");
 const guestStatusService = require("../services/guestStatus.service");
 
-const getAll = async (req, res) => {
+const {
+  CreateGuestStatusValidationSchema,
+  UpdateGuestStatusValidationSchema,
+
+  GetGuestFiltersValidationSchema,
+} = require("../models/guestStatus.model");
+const logger = require("../configs/winston.config");
+
+const { responseHandler } = require("../middlewares/response.middleware");
+const {
+  APIError,
+  InternalServerError,
+  ValidationError,
+} = require("../lib/CustomErrors");
+
+const { validateStatus } = require("../utils/guestStatus.util");
+
+const getAll = async (req, res, next) => {
   try {
     const guests = await guestService.getAll(req.params.propertyId);
-    return res.status(200).json({ result: { guests: guests } });
+    return responseHandler(res, { guests: guests });
   } catch (e) {
-    return res.status(500).json({ error: { server: "Internal server error" } });
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError());
   }
 };
 
-const create = async (req, res) => {
+const create = async (req, res, next) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
   try {
-    const { currentStatus, ...guest } = req.body;
+    // TODO: add messageGuest
+    const { status, ...guest } = req.body;
 
     const propertyId = req.params.propertyId;
-    const result = GuestValidationScehma.safeParse(guest);
-    if (!result.success) {
-      return res
-        .status(400)
-        .json({ error: result.error.flatten().fieldErrors });
+    const guestResult = CreateGuestValidationSchema.safeParse(guest);
+    const statusResult = CreateGuestStatusValidationSchema.safeParse(status);
+
+    if (!guestResult.success || !statusResult.success) {
+      throw new ValidationError("Validation Error", {
+        ...guestResult?.error?.flatten().fieldErrors,
+        ...statusResult?.error?.flatten().fieldErrors,
+      });
     }
-    const newGuest = await guestService.create(guest, propertyId);
+
+    if (!validateStatus(status)) {
+      throw new ValidationError("Invalid Status", {
+        currentStatus: "Invalid Status",
+      });
+    }
+
+    const newGuest = await guestService.create(guest, propertyId, session);
+
     const newGuestStatus = await guestStatusService.create(
       propertyId,
       newGuest._id,
-      currentStatus
+      status,
+      session
     );
-    if (!newGuest || !newGuestStatus) {
-      return res.status(500).json({ error: { guest: "Error creating guest" } });
-    }
-    return res
-      .status(200)
-      .json({ result: { guest: newGuest, guestStatus: newGuestStatus } });
+
+    await session.commitTransaction();
+    session.endSession();
+    return responseHandler(
+      res,
+      { guest: { ...newGuest._doc, status: { ...newGuestStatus._doc } } },
+      201,
+      "Guest Created"
+    );
   } catch (e) {
-    return res
-      .status(500)
-      .json({ error: { server: "Internal server error" + e } });
+    await session.abortTransaction();
+    session.endSession();
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(
+      new InternalServerError("Internal server error while creating")
+    );
   }
 };
 
-const getById = async (req, res) => {
+const getById = async (req, res, next) => {
   try {
     const guestId = req.params.guestId;
     const propertyId = req.params.propertyId;
     const guest = await guestService.getById(guestId, propertyId);
-    return res.status(200).json({ result: { guest: guest } });
+    const guestStatus = await guestStatusService.getByGuestId(guestId);
+    return responseHandler(res, {
+      guest: { ...guest._doc, status: guestStatus },
+    });
   } catch (e) {
-    return res.status(500).json({ error: { server: "Internal server error" } });
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError());
   }
 };
 
-const update = async (req, res) => {
+const update = async (req, res, next) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
   try {
-    const guest = req.body;
+    // TODO: add messageGuest
+    const { status, ...guest } = req.body;
     const propertyId = req.params.propertyId;
     const guestId = req.params.guestId;
-    const result = GuestValidationScehma.safeParse(guest);
-    if (!result.success) {
-      return res
-        .status(400)
-        .json({ error: result.error.flatten().fieldErrors });
+    const guestResult = await UpdateGuestValidationSchema.safeParseAsync(guest);
+    const statusResult =
+      await UpdateGuestStatusValidationSchema.safeParseAsync(status);
+    if (!guestResult.success || !statusResult.success) {
+      throw new ValidationError("Validation Error", {
+        ...guestResult?.error?.flatten().fieldErrors,
+        ...guestResult?.error?.flatten().fieldErrors,
+      });
     }
-    const updatedGuest = await guestService.update(guest, propertyId, guestId);
-    return res.status(200).json({ result: { guest: updatedGuest } });
+    const updatedGuest = await guestService.update(
+      guest,
+      propertyId,
+      guestId,
+      session
+    );
+    const updatedGuestStatus = await guestStatusService.update(
+      guestId,
+      status,
+      session
+    );
+    await session.commitTransaction();
+    session.endSession();
+    return responseHandler(
+      res,
+      {
+        guest: { ...updatedGuest._doc, status: updatedGuestStatus },
+      },
+      200,
+      "Guest Updated"
+    );
   } catch (e) {
-    return res.status(500).json({ error: { server: "Internal server error" } });
+    await session.abortTransaction();
+    session.endSession();
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(
+      new InternalServerError("Internal server error while updating")
+    );
   }
 };
 
-const remove = async (req, res) => {
+const remove = async (req, res, next) => {
   try {
     const guestId = req.params.guestId;
     const propertyId = req.params.propertyId;
     const removedGuest = await guestService.remove(guestId, propertyId);
-    return res.status(200).json({ result: { guest: removedGuest } });
+    return responseHandler(res, { guest: removedGuest });
   } catch (e) {
-    return res.status(500).json({ error: { server: "Internal server error" } });
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError());
   }
 };
 
-module.exports = { getAll, create, getById, update, remove };
+const getAllGuestsWithStatus = async (req, res, next) => {
+  try {
+    const filters = req.query;
+    const filtersResult = GetGuestFiltersValidationSchema.safeParse(filters);
+
+    const propertyId = req.params.propertyId;
+    if (!filtersResult.success) {
+      throw new ValidationError(
+        "Validation Error",
+        filtersResult.error.flatten().fieldErrors
+      );
+    }
+
+    // let guests = await guestService.getAllGuestsWithStatus(propertyId);
+    let guests = await guestStatusService.getAllGuestWithStatusv2(
+      propertyId,
+      filtersResult.data
+    );
+    
+    return responseHandler(res, { guests: guests });
+  } catch (e) {
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(
+      new InternalServerError(e.message)
+    );
+  }
+};
+
+module.exports = {
+  getAll,
+  create,
+  getById,
+  update,
+  remove,
+  getAllGuestsWithStatus,
+};
