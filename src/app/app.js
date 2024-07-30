@@ -64,8 +64,7 @@ const createApp = () => {
   // app.use(helmet());
 
   // Logging
-  app.use(loggerMiddleware);
- 
+
   app.use(
     "/api-docs",
     swaggerUi.serve,
@@ -75,6 +74,7 @@ const createApp = () => {
   );
 
   // Middlewares
+  app.use(loggerMiddleware);
   app.use(express.json());
   app.use(cookieParser());
   app.use(

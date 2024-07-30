@@ -42,14 +42,19 @@ const create = async (propertyId, messageTemplate, session) => {
   return newMessageTemplate;
 };
 
-const getById = async (messageTemplateId) => {
+const getById = async (propertyId, messageTemplateId) => {
   const messageTemplate = await MessageTemplate.findById(messageTemplateId);
   return messageTemplate;
 };
 
-const update = async (messageTemplateId, messageTemplate, session) => {
-  const updatedMessageTemplate = await MessageTemplate.findByIdAndUpdate(
-    messageTemplateId,
+const update = async (
+  propertyId,
+  messageTemplateId,
+  messageTemplate,
+  session
+) => {
+  const updatedMessageTemplate = await MessageTemplate.findOneAndUpdate(
+    { _id: messageTemplateId, propertyId: propertyId },
     messageTemplate,
     { new: true, session: session }
   );
@@ -61,13 +66,22 @@ const getByNameAndPropertyId = async (name, propertyId) => {
     propertyId,
   });
   return messageTemplate;
-}
+};
 const remove = async (messageTemplateId, session) => {
   const removedMessageTemplate = await MessageTemplate.findByIdAndDelete(
     messageTemplateId,
     { session: session }
   );
   return removedMessageTemplate;
+};
+
+const updateAll = async (propertyId, messageTemplates, session) => {
+  const updatedMessageTemplates = await MessageTemplate.updateMany(
+    { propertyId },
+    messageTemplates,
+    { session: session }
+  );
+  return updatedMessageTemplates;
 };
 
 module.exports = {
@@ -78,4 +92,5 @@ module.exports = {
   remove,
   createDefaults,
   getByNameAndPropertyId,
+  updateAll,
 };

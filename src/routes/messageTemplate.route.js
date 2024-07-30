@@ -8,6 +8,7 @@ const {
   getById,
   update,
   remove,
+  updateAll,
 } = require("../controllers/messageTemplate.controller");
 const { authenticateToken } = require("../middlewares/jwt.middleware");
 const {
@@ -35,4 +36,7 @@ router.delete(
   checkPropertyAccess,
   remove
 );
+
+router.put("/:propertyId", authenticateToken, checkPropertyAccess, updateAll);
+
 module.exports = router;

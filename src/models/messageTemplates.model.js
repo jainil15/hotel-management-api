@@ -25,6 +25,7 @@ const messageTemplateSchema = new Schema(
       type: String,
       enum: Object.values(MESSAGE_TEMPLATE_TYPES),
       default: MESSAGE_TEMPLATE_TYPES.CUSTOM,
+      immutable: true,
     },
     name: { type: String, required: true },
     message: { type: String, required: true },
@@ -55,6 +56,26 @@ const UpdateMessageTemplateValidationSchema = z.object({
   active: z.boolean().optional(),
 });
 
+const UpdateManyMessageTemplateValidationSchema = z.array(
+  z.object({
+    _id: z
+      .string()
+      .refine((val) => mongoose.Types.ObjectId.isValid(val), {
+        message: "Invalid ObjectId",
+      })
+      .optional(),
+    name: z.string().optional(),
+    message: z.string().optional(),
+    type: z.enum(Object.values(MESSAGE_TEMPLATE_TYPES)).optional(),
+  })
+);
+
+const CreateCustomMessageTemplateValidationSchema = z.object({
+  name: z.string(),
+  message: z.string(),
+  type: z.enum([MESSAGE_TEMPLATE_TYPES.CUSTOM]).optional(),
+});
+
 const MessageTemplate = mongoose.model(
   "MessageTemplate",
   messageTemplateSchema
@@ -69,4 +90,6 @@ module.exports = {
   MessageTemplateValidationSchema,
   UpdateMessageTemplateValidationSchema,
   CreateMessageTemplateValidationSchema,
+  UpdateManyMessageTemplateValidationSchema,
+  CreateCustomMessageTemplateValidationSchema,
 };

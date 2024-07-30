@@ -186,4 +186,5 @@ const create = async (req, res, next) => {
   }
 };
 
+
 module.exports = { register, login, logout, getUser, create };

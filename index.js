@@ -25,7 +25,7 @@ const PORT = process.env.PORT || 8000;
 Connect().then(() => {
   logger.info("Database connected successfully");
 });
-
+  
 const app = createApp();
 // Listener
 if (process.env.NODE_ENV === "production") logger.info(cmdLineLogo2);

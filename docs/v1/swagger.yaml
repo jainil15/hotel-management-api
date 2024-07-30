@@ -114,6 +114,8 @@ paths:
       operationId: post-user-logout
       x-stoplight:
         id: rl0dfsy0rxz57
+      security:
+        - Bearer: []
   /user:
     get:
       summary: Get User
@@ -715,6 +717,25 @@ paths:
         - Bearer: []
       requestBody:
         $ref: '#/components/requestBodies/CreateMessageTemplate'
+    put:
+      summary: Update All Templates
+      tags:
+        - MessageTemplate
+      responses: {}
+      operationId: put-messageTemplate-propertyId
+      x-stoplight:
+        id: tqxogfouffgio
+      security:
+        - Bearer: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                x-stoplight:
+                  id: z5onaoqwf2qy0
+                type: object
   '/messageTemplate/{propertyId}/{messageTemplateId}':
     parameters:
       - schema:
@@ -1075,7 +1096,7 @@ components:
         Example 1:
           _id: 669e9b4fecb5b6613114ed8e
           propertyId: 669bb5387629e1fff5cb35a5
-          currentStatus: Reservation
+          currentStatus: Reservation Confirmed
           lateCheckOutStatus: Not Requested
           earlyCheckInStatus: Not Requested
           reservationStatus: Confirmed
@@ -1342,7 +1363,7 @@ components:
                     x-stoplight:
                       id: j46el0lr9itcw
                     enum:
-                      - Reservation
+                      - Reservation Confirmed
                       - In House
                       - Checked Out
                   lateCheckOutStatus:
@@ -1390,7 +1411,7 @@ components:
                 lastName: Last
                 email: firstlast123@guest.com
                 status:
-                  currentStatus: Reservation
+                  currentStatus: Reservation Confirmed
     CreateMessageTemplate:
       content:
         application/json:
@@ -1436,7 +1457,7 @@ components:
                 x-stoplight:
                   id: jt2v990rm57vz
                 enum:
-                  - Reservation
+                  - Reservation Confirmed
                   - In House
                   - Checked Out
               lateCheckOutStatus:
@@ -1470,6 +1491,32 @@ components:
                 enum:
                   - Not Applied
                   - Applied
+    UpdateMessageTemplate:
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - type
+              - message
+              - name
+            properties:
+              type:
+                type: string
+                x-stoplight:
+                  id: 97qqkeec04yen
+              message:
+                type: string
+                x-stoplight:
+                  id: ie8zrbhz1cqsu
+              name:
+                type: string
+                x-stoplight:
+                  id: oux0hu0rrzx3a
+              _id:
+                type: string
+                x-stoplight:
+                  id: 05ue8itc1jd1a
   responses:
     Login:
       description: Login response
@@ -1699,7 +1746,7 @@ components:
                     status:
                       _id: 669e9b4fecb5b6613114ed8e
                       propertyId: 669bb5387629e1fff5cb35a5
-                      currentStatus: Reservation
+                      currentStatus: Reservation Confirmed
                       lateCheckOutStatus: Not Requested
                       earlyCheckInStatus: Not Requested
                       reservationStatus: Confirmed

@@ -57,7 +57,6 @@ const create = async (req, res, next) => {
 const getByGuestId = async (req, res, next) => {
   try {
     const { guestId } = req.params;
-    console.log("Guest Id", guestId);
     const guestStatus = await guestStatusService.getByGuestId(guestId);
     if (!guestStatus) {
       return responseHandler(res, {}, 404, "Guest Status Not Found");

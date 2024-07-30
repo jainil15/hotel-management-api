@@ -1,5 +1,9 @@
 const jwt = require("jsonwebtoken");
-const { UnauthorizedError, APIError, InternalServerError } = require("../lib/CustomErrors");
+const {
+  UnauthorizedError,
+  APIError,
+  InternalServerError,
+} = require("../lib/CustomErrors");
 // Authenticate Token middleware
 const authenticateToken = async (req, res, next) => {
   try {
