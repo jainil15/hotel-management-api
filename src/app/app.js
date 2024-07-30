@@ -3,7 +3,8 @@ const express = require("express");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-
+const helmet = require("helmet");
+const responseTime = require("response-time");
 // Routes imports
 const userRoutes = require("../routes/user.route");
 const authRoutes = require("../routes/auth.route");
@@ -46,15 +47,25 @@ const logger = require("../configs/winston.config");
 
 const { NotFoundError } = require("../lib/CustomErrors");
 const { responseHandler } = require("../middlewares/response.middleware");
+const { loggerMiddleware } = require("../middlewares/logger.middleware");
 
 // Setup
 const PORT = process.env.PORT || 8000;
 
 // Connect().then();
+/**
+ * Create express app
+ * @returns {import("express").Application} - Express app
+ */
 const createApp = () => {
   const app = express();
-  const specs = yaml.load("./api/v1/swagger.yaml");
+  const specs = yaml.load("./docs/v1/swagger.yaml");
+  app.use(responseTime());
+  // app.use(helmet());
 
+  // Logging
+  app.use(loggerMiddleware);
+ 
   app.use(
     "/api-docs",
     swaggerUi.serve,
@@ -72,27 +83,6 @@ const createApp = () => {
     })
   );
   app.use(cors(corsOptionsDelegate));
-
-  // Logging
-  app.use((req, res, next) => {
-    const initialUrl = req.url;
-    const uuid = req.headers["x-request-id"];
-    const time = new Date();
-    // logger.info(`[REQUEST] ${req.method} ${req.url} [${uuid}]`);
-    res.on("finish", () => {
-      const log = `[RESPONSE] ${req.ip} | ${res.statusCode} | ${initialUrl} [${uuid}] ${new Date() - time}ms`;
-
-      if (res.statusCode >= 400 && res.statusCode < 500) {
-        logger.warn(log);
-      } else if (res.statusCode >= 500) {
-        logger.error(log);
-      } else {
-        logger.info(log);
-      }
-    });
-    next();
-  });
-
   // Routers
   app.use("/user", userRoutes);
   app.use("/auth", authRoutes);

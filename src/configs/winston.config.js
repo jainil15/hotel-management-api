@@ -1,5 +1,23 @@
 const winston = require("winston");
 const { format, transports } = require("winston");
+const customLevels = {
+  error: 0,
+  warn: 1,
+  info: 2,
+  http: 3,
+  verbose: 4,
+  debug: 5,
+  silly: 6,
+};
+const customColors = {
+  error: "redBG",
+  warn: "yellowBG",
+  info: "greenBG",
+  http: "blueBG",
+  verbose: "cyanBG",
+  debug: "magentaBG",
+  silly: "whiteBG",
+};
 const logger = winston.createLogger({
   level: "debug",
   format: winston.format.combine(
@@ -7,12 +25,14 @@ const logger = winston.createLogger({
       info.level = info.level.toUpperCase();
       return info;
     })(),
-    format.colorize({ all: true }),
+
     format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
     format.prettyPrint({ colorize: true, depth: 3 }),
     format.printf(
-      (info) => `[${info.level}] [${info.timestamp}] ${info.message}`
-    )
+      (info) =>
+        `[${info.level == "INFO" ? "INFO" : "HTTP"}] [${info.timestamp}] ${info.message}`
+    ),
+    format.colorize({ all: true })
   ),
 
   transports: [
@@ -30,6 +50,7 @@ const logger = winston.createLogger({
     new transports.Console(),
   ],
 });
+// winston.addColors(customColors);
 
 if (process.env.NODE_ENV !== "production") {
   logger.add(
