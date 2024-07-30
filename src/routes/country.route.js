@@ -50,7 +50,7 @@ router.get("/:country/states", async (req, res, next) => {
     }
     responseHandler(res, { states: states });
   } catch (e) {
-    return next(new InternalServerError());
+    return next(new InternalServerError(e.message));
   }
 });
 
@@ -61,16 +61,16 @@ router.get("/:country/:state/cities", async (req, res, next) => {
 
     const cities = countryStateCityFile
       .find((c) => c.iso2 === countryIso)
-      .states.find((s) => s.state_code === stateCode)
+      ?.states.find((s) => s.state_code === stateCode)
       ?.cities.map((c) => ({
         name: c.name,
       }));
     if (!cities) {
-      return next(new BadRequestError({ cities: ["Cities not found"] }));
+      return next(new BadRequestError("Bad Request",{ cities: ["Cities not found"] }));
     }
     responseHandler(res, { cities: cities });
   } catch (e) {
-    return next(new InternalServerError());
+    return next(new InternalServerError(e.message));
   }
 });
 

@@ -11,7 +11,6 @@ const {
 } = require("../constants/guestStatus.contant");
 const { dateValidation } = require("../utils/dateCompare");
 
-
 const guestStatusSchema = new Schema(
   {
     propertyId: {

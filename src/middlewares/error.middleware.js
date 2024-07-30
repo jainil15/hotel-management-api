@@ -15,7 +15,7 @@ const errorMiddleware = async (err, req, res, next) => {
     error: err.error,
     type: err.statusName || "INTERNAL_SERVER_ERROR",
     message: err.message || "Something went wrong on the server.",
-    stack: process.env.NODE_ENV === "development" ? err.stack : {},
+    stack: process.env.NODE_ENV === "development1" ? err.stack : {},
   });
 };
 
