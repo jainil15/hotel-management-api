@@ -1,23 +1,26 @@
 // import { Request } from "express";
 
 const { MessagingResponse } = require("twilio").twiml;
+const { ValidationError } = require("../lib/CustomErrors");
+const { responseHandler } = require("../middlewares/response.middleware");
 const { Guest } = require("../models/guest.model");
 const { MessageValidationSchema, Message } = require("../models/message.model");
 const { Property } = require("../models/property.model");
+const { APIError, InternalServerError } = require("../lib/CustomErrors");
 
 require("dotenv").config();
 
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 const client = require("twilio")(accountSid, authToken);
-const sendsms = async (req, res) => {
+const sendsms = async (req, res, next) => {
   try {
     const message = req.body;
     const result = MessageValidationSchema.safeParse(message);
     if (!result.success) {
-      return res
-        .status(400)
-        .json({ error: result.error.flatten().fieldErrors });
+      throw new ValidationError("Validation Error", {
+        ...result.error.flatten().fieldErrors,
+      });
     }
     // TODO: Move code to service
     const guest = await Guest.findById(req.params.guestId);
@@ -36,17 +39,17 @@ const sendsms = async (req, res) => {
       senderId: req.params.propertyId,
       receiverId: req.params.guestId,
     });
-    
-    res.status(200).json({ result: { message: newMessage } });
+    return responseHandler(res, { message: newMessage }, 200, "Message Sent");
   } catch (e) {
-    res.status(500).json({ error: { server: "Internal Server Error" + e } });
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError());
   }
 };
 
-const incomingMessage = async (req, res) => {
+const incomingMessage = async (req, res, next) => {
   try {
-    
-    
     const twiml = new MessagingResponse();
     // TODO: Move code to service
     const property = await Property.findOne({
@@ -71,13 +74,14 @@ const incomingMessage = async (req, res) => {
     twiml.message("Welcome to Onelyk \n https://www.onelyk.com");
     return res.status(200).type("text/xml").send(twiml.toString());
   } catch (e) {
-    return res
-      .status(500)
-      .json({ error: { server: "Internal Server Error" + e } });
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError());
   }
 };
 
-const errorLogging = async (req, res) => {
+const errorLogging = async (req, res, next) => {
   try {
     return res.status(200).json({ result: { message: "Error received" } });
   } catch (e) {
@@ -87,9 +91,8 @@ const errorLogging = async (req, res) => {
   }
 };
 
-const status = async (req, res) => {
+const status = async (req, res, next) => {
   try {
-    
     return res.status(200).json({ result: { message: "Status received" } });
   } catch (e) {
     return res

@@ -1,5 +1,12 @@
+const { MessageValidationSchema } = require("../models/message.model");
 const guestService = require("../services/guest.service");
 const messageService = require("../services/message.service");
+const propertyService = require("../services/property.service");
+const twilio = require("twilio");
+const client = new twilio(
+  process.env.TWILIO_ACCOUNT_SID,
+  process.env.TWILIO_AUTH_TOKEN
+);
 module.exports = (io, socket) => {
   const sendsms = async (payload) => {
     const message = payload;

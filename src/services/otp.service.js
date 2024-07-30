@@ -1,3 +1,4 @@
+const { NotFoundError } = require("../lib/CustomErrors");
 const { Otp } = require("../models/otp.model");
 
 const create = async (otp) => {
@@ -10,32 +11,20 @@ const create = async (otp) => {
   return savedOtp;
 };
 const getByEmail = async (email) => {
-  try {
-    const otp = await Otp.findOne({ "user.email": email });
-    return otp;
-  } catch (e) {
-    throw new Error("Error getting otp by email");
-  }
+  const otp = await Otp.findOne({ "user.email": email });
+  return otp;
 };
 const update = async (otp) => {
-  try {
-    const updatedOtp = await Otp.findByIdAndUpdate(otp._id, otp, { new: true });
-    return updatedOtp;
-  } catch (e) {
-    throw new Error("Error updating otp" + e);
-  }
+  const updatedOtp = await Otp.findByIdAndUpdate(otp._id, otp, { new: true });
+  return updatedOtp;
 };
 
 const verify = async (email, otp) => {
-  try {
-    const newOtp = await Otp.findOne({ "user.email": email, otp });
-    if (newOtp) {
-      await newOtp.deleteOne();
-    }
-    return newOtp;
-  } catch (e) {
-    throw new Error("Error verifying otp");
+  const newOtp = await Otp.findOne({ "user.email": email, otp });
+  if (newOtp) {
+    await newOtp.deleteOne();
   }
+  return newOtp;
 };
 
 module.exports = { create, update, verify, getByEmail };

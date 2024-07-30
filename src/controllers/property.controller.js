@@ -1,9 +1,21 @@
+const { default: mongoose } = require("mongoose");
+const {
+  ValidationError,
+  APIError,
+  InternalServerError,
+  ConflictError,
+  NotFoundError,
+} = require("../lib/CustomErrors");
+const { responseHandler } = require("../middlewares/response.middleware");
 const { PropertyValidationSchema } = require("../models/property.model");
 const { SettingValidationSchema } = require("../models/setting.model");
 const propertyService = require("../services/property.service");
+const messageTemplateService = require("../services/messageTemplate.service");
 const checkImageType = require("../utils/checkType");
 
-const create = async (req, res) => {
+const create = async (req, res, next) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
   try {
     const {
       standardCheckinTime,
@@ -13,7 +25,6 @@ const create = async (req, res) => {
       ...property
     } = req.body;
 
-    
     // validation errors
     const result = PropertyValidationSchema.safeParse({
       ...property,
@@ -28,21 +39,17 @@ const create = async (req, res) => {
     });
     // validation errors
     if (!result.success || !settingResult.success) {
-      return res.status(400).json({
-        error: {
-          ...result?.error?.flatten().fieldErrors,
-          ...settingResult?.error?.flatten().fieldErrors,
-        },
+      throw new ValidationError("Validation Error", {
+        ...result?.error?.flatten().fieldErrors,
+        ...settingResult?.error?.flatten().fieldErrors,
       });
     }
-    
+
     // check if email already exists
     const oldProperty = await propertyService.getByEmail(property.email);
     if (oldProperty) {
-      return res.status(400).json({
-        error: {
-          email: "Email already exists",
-        },
+      throw new ConflictError("Property with this email already exists", {
+        email: ["Property with this email already exists"],
       });
     }
     // create new property
@@ -50,42 +57,63 @@ const create = async (req, res) => {
       property,
       req.files,
       req.user,
-      settingResult.data
+      settingResult.data,
+      session
     );
-
-    return res.status(200).json({ result: { property: newProperty } });
+    
+    const defaultTemplates = await messageTemplateService.createDefaults(
+      newProperty._id,
+      session
+    );
+    await session.commitTransaction();
+    session.endSession();
+    return responseHandler(
+      res,
+      { property: newProperty },
+      201,
+      "Property created"
+    );
+    
   } catch (e) {
-    return res
-      .status(500)
-      .json({ error: { server: "Internal server error" + e } });
+    await session.abortTransaction();
+    session.endSession();
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError(e.message));
   }
 };
 
-const getAll = async (req, res) => {
+const getAll = async (req, res, next) => {
   try {
     const properties = await propertyService.getAll(req.user);
-    return res.status(200).json({ result: { properties: properties } });
+    if (!properties) {
+      throw new NotFoundError("No properties found", {});
+    }
+    return responseHandler(res, { properties: properties });
   } catch (e) {
-    return res
-      .status(500)
-      .json({ error: { server: "Internal server error" + e } });
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError());
   }
 };
 
-const getById = async (req, res) => {
+const getById = async (req, res, next) => {
   try {
     const propertyId = req.params.propertyId;
 
     const property = await propertyService.getById(propertyId);
-    return res.status(200).json({ result: { property: property } });
+    return responseHandler(res, { property: property });
   } catch (e) {
-    return res
-      .status(500)
-      .json({ error: { server: "Internal server error" + e } });
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError());
   }
 };
 
-const update = async (req, res) => {
+const update = async (req, res, next) => {
   try {
     const property = req.body;
     const propertyId = req.params.propertyId;
@@ -94,28 +122,31 @@ const update = async (req, res) => {
     });
     // validation errors
     if (!result.success) {
-      return res
-        .status(400)
-        .json({ error: result.error.flatten().fieldErrors });
+      throw new ValidationError(
+        "Validation Error",
+        result.error.flatten().fieldErrors
+      );
     }
     const updatedProperty = await propertyService.update(property, propertyId);
-    return res.status(200).json({ result: { property: updatedProperty } });
+    return responseHandler(res, { property: updatedProperty });
   } catch (e) {
-    return res
-      .status(500)
-      .json({ error: { server: "Internal server error" + e } });
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError());
   }
 };
 
-const remove = async (req, res) => {
+const remove = async (req, res, next) => {
   try {
     const propertyId = req.params.propertyId;
     const removedProperty = await propertyService.remove(propertyId);
-    return res.status(200).json({ result: { property: removedProperty } });
+    return responseHandler(res, { property: removedProperty });
   } catch (e) {
-    return res
-      .status(500)
-      .json({ error: { server: "Internal server error" + e } });
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError());
   }
 };
 

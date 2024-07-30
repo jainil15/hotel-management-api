@@ -4,57 +4,57 @@ const countryStatesFile = require("../data/country+state.json");
 const countryStateCityFile = require("../data/country+state+city.json");
 const timezoneFile = require("../data/timezone.json");
 const zipcodeFile = require("../data/zipcodes.json");
+const { BadRequestError, InternalServerError } = require("../lib/CustomErrors");
+const { responseHandler } = require("../middlewares/response.middleware");
 const router = Router();
 
-router.get("/", async (req, res) => {
+router.get("/", async (req, res, next) => {
   try {
-    return res.status(200).json({
-      result: {
-        countries: countryFile.map((c) => ({ name: c.name, iso2: c.iso2 })),
-      },
+    responseHandler(res, {
+      countries: countryFile.map((c) => ({ name: c.name, iso2: c.iso2 })),
     });
   } catch (e) {
-    return res
-      .status(500)
-      .json({ error: { server: "Internal Server Error " + e } });
+    return next(new InternalServerError());
   }
 });
 
-router.get("/:country/timezones", async (req, res) => {
+router.get("/:country/timezones", async (req, res, next) => {
   try {
     const countryIso = req.params.country;
     const timezone = countryFile.find((c) => c.iso2 === countryIso).timezones;
     if (!timezone) {
-      return res
-        .status(400)
-        .json({ error: { timezones: "Timezones not found" } });
+      return next(
+        new BadRequestError("Timezones not found", {
+          timezones: ["Timezones not found"],
+        })
+      );
     }
-    return res.status(200).json({ result: { timezones: timezone } });
+    responseHandler(res, { timezones: timezone });
   } catch (e) {
-    return res
-      .status(500)
-      .json({ error: { server: "Internal Server Error " + e } });
+    return next(new InternalServerError());
   }
 });
 
-router.get("/:country/states", async (req, res) => {
+router.get("/:country/states", async (req, res, next) => {
   try {
     const countryIso = req.params.country;
     const states = countryStatesFile
       .find((c) => c.iso2 === countryIso)
       .states.map((s) => ({ name: s.name, state_code: s.state_code }));
     if (!states) {
-      return res.status(400).json({ error: { states: "States not found" } });
+      return next(
+        new BadRequestError("States not found", {
+          states: ["States not found"],
+        })
+      );
     }
-    return res.status(200).json({ result: { states: states } });
+    responseHandler(res, { states: states });
   } catch (e) {
-    return res
-      .status(500)
-      .json({ error: { server: "Internal Server Error " + e } });
+    return next(new InternalServerError());
   }
 });
 
-router.get("/:country/:state/cities", async (req, res) => {
+router.get("/:country/:state/cities", async (req, res, next) => {
   try {
     const countryIso = req.params.country;
     const stateCode = req.params.state;
@@ -66,15 +66,15 @@ router.get("/:country/:state/cities", async (req, res) => {
         name: c.name,
       }));
     if (!cities) {
-      return res.status(400).json({ error: { city: "Cities not found" } });
+      return next(new BadRequestError({ cities: ["Cities not found"] }));
     }
-    return res.status(200).json({ result: { cities: cities } });
+    responseHandler(res, { cities: cities });
   } catch (e) {
-    return res.status(500).json({ error: { server: "Internal server error" } });
+    return next(new InternalServerError());
   }
 });
 
-router.get("/:country/:zipcode", async (req, res) => {
+router.get("/:country/:zipcode", async (req, res, next) => {
   try {
     const countryIso = req.params.country;
     const zipcode = req.params.zipcode;
@@ -84,11 +84,15 @@ router.get("/:country/:zipcode", async (req, res) => {
     );
 
     if (!zipcodes) {
-      return res.status(400).json({ error: { zipcode: "Zipcode not found" } });
+      return next(
+        new BadRequestError("Invalid zip code", {
+          zipcode: ["Zipcode not found"],
+        })
+      );
     }
-    return res.status(200).json({ result: { zipcodes: zipcodes } });
+    responseHandler(res, { zipcodes });
   } catch (e) {
-    return res.status(500).json({ error: { server: "Internal server error" } });
+    return next(new InternalServerError());
   }
 });
 

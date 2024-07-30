@@ -8,15 +8,15 @@ const fs = require("fs");
 const { TwilioAccount } = require("../models/twilioAccount.model");
 const twilio = require("twilio");
 const { Setting } = require("../models/setting.model");
+const { NotFoundError, InternalServerError } = require("../lib/CustomErrors");
 require("dotenv").config();
 
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 const twilioClient = require("twilio")(accountSid, authToken);
 
-const create = async (property, files, user, setting) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
+const create = async (property, files, user, setting, session) => {
+  
   try {
     const logo = files.logo[0];
     const cover = files.cover[0];
@@ -62,76 +62,55 @@ const create = async (property, files, user, setting) => {
     await client.send(logoCommand);
     await client.send(coverCommand);
 
-    await session.commitTransaction();
-    session.endSession();
+    
     return savedProperty;
   } catch (e) {
-    await session.abortTransaction();
-    session.endSession();
-    throw new Error("Error creating property" + e);
+    
+    throw new InternalServerError("Error creating property", e.message);
   }
 };
 
 const getAll = async (user) => {
-  try {
-    const propertyAccess = await PropertyAccess.find({
-      userId: user._id,
-    }).populate("propertyId");
+  const propertyAccess = await PropertyAccess.find({
+    userId: user._id,
+  }).populate("propertyId");
 
-    const properties = propertyAccess.map((access) => access.propertyId);
-    return properties;
-  } catch (e) {
-    throw new Error("Error getting properties" + e);
-  }
+  const properties = propertyAccess.map((access) => access.propertyId).filter((property) => property);
+  return properties;
 };
 
 const update = async (property, propertyId) => {
-  try {
-    const updatedProperty = await Property.findByIdAndUpdate(
-      propertyId,
-      property,
-      { new: true },
-    );
-    return updatedProperty;
-  } catch (e) {
-    throw new Error("Error updating property" + e);
-  }
+  const updatedProperty = await Property.findByIdAndUpdate(
+    propertyId,
+    property,
+    { new: true }
+  );
+  return updatedProperty;
 };
 
 const remove = async (propertyId) => {
-  try {
-    const removedProperty = await Property.findByIdAndDelete(propertyId);
-    const _propertyAccess = await PropertyAccess.findOneAndDelete({
-      propertyId: propertyId,
-    });
-    return removedProperty;
-  } catch (e) {
-    throw new Error("Error deleting property " + e);
-  }
+  const removedProperty = await Property.findByIdAndDelete(propertyId);
+  const _propertyAccess = await PropertyAccess.findOneAndDelete({
+    propertyId: propertyId,
+  });
+  return removedProperty;
 };
 
 const getById = async (propertyId) => {
-  try {
-    const property = await Property.findById(propertyId);
-    if (!property) {
-      throw new Error("Property not found");
-    }
-    return property;
-  } catch (e) {
-    throw new Error("Error getting property by id" + e);
+  const property = await Property.findById(propertyId);
+  if (!property) {
+    throw new NotFoundError("Property not found", {
+      propertyId: ["Property not found for the given id"],
+    });
   }
+  return property;
 };
 
 const getByEmail = async (email) => {
-  try {
-    const property = await Property.findOne({
-      email: email,
-    });
-
-    return property;
-  } catch (e) {
-    throw new Error("Error getting property by email");
-  }
+  const property = await Property.findOne({
+    email: email,
+  });
+  return property;
 };
 
 module.exports = { create, getAll, update, remove, getById, getByEmail };

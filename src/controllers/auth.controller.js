@@ -7,9 +7,16 @@ const { User } = require("../models/user.model");
 const cookieOptions = require("../configs/cookie.config");
 const { generateOtp } = require("../utils/generateOtp");
 const sendOtp = require("../utils/sendOtp");
+const {
+  ValidationError,
+  UnauthorizedError,
+  InternalServerError,
+  APIError,
+} = require("../lib/CustomErrors");
+const { responseHandler } = require("../middlewares/response.middleware");
 
 // Get access token
-const getAccessToken = async (req, res) => {
+const getAccessToken = async (req, res, next) => {
   try {
     // Validate request query
     const validation = z
@@ -19,9 +26,12 @@ const getAccessToken = async (req, res) => {
       .safeParse(req.query);
     // Validation error
     if (!validation.success) {
-      return res
-        .status(400)
-        .json({ error: validation.error.flatten().fieldErrors });
+      return next(
+        new ValidationError(
+          "Validation Error",
+          validation.error.flatten().fieldErrors
+        )
+      );
     }
     // Get session
     const session = await authService.getSession(req.query.email);
@@ -29,25 +39,21 @@ const getAccessToken = async (req, res) => {
     const refreshToken = req.cookies["refreshToken"];
     // Check if refresh token exists
     if (!refreshToken) {
-      return res
-        .status(401)
-        .json({ error: { auth: "Refresh token does not exist" } });
+      return next(new UnauthorizedError("Refresh token not found", {}));
     }
     // Check if session exists
     if (!session) {
-      return res
-        .status(401)
-        .json({ error: { auth: "Session does not exist" } });
+      return next(new UnauthorizedError("Session not found", {}));
     }
     // Check if session is valid
     if (!session.valid) {
-      return res.status(401).json({ error: { auth: "Session is not valid" } });
+      return next(new UnauthorizedError("Session is not valid", {}));
     }
     // Decode refresh token
     const decoded = await authService.decodeRefreshToken(refreshToken);
     // Check if email matches
     if (decoded.email !== req.query.email) {
-      return res.status(401).json({ error: { auth: "Email does not match" } });
+      return next(new UnauthorizedError("Email does not match", {}));
     }
     // Extract payload
     const { __exp, sessionId, iat, exp, ...rest } = decoded;
@@ -56,22 +62,19 @@ const getAccessToken = async (req, res) => {
     const accessToken = generateAccessToken(
       { ...rest },
       "1d",
-      process.env.ACCESS_TOKEN_SECRET,
+      process.env.ACCESS_TOKEN_SECRET
     );
     // Send response
-    return res.status(200).json({
-      result: {
-        accessToken: accessToken,
-      },
-    });
+    return responseHandler(res, { accessToken });
   } catch (e) {
-    return res
-      .status(500)
-      .json({ error: { server: "Internal server error" + e } });
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError());
   }
 };
 
-const verifyOtp = async (req, res) => {
+const verifyOtp = async (req, res, next) => {
   try {
     const { email, otp } = req.body;
     const result = z
@@ -81,14 +84,19 @@ const verifyOtp = async (req, res) => {
       })
       .safeParse(req.body);
     if (!result.success) {
-      return res
-        .status(400)
-        .json({ error: result.error.flatten().fieldErrors });
+      return next(
+        new ValidationError(
+          "Validation Error",
+          result.error.flatten().fieldErrors
+        )
+      );
     }
 
     const newOtp = await optService.verify(email, otp);
     if (newOtp == null) {
-      return res.status(401).json({ error: "Invalid OTP" });
+      return next(
+        new UnauthorizedError("Invalid OTP", { otp: ["Invalid OTP"] })
+      );
     }
     const { user } = newOtp;
     const newUser = new User(user);
@@ -98,14 +106,20 @@ const verifyOtp = async (req, res) => {
 
     // return user and access token
     // req.user = _user;
-    return res.status(200).json({ result: { user: _user } });
+    return responseHandler(
+      res,
+      { user: _user },
+      201,
+      "User created successfully"
+    );
   } catch (e) {
-    return res
-      .status(500)
-      .json({ error: { server: "Internal server error" + e } });
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError());
   }
 };
-const resendOtp = async (req, res) => {
+const resendOtp = async (req, res, next) => {
   try {
     const { email } = req.body;
     const result = z
@@ -114,25 +128,31 @@ const resendOtp = async (req, res) => {
       })
       .safeParse(req.body);
     if (!result.success) {
-      return res
-        .status(400)
-        .json({ error: result.error.flatten().fieldErrors });
+      return next(
+        new ValidationError(
+          "Validation Error",
+          result.error.flatten().fieldErrors
+        )
+      );
     }
     const otp = await optService.getByEmail(email);
     if (!otp) {
-      return res.status(500).json({ error: { email: "Email not found" } });
+      return next(
+        new UnauthorizedError("Email not found", { email: ["Email not found"] })
+      );
     }
     const otpValue = generateOtp();
     otp.otp = otpValue;
     otp.expiresAt = Date.now();
     otp.deleteOne();
-    const sentMail = await sendOtp(otp.user.email, otpValue);
+    const sentMail = sendOtp(otp.user.email, otpValue);
     await otp.save();
-    return res.status(200).json({ result: { message: "Email Sent" } });
+    return responseHandler(res, {}, 200, "Otp sent successfully");
   } catch (e) {
-    return res
-      .status(500)
-      .json({ error: { server: "Internal server error" + e } });
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError(e.message));
   }
 };
 module.exports = { getAccessToken, verifyOtp, resendOtp };

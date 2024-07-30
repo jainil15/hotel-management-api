@@ -8,9 +8,9 @@ const otpSchema = new mongoose.Schema(
       lastName: { type: String, required: true },
       email: { type: String, required: true, unique: true },
       password_hash: { type: String, required: true },
-      phoneNumber: { type: String, required: true },
-      role: { type: String, required: true },
-      active: { type: Boolean },
+      phoneNumber: { type: String },
+      role: { type: String },
+      active: { type: Boolean, default: true },
     },
     otp: { type: String, required: true },
     expiresAt: {

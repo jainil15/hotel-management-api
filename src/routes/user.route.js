@@ -29,7 +29,7 @@ router.post(
   authenticateToken,
   checkPropertyAccess,
   checkPermissions("admin"),
-  create,
+  create
 );
 
 module.exports = router;
