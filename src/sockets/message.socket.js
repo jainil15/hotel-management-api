@@ -12,7 +12,7 @@ module.exports = (io, socket) => {
     const message = payload;
     const result = MessageValidationSchema.safeParse(message);
     if (!result.success) {
-      io.emit("message_error", { error: result.error.flatten().fieldErrors });
+      io.emit("error", { error: result.error.flatten().fieldErrors });
     }
     const guest = await guestService.getById(
       message.guestId,

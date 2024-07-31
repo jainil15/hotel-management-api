@@ -10,8 +10,10 @@ const {
   ValidationError,
   InternalServerError,
   APIError,
+  UnauthorizedError,
 } = require("../lib/CustomErrors");
 const { responseHandler } = require("../middlewares/response.middleware");
+const { validateStatusForGuest } = require("../utils/guestStatus.util");
 
 const create = async (req, res, next) => {
   const session = await mongoose.startSession();
@@ -76,6 +78,7 @@ const update = async (req, res, next) => {
   try {
     const { propertyId, guestId } = req.params;
     const guestStatus = req.body;
+
     const result = UpdateGuestStatusValidationSchema.safeParse({
       guestId,
       propertyId,
@@ -90,11 +93,17 @@ const update = async (req, res, next) => {
     const updatedGuestStatus = await guestStatusService.update(
       guestId,
       guestStatus,
-      session
+      session,
+      
     );
+    
     if (!updatedGuestStatus) {
       return responseHandler(res, {}, 404, "Guest Status Not Found");
     }
+    
+    req.app.io
+      .to(`property:${updatedGuestStatus.propertyId}`)
+      .emit("guest:guestStatusUpdate", { guestStatus: updatedGuestStatus });
     await session.commitTransaction();
     await session.endSession();
     return responseHandler(

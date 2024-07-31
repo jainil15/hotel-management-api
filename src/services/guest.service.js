@@ -33,14 +33,14 @@ const getById = async (guestId, propertyId) => {
   return guest;
 };
 /**
+ * Update guest
  * @param {object} guest - guest object
  * @param {string} propertyId - property id
- * @param guestId
- * @param {*} session - mongoose session
+ * @param {string} guestId - guest id
+ * @param {object} session - mongoose session
  * @returns {object} updatedGuest - updated guest object
  */
 const update = async (guest, propertyId, guestId, session) => {
-  
   const updatedGuest = await Guest.findOneAndUpdate(
     { _id: guestId, propertyId: propertyId },
     {

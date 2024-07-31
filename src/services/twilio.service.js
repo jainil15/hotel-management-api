@@ -278,4 +278,6 @@ module.exports = {
   buyPhoneNumber,
   createSubaccount,
   getTollFreeVerificationStatus,
+  sendMessage,
+  broadcastMessage,
 };

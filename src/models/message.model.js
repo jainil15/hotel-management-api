@@ -25,9 +25,22 @@ const MessageValidationSchema = z.object({
   guestId: z.string(),
   content: z.string(),
   messageType: z.string(),
-  messageTriggerType: z.number().int(),
-  active: z.boolean(),
+  messageTriggerType: z.number(),
+  active: z.boolean().optional(),
+});
+
+const CreateMessageValidationSchema = z.object({
+  propertyId: z.string(),
+  guestId: z.string(),
+  content: z.string(),
+  messageType: z.string(),
+  messageTriggerType: z.number(),
+  active: z.boolean().optional(),
 });
 
 const Message = mongoose.model("Message", messageSchema);
-module.exports = { Message, MessageValidationSchema };
+module.exports = {
+  Message,
+  MessageValidationSchema,
+  CreateMessageValidationSchema,
+};

@@ -13,6 +13,7 @@ const {
   InternalServerError,
   ConflictError,
 } = require("../lib/CustomErrors");
+const { mongo, default: mongoose } = require("mongoose");
 
 const getPhoneNumbers = async (req, res, next) => {
   try {
@@ -120,9 +121,34 @@ const getTollFreeVerificationStatus = async (req, res, next) => {
   }
 };
 
+const sendMessage = async (req, res, next) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const propertyId = req.params.propertyId;
+    const guestId = req.body.guestId;
+    const body = req.body.body;
+
+    const newMessage = await twilioService.sendMessage(
+      propertyId,
+      guestId,
+      body,
+      session
+    );
+
+    return responseHandler(res, {}, 201, "Message sent successfully");
+  } catch (e) {
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError(e.message));
+  }
+};
+
 module.exports = {
   getPhoneNumbers,
   buyPhoneNumber,
   createSubaccount,
   getTollFreeVerificationStatus,
+  sendMessage,
 };

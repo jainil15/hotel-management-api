@@ -1,6 +1,9 @@
 const {
   GUEST_CURRENT_STATUS,
   RESERVATION_STATUS,
+  PRE_ARRIVAL_STATUS,
+  EARLY_CHECK_IN_STATUS,
+  LATE_CHECK_OUT_STATUS,
 } = require("../constants/guestStatus.contant");
 const { GuestStatus } = require("../models/guestStatus.model");
 
@@ -33,13 +36,15 @@ const AllowedStatus = {
  */
 const validateUpdate = (currentGuestStatus, updateGuestStatus) => {
   if (currentGuestStatus.currentStatus === updateGuestStatus.currentStatus) {
-    
     switch (currentGuestStatus.currentStatus) {
       case GUEST_CURRENT_STATUS.RESERVED:
         if (
           currentGuestStatus.reservationStatus === RESERVATION_STATUS.CANCELLED
         ) {
-          if (updateGuestStatus.reservationStatus !== currentGuestStatus.reservationStatus) {
+          if (
+            updateGuestStatus.reservationStatus !==
+            currentGuestStatus.reservationStatus
+          ) {
             return true;
           }
           return false;
@@ -102,5 +107,42 @@ const validateStatus = (guestStatus) => {
   return true;
 };
 
+const GUEST_ALLOWED_STATUS = {
+  [GUEST_CURRENT_STATUS.RESERVED]: {
+    reservationStatus: [RESERVATION_STATUS.CANCELLED],
+    earlyCheckInStatus: [EARLY_CHECK_IN_STATUS.REQUESTED],
+    preArrivalStatus: [PRE_ARRIVAL_STATUS.APPLIED],
+  },
+  [GUEST_CURRENT_STATUS.IN_HOUSE]: {
+    lateCheckOutStatus: [LATE_CHECK_OUT_STATUS.REQUESTED],
+  },
+};
+/**
+ * Perform validation on update guest guest status
+ * @param {import('../models/guestStatus.model.js').GuestStatusType} currentGuestStatus - current guest status
+ * @param {import('../models/guestStatus.model.js').GuestStatusType} updatedGuestStatus - updated guest status
+ * @returns {boolean} - true if valid, false otherwise
+ */
+const validateStatusForGuest = (currentGuestStatus, updatedGuestStatus) => {
+  if (currentGuestStatus.currentStatus !== updatedGuestStatus.currentStatus) {
+    return false;
+  }
+  console.log(currentGuestStatus, updatedGuestStatus);
+  for (const key in GUEST_ALLOWED_STATUS[currentGuestStatus.currentStatus]) {
+    console.log(currentGuestStatus[key], updatedGuestStatus[key]);
+    if (currentGuestStatus[key] !== updatedGuestStatus[key]) {
+      console.log("Diff: ", currentGuestStatus[key], updatedGuestStatus[key]);
+      console.log(currentGuestStatus, updatedGuestStatus);
+      if (
+        !GUEST_ALLOWED_STATUS[currentGuestStatus.currentStatus][key].includes(
+          updatedGuestStatus[key]
+        )
+      ) {
+        return false;
+      }
+    }
+  }
+  return true;
+};
 
-module.exports = { validateUpdate, validateStatus };
+module.exports = { validateUpdate, validateStatus, validateStatusForGuest };

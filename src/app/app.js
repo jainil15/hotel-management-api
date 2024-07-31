@@ -111,6 +111,34 @@ const createApp = () => {
 
   // Error handling
   app.use(errorMiddleware);
+
+  const server = app.listen(PORT, () => {
+    logger.info(`Server is running on port ${PORT}.`);
+  });
+
+  // Sockets
+  const io = new Server(server, {
+    
+    cors: {
+      origin: "*",
+    },
+  });
+
+  // Sockets middlewares
+  io.use(authenticateTokenSocket);
+  io.use(checkPropertyAccessSocket);
+
+  // Sockets onConnection
+  const onConnection = async (socket) => {
+    const { propertyId } = socket.handshake.query;
+    socket.join(`property:${propertyId}`);
+    guestSocket(io, socket);
+    messageSocket(io, socket);
+  };
+
+  // Sockets connection
+  io.on("connection", onConnection);
+  app.io = io;
   return app;
 };
 

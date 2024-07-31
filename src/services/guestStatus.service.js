@@ -4,8 +4,15 @@ const {
   GUEST_REQUEST,
 } = require("../constants/guestStatus.contant");
 const { GuestStatus } = require("../models/guestStatus.model");
-const { validateUpdate } = require("../utils/guestStatus.util");
-const { ValidationError, NotFoundError } = require("../lib/CustomErrors");
+const {
+  validateUpdate,
+  validateStatusForGuest,
+} = require("../utils/guestStatus.util");
+const {
+  ValidationError,
+  NotFoundError,
+  UnauthorizedError,
+} = require("../lib/CustomErrors");
 const { Guest } = require("../models/guest.model");
 const {
   dateValidation,
@@ -213,7 +220,7 @@ const getAllGuestWithStatusv2 = async (propertyId, filters) => {
   return guests;
 };
 
-const update = async (guestId, guestStatus, session) => {
+const update = async (guestId, guestStatus, session, role = "admin") => {
   const oldGuestStatus = await GuestStatus.findOne({ guestId });
   const updatedGuestStatus = await GuestStatus.findOneAndUpdate(
     { guestId: guestId },
@@ -233,6 +240,16 @@ const update = async (guestId, guestStatus, session) => {
       currentStatus: ["Invalid Status"],
     });
   }
+
+  if (
+    role === "guest" &&
+    !validateStatusForGuest(oldGuestStatus, updatedGuestStatus)
+  ) {
+    throw new UnauthorizedError("Unauthorized to update status", {
+      guestId: ["Guest is not allowed to update status"],
+    });
+  }
+
   return updatedGuestStatus;
 };
 

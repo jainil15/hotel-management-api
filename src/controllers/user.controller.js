@@ -27,7 +27,7 @@ const register = async (req, res, next) => {
     const user = req.body;
     // validate user details
     const result = UserValidationSchema.safeParse(user);
-    
+
     // validation errors
     if (!result.success) {
       throw new ValidationError(
@@ -35,7 +35,7 @@ const register = async (req, res, next) => {
         result.error.flatten().fieldErrors
       );
     }
-    
+
     // check if user already exists
     const existingUser = await userService.getByEmail(user.email);
     if (existingUser) {
@@ -43,19 +43,19 @@ const register = async (req, res, next) => {
         email: ["Email already exists"],
       });
     }
-    
+
     const saltRounds = 10;
     const salt = await bcrypt.genSalt(saltRounds);
 
     const hashedPassword = await bcrypt.hash(user.password, salt);
     const otp = generateOtp();
-    
+
     const newOtp = await otpService.create({
       email: user.email,
       otp: otp,
       user: { ...user, role: "admin", password_hash: hashedPassword },
     });
-    
+
     const sentMail = sendOtp(user.email, otp);
     return responseHandler(res, {}, 201, "Email Sent");
     // send otp to user email
@@ -112,6 +112,7 @@ const login = async (req, res, next) => {
       res.cookie("refreshToken", refreshToken, cookieOptions);
       // return user and access token
       // req.user = _user;
+
       return responseHandler(
         res,
         { user: _user, accessToken },
@@ -128,7 +129,7 @@ const login = async (req, res, next) => {
     if (e instanceof APIError) {
       return next(e);
     }
-    return next(new InternalServerError());
+    return next(new InternalServerError(e.message));
   }
 };
 
@@ -185,6 +186,5 @@ const create = async (req, res, next) => {
     return next(new InternalServerError());
   }
 };
-
 
 module.exports = { register, login, logout, getUser, create };

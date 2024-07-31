@@ -72,11 +72,17 @@ const UpdateGuestStatusValidationSchema = z.object({
 });
 
 const GetGuestFiltersValidationSchema = z.object({
-  checkIn: z.string().refine((date) => dateValidation(date)).optional(),
-  checkOut: z.string().refine((date) => dateValidation(date)).optional(),
+  checkIn: z
+    .string()
+    .refine((date) => dateValidation(date))
+    .optional(),
+  checkOut: z
+    .string()
+    .refine((date) => dateValidation(date))
+    .optional(),
   currentStatus: z.enum(Object.values(GUEST_CURRENT_STATUS)).optional(),
   name: z.string().optional(),
-})
+});
 
 const GuestStatus = mongoose.model("GuestStatus", guestStatusSchema);
 
@@ -84,7 +90,6 @@ const GuestStatus = mongoose.model("GuestStatus", guestStatusSchema);
  * @typedef {import("mongoose").Model<GuestStatus>} GuestStatus
  * @typedef {typeof GuestStatus.schema.obj} GuestStatusType
  */
-
 
 GuestStatus.init().then((GuestStatus) => {
   logger.info("Initialized Guest Status Model");
@@ -95,5 +100,5 @@ module.exports = {
   GuestStatusValidationSchema,
   CreateGuestStatusValidationSchema,
   UpdateGuestStatusValidationSchema,
-  GetGuestFiltersValidationSchema
+  GetGuestFiltersValidationSchema,
 };
