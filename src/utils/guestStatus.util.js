@@ -127,12 +127,9 @@ const validateStatusForGuest = (currentGuestStatus, updatedGuestStatus) => {
   if (currentGuestStatus.currentStatus !== updatedGuestStatus.currentStatus) {
     return false;
   }
-  console.log(currentGuestStatus, updatedGuestStatus);
+
   for (const key in GUEST_ALLOWED_STATUS[currentGuestStatus.currentStatus]) {
-    console.log(currentGuestStatus[key], updatedGuestStatus[key]);
     if (currentGuestStatus[key] !== updatedGuestStatus[key]) {
-      console.log("Diff: ", currentGuestStatus[key], updatedGuestStatus[key]);
-      console.log(currentGuestStatus, updatedGuestStatus);
       if (
         !GUEST_ALLOWED_STATUS[currentGuestStatus.currentStatus][key].includes(
           updatedGuestStatus[key]

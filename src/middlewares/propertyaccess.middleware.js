@@ -56,12 +56,12 @@ const checkPropertyAccessSocket = async (socket, next) => {
     });
 
     if (!propertyAccess) {
-      console.log("Property Access Denied");
+     
       return next(new Error("Router Not Accessible"));
     }
     next();
   } catch (e) {
-    console.log("Error: ", e);
+    
     return next(new Error("Internal server error"));
   }
 };

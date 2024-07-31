@@ -36,7 +36,7 @@ const authenticateTokenSocket = async (socket, next) => {
     // Get the token from the handshake headers
     const authHeader = socket.handshake.headers["authorization"];
     const token = authHeader && authHeader.split(" ")[1];
-    console.log("Token: ",token)
+    
     if (token == null) {
       return next(new UnauthorizedError("Authorization Missing"));
     }
@@ -44,7 +44,7 @@ const authenticateTokenSocket = async (socket, next) => {
     // Verify the token
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
       if (err) {
-        console.log("Error: ",err, user)
+        
         return next(new UnauthorizedError("Unauthorized"));
       }
 
@@ -52,7 +52,7 @@ const authenticateTokenSocket = async (socket, next) => {
       next();
     });
   } catch (e) {
-    console.log("Error: ",e)
+    
     next(new InternalServerError("Internal server error"));
   }
 };
