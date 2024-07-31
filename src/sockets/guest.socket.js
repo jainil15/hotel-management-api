@@ -45,3 +45,7 @@ module.exports = (io, socket) => {
   // socket.on("guest:read", readGuest);
   socket.on("guest:getAll", getAllGuests);
 };
+/**
+ * 
+ * updateStatus => guest.find((guest) => guest.id === updateStatus.guestId).status = updateStatus.status
+ */

@@ -38,20 +38,20 @@ const authenticateTokenSocket = async (socket, next) => {
     const token = authHeader && authHeader.split(" ")[1];
 
     if (token == null) {
-      return next(new Error("Authorization Missing"));
+      return next(new UnauthorizedError("Authorization Missing"));
     }
 
     // Verify the token
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
       if (err) {
-        return next(new Error("Unauthorized"));
+        return next(new UnauthorizedError("Unauthorized"));
       }
 
       socket.user = user;
       next();
     });
   } catch (e) {
-    next(new Error("Internal server error"));
+    next(new InternalServerError("Internal server error"));
   }
 };
 
