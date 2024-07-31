@@ -125,8 +125,8 @@ const createApp = () => {
   });
 
   // Sockets middlewares
-  io.use(authenticateTokenSocket);
-  io.use(checkPropertyAccessSocket);
+  // io.use(authenticateTokenSocket);
+  // io.use(checkPropertyAccessSocket);
 
   // Sockets onConnection
   const onConnection = async (socket) => {
