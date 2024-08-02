@@ -33,7 +33,7 @@ const guestSchema = new Schema(
     checkIn: { type: Date, required: true },
     checkOut: { type: Date, required: true },
     confirmationNumber: { type: String, required: true },
-    roomNumber: { type: String, required: true },
+    roomNumber: { type: String },
     firstName: { type: String },
     lastName: { type: String },
     email: { type: String },

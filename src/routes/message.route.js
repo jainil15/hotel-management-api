@@ -12,12 +12,14 @@ const {
 const { authenticateToken } = require("../middlewares/jwt.middleware");
 const { TwilioAccount } = require("../models/twilioAccount.model");
 const twilio = require("twilio");
+const { ROLE } = require("../constants/role.constant");
 const router = Router();
 
 router.post(
   "/:propertyId/:guestId",
   authenticateToken,
   checkPropertyAccess,
+  checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
   sendsms
 );
 router.post("/incoming-message", incomingMessage);

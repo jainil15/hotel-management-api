@@ -10,61 +10,47 @@ const {
 const { authenticateToken } = require("../middlewares/jwt.middleware");
 const {
   checkPropertyAccess,
+  checkPermissions,
 } = require("../middlewares/propertyaccess.middleware");
-const guestStatusService = require("../services/guestStatus.service");
-const { APIError, InternalServerError } = require("../lib/CustomErrors");
-const { responseHandler } = require("../middlewares/response.middleware");
+const { ROLE } = require("../constants/role.constant");
+const { checkGuestAccess } = require("../middlewares/guestAccess.middleware");
 const router = Router();
 
-router.post("/:propertyId", authenticateToken, checkPropertyAccess, create);
+router.post(
+  "/:propertyId",
+  authenticateToken,
+  checkPropertyAccess,
+  checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
+  create
+);
 router.get(
   "/:propertyId",
   authenticateToken,
   checkPropertyAccess,
+  checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
   getAllGuestsWithStatus
-);
-router.get(
-  "/:propertyId/guestStatus",
-
-  async (req, res, next) => {
-    try {
-      const { currentStatus, checkIn, checkOut } = req.query;
-      const filters = {
-        currentStatus: currentStatus,
-        checkIn: checkIn,
-        checkOut: checkOut,
-      };
-
-      const guests = await guestStatusService.getAllGuestWithStatusv2(
-        req.params.propertyId,
-        filters
-      );
-      return responseHandler(res, { guests: guests });
-    } catch (e) {
-      if (e instanceof APIError) {
-        return next(e);
-      }
-      return next(new InternalServerError(e.message));
-    }
-  }
 );
 
 router.get(
   "/:propertyId/:guestId",
   authenticateToken,
   checkPropertyAccess,
+  checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK, ROLE.GUEST]),
+  checkGuestAccess,
   getById
 );
 router.put(
   "/:propertyId/:guestId",
   authenticateToken,
   checkPropertyAccess,
+  checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
   update
 );
 router.delete(
   "/:propertyId/:guestId",
   authenticateToken,
   checkPropertyAccess,
+  checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
   remove
 );
 

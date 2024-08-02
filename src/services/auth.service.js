@@ -1,6 +1,7 @@
 const { UnauthorizedError, NotFoundError } = require("../lib/CustomErrors");
 const Session = require("../models/session.model");
 const jwt = require("jsonwebtoken");
+const { generateAccessToken } = require("../utils/generateToken");
 require("dotenv").config();
 
 // Create a new session
@@ -53,9 +54,30 @@ const decodeRefreshToken = async (refreshToken) => {
   return decoded;
 };
 
+const genreateGuestAccessToken = (guest) => {
+  console.log(guest)
+  return generateAccessToken(
+    {
+      _id: guest._id,
+      email: guest.email,
+      role: "guest",
+      firstName: guest.firstName,
+      lastName: guest.lastName,
+      email: guest.email,
+      phoneNumber: guest.phoneNumber,
+      active: guest.active,
+      createdAt: guest.createdAt,
+      updatedAt: guest.updatedAt,
+    },
+    "1d",
+    process.env.ACCESS_TOKEN_SECRET
+  );
+};
+
 module.exports = {
   createSession,
   getSession,
   decodeRefreshToken,
   deleteSession,
+  genreateGuestAccessToken,
 };

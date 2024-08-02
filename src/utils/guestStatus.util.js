@@ -125,7 +125,9 @@ const GUEST_ALLOWED_STATUS = {
  */
 const validateStatusForGuest = (currentGuestStatus, updatedGuestStatus) => {
   if (currentGuestStatus.currentStatus !== updatedGuestStatus.currentStatus) {
+    
     return false;
+
   }
 
   for (const key in GUEST_ALLOWED_STATUS[currentGuestStatus.currentStatus]) {
@@ -135,6 +137,7 @@ const validateStatusForGuest = (currentGuestStatus, updatedGuestStatus) => {
           updatedGuestStatus[key]
         )
       ) {
+        console.log("key", key, currentGuestStatus[key], updatedGuestStatus[key]);
         return false;
       }
     }

@@ -24,7 +24,10 @@ const { Connect } = require("../lib/db");
 
 // config imports
 const { corsOptionsDelegate } = require("../configs/cors.config");
-const { authenticateTokenSocket } = require("../middlewares/jwt.middleware");
+const {
+  authenticateTokenSocket,
+  authenticateToken,
+} = require("../middlewares/jwt.middleware");
 
 // env imports
 require("dotenv").config();
@@ -48,6 +51,7 @@ const logger = require("../configs/winston.config");
 const { NotFoundError } = require("../lib/CustomErrors");
 const { responseHandler } = require("../middlewares/response.middleware");
 const { loggerMiddleware } = require("../middlewares/logger.middleware");
+const { checkGuestAccess } = require("../middlewares/guestAccess.middleware");
 
 // Setup
 const PORT = process.env.PORT || 8000;
@@ -83,14 +87,16 @@ const createApp = () => {
     })
   );
   app.use(cors(corsOptionsDelegate));
+
   // Routers
   app.use("/user", userRoutes);
   app.use("/auth", authRoutes);
+  app.use("/country", countryRoutes);
   app.use("/property", propertyRoutes);
+  app.use("*",authenticateToken)
   app.use("/guest", guestRoutes);
   app.use("/message", messageRoutes);
   app.use("/twilio", twilioRoutes);
-  app.use("/country", countryRoutes);
   app.use("/guestStatus", guestStatusRoutes);
   app.use("/messageTemplate", messageTemplateRoutes);
 
@@ -118,7 +124,6 @@ const createApp = () => {
 
   // Sockets
   const io = new Server(server, {
-    
     cors: {
       origin: "*",
     },

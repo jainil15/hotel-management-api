@@ -12,6 +12,7 @@ const {
   ValidationError,
   NotFoundError,
   UnauthorizedError,
+  ForbiddenError,
 } = require("../lib/CustomErrors");
 const { Guest } = require("../models/guest.model");
 const {
@@ -245,7 +246,7 @@ const update = async (guestId, guestStatus, session, role = "admin") => {
     role === "guest" &&
     !validateStatusForGuest(oldGuestStatus, updatedGuestStatus)
   ) {
-    throw new UnauthorizedError("Unauthorized to update status", {
+    throw new ForbiddenError("Forbidden to update status", {
       guestId: ["Guest is not allowed to update status"],
     });
   }

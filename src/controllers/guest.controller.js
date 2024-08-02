@@ -135,6 +135,11 @@ const update = async (req, res, next) => {
     );
     await session.commitTransaction();
     session.endSession();
+    req.app.io
+      .to(`property:${propertyId}`)
+      .emit("guest:guestUpdate", {
+        guest: { ...updatedGuest._doc, status: updatedGuestStatus },
+      }); 
     return responseHandler(
       res,
       {
@@ -187,17 +192,18 @@ const getAllGuestsWithStatus = async (req, res, next) => {
       propertyId,
       filtersResult.data
     );
-    
+
     return responseHandler(res, { guests: guests });
   } catch (e) {
     if (e instanceof APIError) {
       return next(e);
     }
-    return next(
-      new InternalServerError(e.message)
-    );
+    return next(new InternalServerError(e.message));
   }
 };
+
+
+
 
 module.exports = {
   getAll,

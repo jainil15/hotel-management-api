@@ -4,12 +4,21 @@ const {
   APIError,
   InternalServerError,
 } = require("../lib/CustomErrors");
+const { Guest } = require("../models/guest.model");
 const PropertyAccess = require("../models/propertyaccess.model");
 
 const checkPropertyAccess = async (req, res, next) => {
   try {
     // Check if the user has access to the property
-
+    if (req.user.role === "guest") {
+      const propertyAccess = await Guest.findOne({
+        _id: req.user._id,
+      });
+      if (!propertyAccess) {
+        throw new ForbiddenError("Property Access Denied", {});
+      }
+      return next();
+    }
     const propertyAccess = await PropertyAccess.findOne({
       userId: req.user._id,
       propertyId: req.params.propertyId,
@@ -56,12 +65,10 @@ const checkPropertyAccessSocket = async (socket, next) => {
     });
 
     if (!propertyAccess) {
-     
       return next(new Error("Router Not Accessible"));
     }
     next();
   } catch (e) {
-    
     return next(new Error("Internal server error"));
   }
 };

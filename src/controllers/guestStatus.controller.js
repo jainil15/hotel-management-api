@@ -90,17 +90,18 @@ const update = async (req, res, next) => {
         result.error.flatten().fieldErrors
       );
     }
+
     const updatedGuestStatus = await guestStatusService.update(
       guestId,
       guestStatus,
       session,
-      
+      req.user.role
     );
-    
+
     if (!updatedGuestStatus) {
       return responseHandler(res, {}, 404, "Guest Status Not Found");
     }
-    
+
     req.app.io
       .to(`property:${updatedGuestStatus.propertyId}`)
       .emit("guest:guestStatusUpdate", { guestStatus: updatedGuestStatus });

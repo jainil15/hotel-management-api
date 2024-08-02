@@ -12,6 +12,7 @@ const {
   checkPropertyAccess,
   checkPermissions,
 } = require("../middlewares/propertyaccess.middleware");
+const { ROLE } = require("../constants/role.constant");
 
 // Twilio Routes
 // Get Phone Numbers
@@ -22,7 +23,7 @@ router.post(
   authenticateToken,
   checkPropertyAccess,
   checkPermissions("admin"),
-  createSubaccount,
+  createSubaccount
 );
 
 router.post(
@@ -30,15 +31,15 @@ router.post(
   authenticateToken,
   checkPropertyAccess,
   checkPermissions("admin"),
-  buyPhoneNumber,
+  buyPhoneNumber
 );
 
 router.get(
   "/:propertyId/tollFreeVerificationStatus",
   authenticateToken,
   checkPropertyAccess,
-  checkPermissions("admin"),
-  getTollFreeVerificationStatus,
+  checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
+  getTollFreeVerificationStatus
 );
 
 module.exports = router;

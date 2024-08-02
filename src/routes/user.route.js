@@ -12,6 +12,7 @@ const {
   checkPermissions,
 } = require("../middlewares/propertyaccess.middleware");
 const { errorMiddleware } = require("../middlewares/error.middleware");
+const { ROLE } = require("../constants/role.constant");
 
 const router = Router();
 
@@ -28,7 +29,7 @@ router.post(
   "/:propertyId",
   authenticateToken,
   checkPropertyAccess,
-  checkPermissions("admin"),
+  checkPermissions([ROLE.ADMIN]),
   create
 );
 

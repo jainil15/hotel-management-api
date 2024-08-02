@@ -12,12 +12,13 @@ const {
   checkPermissions,
 } = require("../middlewares/propertyaccess.middleware");
 const multer = require("multer");
+const { ROLE } = require("../constants/role.constant");
 const router = Router();
 const upload = multer();
 router.post(
   "/",
   authenticateToken,
-  checkPermissions("admin"),
+  checkPermissions([ROLE.ADMIN]),
   upload.fields([
     { name: "logo", maxCount: 1 },
     { name: "cover", maxCount: 1 },
@@ -25,8 +26,31 @@ router.post(
   create
 );
 
-router.get("/", authenticateToken, getAll);
-router.get("/:propertyId", authenticateToken, checkPropertyAccess, getById);
-router.put("/:propertyId", authenticateToken, checkPropertyAccess, update);
-router.delete("/:propertyId", authenticateToken, checkPropertyAccess, remove);
+router.get(
+  "/",
+  authenticateToken,
+  checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
+  getAll
+);
+router.get(
+  "/:propertyId",
+  authenticateToken,
+  checkPropertyAccess,
+  checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
+  getById
+);
+router.put(
+  "/:propertyId",
+  authenticateToken,
+  checkPropertyAccess,
+  checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
+  update
+);
+router.delete(
+  "/:propertyId",
+  authenticateToken,
+  checkPropertyAccess,
+  checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
+  remove
+);
 module.exports = router;

@@ -14,6 +14,7 @@ const {
   APIError,
 } = require("../lib/CustomErrors");
 const { responseHandler } = require("../middlewares/response.middleware");
+const { Guest } = require("../models/guest.model");
 
 // Get access token
 const getAccessToken = async (req, res, next) => {
@@ -143,7 +144,7 @@ const resendOtp = async (req, res, next) => {
     }
     const otpValue = generateOtp();
     otp.otp = otpValue;
-    otp.expiresAt = Date.now();
+
     otp.deleteOne();
     const sentMail = sendOtp(otp.user.email, otpValue);
     await otp.save();
@@ -155,4 +156,28 @@ const resendOtp = async (req, res, next) => {
     return next(new InternalServerError(e.message));
   }
 };
-module.exports = { getAccessToken, verifyOtp, resendOtp };
+
+const genreateGuestAccessToken = async (req, res, next) => {
+  try {
+    console.log("genreateGuestAccessToken");
+    const guestId = req.params.guestId;
+    const guest = await Guest.findOne({ _id: guestId });
+    if (!guest) {
+      return next(new UnauthorizedError("Guest not found", {}));
+    }
+    const accessToken = authService.genreateGuestAccessToken(guest);
+    return responseHandler(res, { accessToken: accessToken });
+  } catch (e) {
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError(e.message));
+  }
+};
+
+module.exports = {
+  getAccessToken,
+  verifyOtp,
+  resendOtp,
+  genreateGuestAccessToken,
+};
