@@ -23,6 +23,16 @@ const getAll = async (propertyId) => {
   return guests;
 };
 
+const  getByGuestId = async (guestId) => {
+  const guest = await Guest.findOne({ _id: guestId });
+  if (!guest) {
+    throw new NotFoundError("Guest not found", {
+      guestId: ["Guest not found for the given id"],
+    });
+  }
+  return guest;
+}
+
 const getById = async (guestId, propertyId) => {
   const guest = await Guest.findOne({ _id: guestId, propertyId: propertyId });
   if (!guest) {
@@ -91,4 +101,5 @@ module.exports = {
   update,
   remove,
   getAllGuestsWithStatus,
+  getByGuestId,
 };

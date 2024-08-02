@@ -1,6 +1,8 @@
 const userService = require("../services/user.service");
 const authService = require("../services/auth.service");
 const optService = require("../services/otp.service");
+const guestService = require("../services/guest.service");
+const guestTokenService = require("../services/guestToken.service");
 const { generateAccessToken } = require("../utils/generateToken");
 const { z } = require("zod");
 const { User } = require("../models/user.model");
@@ -159,7 +161,6 @@ const resendOtp = async (req, res, next) => {
 
 const genreateGuestAccessToken = async (req, res, next) => {
   try {
-    console.log("genreateGuestAccessToken");
     const guestId = req.params.guestId;
     const guest = await Guest.findOne({ _id: guestId });
     if (!guest) {
@@ -175,9 +176,46 @@ const genreateGuestAccessToken = async (req, res, next) => {
   }
 };
 
+const guestLoginWithToken = async (req, res, next) => {
+  try {
+    const { token } = req.params;
+    const guestToken = await guestTokenService.getByToken(token);
+    if (!guestToken || guestToken.expiry < new Date()) {
+      throw new UnauthorizedError("Invalid token", { token: ["Invalid"] });
+    }
+    const guest = await guestService.getByGuestId(guestToken.guestId);
+    const generateToken = await authService.genreateGuestAccessToken(guest);
+    await guestTokenService.deleteByGuestId(guestToken.guestId);
+    return responseHandler(res, { accessToken: generateToken });
+  } catch (e) {
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError(e.message));
+  }
+};
+
+const isLoggedIn = async (req, res, next) => {
+  try {
+    if (!req.user) {
+      throw new UnauthorizedError("User not found", {});
+    }
+    return responseHandler(res, { user: req.user });
+  } catch (e) {
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError(e.message));
+  }
+};
+
+
+
 module.exports = {
   getAccessToken,
   verifyOtp,
   resendOtp,
   genreateGuestAccessToken,
+  guestLoginWithToken,
+  isLoggedIn,
 };

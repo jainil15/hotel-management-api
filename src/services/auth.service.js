@@ -55,10 +55,10 @@ const decodeRefreshToken = async (refreshToken) => {
 };
 
 const genreateGuestAccessToken = (guest) => {
-  console.log(guest)
   return generateAccessToken(
     {
       _id: guest._id,
+      propertyId: guest.propertyId,
       email: guest.email,
       role: "guest",
       firstName: guest.firstName,

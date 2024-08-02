@@ -3,15 +3,15 @@ x-stoplight:
   id: qwywpxxlzuzxl
 info:
   title: Onelyk Swagger UI
-  version: '1.0'
+  version: "1.0"
   summary: Onelyk Api
   description: Onelyk Api
 servers:
-  - url: 'http://localhost:3000'
+  - url: "http://localhost:3000"
     description: Local
-  - url: 'https://mvx7d4vf-3000.inc1.devtunnels.ms'
+  - url: "https://mvx7d4vf-3000.inc1.devtunnels.ms"
     description: Devtunnel
-  - url: 'https://testhotelapi.onelyk.com'
+  - url: "https://testhotelapi.onelyk.com"
     description: Testing (PROD)
 paths:
   /user/register:
@@ -19,14 +19,14 @@ paths:
       summary: User Registration
       operationId: regiester-user
       responses:
-        '200':
-          $ref: '#/components/responses/Register'
-        '400':
-          $ref: '#/components/responses/Error'
-        '500':
-          $ref: '#/components/responses/Error'
+        "200":
+          $ref: "#/components/responses/Register"
+        "400":
+          $ref: "#/components/responses/Error"
+        "500":
+          $ref: "#/components/responses/Error"
       requestBody:
-        $ref: '#/components/requestBodies/Register'
+        $ref: "#/components/requestBodies/Register"
       description: Register new user
       x-stoplight:
         id: 7xhk6wcrsm2m3
@@ -41,15 +41,15 @@ paths:
       tags:
         - User
       responses:
-        '200':
-          $ref: '#/components/responses/Login'
-        '500':
-          $ref: '#/components/responses/Error'
+        "200":
+          $ref: "#/components/responses/Login"
+        "500":
+          $ref: "#/components/responses/Error"
       operationId: login-user
       x-stoplight:
         id: 8m90dlv0xc09x
       requestBody:
-        $ref: '#/components/requestBodies/Login'
+        $ref: "#/components/requestBodies/Login"
   /auth/accessToken:
     get:
       summary: Request AccessToken
@@ -70,16 +70,16 @@ paths:
           description: Valid Refresh token
       tags:
         - Auth
-      description: ''
+      description: ""
     parameters: []
   /auth/verifyOtp:
     post:
       summary: Verify OTP
       responses:
-        '200':
-          $ref: '#/components/responses/Login'
-        '500':
-          $ref: '#/components/responses/Error'
+        "200":
+          $ref: "#/components/responses/Login"
+        "500":
+          $ref: "#/components/responses/Error"
       operationId: post-auth-verifyOtp
       x-stoplight:
         id: 2mys6pc0tw9tn
@@ -108,7 +108,7 @@ paths:
       tags:
         - User
       responses:
-        '200':
+        "200":
           description: OK
           content: {}
       operationId: post-user-logout
@@ -127,7 +127,7 @@ paths:
         id: ztlhlwiajutbr
       security:
         - Bearer: []
-  '/user/{propertyId}':
+  "/user/{propertyId}":
     parameters:
       - schema:
           type: string
@@ -137,13 +137,13 @@ paths:
     post:
       summary: Create User
       responses:
-        '200':
-          $ref: '#/components/responses/User'
+        "200":
+          $ref: "#/components/responses/User"
       operationId: post-user-propertyId
       x-stoplight:
         id: jrjx090obmx3q
       requestBody:
-        $ref: '#/components/requestBodies/User'
+        $ref: "#/components/requestBodies/User"
       security:
         - Bearer: []
       tags:
@@ -154,19 +154,19 @@ paths:
       tags:
         - Property
       responses:
-        '200':
-          $ref: '#/components/responses/PropertyResponse'
+        "200":
+          $ref: "#/components/responses/PropertyResponse"
         4XX:
-          $ref: '#/components/responses/Error'
+          $ref: "#/components/responses/Error"
         5XX:
-          $ref: '#/components/responses/Error'
+          $ref: "#/components/responses/Error"
       operationId: Create-Property
       x-stoplight:
         id: ryjalcd5tmwuq
       security:
         - Bearer: []
       requestBody:
-        $ref: '#/components/requestBodies/CreateProperty'
+        $ref: "#/components/requestBodies/CreateProperty"
     get:
       summary: Get all properties associated with user
       tags:
@@ -193,7 +193,7 @@ paths:
           name: country
       tags:
         - Twilio
-  '/twilio/{propertyId}/buyPhoneNumber':
+  "/twilio/{propertyId}/buyPhoneNumber":
     parameters:
       - schema:
           type: string
@@ -205,7 +205,7 @@ paths:
       tags:
         - Twilio
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -228,7 +228,7 @@ paths:
       operationId: post-twilio-propertyId-buyPhoneNumber
       x-stoplight:
         id: r0xyiornttr0a
-      description: ''
+      description: ""
       requestBody:
         content:
           application/json:
@@ -243,7 +243,7 @@ paths:
                     id: c4sii266sgyvi
       security:
         - Bearer: []
-  '/twilio/{propertyId}/createSubaccount':
+  "/twilio/{propertyId}/createSubaccount":
     parameters:
       - schema:
           type: string
@@ -255,7 +255,7 @@ paths:
       tags:
         - Twilio
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -286,7 +286,7 @@ paths:
       tags:
         - Auth
       responses:
-        '200':
+        "200":
           description: Email Sent
           headers: {}
           content:
@@ -315,7 +315,7 @@ paths:
                   type: string
                   x-stoplight:
                     id: b35muo8oajf1m
-  '/property/{propertyId}':
+  "/property/{propertyId}":
     parameters:
       - schema:
           type: string
@@ -327,8 +327,8 @@ paths:
       tags:
         - Property
       responses:
-        '200':
-          $ref: '#/components/responses/PropertyResponse'
+        "200":
+          $ref: "#/components/responses/PropertyResponse"
       operationId: get-property-propertyId
       x-stoplight:
         id: jqjeu1hs5q8ry
@@ -340,7 +340,7 @@ paths:
       tags:
         - Country
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -362,7 +362,7 @@ paths:
       operationId: get-country
       x-stoplight:
         id: eahvalgj8q15t
-  '/country/{country}/states':
+  "/country/{country}/states":
     parameters:
       - schema:
           type: string
@@ -375,7 +375,7 @@ paths:
       tags:
         - Country
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -397,7 +397,7 @@ paths:
       operationId: get-country-countryId-states
       x-stoplight:
         id: yewamkjrance5
-  '/country/{country}/timezones':
+  "/country/{country}/timezones":
     parameters:
       - schema:
           type: string
@@ -410,7 +410,7 @@ paths:
       tags:
         - Country
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -438,7 +438,7 @@ paths:
       operationId: get-country-countryId-timezone
       x-stoplight:
         id: cr2z17dg4genl
-  '/country/{country}/{zipcode}':
+  "/country/{country}/{zipcode}":
     parameters:
       - schema:
           type: string
@@ -457,7 +457,7 @@ paths:
       tags:
         - Country
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -497,20 +497,20 @@ paths:
                     result:
                       zipcodes:
                         country_code: US
-                        zipcode: '84765'
+                        zipcode: "84765"
                         place: Santa Clara
                         state: Utah
                         state_code: UT
                         province: Washington
-                        province_code: '053'
-                        community: ''
-                        community_code: ''
-                        latitude: '37.1282'
-                        longitude: '-113.676'
+                        province_code: "053"
+                        community: ""
+                        community_code: ""
+                        latitude: "37.1282"
+                        longitude: "-113.676"
       operationId: get-country-countrycode-zipcode
       x-stoplight:
         id: rt0gmfe39ejzk
-  '/country/{country}/{state}/cities':
+  "/country/{country}/{state}/cities":
     parameters:
       - schema:
           type: string
@@ -529,7 +529,7 @@ paths:
       tags:
         - Country
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -556,7 +556,7 @@ paths:
       operationId: get-country-country-state-cities
       x-stoplight:
         id: z3giqx0o6pq65
-  '/twilio/{propertyId}/tollFreeVerificationStatus':
+  "/twilio/{propertyId}/tollFreeVerificationStatus":
     parameters:
       - schema:
           type: string
@@ -568,7 +568,7 @@ paths:
       tags:
         - Twilio
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -589,21 +589,21 @@ paths:
         id: es0glpjzixbxx
       security:
         - Bearer: []
-  '/guest/{propertyId}':
+  "/guest/{propertyId}":
     post:
       summary: Create guest with Status
       tags:
         - Guest
       responses:
-        '200':
-          $ref: '#/components/responses/CreateGuest'
+        "200":
+          $ref: "#/components/responses/CreateGuest"
       operationId: post-guest-propertyId
       x-stoplight:
         id: vyo5rxdr47cse
       security:
         - Bearer: []
       requestBody:
-        $ref: '#/components/requestBodies/CreateGuest'
+        $ref: "#/components/requestBodies/CreateGuest"
     parameters:
       - schema:
           type: string
@@ -648,7 +648,7 @@ paths:
           allowEmptyValue: true
       security:
         - Bearer: []
-  '/guest/{propertyId}/{guestId}':
+  "/guest/{propertyId}/{guestId}":
     parameters:
       - schema:
           type: string
@@ -665,13 +665,13 @@ paths:
       tags:
         - Guest
       responses:
-        '200':
-          $ref: '#/components/responses/CreateGuest'
+        "200":
+          $ref: "#/components/responses/CreateGuest"
       operationId: put-guest-propertyId-guestId
       x-stoplight:
         id: 8qsp31nk6963h
       requestBody:
-        $ref: '#/components/requestBodies/CreateGuest'
+        $ref: "#/components/requestBodies/CreateGuest"
       security:
         - Bearer: []
     get:
@@ -679,14 +679,14 @@ paths:
       tags:
         - Guest
       responses:
-        '200':
-          $ref: '#/components/responses/CreateGuest'
+        "200":
+          $ref: "#/components/responses/CreateGuest"
       operationId: get-guest-propertyId-guestId
       x-stoplight:
         id: wnosjabi6hyhh
       security:
         - Bearer: []
-  '/messageTemplate/{propertyId}':
+  "/messageTemplate/{propertyId}":
     parameters:
       - schema:
           type: string
@@ -708,15 +708,15 @@ paths:
       tags:
         - MessageTemplate
       responses:
-        '200':
-          $ref: '#/components/responses/CreateMessageTemplate'
+        "200":
+          $ref: "#/components/responses/CreateMessageTemplate"
       operationId: post-messageTemplate-propertyId
       x-stoplight:
         id: g3ds5i6zexgku
       security:
         - Bearer: []
       requestBody:
-        $ref: '#/components/requestBodies/CreateMessageTemplate'
+        $ref: "#/components/requestBodies/CreateMessageTemplate"
     put:
       summary: Update All Templates
       tags:
@@ -736,7 +736,7 @@ paths:
                 x-stoplight:
                   id: z5onaoqwf2qy0
                 type: object
-  '/messageTemplate/{propertyId}/{messageTemplateId}':
+  "/messageTemplate/{propertyId}/{messageTemplateId}":
     parameters:
       - schema:
           type: string
@@ -763,28 +763,28 @@ paths:
       tags:
         - MessageTemplate
       responses:
-        '200':
-          $ref: '#/components/responses/CreateMessageTemplate'
+        "200":
+          $ref: "#/components/responses/CreateMessageTemplate"
       operationId: put-messageTemplate-propertyId-messageTemplateId
       x-stoplight:
         id: fg4p64kkk534l
       security:
         - Bearer: []
       requestBody:
-        $ref: '#/components/requestBodies/CreateMessageTemplate'
+        $ref: "#/components/requestBodies/CreateMessageTemplate"
     delete:
       summary: Delete message template
       tags:
         - MessageTemplate
       responses:
-        '200':
+        "200":
           description: OK
       operationId: delete-messageTemplate-propertyId-messageTemplateId
       x-stoplight:
         id: uqjzynq8v29vm
       security:
         - Bearer: []
-  '/guestStatus/{propertyId}/{guestId}':
+  "/guestStatus/{propertyId}/{guestId}":
     parameters:
       - schema:
           type: string
@@ -801,8 +801,8 @@ paths:
       tags:
         - Guest Status
       responses:
-        '200':
-          $ref: '#/components/responses/GuestStatus'
+        "200":
+          $ref: "#/components/responses/GuestStatus"
       operationId: get-guestStatus-propertyId-guestId
       x-stoplight:
         id: 01sisp96036vu
@@ -813,15 +813,47 @@ paths:
       tags:
         - Guest Status
       responses:
-        '200':
-          $ref: '#/components/responses/GuestStatus'
+        "200":
+          $ref: "#/components/responses/GuestStatus"
       operationId: put-guestStatus-propertyId-guestId
       x-stoplight:
         id: wdogp9jz9ub4g
       requestBody:
-        $ref: '#/components/requestBodies/UpdateGuestStatus'
+        $ref: "#/components/requestBodies/UpdateGuestStatus"
       security:
         - Bearer: []
+  "/auth/guestAccessToken/{guestId}":
+    parameters:
+      - schema:
+          type: string
+        name: guestId
+        in: path
+        required: true
+    get:
+      summary: Get access token for Guest
+      tags:
+        - Auth
+      responses:
+        2XX:
+          description: Success
+      operationId: get-auth-guestAccessToken-guestId
+      x-stoplight:
+        id: ikrvbejxoka8j
+  "/auth/guestLogin/{token}":
+    parameters:
+      - schema:
+          type: string
+        name: token
+        in: path
+        required: true
+    post:
+      summary: Guest Login using  guest token
+      tags:
+        - Auth
+      responses: {}
+      operationId: post-auth-guestLogin-token
+      x-stoplight:
+        id: rotvyvzh8vujs
 components:
   schemas:
     User:
@@ -928,7 +960,7 @@ components:
           type: string
           x-stoplight:
             id: asmx1af0fxhrn
-      description: ''
+      description: ""
     Property:
       type: object
       x-examples:
@@ -936,20 +968,20 @@ components:
           _id: 6698ccbc3bfa38a274593d9b
           name: Onelyk Test Property
           email: jainilpatel145@gmail.com
-          phoneNumber: '1234567890'
-          website: 'https://www.onelyk.com'
+          phoneNumber: "1234567890"
+          website: "https://www.onelyk.com"
           about: This is a onelyk test property
           country: United States
           state: New York
           city: New York
           address: 55 Street
-          countryCode: '+1'
+          countryCode: "+1"
           active: true
-          createdAt: '2024-07-18T08:05:16.703Z'
-          updatedAt: '2024-07-18T08:05:16.735Z'
+          createdAt: "2024-07-18T08:05:16.703Z"
+          updatedAt: "2024-07-18T08:05:16.735Z"
           __v: 0
-          coverUrl: 'https://onelyk-images-bucket.s3.amazonaws.com/property/6698ccbc3bfa38a274593d9b/cover/cover.jpg'
-          logoUrl: 'https://onelyk-images-bucket.s3.amazonaws.com/property/6698ccbc3bfa38a274593d9b/logo/logo.jpg'
+          coverUrl: "https://onelyk-images-bucket.s3.amazonaws.com/property/6698ccbc3bfa38a274593d9b/cover/cover.jpg"
+          logoUrl: "https://onelyk-images-bucket.s3.amazonaws.com/property/6698ccbc3bfa38a274593d9b/logo/logo.jpg"
       properties:
         _id:
           type: string
@@ -995,36 +1027,36 @@ components:
         Example 1:
           _id: 669106a217122df7b4875582
           propertyId: 669bb5387629e1fff5cb35a5
-          countryCode: '+1'
-          phoneNumber: '9191229133'
+          countryCode: "+1"
+          phoneNumber: "9191229133"
           source: Source of the guest
-          checkIn: '2024-07-23T23:35:00.000Z'
-          checkOut: '2024-07-16T23:35:00.000Z'
-          confirmationNumber: '9325923593259325'
+          checkIn: "2024-07-23T23:35:00.000Z"
+          checkOut: "2024-07-16T23:35:00.000Z"
+          confirmationNumber: "9325923593259325"
           roomNumber: C-8
           firstName: Jon
           lastName: Doe
           email: user@gmail.com
           active: true
-          createdAt: '2024-07-12T10:34:10.279Z'
-          updatedAt: '2024-07-12T10:34:10.279Z'
+          createdAt: "2024-07-12T10:34:10.279Z"
+          updatedAt: "2024-07-12T10:34:10.279Z"
           __v: 0
       examples:
         - _id: 669106a217122df7b4875582
           propertyId: 669bb5387629e1fff5cb35a5
-          countryCode: '+1'
-          phoneNumber: '9191229133'
+          countryCode: "+1"
+          phoneNumber: "9191229133"
           source: Source of the guest
-          checkIn: '2024-07-23T23:35:00.000Z'
-          checkOut: '2024-07-16T23:35:00.000Z'
-          confirmationNumber: '9325923593259325'
+          checkIn: "2024-07-23T23:35:00.000Z"
+          checkOut: "2024-07-16T23:35:00.000Z"
+          confirmationNumber: "9325923593259325"
           roomNumber: C-8
           firstName: Jon
           lastName: Doe
           email: user@gmail.com
           active: true
-          createdAt: '2024-07-12T10:34:10.279Z'
-          updatedAt: '2024-07-12T10:34:10.279Z'
+          createdAt: "2024-07-12T10:34:10.279Z"
+          updatedAt: "2024-07-12T10:34:10.279Z"
           __v: 0
       required:
         - _id
@@ -1101,8 +1133,8 @@ components:
           earlyCheckInStatus: Not Requested
           reservationStatus: Confirmed
           preArrivalStatus: Not Applied
-          createdAt: '2024-07-22T17:47:59.118Z'
-          updatedAt: '2024-07-22T17:47:59.118Z'
+          createdAt: "2024-07-22T17:47:59.118Z"
+          updatedAt: "2024-07-22T17:47:59.118Z"
           __v: 0
   securitySchemes:
     Bearer:
@@ -1163,7 +1195,7 @@ components:
             Example 1:
               value:
                 email: jainil1235@gmail.com
-                password: '123456'
+                password: "123456"
       description: User Login request
     User:
       content:
@@ -1306,7 +1338,7 @@ components:
         application/json:
           schema:
             type: object
-      description: ''
+      description: ""
     CreateGuest:
       content:
         application/json:
@@ -1316,19 +1348,19 @@ components:
               Example 1:
                 _id: 669106a217122df7b4875582
                 propertyId: 669bb5387629e1fff5cb35a5
-                countryCode: '+1'
-                phoneNumber: '9191229133'
+                countryCode: "+1"
+                phoneNumber: "9191229133"
                 source: Source of the guest
-                checkIn: '2024-07-23T23:35:00.000Z'
-                checkOut: '2024-07-16T23:35:00.000Z'
-                confirmationNumber: '9325923593259325'
+                checkIn: "2024-07-23T23:35:00.000Z"
+                checkOut: "2024-07-16T23:35:00.000Z"
+                confirmationNumber: "9325923593259325"
                 roomNumber: C-8
                 firstName: Jon
                 lastName: Doe
                 email: user@gmail.com
                 active: true
-                createdAt: '2024-07-12T10:34:10.279Z'
-                updatedAt: '2024-07-12T10:34:10.279Z'
+                createdAt: "2024-07-12T10:34:10.279Z"
+                updatedAt: "2024-07-12T10:34:10.279Z"
                 __v: 0
             properties:
               countryCode:
@@ -1400,12 +1432,12 @@ components:
           examples:
             Example 1:
               value:
-                countryCode: '+1'
-                phoneNumber: '1234567890'
+                countryCode: "+1"
+                phoneNumber: "1234567890"
                 source: Booking.com
-                checkIn: '2019-08-24T14:15:22Z'
-                checkOut: '2019-08-25T14:15:22Z'
-                confirmationNumber: '123456789012'
+                checkIn: "2019-08-24T14:15:22Z"
+                checkOut: "2019-08-25T14:15:22Z"
+                confirmationNumber: "123456789012"
                 roomNumber: C-102
                 firstName: First
                 lastName: Last
@@ -1429,9 +1461,9 @@ components:
                 message: You are checked out
                 active: true
                 createdAt:
-                  $date: '2024-07-27T10:19:39.608Z'
+                  $date: "2024-07-27T10:19:39.608Z"
                 updatedAt:
-                  $date: '2024-07-27T10:19:39.608Z'
+                  $date: "2024-07-27T10:19:39.608Z"
                 __v: 0
             required:
               - name
@@ -1531,7 +1563,7 @@ components:
                 type: object
                 properties:
                   user:
-                    $ref: '#/components/schemas/UserWithoutPassword'
+                    $ref: "#/components/schemas/UserWithoutPassword"
                     x-stoplight:
                       id: tx2oe7mwhw59e
                   accessToken:
@@ -1570,7 +1602,7 @@ components:
                     - Zipcode not found
                 type: BAD_REQUEST
                 message: Invalid zip code
-                stack: ''
+                stack: ""
             required:
               - status
               - statusCode
@@ -1596,7 +1628,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/UserWithoutPassword'
+            $ref: "#/components/schemas/UserWithoutPassword"
     PropertyResponse:
       description: Property Response
       content:
@@ -1651,7 +1683,7 @@ components:
           schema:
             type: object
             properties:
-              '':
+              "":
                 type: string
                 x-stoplight:
                   id: l1ju0k5o5khvd
@@ -1729,19 +1761,19 @@ components:
                   guest:
                     _id: 669106a217122df7b4875582
                     propertyId: 669bb5387629e1fff5cb35a5
-                    countryCode: '+1'
-                    phoneNumber: '9191229133'
+                    countryCode: "+1"
+                    phoneNumber: "9191229133"
                     source: Source of the guest
-                    checkIn: '2024-07-23T23:35:00.000Z'
-                    checkOut: '2024-07-16T23:35:00.000Z'
-                    confirmationNumber: '9325923593259325'
+                    checkIn: "2024-07-23T23:35:00.000Z"
+                    checkOut: "2024-07-16T23:35:00.000Z"
+                    confirmationNumber: "9325923593259325"
                     roomNumber: C-8
                     firstName: Jon
                     lastName: Doe
                     email: user@gmail.com
                     active: true
-                    createdAt: '2024-07-12T10:34:10.279Z'
-                    updatedAt: '2024-07-12T10:34:10.279Z'
+                    createdAt: "2024-07-12T10:34:10.279Z"
+                    updatedAt: "2024-07-12T10:34:10.279Z"
                     __v: 0
                     status:
                       _id: 669e9b4fecb5b6613114ed8e
@@ -1751,8 +1783,8 @@ components:
                       earlyCheckInStatus: Not Requested
                       reservationStatus: Confirmed
                       preArrivalStatus: Not Applied
-                      createdAt: '2024-07-22T17:47:59.118Z'
-                      updatedAt: '2024-07-22T17:47:59.118Z'
+                      createdAt: "2024-07-22T17:47:59.118Z"
+                      updatedAt: "2024-07-22T17:47:59.118Z"
                       __v: 0
     CreateMessageTemplate:
       description: Example response
@@ -1772,9 +1804,9 @@ components:
                 message: You are checked out
                 active: true
                 createdAt:
-                  $date: '2024-07-27T10:19:39.608Z'
+                  $date: "2024-07-27T10:19:39.608Z"
                 updatedAt:
-                  $date: '2024-07-27T10:19:39.608Z'
+                  $date: "2024-07-27T10:19:39.608Z"
                 __v: 0
             properties:
               _id:
@@ -1810,7 +1842,7 @@ components:
             type: object
             properties:
               result:
-                $ref: '#/components/schemas/GuestStatus'
+                $ref: "#/components/schemas/GuestStatus"
                 x-stoplight:
                   id: 4ow7yqky33eyp
               message:

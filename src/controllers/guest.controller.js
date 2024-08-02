@@ -5,7 +5,10 @@ const {
 } = require("../models/guest.model");
 const guestService = require("../services/guest.service");
 const guestStatusService = require("../services/guestStatus.service");
-
+const guestTokenService = require("../services/guestToken.service");
+const twilioService = require("../services/twilio.service");
+const twilioAccountService = require("../services/twilioAccount.service");
+const propertyService = require("../services/property.service");
 const {
   CreateGuestStatusValidationSchema,
   UpdateGuestStatusValidationSchema,
@@ -22,6 +25,7 @@ const {
 } = require("../lib/CustomErrors");
 
 const { validateStatus } = require("../utils/guestStatus.util");
+const { TwilioAccount } = require("../models/twilioAccount.model");
 
 const getAll = async (req, res, next) => {
   try {
@@ -67,8 +71,19 @@ const create = async (req, res, next) => {
       status,
       session
     );
-
+    const accessToken = await guestTokenService.create(newGuest._id, session);
+    const property = await propertyService.getById(propertyId);
+    
+    // Send message to the guest
+    const message = `Welcome to ${property.name}, You guest portal link is: http://localhost:3000/login?token=${accessToken}`;
+    await twilioService.sendAccessLink(
+      propertyId,
+      `${newGuest.countryCode + newGuest.phoneNumber}`,
+      message
+    );
+ 
     await session.commitTransaction();
+
     session.endSession();
     return responseHandler(
       res,
@@ -83,8 +98,8 @@ const create = async (req, res, next) => {
       return next(e);
     }
     return next(
-      new InternalServerError("Internal server error while creating")
-    );
+      new InternalServerError(e.message)
+    )
   }
 };
 
@@ -135,11 +150,9 @@ const update = async (req, res, next) => {
     );
     await session.commitTransaction();
     session.endSession();
-    req.app.io
-      .to(`property:${propertyId}`)
-      .emit("guest:guestUpdate", {
-        guest: { ...updatedGuest._doc, status: updatedGuestStatus },
-      }); 
+    req.app.io.to(`property:${propertyId}`).emit("guest:guestUpdate", {
+      guest: { ...updatedGuest._doc, status: updatedGuestStatus },
+    });
     return responseHandler(
       res,
       {
@@ -201,9 +214,6 @@ const getAllGuestsWithStatus = async (req, res, next) => {
     return next(new InternalServerError(e.message));
   }
 };
-
-
-
 
 module.exports = {
   getAll,

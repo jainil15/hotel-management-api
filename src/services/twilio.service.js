@@ -169,6 +169,20 @@ const getTollFreeVerificationStatus = async (propertyId) => {
   return tollfreeVerification.status;
 };
 
+const sendAccessLink = async (propertyId, guestPhoneNumber, body) => {
+  const twilioAccount = await TwilioAccount.findOne({
+    propertyId: propertyId,
+  });
+  const twilioSubClient = twilio(accountSid, authToken, {
+    accountSid: twilioAccount.sid,
+  });
+  const message = await twilioSubClient.messages.create({
+    body: body,
+    from: `${twilioAccount.countryCode + twilioAccount.phoneNumber}`,
+    to: guestPhoneNumber,
+  });
+  return message;
+};
 /**
  * Send Message from twilio Account
  * @param {string} propertyId - property id
@@ -204,8 +218,8 @@ const sendMessage = async (propertyId, guestId, body, session) => {
   });
   const message = await twilioSubClient.messages.create({
     body: body,
-    from: twilioAccount.phoneNumber,
-    to: guest.phoneNumber,
+    from: `twilioAccount.phoneNumber`,
+    to: `${guest.countryCode + guest.phoneNumber}`,
   });
   const newMessage = new Message({
     propertyId: propertyId,
@@ -280,4 +294,5 @@ module.exports = {
   getTollFreeVerificationStatus,
   sendMessage,
   broadcastMessage,
+  sendAccessLink,
 };

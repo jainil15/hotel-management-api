@@ -51,7 +51,6 @@ const logger = require("../configs/winston.config");
 const { NotFoundError } = require("../lib/CustomErrors");
 const { responseHandler } = require("../middlewares/response.middleware");
 const { loggerMiddleware } = require("../middlewares/logger.middleware");
-const { checkGuestAccess } = require("../middlewares/guestAccess.middleware");
 
 // Setup
 const PORT = process.env.PORT || 8000;
@@ -93,7 +92,6 @@ const createApp = () => {
   app.use("/auth", authRoutes);
   app.use("/country", countryRoutes);
   app.use("/property", propertyRoutes);
-  app.use("*",authenticateToken)
   app.use("/guest", guestRoutes);
   app.use("/message", messageRoutes);
   app.use("/twilio", twilioRoutes);
@@ -137,6 +135,7 @@ const createApp = () => {
   const onConnection = async (socket) => {
     const { propertyId } = socket.handshake.query;
     socket.join(`property:${propertyId}`);
+    // useless for now
     guestSocket(io, socket);
     messageSocket(io, socket);
   };
