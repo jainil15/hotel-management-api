@@ -15,6 +15,7 @@ const twilioRoutes = require("../routes/twilio.route");
 const countryRoutes = require("../routes/country.route");
 const guestStatusRoutes = require("../routes/guestStatus.route");
 const messageTemplateRoutes = require("../routes/messageTemplate.route");
+const chatListRoutes = require("../routes/chatList.route");
 
 // Socket imports
 const guestSocket = require("../sockets/guest.socket");
@@ -25,8 +26,8 @@ const { Connect } = require("../lib/db");
 // config imports
 const { corsOptionsDelegate } = require("../configs/cors.config");
 const {
-  authenticateTokenSocket,
-  authenticateToken,
+	authenticateTokenSocket,
+	authenticateToken,
 } = require("../middlewares/jwt.middleware");
 
 // env imports
@@ -35,7 +36,7 @@ require("dotenv").config();
 // Socket io imports
 const { Server } = require("socket.io");
 const {
-  checkPropertyAccessSocket,
+	checkPropertyAccessSocket,
 } = require("../middlewares/propertyaccess.middleware");
 
 // Swagger imports
@@ -61,89 +62,94 @@ const PORT = process.env.PORT || 8000;
  * @returns {import("express").Application} - Express app
  */
 const createApp = () => {
-  const app = express();
-  const specs = yaml.load("./docs/v1/swagger.yaml");
-  app.use(responseTime());
-  // app.use(helmet());
+	const app = express();
+	const specs = yaml.load("./docs/v1/swagger.yaml");
+	app.use(responseTime());
+	// app.use(helmet());
 
-  // Logging
+	// Logging
 
-  app.use(
-    "/api-docs",
-    swaggerUi.serve,
-    swaggerUi.setup(specs, {
-      explorer: true,
-    })
-  );
+	app.use(
+		"/api-docs",
+		swaggerUi.serve,
+		swaggerUi.setup(specs, {
+			explorer: true,
+		}),
+	);
 
-  // Middlewares
-  app.use(loggerMiddleware);
-  app.use(express.json());
-  app.use(cookieParser());
-  app.use(
-    bodyParser.urlencoded({
-      extended: true,
-    })
-  );
-  app.use(cors(corsOptionsDelegate));
+	// Middlewares
+	app.use(loggerMiddleware);
+	app.use(express.json());
+	app.use(cookieParser());
+	app.use(
+		bodyParser.urlencoded({
+			extended: true,
+		}),
+	);
+	app.use(cors(corsOptionsDelegate));
 
-  // Routers
-  app.use("/user", userRoutes);
-  app.use("/auth", authRoutes);
-  app.use("/country", countryRoutes);
-  app.use("/property", propertyRoutes);
-  app.use("/guest", guestRoutes);
-  app.use("/message", messageRoutes);
-  app.use("/twilio", twilioRoutes);
-  app.use("/guestStatus", guestStatusRoutes);
-  app.use("/messageTemplate", messageTemplateRoutes);
-
+	// Routers
+	app.use("/user", userRoutes);
+	app.use("/auth", authRoutes);
+	app.use("/country", countryRoutes);
+	app.use("/property", propertyRoutes);
+	app.use("/guest", guestRoutes);
+	app.use("/message", messageRoutes);
+	app.use("/twilio", twilioRoutes);
+	app.use("/guestStatus", guestStatusRoutes);
+	app.use("/messageTemplate", messageTemplateRoutes);
+	app.use("/chatList", chatListRoutes);
+ 
   // Health Check
-  app.get("/health", (req, res, next) => {
-    return responseHandler(res, {}, 200, "Server is running");
-  });
+	app.get("/health", (req, res, next) => {
+		return responseHandler(res, {}, 200, "Server is running");
+	});
 
-  // Catch all route
-  app.all("*", (req, res, next) => {
-    return next(
-      new NotFoundError("Route not found.", {
-        req: [req.url],
-        method: [req.method],
-      })
-    );
-  });
+	// Catch all route
+	app.all("*", (req, res, next) => {
+		return next(
+			new NotFoundError("Route not found.", {
+				req: [req.url],
+				method: [req.method],
+			}),
+		);
+	});
 
-  // Error handling
-  app.use(errorMiddleware);
+	// Error handling
+	app.use(errorMiddleware);
 
-  const server = app.listen(PORT, () => {
-    logger.info(`Server is running on port ${PORT}.`);
-  });
+	const server = app.listen(PORT, () => {
+		logger.info(`Server is running on port ${PORT}.`);
+	});
 
-  // Sockets
-  const io = new Server(server, {
-    cors: {
-      origin: "*",
-    },
-  });
+	// Sockets
+	const io = new Server(server, {
+		cors: {
+			origin: "*",
+		},
+	});
 
-  // Sockets middlewares
-  io.use(authenticateTokenSocket);
-  io.use(checkPropertyAccessSocket);
+	// Sockets middlewares
+	// io.use(authenticateTokenSocket);
+	// io.use(checkPropertyAccessSocket);
 
-  // Sockets onConnection
-  const onConnection = async (socket) => {
-    const { propertyId } = socket.handshake.query;
-    socket.join(`property:${propertyId}`);
-    // useless for now
-    guestSocket(io, socket);
-    messageSocket(io, socket);
-  };
+	// Sockets onConnection
+	const onConnection = async (socket) => {
+		const { propertyId } = socket.handshake.query;
+		console.log("connected to property:", propertyId);
+		socket.join(`property:${propertyId}`);
+		// useless for now
+		guestSocket(io, socket);
+		messageSocket(io, socket);
+	};
 
-  // Sockets connection
-  io.on("connection", onConnection);
-  app.io = io;
-  return app;
+	// Sockets connection
+	io.on("connection", onConnection);
+	io.on("disconnect", (socket) => {
+		console.log("disconnected");
+	});
+	app.io = io;
+	return app;
 };
 
 module.exports = { createApp };

@@ -54,7 +54,13 @@ const decodeRefreshToken = async (refreshToken) => {
   return decoded;
 };
 
-const genreateGuestAccessToken = (guest) => {
+const decodeAccessToken = async (accessToken) => {
+  const decoded = await jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
+  return decoded;
+}
+
+
+const genreateGuestAccessToken = (guest, expiry="1d") => {
   return generateAccessToken(
     {
       _id: guest._id,
@@ -69,7 +75,7 @@ const genreateGuestAccessToken = (guest) => {
       createdAt: guest.createdAt,
       updatedAt: guest.updatedAt,
     },
-    "1d",
+    expiry,
     process.env.ACCESS_TOKEN_SECRET
   );
 };
@@ -80,4 +86,5 @@ module.exports = {
   decodeRefreshToken,
   deleteSession,
   genreateGuestAccessToken,
+  decodeAccessToken
 };

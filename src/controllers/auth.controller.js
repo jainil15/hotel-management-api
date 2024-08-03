@@ -16,6 +16,7 @@ const {
   APIError,
 } = require("../lib/CustomErrors");
 const { responseHandler } = require("../middlewares/response.middleware");
+const { GuestSession } = require("../models/guestSession.model");
 const { Guest } = require("../models/guest.model");
 
 // Get access token
@@ -209,7 +210,30 @@ const isLoggedIn = async (req, res, next) => {
   }
 };
 
-
+// Unsecure
+const refreshGuestAccessToken = (req, res, next) => {
+  try {
+    const accessToken = req.headers["authorization"].split(" ")[1];
+    if (!accessToken) {
+      throw new UnauthorizedError("Refresh token not found", {});
+    }
+    const decoded = authService.decodeAccessToken(accessToken);
+    if (!decoded) {
+      throw new UnauthorizedError("Invalid token", {});
+    }
+    const guest = Guest.findOne({ _id: decoded._id });
+    if (!guest) {
+      throw new UnauthorizedError("Guest not found", {});
+    }
+    const newAccessToken = authService.genreateGuestAccessToken(guest);
+    return responseHandler(res, { accessToken: newAccessToken });
+  } catch (e) {
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError(e.message));
+  }
+};
 
 module.exports = {
   getAccessToken,

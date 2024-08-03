@@ -25,7 +25,8 @@ const {
 } = require("../lib/CustomErrors");
 
 const { validateStatus } = require("../utils/guestStatus.util");
-const { TwilioAccount } = require("../models/twilioAccount.model");
+const { z } = require("zod");
+require("dotenv").config();
 
 const getAll = async (req, res, next) => {
   try {
@@ -44,46 +45,62 @@ const create = async (req, res, next) => {
   session.startTransaction();
   try {
     // TODO: add messageGuest
-    const { status, ...guest } = req.body;
-
+    const { sendMessage, status, ...guest } = req.body;
     const propertyId = req.params.propertyId;
+
+    // Validate guest and status
     const guestResult = CreateGuestValidationSchema.safeParse(guest);
     const statusResult = CreateGuestStatusValidationSchema.safeParse(status);
-
-    if (!guestResult.success || !statusResult.success) {
+    const sendMessageResult = z.boolean().safeParse(sendMessage);
+    // Validate guest and status
+    if (
+      !guestResult.success ||
+      !statusResult.success ||
+      !sendMessageResult.success
+    ) {
       throw new ValidationError("Validation Error", {
         ...guestResult?.error?.flatten().fieldErrors,
         ...statusResult?.error?.flatten().fieldErrors,
+        ...sendMessageResult?.error?.flatten().fieldErrors,
       });
     }
 
+    // Check if status is valid
     if (!validateStatus(status)) {
       throw new ValidationError("Invalid Status", {
         currentStatus: "Invalid Status",
       });
     }
 
+    // Create guest
     const newGuest = await guestService.create(guest, propertyId, session);
 
+    // Create guest status
     const newGuestStatus = await guestStatusService.create(
       propertyId,
       newGuest._id,
       status,
       session
     );
-    const accessToken = await guestTokenService.create(newGuest._id, session);
-    const property = await propertyService.getById(propertyId);
-    
-    // Send message to the guest
-    const message = `Welcome to ${property.name}, You guest portal link is: http://localhost:3000/login?token=${accessToken}`;
-    await twilioService.sendAccessLink(
-      propertyId,
-      `${newGuest.countryCode + newGuest.phoneNumber}`,
-      message
-    );
- 
-    await session.commitTransaction();
 
+    if (sendMessage === true) {
+      // get access token for guest login
+      const accessToken = await guestTokenService.create(newGuest._id, session);
+      // Get property
+      const property = await propertyService.getById(propertyId);
+
+      // Send message to the guest
+      const message = `Welcome to ${property.name}, You guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/login?token=${accessToken}`;
+      await twilioService.sendAccessLink(
+        propertyId,
+        `${newGuest.countryCode + newGuest.phoneNumber}`,
+        message
+      );
+    }
+    req.app.io.to(`property:${propertyId}`).emit("guest:guestUpdate", {
+      guest: { ...newGuest._doc, status: { ...newGuestStatus._doc } },
+    });
+    await session.commitTransaction();
     session.endSession();
     return responseHandler(
       res,
@@ -97,9 +114,7 @@ const create = async (req, res, next) => {
     if (e instanceof APIError) {
       return next(e);
     }
-    return next(
-      new InternalServerError(e.message)
-    )
+    return next(new InternalServerError(e.message));
   }
 };
 
@@ -201,7 +216,7 @@ const getAllGuestsWithStatus = async (req, res, next) => {
     }
 
     // let guests = await guestService.getAllGuestsWithStatus(propertyId);
-    let guests = await guestStatusService.getAllGuestWithStatusv2(
+    const guests = await guestStatusService.getAllGuestWithStatusv2(
       propertyId,
       filtersResult.data
     );

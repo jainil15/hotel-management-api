@@ -8,8 +8,8 @@ const {
 const authenticateToken = async (req, res, next) => {
   try {
     // Get the token from the header
-    const authHeader = req.headers["authorization"];
-    const token = authHeader && authHeader.split(" ")[1];
+    const authHeader = req.headers.authorization;
+    const token = authHeader?.split(" ")[1];
     // || req.cookie?.refreshToken == null
 
     if (token == null) {
@@ -34,8 +34,8 @@ const authenticateToken = async (req, res, next) => {
 const authenticateTokenSocket = async (socket, next) => {
   try {
     // Get the token from the handshake headers
-    const authHeader = socket.handshake.headers["authorization"];
-    const token = authHeader && authHeader.split(" ")[1];
+    const authHeader = socket.handshake.headers.authorization;
+    const token = authHeader?.split(" ")[1];
     
     if (token == null) {
       return next(new UnauthorizedError("Authorization Missing"));
