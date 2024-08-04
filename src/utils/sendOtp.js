@@ -38,7 +38,7 @@ const generateTemplate = (otp) => {
           </tr>
           <tr>
             <td style="font-weight: lighter; color: #828282; font-size: small; padding: 5px;">
-              Onelyk, 30 some street, California, US
+              Onelyk, California, US
             </td>
           </tr>
         </table>

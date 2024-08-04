@@ -73,11 +73,21 @@ const update = async (guest, propertyId, guestId, session) => {
 	return updatedGuest;
 };
 
-const remove = async (guestId, propertyId) => {
-	const removedGuest = await Guest.findOneAndDelete({
-		_id: guestId,
-		propertyId: propertyId,
-	});
+/**
+ * Remove guest
+ * @param {string} guestId - guest id
+ * @param {string} propertyId - property id
+ * @param {object} session - mongoose session
+ * @returns {object} removedGuest - removed guest object
+ */
+const remove = async (guestId, propertyId, session) => {
+	const removedGuest = await Guest.findOneAndDelete(
+		{
+			_id: guestId,
+			propertyId: propertyId,
+		},
+		{ session: session },
+	);
 	if (!removedGuest) {
 		throw new NotFoundError("Guest not found", {
 			guestId: ["Guest not found for the given id"],
@@ -86,6 +96,11 @@ const remove = async (guestId, propertyId) => {
 	return removedGuest;
 };
 
+/**
+ * Get all guests with status
+ * @param {string} propertyId - property id
+ * @returns {object} guests - guests object
+ */
 const getAllGuestsWithStatus = async (propertyId) => {
 	const guests = await GuestStatus.find({ propertyId: propertyId }).populate(
 		"guestId",
@@ -100,6 +115,11 @@ const getAllGuestsWithStatus = async (propertyId) => {
 	});
 };
 
+/**
+ * Get phone numbers of guests
+ * @param {string[]} guestIds - guest ids
+ * @returns {object} phoneNumbers - phone numbers object
+ */
 const getPhoneNumbers = async (guestIds) => {
 	const phoneNumbers = await Guest.find(
 		{ _id: { $in: guestIds } },

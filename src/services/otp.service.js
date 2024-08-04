@@ -6,14 +6,14 @@ const { Otp } = require("../models/otp.model");
  * @param {object} otp - The OTP object
  * @returns {Promise<Otp>} - The saved OTP
  */
-const create = async (otp) => {
-  const oldOtp = await getByEmail(otp.user.email);
-  if (oldOtp) {
-    await oldOtp.deleteOne();
-  }
-  const newOtp = new Otp(otp);
-  const savedOtp = await newOtp.save();
-  return savedOtp;
+const create = async (otp, session) => {
+	const oldOtp = await getByEmail(otp.user.email);
+	if (oldOtp) {
+		await oldOtp.deleteOne();
+	}
+	const newOtp = new Otp(otp);
+	const savedOtp = await newOtp.save({ session });
+	return savedOtp;
 };
 
 /**
@@ -22,8 +22,8 @@ const create = async (otp) => {
  * @returns {Promise<Otp>} - The OTP
  */
 const getByEmail = async (email) => {
-  const otp = await Otp.findOne({ "user.email": email });
-  return otp;
+	const otp = await Otp.findOne({ "user.email": email });
+	return otp;
 };
 
 /**
@@ -32,8 +32,8 @@ const getByEmail = async (email) => {
  * @returns {Promise<Otp>} - The updated OTP
  */
 const update = async (otp) => {
-  const updatedOtp = await Otp.findByIdAndUpdate(otp._id, otp, { new: true });
-  return updatedOtp;
+	const updatedOtp = await Otp.findByIdAndUpdate(otp._id, otp, { new: true });
+	return updatedOtp;
 };
 
 /**
@@ -43,11 +43,11 @@ const update = async (otp) => {
  * @returns {Promise<Otp>} - The verified OTP
  */
 const verify = async (email, otp) => {
-  const newOtp = await Otp.findOne({ "user.email": email, otp });
-  if (newOtp) {
-    await newOtp.deleteOne();
-  }
-  return newOtp;
+	const newOtp = await Otp.findOne({ "user.email": email, otp });
+	if (newOtp) {
+		await newOtp.deleteOne();
+	}
+	return newOtp;
 };
 
 module.exports = { create, update, verify, getByEmail };

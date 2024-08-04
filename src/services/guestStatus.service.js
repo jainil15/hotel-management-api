@@ -290,8 +290,19 @@ const update = async (guestId, guestStatus, session, role = "admin") => {
 	return updatedGuestStatus;
 };
 
+const remove = async (guestId, session) => {
+	const guestStatus = await GuestStatus.findOneAndDelete({ guestId });
+	if (!guestStatus) {
+		throw new NotFoundError("Guest not found", {
+			guestId: ["Guest not found"],
+		});
+	}
+	return guestStatus;
+};
+
 module.exports = {
 	create,
+	remove,
 	getByGuestId,
 	getByPropertyId,
 	update,

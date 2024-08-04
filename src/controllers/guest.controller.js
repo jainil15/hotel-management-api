@@ -200,12 +200,25 @@ const update = async (req, res, next) => {
 };
 
 const remove = async (req, res, next) => {
+	const session = await mongoose.startSession();
+	session.startTransaction();
 	try {
-		const guestId = req.params.guestId;
-		const propertyId = req.params.propertyId;
-		const removedGuest = await guestService.remove(guestId, propertyId);
+		const { propertyId, guestId } = req.params;
+
+		const removedGuest = await guestService.remove(
+			guestId,
+			propertyId,
+			session,
+		);
+		await guestStatusService.remove(guestId, session);
+		await chatListService.remove(propertyId, guestId, session);
+		
+		await session.commitTransaction();
+		session.endSession();
 		return responseHandler(res, { guest: removedGuest });
 	} catch (e) {
+		await session.abortTransaction();
+		session.endSession();
 		if (e instanceof APIError) {
 			return next(e);
 		}

@@ -38,4 +38,8 @@ const UpdateChatListValidationSchema = z.object({
 
 const ChatList = mongoose.model("ChatList", chatListSchema);
 
-module.exports = { ChatList, CreateChatListValidationSchema, UpdateChatListValidationSchema };
+module.exports = {
+	ChatList,
+	CreateChatListValidationSchema,
+	UpdateChatListValidationSchema,
+};

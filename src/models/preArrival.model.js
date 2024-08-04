@@ -20,6 +20,8 @@ const preArrivalSchema = new Schema(
   { timestamps: true }
 );
 preArrivalSchema.index({ guestId: 1 }, { unique: true });
+
+
 const PreArrival = mongoose.model("PreArrival", preArrivalSchema);
 PreArrival.init(() => {
   logger.info("initialized PreArrival model ");
