@@ -4,43 +4,49 @@ const { Guest } = require("../models/guest.model");
 const { GuestStatus } = require("../models/guestStatus.model");
 
 const create = async (guest, propertyId, session) => {
-  try {
-    const newGuest = new Guest({ ...guest, propertyId: propertyId });
-    const savedGuest = await newGuest.save({ session });
-    return savedGuest;
-  } catch (e) {
-    throw new Error("Error while creating guest");
-  }
+	try {
+		const newGuest = new Guest({ ...guest, propertyId: propertyId });
+		const savedGuest = await newGuest.save({ session });
+		return savedGuest;
+	} catch (e) {
+		throw new Error("Error while creating guest");
+	}
 };
 
 /**
  * Get all guests
  * @param {string} propertyId - property id
- * @returns {Array} guests - array of guests
+ * @returns {Promise<Guest>} guests - guests object
  */
 const getAll = async (propertyId) => {
-  const guests = await Guest.find({ propertyId: propertyId });
-  return guests;
+	const guests = await Guest.find({ propertyId: propertyId });
+	return guests;
 };
 
-const  getByGuestId = async (guestId) => {
-  const guest = await Guest.findOne({ _id: guestId });
-  if (!guest) {
-    throw new NotFoundError("Guest not found", {
-      guestId: ["Guest not found for the given id"],
-    });
-  }
-  return guest;
-}
+const getByGuestId = async (guestId) => {
+	const guest = await Guest.findOne({ _id: guestId });
+	if (!guest) {
+		throw new NotFoundError("Guest not found", {
+			guestId: ["Guest not found for the given id"],
+		});
+	}
+	return guest;
+};
 
+/**
+ * Get guest by id
+ * @param {string} guestId - guest id
+ * @param {string} propertyId - property id
+ * @returns {object} guest - guest object
+ */
 const getById = async (guestId, propertyId) => {
-  const guest = await Guest.findOne({ _id: guestId, propertyId: propertyId });
-  if (!guest) {
-    throw new NotFoundError("Guest not found", {
-      guestId: ["Guest not found for the given id"],
-    });
-  }
-  return guest;
+	const guest = await Guest.findOne({ _id: guestId, propertyId: propertyId });
+	if (!guest) {
+		throw new NotFoundError("Guest not found", {
+			guestId: ["Guest not found for the given id"],
+		});
+	}
+	return guest;
 };
 /**
  * Update guest
@@ -51,55 +57,75 @@ const getById = async (guestId, propertyId) => {
  * @returns {object} updatedGuest - updated guest object
  */
 const update = async (guest, propertyId, guestId, session) => {
-  const updatedGuest = await Guest.findOneAndUpdate(
-    { _id: guestId, propertyId: propertyId },
-    {
-      ...guest,
-      propertyId: propertyId,
-    },
-    { session: session }
-  );
-  if (!updatedGuest) {
-    throw new NotFoundError("Guest not found", {
-      guestId: ["Guest not found for the given id"],
-    });
-  }
-  return updatedGuest;
+	const updatedGuest = await Guest.findOneAndUpdate(
+		{ _id: guestId, propertyId: propertyId },
+		{
+			...guest,
+			propertyId: propertyId,
+		},
+		{ session: session },
+	);
+	if (!updatedGuest) {
+		throw new NotFoundError("Guest not found", {
+			guestId: ["Guest not found for the given id"],
+		});
+	}
+	return updatedGuest;
 };
 
 const remove = async (guestId, propertyId) => {
-  const removedGuest = await Guest.findOneAndDelete({
-    _id: guestId,
-    propertyId: propertyId,
-  });
-  if (!removedGuest) {
-    throw new NotFoundError("Guest not found", {
-      guestId: ["Guest not found for the given id"],
-    });
-  }
-  return removedGuest;
+	const removedGuest = await Guest.findOneAndDelete({
+		_id: guestId,
+		propertyId: propertyId,
+	});
+	if (!removedGuest) {
+		throw new NotFoundError("Guest not found", {
+			guestId: ["Guest not found for the given id"],
+		});
+	}
+	return removedGuest;
 };
 
 const getAllGuestsWithStatus = async (propertyId) => {
-  const guests = await GuestStatus.find({ propertyId: propertyId }).populate(
-    "guestId"
-  );
+	const guests = await GuestStatus.find({ propertyId: propertyId }).populate(
+		"guestId",
+	);
 
-  return guests.map((guest) => {
-    const { guestId, ...guestStatus } = { ...guest._doc };
-    return {
-      ...guestId._doc,
-      status: guestStatus,
-    };
-  });
+	return guests.map((guest) => {
+		const { guestId, ...guestStatus } = { ...guest._doc };
+		return {
+			...guestId._doc,
+			status: guestStatus,
+		};
+	});
+};
+
+const getPhoneNumbers = async (guestIds) => {
+	const phoneNumbers = await Guest.find(
+		{ _id: { $in: guestIds } },
+		{ phoneNumber: 1 },
+	);
+	return phoneNumbers;
+};
+
+/**
+ * Find guest
+ * @param {object} filter - filter object
+ * @returns {object} guest - guest object
+ */
+const find = async (filter) => {
+	const guest = await Guest.findOne(filter);
+	return guest;
 };
 
 module.exports = {
-  create,
-  getAll,
-  getById,
-  update,
-  remove,
-  getAllGuestsWithStatus,
-  getByGuestId,
+	create,
+	getAll,
+	getById,
+	update,
+	remove,
+	getAllGuestsWithStatus,
+	getByGuestId,
+	getPhoneNumbers,
+	find,
 };

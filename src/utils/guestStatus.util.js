@@ -93,6 +93,11 @@ const validateUpdate = (currentGuestStatus, updateGuestStatus) => {
 	return validateStatus(updateGuestStatus);
 };
 
+/**
+ * Perform validation on guest status
+ * @param {object} guestStatus - guest status
+ * @returns {boolean} - true if valid, false otherwise
+ */
 const validateStatus = (guestStatus) => {
 	const currentStatus = guestStatus.currentStatus;
 

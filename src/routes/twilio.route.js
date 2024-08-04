@@ -1,16 +1,16 @@
 const { Router } = require("express");
 const router = Router();
-
+const twilioController = require("../controllers/twilio.controller");
 const {
-  getPhoneNumbers,
-  buyPhoneNumber,
-  createSubaccount,
-  getTollFreeVerificationStatus,
+	getPhoneNumbers,
+	buyPhoneNumber,
+	createSubaccount,
+	getTollFreeVerificationStatus,
 } = require("../controllers/twilio.controller");
 const { authenticateToken } = require("../middlewares/jwt.middleware");
 const {
-  checkPropertyAccess,
-  checkPermissions,
+	checkPropertyAccess,
+	checkPermissions,
 } = require("../middlewares/propertyaccess.middleware");
 const { ROLE } = require("../constants/role.constant");
 
@@ -19,27 +19,29 @@ const { ROLE } = require("../constants/role.constant");
 router.get("/phoneNumbers", authenticateToken, getPhoneNumbers);
 
 router.post(
-  "/:propertyId/createSubaccount",
-  authenticateToken,
-  checkPropertyAccess,
-  checkPermissions("admin"),
-  createSubaccount
+	"/:propertyId/createSubaccount",
+	authenticateToken,
+	checkPropertyAccess,
+	checkPermissions("admin"),
+	createSubaccount,
 );
 
 router.post(
-  "/:propertyId/buyPhoneNumber",
-  authenticateToken,
-  checkPropertyAccess,
-  checkPermissions("admin"),
-  buyPhoneNumber
+	"/:propertyId/buyPhoneNumber",
+	authenticateToken,
+	checkPropertyAccess,
+	checkPermissions("admin"),
+	buyPhoneNumber,
 );
 
 router.get(
-  "/:propertyId/tollFreeVerificationStatus",
-  authenticateToken,
-  checkPropertyAccess,
-  checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
-  getTollFreeVerificationStatus
+	"/:propertyId/tollFreeVerificationStatus",
+	authenticateToken,
+	checkPropertyAccess,
+	checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
+	getTollFreeVerificationStatus,
 );
+
+router.get("/:propertyId/billing", twilioController.subaccountBilling);
 
 module.exports = router;

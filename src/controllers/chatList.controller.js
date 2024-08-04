@@ -18,12 +18,12 @@ const getAllByPropertyId = async (req, res, next) => {
 	try {
 		const propertyId = req.params.propertyId;
 		const chatLists = await chatListService.getByPropertyId(propertyId);
-		return responseHandler(res, { chatLists });
+		return responseHandler(res, chatLists);
 	} catch (e) {
 		if (e instanceof APIError) {
 			return next(e);
 		}
-		return next(new InternalServerError());
+		return next(new InternalServerError(e.message));
 	}
 };
 

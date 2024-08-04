@@ -183,108 +183,18 @@ const sendAccessLink = async (propertyId, guestPhoneNumber, body) => {
 	});
 	return message;
 };
-/**
- * Send Message from twilio Account
- * @param {string} propertyId - property id
- * @param {string} guestId - guest id
- * @param {string} body - message body
- * @param {object} session - mongoose session
- * @returns {object} message - twilio message object
- */
-const sendMessage = async (propertyId, guestId, body, session) => {
-	const property = await Property.findById(propertyId);
-	if (!property) {
-		throw new NotFoundError("Property not found", {
-			propertyId: ["Property not found for the given id"],
-		});
-	}
-	const twilioAccount = await TwilioAccount.findOne({
-		propertyId: propertyId,
-	});
-	if (!twilioAccount) {
-		throw new NotFoundError("Twilio Account not found", {
-			propertyId: ["Twilio account found for the given property id"],
-		});
-	}
-
-	const guest = await Guest.findOne({ _id: guestId });
-	if (!guest) {
-		throw new NotFoundError("Guest not found", {
-			guestId: ["Guest not found for the given id"],
-		});
-	}
-	const twilioSubClient = twilio(accountSid, authToken, {
-		accountSid: twilioAccount.sid,
-	});
-	const message = await twilioSubClient.messages.create({
-		body: body,
-		from: `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
-		to: `${guest.countryCode}${guest.phoneNumber}`,
-	});
-	const newMessage = new Message({
-		propertyId: propertyId,
-		guestId: guestId,
-		senderId: propertyId,
-		receiverId: guestId,
-		content: body,
-		messageTriggerType: "Manual",
-		messageType: "SMS",
-	});
-	await newMessage.save({ session: session });
-	return message;
-};
 
 /**
- * Broadcast Message to multiple guests
- * @param {string} propertyId - property id
- * @param {string[]} guestIds - array of guest ids
- * @param {string} body - message body
- * @param {object} session - mongoose session
- * @returns {object[]} newMessages - array of new messages
+ * Get subaccount billing
+ * @param {object} client - twilio client object
+ * @returns {object} messages - twilio messages object
  */
-const broadcastMessage = async (propertyId, guestIds, body, session) => {
-	const newMessages = [];
-	const property = await Property.findById(propertyId);
-	if (!property) {
-		throw new NotFoundError("Property not found", {
-			propertyId: ["Property not found for the given id"],
-		});
-	}
-	const twilioAccount = await TwilioAccount.findOne({
-		propertyId: propertyId,
-	});
-	if (!twilioAccount) {
-		throw new NotFoundError("Twilio Account not found", {
-			propertyId: ["Twilio account found for the given property id"],
-		});
-	}
-	const twilioSubClient = twilio(accountSid, authToken, {
-		accountSid: twilioAccount.sid,
-	});
-	const guestPhoneNumbers = await Guest.find(
-		{ _id: { $in: guestIds } },
-		{ phoneNumber: 1 },
-	);
-
-	for (const guestPhoneNumber of guestPhoneNumbers) {
-		const message = await twilioSubClient.messages.create({
-			body: body,
-			from: `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
-			to: `${guestPhoneNumber.countryCode}${guestPhoneNumber.phoneNumber}`,
-		});
-		const newMessage = new Message({
-			propertyId: propertyId,
-			guestId: guestPhoneNumber._id,
-			senderId: propertyId,
-			receiverId: guestPhoneNumber._id,
-			content: body,
-			messageTriggerType: "Manual",
-			messageType: "Broadcast",
-		});
-		await newMessages.save({ session: session });
-		newMessages.push(newMessage);
-	}
-	return newMessages;
+const subaccountBilling = async (client) => {
+	const messages = await client.messages.list();
+	const bill = messages.reduce((acc, message) => {
+		return acc + Math.abs(Number(message.price));
+	}, 0);
+	return bill;
 };
 
 module.exports = {
@@ -292,7 +202,6 @@ module.exports = {
 	buyPhoneNumber,
 	createSubaccount,
 	getTollFreeVerificationStatus,
-	sendMessage,
-	broadcastMessage,
 	sendAccessLink,
+	subaccountBilling,
 };

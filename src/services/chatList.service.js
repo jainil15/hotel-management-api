@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const { ChatList } = require("../models/chatList.model");
 
 /**
@@ -22,7 +23,101 @@ const create = async (propertyId, guestId, session) => {
  * @returns {Promise<ChatList>} - chatList
  */
 const getByPropertyId = async (propertyId) => {
-	const chatList = await ChatList.find({ propertyId: propertyId });
+	const pipeline = [
+		// Match the documents with the given propertyId
+		{ $match: { propertyId: new mongoose.Types.ObjectId(propertyId) } },
+
+		// Lookup to populate the guestId field
+		{
+			$lookup: {
+				from: "guests", // The name of the Guest collection
+				localField: "guestId",
+				foreignField: "_id",
+				as: "guest",
+			},
+		},
+		{
+			$lookup: {
+				from: "messages", // The name of the Message collection
+				localField: "latestMessage",
+				foreignField: "_id",
+				as: "latestMessage",
+			},
+		},
+		{
+			$lookup: {
+				localField: "guestId",
+				from: "gueststatuses",
+				foreignField: "guestId",
+				as: "gueststatus",
+			},
+		},
+
+		{
+			$unwind: "$gueststatus",
+		},
+		{ $unwind: "$guest" },
+		{
+			$group: {
+				_id: "$propertyId",
+				chatLists: { $push: "$$ROOT" },
+				totalUnreadMessages: { $sum: "$unreadMessages" },
+			},
+		},
+		{
+			$project: {
+				_id: 0,
+				propertyId: "$_id",
+				chatLists: {
+					$map: {
+						input: "$chatLists",
+						as: "chatList",
+						in: {
+							_id: "$$chatList._id",
+							propertyId: "$$chatList.propertyId",
+							guestId: "$$chatList.guestId",
+							unreadMessages: "$$chatList.unreadMessages",
+							latestMessage: "$$chatList.latestMessage",
+							createdAt: "$$chatList.createdAt",
+							updatedAt: "$$chatList.updatedAt",
+							guest: {
+								_id: "$$chatList.guest._id",
+								countryCode: "$$chatList.guest.countryCode",
+								phoneNumber: "$$chatList.guest.phoneNumber",
+								source: "$$chatList.guest.source",
+								checkIn: "$$chatList.guest.checkIn",
+								checkOut: "$$chatList.guest.checkOut",
+								confirmationNumber: "$$chatList.guest.confirmationNumber",
+								roomNumber: "$$chatList.guest.roomNumber",
+								firstName: "$$chatList.guest.firstName",
+								lastName: "$$chatList.guest.lastName",
+								email: "$$chatList.guest.email",
+								active: "$$chatList.guest.active",
+								currentStatus: "$$chatList.guest.currentStatus",
+								lateCheckOutStatus: "$$chatList.guest.lateCheckOutStatus",
+								earlyCheckInStatus: "$$chatList.guest.earlyCheckInStatus",
+								reservationStatus: "$$chatList.guest.reservationStatus",
+								preArrivalStatus: "$$chatList.guest.preArrivalStatus",
+								status: {
+									currentStatus: "$$chatList.gueststatus.currentStatus",
+									lateCheckOutStatus:
+										"$$chatList.gueststatus.lateCheckOutStatus",
+									earlyCheckInStatus:
+										"$$chatList.gueststatus.earlyCheckInStatus",
+									reservationStatus: "$$chatList.gueststatus.reservationStatus",
+									preArrivalStatus: "$$chatList.gueststatus.preArrivalStatus",
+								},
+							},
+						},
+					},
+				},
+				latestMessage: "$latestMessage",
+				totalUnreadMessages: 1,
+			},
+		},
+	];
+
+	const chatList = await ChatList.aggregate(pipeline);
 	return chatList;
 };
 
@@ -58,4 +153,36 @@ const remove = async (propertyId, guestId, session) => {
 	return chatList;
 };
 
-module.exports = { create, getByPropertyId, update, remove };
+/**
+ * Update and increment unread messages
+ * @param {string} propertyId - propertyId
+ * @param {string} guestId - guestId
+ * @param {object} chatList - chatList
+ * @param {object} session - mongoose session
+ * @returns {Promise<ChatList>} - chatList
+ */
+
+const updateAndIncUnreadMessages = async (
+	propertyId,
+	guestId,
+	chatList,
+	session,
+) => {
+	const updatedChatList = await ChatList.findOneAndUpdate(
+		{ propertyId: propertyId, guestId: guestId },
+		{
+			...chatList,
+			$inc: { unreadMessages: 1 },
+		},
+		{ new: true, session },
+	);
+	return updatedChatList;
+};
+
+module.exports = {
+	create,
+	getByPropertyId,
+	update,
+	remove,
+	updateAndIncUnreadMessages,
+};

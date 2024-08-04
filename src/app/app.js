@@ -16,6 +16,7 @@ const countryRoutes = require("../routes/country.route");
 const guestStatusRoutes = require("../routes/guestStatus.route");
 const messageTemplateRoutes = require("../routes/messageTemplate.route");
 const chatListRoutes = require("../routes/chatList.route");
+const smsRoutes = require("../routes/sms.route");
 
 // Socket imports
 const guestSocket = require("../sockets/guest.socket");
@@ -99,8 +100,8 @@ const createApp = () => {
 	app.use("/guestStatus", guestStatusRoutes);
 	app.use("/messageTemplate", messageTemplateRoutes);
 	app.use("/chatList", chatListRoutes);
- 
-  // Health Check
+	app.use("/sms", smsRoutes);
+	// Health Check
 	app.get("/health", (req, res, next) => {
 		return responseHandler(res, {}, 200, "Server is running");
 	});
@@ -130,8 +131,8 @@ const createApp = () => {
 	});
 
 	// Sockets middlewares
-	// io.use(authenticateTokenSocket);
-	// io.use(checkPropertyAccessSocket);
+	io.use(authenticateTokenSocket);
+	io.use(checkPropertyAccessSocket);
 
 	// Sockets onConnection
 	const onConnection = async (socket) => {
