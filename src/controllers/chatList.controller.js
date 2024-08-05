@@ -55,7 +55,7 @@ const update = async (req, res, next) => {
 		);
 		await session.commitTransaction();
 		session.endSession();
-		req.app.io.to(`property:${propertyId}`).emit("chatList:chatListUpdate", {
+		req.app.io.to(`property:${propertyId}`).emit("chatList:update", {
 			chatList: updatedChatList,
 		});
 		return responseHandler(res, { chatList: updatedChatList });

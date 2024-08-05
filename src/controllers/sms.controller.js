@@ -86,12 +86,9 @@ const send = async (req, res, next) => {
 		req.app.io.to(`property:${propertyId}`).emit("chatList:update", {
 			chatList: updatedChatList,
 		});
-		req.app.io
-			.to(`property:${propertyId}`)
-			.to(`guest:${guestId}`)
-			.emit("message:newMessage", {
-				message: newMessage,
-			});
+		req.app.io.to(`guest:${guestId}`).emit("message:newMessage", {
+			message: newMessage,
+		});
 
 		await session.commitTransaction();
 		session.endSession();
@@ -135,8 +132,8 @@ const status = async (req, res, next) => {
 			session,
 		);
 
-    await session.commitTransaction();
-    session.endSession();
+		await session.commitTransaction();
+		session.endSession();
 		req.app.io
 			.to(`property:${updatedMessage.propertyId}`)
 			.to(`guest:${updatedMessage.guestId}`)

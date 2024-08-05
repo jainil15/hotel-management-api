@@ -209,11 +209,11 @@ const incomingMessage = async (req, res, next) => {
 			session,
 		);
 
-		req.app.io.to(`property:${property._id}`).emit("message:newMessage", {
+		req.app.io.to(`guest:${guest._id}`).emit("message:newMessage", {
 			message: newMessage,
 		});
 
-		req.app.io.to(`guest:${guest._id}`).emit("chatList:update", {
+		req.app.io.to(`property:${property._id}`).emit("chatList:update", {
 			chatList: updatedChatList,
 		});
 

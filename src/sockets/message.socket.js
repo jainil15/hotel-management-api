@@ -8,6 +8,12 @@ const client = new twilio(
 	process.env.TWILIO_ACCOUNT_SID,
 	process.env.TWILIO_AUTH_TOKEN,
 );
+
+/**
+ * Message socket
+ * @param {import('socket.io').Server} io - socket io
+ * @param {import('socket.io').Socket} socket - socket
+ */
 module.exports = (io, socket) => {
 	//useless
 	const sendsms = async (payload) => {
@@ -57,7 +63,7 @@ module.exports = (io, socket) => {
 					NotFoundError("Guest not found", { guestId: "Guest not found" }),
 				);
 		}
-		socket.join(payload.guestId);
+		socket.join(`guest:${payload.guestId}`);
 	};
 
 	/**
@@ -72,6 +78,7 @@ module.exports = (io, socket) => {
 			payload.guestId,
 			payload.propertyId,
 		);
+		
 		if (!guest) {
 			return io
 				.to(`property:${payload.propertyId}`)
@@ -80,9 +87,10 @@ module.exports = (io, socket) => {
 					NotFoundError("Guest not found", { guestId: "Guest not found" }),
 				);
 		}
-		socket.leave(payload.guestId);
+		socket.leave(`guest:${payload.guestId}`);
 	};
 
+	// useless - maybe used in the future
 	const getAllMessages = async (payload) => {
 		const { propertyId } = socket.handshake.query;
 		const messages = await messageService.getAll(propertyId, payload.guestId);
@@ -91,7 +99,7 @@ module.exports = (io, socket) => {
 	socket.on("message:joinRoom", joinRoom);
 	socket.on("message:leaveRoom", leaveRoom);
 
-  // Useless code
+	// Useless code
 	socket.on("message:send", sendsms);
 	socket.on("message:getAll", getAllMessages);
 };

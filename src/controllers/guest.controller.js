@@ -182,6 +182,8 @@ const update = async (req, res, next) => {
 		req.app.io.to(`property:${propertyId}`).emit("guest:guestUpdate", {
 			guest: { ...updatedGuest._doc, status: updatedGuestStatus },
 		});
+		req.app.io.to(`property:${propertyId}`).emit("chatList:update", {});
+
 		return responseHandler(
 			res,
 			{
@@ -213,9 +215,22 @@ const remove = async (req, res, next) => {
 			propertyId,
 			session,
 		);
-		await guestStatusService.remove(guestId, session);
-		await chatListService.remove(propertyId, guestId, session);
-		
+		const removedGuestStatus = await guestStatusService.remove(
+			guestId,
+			session,
+		);
+		const removedChatList = await chatListService.remove(
+			propertyId,
+			guestId,
+			session,
+		);
+
+		req.app.io.to(`property:${propertyId}`).emit("guest:guestUpdate", {
+			guest: { ...removedGuest._doc, status: removedGuestStatus },
+		});
+		req.app.io.to(`property:${propertyId}`).emit("chatList:update", {
+			chatList: removedChatList,
+		});
 		await session.commitTransaction();
 		session.endSession();
 		return responseHandler(res, { guest: removedGuest });
