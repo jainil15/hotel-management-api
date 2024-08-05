@@ -88,7 +88,13 @@ const getAllGuestWithStatus = async (propertyId) => {
  */
 const getAllGuestWithStatusv2 = async (propertyId, filters) => {
 	const guestPipeline = [];
-
+	guestPipeline.push(
+		{
+			$match: {
+				propertyId: new mongoose.Types.ObjectId(propertyId),
+			},
+		},
+	);
 	if (filters.checkIn) {
 		guestPipeline.push(
 			{

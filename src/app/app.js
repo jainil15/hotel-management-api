@@ -1,8 +1,7 @@
 // node_modules imports
-
+const { instrument } = require("@socket.io/admin-ui");
 const path = require("node:path");
 const express = require("express");
-const favicon = require("serve-favicon");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const bodyParser = require("body-parser");
@@ -132,7 +131,12 @@ const createApp = () => {
 			origin: "*",
 		},
 	});
-
+	instrument(io, {auth: {
+    type: "basic",
+    username: "admin",
+    password: "$2b$10$heqvAkYMez.Va6Et2uXInOnkCT6/uQj1brkrbyG3LpopDklcq7ZOS" // "changeit" encrypted with bcrypt
+  },
+ });
 	// Sockets middlewares
 	io.use(authenticateTokenSocket);
 	io.use(checkPropertyAccessSocket);
