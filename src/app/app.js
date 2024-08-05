@@ -1,5 +1,8 @@
 // node_modules imports
+
+const path = require("node:path");
 const express = require("express");
+const favicon = require("serve-favicon");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const bodyParser = require("body-parser");
@@ -137,7 +140,7 @@ const createApp = () => {
 	// Sockets onConnection
 	const onConnection = async (socket) => {
 		const { propertyId } = socket.handshake.query;
-		console.log("connected to property:", propertyId);
+		logger.info("connected to property:", propertyId);
 		socket.join(`property:${propertyId}`);
 		// useless for now
 		guestSocket(io, socket);
@@ -147,7 +150,7 @@ const createApp = () => {
 	// Sockets connection
 	io.on("connection", onConnection);
 	io.on("disconnect", (socket) => {
-		console.log("disconnected");
+		logger.info("disconnected from property");
 	});
 	app.io = io;
 	return app;

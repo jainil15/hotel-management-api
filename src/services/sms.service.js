@@ -48,6 +48,7 @@ const sendMessage = async (propertyId, guestId, body, session) => {
 		body: body,
 		from: `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
 		to: `${guest.countryCode}${guest.phoneNumber}`,
+		statusCallback: process.env.TWILIO_STATUS_CALLBACK,
 	});
 	const newMessage = messageService.create(
 		{
@@ -58,6 +59,7 @@ const sendMessage = async (propertyId, guestId, body, session) => {
 			content: body,
 			messageTriggerType: "Manual",
 			messageType: "SMS",
+			messageSid: message.sid,
 		},
 		session,
 	);
@@ -99,6 +101,7 @@ const broadcastMessage = async (propertyId, guestIds, body, session) => {
 			body: body,
 			from: `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
 			to: `${guestPhoneNumber.countryCode}${guestPhoneNumber.phoneNumber}`,
+			statusCallback: process.env.TWILIO_STATUS_CALLBACK,
 		});
 		const newMessage = new messageService(
 			{
@@ -109,6 +112,7 @@ const broadcastMessage = async (propertyId, guestIds, body, session) => {
 				content: body,
 				messageTriggerType: "Manual",
 				messageType: "Broadcast",
+				messageSid: message.sid,
 			},
 			session,
 		);
@@ -120,7 +124,7 @@ const broadcastMessage = async (propertyId, guestIds, body, session) => {
 
 /**
  * Send SMS using twilio client
- * @param {object} client - twilio client object
+ * @param {import('twilio').Twilio} client - twilio client object
  * @param {string} from - sender phone number
  * @param {string} to - receiver phone number
  * @param {string} body - message body
@@ -131,7 +135,9 @@ const send = async (client, from, to, body) => {
 		body: body,
 		from: from,
 		to: to,
+		statusCallback: process.env.TWILIO_STATUS_CALLBACK,
 	});
+	
 	return sentMessage;
 };
 

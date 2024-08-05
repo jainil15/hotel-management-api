@@ -10,4 +10,13 @@ const getByPropertyId = async (propertyId) => {
   return twilioAccount;
 };
 
-module.exports = { getByPropertyId };
+/**
+ * Find twilio account
+ * @param {object} filter - The query to filter twilio account
+ * @returns {Promise<TwilioAccount>} - The list of twilio account
+ */
+const findOne = async (filter) => {
+  return await TwilioAccount.findOne(filter);
+};
+
+module.exports = { getByPropertyId, findOne };

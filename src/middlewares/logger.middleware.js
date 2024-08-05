@@ -9,7 +9,7 @@ const logger = require("../configs/winston.config");
 const loggerMiddleware = (req, res, next) => {
   const initialUrl = req.url;
   const uuid = req.headers["x-request-id"];
-  const ip = req.headers["x-forwarded-for"];
+  const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
 
   // logger.info(`[REQUEST] ${req.method} ${req.url} [${uuid}]`);
   try {

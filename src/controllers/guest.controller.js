@@ -111,6 +111,9 @@ const create = async (req, res, next) => {
 		req.app.io.to(`property:${propertyId}`).emit("guest:guestUpdate", {
 			guest: { ...newGuest._doc, status: { ...newGuestStatus._doc } },
 		});
+		req.app.io.to(`property:${propertyId}`).emit("chatList:update", {
+			chatList: chatList,
+		});
 		await session.commitTransaction();
 		session.endSession();
 		return responseHandler(

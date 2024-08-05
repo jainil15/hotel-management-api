@@ -48,4 +48,25 @@ const getById = async (messageId, propertyId, guestId) => {
 	return message;
 };
 
-module.exports = { create, getAll, getById };
+/**
+ * Update the status of a message
+ * @param {string} messageSid - The message sid
+ * @param {string} status - The new status
+ * @param {object} session - The mongoose session
+ * @returns {Promise<Message>} - The updated message
+ */
+const updateStatus = async (messageSid, status, session) => {
+	const updatedMessage = await Message.findOneAndUpdate(
+		{ messageSid: messageSid },
+		{ $set: { status: status } },
+		{ new: true, session: session },
+	);
+	if (!updatedMessage) {
+		throw new NotFoundError("Message not found", {
+			messageId: ["Message not found for the given id"],
+		});
+	}
+	return updatedMessage;
+};
+
+module.exports = { create, getAll, getById, updateStatus };

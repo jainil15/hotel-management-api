@@ -13,6 +13,8 @@ require("dotenv").config();
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 const client = require("twilio")(accountSid, authToken);
+
+//useless
 const sendsms = async (req, res, next) => {
 	try {
 		const message = req.body;
@@ -48,6 +50,7 @@ const sendsms = async (req, res, next) => {
 	}
 };
 
+// useless
 const incomingMessage = async (req, res, next) => {
 	try {
 		const twiml = new MessagingResponse();
@@ -60,6 +63,7 @@ const incomingMessage = async (req, res, next) => {
 			propertyId: property._id,
 		});
 
+		
 		const newMessage = new Message({
 			guestId: guest._id,
 			propertyId: property._id,
@@ -81,6 +85,7 @@ const incomingMessage = async (req, res, next) => {
 	}
 };
 
+// useless
 const errorLogging = async (req, res, next) => {
 	try {
 		return res.status(200).json({ result: { message: "Error received" } });
@@ -91,6 +96,7 @@ const errorLogging = async (req, res, next) => {
 	}
 };
 
+//useless
 const status = async (req, res, next) => {
 	try {
 		return res.status(200).json({ result: { message: "Status received" } });

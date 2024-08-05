@@ -141,12 +141,6 @@ const validateStatusForGuest = (currentGuestStatus, updatedGuestStatus) => {
 					updatedGuestStatus[key],
 				)
 			) {
-				console.log(
-					"key",
-					key,
-					currentGuestStatus[key],
-					updatedGuestStatus[key],
-				);
 				return false;
 			}
 		}

@@ -15,6 +15,8 @@ const messageSchema = new Schema(
 		content: { type: String, required: true },
 		messageType: { type: String, required: true },
 		messageTriggerType: { type: String, required: true },
+		status: { type: String, default: "sent" },
+		messageSid: { type: String },
 	},
 	{ timestamps: true },
 );
