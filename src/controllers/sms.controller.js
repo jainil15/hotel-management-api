@@ -21,6 +21,7 @@ const {
 	messageType,
 } = require("../constants/message.constant");
 require("dotenv").config();
+
 /**
  * Send SMS to guest
  * @param {import('express').Request} req - request object
@@ -110,7 +111,68 @@ const send = async (req, res, next) => {
  * @param {import('express').NextFunction} next - next middleware
  * @returns {object} response - response object
  */
-const receive = async (req, res, next) => {};
+const receive = async (req, res, next) => {
+	const session = await mongoose.startSession();
+	session.startTransaction();
+	try {
+		const { From, To, Body, MessageSid } = req.body;
+		const twilioAccount = await twilioAccountService.findOne({
+			phoneNumber: To,
+		});
+
+		if (!twilioAccount) {
+			throw new NotFoundError("Twilio Account not found", {
+				phoneNumber: ["Twilio account found for the given phone number"],
+			});
+		}
+
+		const guest = await guestService.find({
+			propertyId: twilio.propertyId,
+			phoneNumber: From,
+		});
+		if (!guest) {
+			throw new NotFoundError("Guest not found", {
+				phoneNumber: ["Guest not found for the given phone number"],
+			});
+		}
+		const newMessage = await messageService.create({
+			propertyId: twilio.propertyId,
+			guestId: guest._id,
+			senderId: guest._id,
+			receiverId: twilio.propertyId,
+			content: Body,
+			messageTriggerType: messageTriggerType.MANUAL,
+			messageType: messageType.SMS,
+			messageSid: MessageSid,
+		});
+
+		const updatedChatList = await chatListService.updateAndIncUnreadMessages(
+			twilio.propertyId,
+			guest._id,
+			{
+				latestMessage: newMessage._id,
+			},
+		);
+
+		await session.commitTransaction();
+		session.endSession();
+
+		req.app.io.to(`property:${twilio.propertyId}`).emit("chatList:update", {
+			chatList: updatedChatList,
+		});
+		req.app.io.to(`guest:${guest._id}`).emit("message:newMessage", {
+			message: newMessage,
+		});
+		return responseHandler(res, {}, 200, "Message received successfully");
+	} catch (e) {
+		await session.abortTransaction();
+		session.endSession();
+		if (e instanceof APIError) {
+			return next(e);
+		}
+		return next(new InternalServerError(e.message));
+	}
+};
 
 /**
  * Receive SMS status update from twilio
