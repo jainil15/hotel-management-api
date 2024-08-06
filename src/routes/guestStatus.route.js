@@ -1,17 +1,18 @@
 const { Router } = require("express");
+const guestStatusController = require("../controllers/guestStatus.controller.js");
 const {
-  create,
-  update,
-  getByGuestId,
+	create,
+	update,
+	getByGuestId,
 } = require("../controllers/guestStatus.controller.js");
 const { authenticateToken } = require("../middlewares/jwt.middleware.js");
 const {
-  checkPropertyAccess,
-  checkPermissions,
+	checkPropertyAccess,
+	checkPermissions,
 } = require("../middlewares/propertyaccess.middleware.js");
 const { ROLE } = require("../constants/role.constant.js");
 const {
-  checkGuestAccess,
+	checkGuestAccess,
 } = require("../middlewares/guestAccess.middleware.js");
 
 // Router
@@ -19,31 +20,40 @@ const router = Router();
 
 // create guest status -- useless
 router.post(
-  "/:propertyId/:guestId",
-  authenticateToken,
-  checkPropertyAccess,
-  checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
-  create
+	"/:propertyId/:guestId",
+	authenticateToken,
+	checkPropertyAccess,
+	checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
+	create,
 );
 
 // get guest status by guest id, perms: admin, frontdesk, guest, guestaccess enabled
 router.get(
-  "/:propertyId/:guestId",
-  authenticateToken,
-  checkPropertyAccess,
-  checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK, ROLE.GUEST]),
-  checkGuestAccess,
-  getByGuestId
+	"/:propertyId/:guestId",
+	authenticateToken,
+	checkPropertyAccess,
+	checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK, ROLE.GUEST]),
+	checkGuestAccess,
+	getByGuestId,
 );
 
 // update guest status, perms: admin, frontdesk
 router.put(
-  "/:propertyId/:guestId",
-  authenticateToken,
-  checkPropertyAccess,
-  checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK, ROLE.GUEST]),
-  checkGuestAccess,
-  update
+	"/:propertyId/:guestId",
+	authenticateToken,
+	checkPropertyAccess,
+	checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK, ROLE.GUEST]),
+	checkGuestAccess,
+	update,
+);
+
+router.post(
+	"/:propertyId/:guestId/request",
+	authenticateToken,
+	checkPropertyAccess,
+	checkPermissions([ROLE.GUEST]),
+	checkGuestAccess,
+	guestStatusController.request,
 );
 
 module.exports = router;

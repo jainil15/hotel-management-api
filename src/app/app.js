@@ -55,7 +55,11 @@ const logger = require("../configs/winston.config");
 const { NotFoundError } = require("../lib/CustomErrors");
 const { responseHandler } = require("../middlewares/response.middleware");
 const { loggerMiddleware } = require("../middlewares/logger.middleware");
+const swaggerOptions = require("../configs/swagger.config");
 
+const { SwaggerTheme, SwaggerThemeNameEnum } = require("swagger-themes");
+
+const theme = new SwaggerTheme();
 // Setup
 const PORT = process.env.PORT || 8000;
 
@@ -77,6 +81,7 @@ const createApp = () => {
 		swaggerUi.serve,
 		swaggerUi.setup(specs, {
 			explorer: true,
+			customCss: theme.getBuffer(SwaggerThemeNameEnum.ONE_DARK),
 		}),
 	);
 
@@ -131,12 +136,16 @@ const createApp = () => {
 			origin: "*",
 		},
 	});
-	instrument(io, {auth: {
-    type: "basic",
-    username: "admin",
-    password: "$2b$10$heqvAkYMez.Va6Et2uXInOnkCT6/uQj1brkrbyG3LpopDklcq7ZOS" // "changeit" encrypted with bcrypt
-  },
- });
+
+	// Admin UI
+	instrument(io, {
+		auth: {
+			type: "basic",
+			username: "admin",
+			password: "$2b$10$heqvAkYMez.Va6Et2uXInOnkCT6/uQj1brkrbyG3LpopDklcq7ZOS", // "changeit" encrypted with bcrypt
+		},
+	});
+	
 	// Sockets middlewares
 	io.use(authenticateTokenSocket);
 	io.use(checkPropertyAccessSocket);

@@ -13,7 +13,7 @@ const { createApp } = require("./src/app/app");
 const logger = require("./src/configs/winston.config");
 const { authenticateTokenSocket } = require("./src/middlewares/jwt.middleware");
 const {
-  checkPropertyAccessSocket,
+	checkPropertyAccessSocket,
 } = require("./src/middlewares/propertyaccess.middleware");
 const { Connect } = require("./src/lib/db");
 const { cmdLineLogo2 } = require("./src/constants/app.constant");
@@ -26,11 +26,12 @@ require("dotenv").config();
 const PORT = process.env.PORT || 8000;
 // App
 Connect().then(() => {
-  logger.info("Database connected successfully");
+	logger.info("Database connected successfully");
 });
-
-const app = createApp();
-
+try {
+	const app = createApp();
+} catch (error) {
+	process.exit(1);
+}
 // Listener
 if (process.env.NODE_ENV === "production") logger.info(cmdLineLogo2);
-

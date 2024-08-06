@@ -3,6 +3,13 @@ const {
 	CreateGuestValidationSchema,
 	UpdateGuestValidationSchema,
 } = require("../models/guest.model");
+const {
+	messageType,
+	messageTriggerType,
+} = require("../constants/message.constant");
+const messageTemplateService = require("../services/messageTemplate.service");
+const messageService = require("../services/message.service");
+const smsService = require("../services/sms.service");
 const guestService = require("../services/guest.service");
 const guestStatusService = require("../services/guestStatus.service");
 const guestTokenService = require("../services/guestToken.service");
@@ -107,6 +114,38 @@ const create = async (req, res, next) => {
 		// TODO: Workflow message trigger
 		// if (sendMessage === true) {
 		// }
+		if (sendMessage === true) {
+			const twilioAccount =
+				await twilioAccountService.getByPropertyId(propertyId);
+			const twilioSubClient = twilioService.getTwilioClient(twilioAccount);
+			const messageTemplate =
+				await messageTemplateService.getByNameAndPropertyId(
+					newGuestStatus.currentStatus,
+					propertyId,
+				);
+			const sentMessage = await smsService.send(
+				twilioSubClient,
+				twilioAccount.phoneNumber,
+				newGuest.phoneNumber,
+				messageTemplate.message,
+			);
+			const newMessage = await messageService.create(
+				{
+					propertyId: propertyId,
+					guestId: newGuest._id,
+					senderId: propertyId,
+					receiverId: newGuest._id,
+					content: sentMessage.body,
+					messageSid: sentMessage.sid,
+					messageType: messageType.SMS,
+					messageTriggerType: messageTriggerType.AUTOMATIC,
+					status: sentMessage.status,
+				},
+				session,
+			);
+		}
+		await session.commitTransaction();
+		session.endSession();
 
 		req.app.io.to(`property:${propertyId}`).emit("guest:guestUpdate", {
 			guest: { ...newGuest._doc, status: { ...newGuestStatus._doc } },
@@ -114,8 +153,7 @@ const create = async (req, res, next) => {
 		req.app.io.to(`property:${propertyId}`).emit("chatList:update", {
 			chatList: chatList,
 		});
-		await session.commitTransaction();
-		session.endSession();
+
 		return responseHandler(
 			res,
 			{ guest: { ...newGuest._doc, status: { ...newGuestStatus._doc } } },

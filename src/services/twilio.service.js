@@ -197,6 +197,18 @@ const subaccountBilling = async (client) => {
 	return bill;
 };
 
+/**
+ * Get twilio client
+ * @param {object} twilioAccount - twilio account object
+ * @returns {import('twilio').Twilio} client - twilio client object
+ */
+const getTwilioClient = async (twilioAccount) => {
+	const client = twilio(accountSid, authToken, {
+		accountSid: twilioAccount.sid,
+	});
+	return client;
+};
+
 module.exports = {
 	getPhoneNumbers,
 	buyPhoneNumber,
@@ -204,4 +216,5 @@ module.exports = {
 	getTollFreeVerificationStatus,
 	sendAccessLink,
 	subaccountBilling,
+	getTwilioClient,
 };

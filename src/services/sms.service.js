@@ -128,7 +128,7 @@ const broadcastMessage = async (propertyId, guestIds, body, session) => {
  * @param {string} from - sender phone number
  * @param {string} to - receiver phone number
  * @param {string} body - message body
- * @returns {object} sentMessage - twilio message object
+ * @returns {Promise<import('twilio/lib/rest/api/v2010/account/message').MessageInstance>} sentMessage - twilio message object
  */
 const send = async (client, from, to, body) => {
 	const sentMessage = await client.messages.create({
@@ -137,7 +137,7 @@ const send = async (client, from, to, body) => {
 		to: to,
 		statusCallback: process.env.TWILIO_STATUS_CALLBACK,
 	});
-	
+
 	return sentMessage;
 };
 

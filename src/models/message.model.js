@@ -37,6 +37,11 @@ const CreateMessageValidationSchema = z.object({
 	messageTriggerType: z.number(),
 });
 
+/**
+ * @typedef {import("mongoose").Model<Message>} Message
+ * @typedef {typeof Message.schema.obj} MessageType
+ */
+
 const Message = mongoose.model("Message", messageSchema);
 module.exports = {
 	Message,

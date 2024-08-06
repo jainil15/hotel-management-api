@@ -1,4 +1,5 @@
 const { default: mongoose } = require("mongoose");
+const messageService = require("./message.service");
 const {
 	GUEST_CURRENT_STATUS,
 	GUEST_REQUEST,
@@ -88,13 +89,11 @@ const getAllGuestWithStatus = async (propertyId) => {
  */
 const getAllGuestWithStatusv2 = async (propertyId, filters) => {
 	const guestPipeline = [];
-	guestPipeline.push(
-		{
-			$match: {
-				propertyId: new mongoose.Types.ObjectId(propertyId),
-			},
+	guestPipeline.push({
+		$match: {
+			propertyId: new mongoose.Types.ObjectId(propertyId),
 		},
-	);
+	});
 	if (filters.checkIn) {
 		guestPipeline.push(
 			{

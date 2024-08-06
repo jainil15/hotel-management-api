@@ -1,7 +1,6 @@
-
-
 const messageType = {
 	SMS: "SMS",
+	REQUEST: "Request",
 };
 
 const messageTriggerType = {

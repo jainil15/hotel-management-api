@@ -3,7 +3,7 @@ const { Message } = require("../models/message.model");
 
 /**
  * Create a new message
- * @param {object} message - The message object
+ * @param {import('../models/message.model').MessageType} message - The message object
  * @param {object} session - The mongoose session
  * @returns {Promise<Message>} - The saved message
  */

@@ -4,92 +4,96 @@ const { messageStatusEnum } = require("../constants/template.contant");
 const logger = require("../configs/winston.config");
 const { z } = require("zod");
 const {
-  GUEST_CURRENT_STATUS,
-  RESERVATION_STATUS,
-  LATE_CHECK_OUT_STATUS,
-  EARLY_CHECK_IN_STATUS,
+	GUEST_CURRENT_STATUS,
+	RESERVATION_STATUS,
+	LATE_CHECK_OUT_STATUS,
+	EARLY_CHECK_IN_STATUS,
 } = require("../constants/guestStatus.contant");
 const {
-  MESSAGE_TEMPLATE_TYPES,
+	MESSAGE_TEMPLATE_TYPES,
 } = require("../constants/messageTemplate.contant");
 const Schema = mongoose.Schema;
 
 const messageTemplateSchema = new Schema(
-  {
-    propertyId: {
-      type: Schema.Types.ObjectId,
-      ref: "Property",
-      required: true,
-    },
-    type: {
-      type: String,
-      enum: Object.values(MESSAGE_TEMPLATE_TYPES),
-      default: MESSAGE_TEMPLATE_TYPES.CUSTOM,
-      immutable: true,
-    },
-    name: { type: String, required: true },
-    message: { type: String, required: true },
-    active: { type: Boolean, default: true },
-  },
-  { timestamps: true }
+	{
+		propertyId: {
+			type: Schema.Types.ObjectId,
+			ref: "Property",
+			required: true,
+		},
+		type: {
+			type: String,
+			enum: Object.values(MESSAGE_TEMPLATE_TYPES),
+			default: MESSAGE_TEMPLATE_TYPES.CUSTOM,
+			immutable: true,
+		},
+		name: { type: String, required: true },
+		message: { type: String, required: true },
+		active: { type: Boolean, default: true },
+	},
+	{ timestamps: true },
 );
 messageTemplateSchema.index({ propertyId: 1, name: 1 }, { unique: true });
 const MessageTemplateValidationSchema = z.object({
-  propertyId: z.string(),
-  name: z.string(),
-  type: z.enum(Object.values(MESSAGE_TEMPLATE_TYPES)),
-  message: z.string(),
-  active: z.boolean().optional(),
+	propertyId: z.string(),
+	name: z.string(),
+	type: z.enum(Object.values(MESSAGE_TEMPLATE_TYPES)),
+	message: z.string(),
+	active: z.boolean().optional(),
 });
 
 const CreateMessageTemplateValidationSchema = z.object({
-  name: z.string(),
-  message: z.string(),
-  type: z.enum(Object.values(MESSAGE_TEMPLATE_TYPES)).optional(),
-  active: z.boolean().optional(),
+	name: z.string(),
+	message: z.string(),
+	type: z.enum(Object.values(MESSAGE_TEMPLATE_TYPES)).optional(),
+	active: z.boolean().optional(),
 });
 
 const UpdateMessageTemplateValidationSchema = z.object({
-  name: z.string().optional(),
-  message: z.string().optional(),
-  type: z.enum(Object.values(MESSAGE_TEMPLATE_TYPES)).optional(),
-  active: z.boolean().optional(),
+	name: z.string().optional(),
+	message: z.string().optional(),
+	type: z.enum(Object.values(MESSAGE_TEMPLATE_TYPES)).optional(),
+	active: z.boolean().optional(),
 });
 
 const UpdateManyMessageTemplateValidationSchema = z.array(
-  z.object({
-    _id: z
-      .string()
-      .refine((val) => mongoose.Types.ObjectId.isValid(val), {
-        message: "Invalid ObjectId",
-      })
-      .optional(),
-    name: z.string().optional(),
-    message: z.string().optional(),
-    type: z.enum(Object.values(MESSAGE_TEMPLATE_TYPES)).optional(),
-  })
+	z.object({
+		_id: z
+			.string()
+			.refine((val) => mongoose.Types.ObjectId.isValid(val), {
+				message: "Invalid ObjectId",
+			})
+			.optional(),
+		name: z.string().optional(),
+		message: z.string().optional(),
+		type: z.enum(Object.values(MESSAGE_TEMPLATE_TYPES)).optional(),
+	}),
 );
 
 const CreateCustomMessageTemplateValidationSchema = z.object({
-  name: z.string(),
-  message: z.string(),
-  type: z.enum([MESSAGE_TEMPLATE_TYPES.CUSTOM]).optional(),
+	name: z.string(),
+	message: z.string(),
+	type: z.enum([MESSAGE_TEMPLATE_TYPES.CUSTOM]).optional(),
 });
 
+/**
+ * @typedef {import("mongoose").Model<MessageTemplate>} MessageTemplate
+ * @typedef {typeof MessageTemplate.schema.obj} MessageTemplateType
+ */
 const MessageTemplate = mongoose.model(
-  "MessageTemplate",
-  messageTemplateSchema
+	"MessageTemplate",
+	messageTemplateSchema,
 );
 
 MessageTemplate.init().then(() => {
-  logger.info("Initialized MessageTemplate Model");
+	logger.info("Initialized MessageTemplate Model");
 });
 
 module.exports = {
-  MessageTemplate,
-  MessageTemplateValidationSchema,
-  UpdateMessageTemplateValidationSchema,
-  CreateMessageTemplateValidationSchema,
-  UpdateManyMessageTemplateValidationSchema,
-  CreateCustomMessageTemplateValidationSchema,
+	MessageTemplate,
+	MessageTemplateValidationSchema,
+	UpdateMessageTemplateValidationSchema,
+	CreateMessageTemplateValidationSchema,
+	UpdateManyMessageTemplateValidationSchema,
+	CreateCustomMessageTemplateValidationSchema,
 };

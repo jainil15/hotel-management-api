@@ -22,7 +22,7 @@ const twilioAccountSchema = new Schema(
     phoneNumberSid: { type: String },
     tollfreeVerificationSid: { type: String },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 const TwilioValidationSchema = z.object({
   propertyId: z.string(),
@@ -49,6 +49,6 @@ const TwilioValidationSchema = z.object({
 });
 const TwilioAccount = mongoose.model("TwilioAccount", twilioAccountSchema);
 TwilioAccount.init().then(() => {
-  logger.info("Initialzed TwilioAccount Model");
+  logger.info("Initialized TwilioAccount Model");
 });
 module.exports = { TwilioAccount };

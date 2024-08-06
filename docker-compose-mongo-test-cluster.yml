@@ -3,9 +3,9 @@ version: "3.8"
 services:
   mongo1:
     image: mongo:7.0
-    command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
+    command: [ "--replSet", "rs0", "--bind_ip_all", "--port", "27017" ]
     ports:
-      - 37017:27017
+      - "37017:27017"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     healthcheck:
@@ -13,7 +13,6 @@ services:
       interval: 5s
       timeout: 30s
       start_period: 0s
-      start_interval: 1s
       retries: 30
     volumes:
       - "mongo1_data:/data/db"
@@ -21,9 +20,9 @@ services:
 
   mongo2:
     image: mongo:7.0
-    command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27018"]
+    command: [ "--replSet", "rs0", "--bind_ip_all", "--port", "27018" ]
     ports:
-      - 37018:27018
+      - "37018:27018"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:
@@ -32,9 +31,9 @@ services:
 
   mongo3:
     image: mongo:7.0
-    command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27019"]
+    command: [ "--replSet", "rs0", "--bind_ip_all", "--port", "27019" ]
     ports:
-      - 37019:27019
+      - "37019:27019"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:

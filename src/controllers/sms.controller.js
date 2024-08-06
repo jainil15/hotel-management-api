@@ -135,6 +135,7 @@ const receive = async (req, res, next) => {
 				phoneNumber: ["Guest not found for the given phone number"],
 			});
 		}
+
 		const newMessage = await messageService.create({
 			propertyId: twilio.propertyId,
 			guestId: guest._id,
@@ -197,7 +198,6 @@ const status = async (req, res, next) => {
 		await session.commitTransaction();
 		session.endSession();
 		req.app.io
-			.to(`property:${updatedMessage.propertyId}`)
 			.to(`guest:${updatedMessage.guestId}`)
 			.emit("message:updateStatus", {
 				message: updatedMessage,
