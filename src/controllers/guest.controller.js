@@ -59,7 +59,7 @@ const create = async (req, res, next) => {
 		// Validate guest and status
 		const guestResult = CreateGuestValidationSchema.safeParse(guest);
 		const statusResult = CreateGuestStatusValidationSchema.safeParse(status);
-		const sendMessageResult = z.boolean().safeParse(sendMessage);
+		const sendMessageResult = z.boolean().optional().safeParse(sendMessage);
 		// Validate guest and status
 		if (
 			!guestResult.success ||
@@ -98,6 +98,7 @@ const create = async (req, res, next) => {
 			session,
 		);
 
+		// Password Less Login
 		// get access token for guest login
 		const accessToken = await guestTokenService.create(newGuest._id, session);
 		// Get property
@@ -105,7 +106,7 @@ const create = async (req, res, next) => {
 
 		// TODO: Move to sms.service
 		// Send message to the guest
-		const message = `Welcome to ${property.name}, You guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/login?token=${accessToken}`;
+		const message = `Welcome to ${property.name}, Your guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/login?token=${accessToken}`;
 		await twilioService.sendAccessLink(
 			propertyId,
 			`${newGuest.countryCode + newGuest.phoneNumber}`,
@@ -114,6 +115,7 @@ const create = async (req, res, next) => {
 		// TODO: Workflow message trigger
 		// if (sendMessage === true) {
 		// }
+		// Send message to the guest according to the status
 		if (sendMessage === true) {
 			const twilioAccount =
 				await twilioAccountService.getByPropertyId(propertyId);
@@ -147,6 +149,7 @@ const create = async (req, res, next) => {
 		await session.commitTransaction();
 		session.endSession();
 
+		// Trigger events
 		req.app.io.to(`property:${propertyId}`).emit("guest:guestUpdate", {
 			guest: { ...newGuest._doc, status: { ...newGuestStatus._doc } },
 		});

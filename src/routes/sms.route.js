@@ -7,7 +7,10 @@ const {
 	checkPermissions,
 	checkPropertyAccess,
 } = require("../middlewares/propertyaccess.middleware");
-const twilioAuth = require("../middlewares/twilio.middleware");
+const {
+	twilioAuth,
+	twilioAuthV2,
+} = require("../middlewares/twilio.middleware");
 
 router.post(
 	"/send/:propertyId/:guestId",
@@ -16,7 +19,7 @@ router.post(
 	checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
 	smsController.send,
 );
-
+router.post("/receive", twilioAuthV2, smsController.receive);
 router.post("/sms-status", twilioAuth, smsController.status);
 
 module.exports = router;

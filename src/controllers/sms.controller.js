@@ -20,6 +20,7 @@ const {
 	messageTriggerType,
 	messageType,
 } = require("../constants/message.constant");
+const logger = require("../configs/winston.config");
 require("dotenv").config();
 
 /**
@@ -115,21 +116,25 @@ const receive = async (req, res, next) => {
 	const session = await mongoose.startSession();
 	session.startTransaction();
 	try {
+		console.log(req.body);
+
+		logger.error(req.body);
 		const { From, To, Body, MessageSid } = req.body;
 		const twilioAccount = await twilioAccountService.findOne({
-			phoneNumber: To,
+			phoneNumber: To.substring(To.length - 10),
 		});
-
+		To.substring(To.length - 10);
 		if (!twilioAccount) {
 			throw new NotFoundError("Twilio Account not found", {
 				phoneNumber: ["Twilio account found for the given phone number"],
 			});
 		}
-
+		console.log(To.substring(To.length - 10), From.substring(From.length - 10));
 		const guest = await guestService.find({
-			propertyId: twilio.propertyId,
-			phoneNumber: From,
+			propertyId: twilioAccount.propertyId,
+			phoneNumber: From.substring(From.length - 10),
 		});
+		
 		if (!guest) {
 			throw new NotFoundError("Guest not found", {
 				phoneNumber: ["Guest not found for the given phone number"],
@@ -137,10 +142,10 @@ const receive = async (req, res, next) => {
 		}
 
 		const newMessage = await messageService.create({
-			propertyId: twilio.propertyId,
+			propertyId: twilioAccount.propertyId,
 			guestId: guest._id,
 			senderId: guest._id,
-			receiverId: twilio.propertyId,
+			receiverId: twilioAccount.propertyId,
 			content: Body,
 			messageTriggerType: messageTriggerType.MANUAL,
 			messageType: messageType.SMS,
@@ -148,7 +153,7 @@ const receive = async (req, res, next) => {
 		});
 
 		const updatedChatList = await chatListService.updateAndIncUnreadMessages(
-			twilio.propertyId,
+			twilioAccount.propertyId,
 			guest._id,
 			{
 				latestMessage: newMessage._id,
@@ -158,7 +163,7 @@ const receive = async (req, res, next) => {
 		await session.commitTransaction();
 		session.endSession();
 
-		req.app.io.to(`property:${twilio.propertyId}`).emit("chatList:update", {
+		req.app.io.to(`property:${twilioAccount.propertyId}`).emit("chatList:update", {
 			chatList: updatedChatList,
 		});
 		req.app.io.to(`guest:${guest._id}`).emit("message:newMessage", {

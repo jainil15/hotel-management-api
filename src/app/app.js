@@ -108,6 +108,7 @@ const createApp = () => {
 	app.use("/messageTemplate", messageTemplateRoutes);
 	app.use("/chatList", chatListRoutes);
 	app.use("/sms", smsRoutes);
+
 	// Health Check
 	app.get("/health", (req, res, next) => {
 		return responseHandler(res, {}, 200, "Server is running");
@@ -145,10 +146,10 @@ const createApp = () => {
 			password: "$2b$10$heqvAkYMez.Va6Et2uXInOnkCT6/uQj1brkrbyG3LpopDklcq7ZOS", // "changeit" encrypted with bcrypt
 		},
 	});
-	
+
 	// Sockets middlewares
-	io.use(authenticateTokenSocket);
-	io.use(checkPropertyAccessSocket);
+	// io.use(authenticateTokenSocket);
+	// io.use(checkPropertyAccessSocket);
 
 	// Sockets onConnection
 	const onConnection = async (socket) => {
