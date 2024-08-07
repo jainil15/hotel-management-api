@@ -61,6 +61,7 @@ const STATUS_TO_TEMPLATE = {
 	},
 	reservationStatus: {
 		[RESERVATION_STATUS.CANCELLED]: "Reservation Cancelled",
+		[RESERVATION_STATUS.CONFIRMED]: "Reservation Confirmed",
 	},
 	earlyCheckInStatus: {
 		[EARLY_CHECK_IN_STATUS.DECLINED]: "Early Check In Declined",

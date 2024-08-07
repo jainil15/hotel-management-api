@@ -177,7 +177,6 @@ const getAllGuestWithStatusv2 = async (propertyId, filters) => {
 		});
 	}
 	if (filters.search) {
-		console.log("search", filters.search);
 		guestPipeline.push(
 			{
 				$addFields: {
@@ -187,15 +186,6 @@ const getAllGuestWithStatusv2 = async (propertyId, filters) => {
 					reverseFullName: {
 						$concat: ["$lastName", "", "$firstName"],
 					},
-					checkInString: {
-						$dateToString: { format: "%d-%m-%Y:%H:%M:%S.%L", date: "$checkIn" },
-					},
-					checkOutString: {
-						$dateToString: {
-							format: "%d-%m-%Y:%H:%M:%S.%L",
-							date: "$checkOut",
-						},
-					},
 				},
 			},
 			{
@@ -203,6 +193,7 @@ const getAllGuestWithStatusv2 = async (propertyId, filters) => {
 					acc[`string_${key}`] = {
 						$cond: {
 							if: { $in: [{ $type: `$${key}` }, ["date", "objectId"]] },
+							// biome-ignore lint/suspicious/noThenProperty: <explanation>
 							then: {
 								$dateToString: { format: "%d:%m:%YT%H:%M", date: `$${key}` },
 							},
