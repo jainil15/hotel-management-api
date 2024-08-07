@@ -22,4 +22,7 @@ const guestStatusToTemplate = (oldStatus, newStatus) => {
 			return STATUS_TO_TEMPLATE[key][newStatus[key]];
 		}
 	});
+	return "Reservation Confirmed";
 };
+
+module.exports = { guestStatusToTemplate };

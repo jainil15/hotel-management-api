@@ -55,14 +55,20 @@ const GuestValidationScehma = z.object({
 	source: z.string().optional(),
 	checkIn: z
 		.string()
-		.refine((val) => datetimeregex.test(val) && isNaN(new Date(val).getTime), {
-			message: "Invalid date format",
-		}),
+		.refine(
+			(val) => datetimeregex.test(val) && !Number.isNaN(Date.parse(val)),
+			{
+				message: "Invalid date format",
+			},
+		),
 	checkOut: z
 		.string()
-		.refine((val) => datetimeregex.test(val) && isNaN(new Date(val).getTime), {
-			message: "Invalid date format",
-		}),
+		.refine(
+			(val) => datetimeregex.test(val) && !Number.isNaN(Date.parse(val)),
+			{
+				message: "Invalid date format",
+			},
+		),
 	confirmationNumber: z.string().min(3).max(255),
 	roomNumber: z.string().optional(),
 	firstName: z.string().optional(),
@@ -80,18 +86,16 @@ const CreateGuestValidationSchema = z
 			message: "Invalid country code format",
 		}),
 		source: z.string(),
-		checkIn: z
-			.string()
-			.refine(
-				(val) => datetimeregex.test(val) && isNaN(new Date(val).getTime),
-				{
-					message: "Invalid date format",
-				},
-			),
+		checkIn: z.string().refine(
+			(val) => datetimeregex.test(val) && !Number.isNaN(Date.parse(val)),
+			{
+				message: "Invalid date format",
+			},
+		),
 		checkOut: z
 			.string()
 			.refine(
-				(val) => datetimeregex.test(val) && isNaN(new Date(val).getTime),
+				(val) => datetimeregex.test(val) && !Number.isNaN(Date.parse(val)),
 				{
 					message: "Invalid date format",
 				},
@@ -138,7 +142,7 @@ const UpdateGuestValidationSchema = z
 		checkIn: z
 			.string()
 			.refine(
-				(val) => datetimeregex.test(val) && isNaN(new Date(val).getTime),
+				(val) => datetimeregex.test(val) && !Number.isNaN(Date.parse(val)),
 				{
 					message: "Invalid date format",
 				},
@@ -147,7 +151,7 @@ const UpdateGuestValidationSchema = z
 		checkOut: z
 			.string()
 			.refine(
-				(val) => datetimeregex.test(val) && isNaN(new Date(val).getTime),
+				(val) => datetimeregex.test(val) && !Number.isNaN(Date.parse(val)),
 				{
 					message: "Invalid date format",
 				},

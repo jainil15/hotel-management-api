@@ -4,6 +4,7 @@ const { Otp } = require("../models/otp.model");
 /**
  * Create a new OTP
  * @param {object} otp - The OTP object
+ * @param {object} session - The mongoose session
  * @returns {Promise<Otp>} - The saved OTP
  */
 const create = async (otp, session) => {

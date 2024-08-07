@@ -91,7 +91,7 @@ const GuestStatus = mongoose.model("GuestStatus", guestStatusSchema);
  * @typedef {typeof GuestStatus.schema.obj} GuestStatusType
  */
 
-GuestStatus.init().then((GuestStatus) => {
+GuestStatus.init().then(() => {
 	logger.info("Initialized Guest Status Model");
 });
 

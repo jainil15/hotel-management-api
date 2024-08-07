@@ -1,17 +1,16 @@
 const { Router } = require("express");
 const {
-  register,
-  login,
-  logout,
-  getUser,
-  create,
+	register,
+	login,
+	logout,
+	getUser,
+	create,
 } = require("../controllers/user.controller");
 const { authenticateToken } = require("../middlewares/jwt.middleware");
 const {
-  checkPropertyAccess,
-  checkPermissions,
+	checkPropertyAccess,
+	checkPermissions,
 } = require("../middlewares/propertyaccess.middleware");
-const { errorMiddleware } = require("../middlewares/error.middleware");
 const { ROLE } = require("../constants/role.constant");
 
 const router = Router();
@@ -26,11 +25,11 @@ router.get("/", authenticateToken, getUser);
 
 // User Routes
 router.post(
-  "/:propertyId",
-  authenticateToken,
-  checkPropertyAccess,
-  checkPermissions([ROLE.ADMIN]),
-  create
+	"/:propertyId",
+	authenticateToken,
+	checkPropertyAccess,
+	checkPermissions([ROLE.ADMIN]),
+	create,
 );
 
 module.exports = router;
