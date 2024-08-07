@@ -176,7 +176,8 @@ const getAllGuestWithStatusv2 = async (propertyId, filters) => {
 			},
 		});
 	}
-	if (filters.name) {
+	if (filters.search) {
+		console.log("search", filters.search);
 		guestPipeline.push(
 			{
 				$addFields: {
@@ -186,42 +187,40 @@ const getAllGuestWithStatusv2 = async (propertyId, filters) => {
 					reverseFullName: {
 						$concat: ["$lastName", "", "$firstName"],
 					},
+					checkInString: {
+						$dateToString: { format: "%d-%m-%Y:%H:%M:%S.%L", date: "$checkIn" },
+					},
+					checkOutString: {
+						$dateToString: {
+							format: "%d-%m-%Y:%H:%M:%S.%L",
+							date: "$checkOut",
+						},
+					},
 				},
 			},
 			{
+				$addFields: Object.keys(Guest.schema.obj).reduce((acc, key) => {
+					acc[`string_${key}`] = {
+						$cond: {
+							if: { $in: [{ $type: `$${key}` }, ["date", "objectId"]] },
+							then: {
+								$dateToString: { format: "%d:%m:%YT%H:%M", date: `$${key}` },
+							},
+							else: { $toString: `$${key}` },
+						},
+					};
+					return acc;
+				}, {}),
+			},
+			{
 				$match: {
-					$expr: {
-						$or: [
-							{
-								$regexMatch: {
-									input: "$fullName",
-									regex: filters.name,
-									options: "ix",
-								},
-							},
-							{
-								$regexMatch: {
-									input: "$lastName",
-									regex: filters.name,
-									options: "ix",
-								},
-							},
-							{
-								$regexMatch: {
-									input: "$firstName",
-									regex: filters.name,
-									options: "ix",
-								},
-							},
-							{
-								$regexMatch: {
-									input: "$reverseFullName",
-									regex: filters.name,
-									options: "ix",
-								},
-							},
-						],
-					},
+					$or: Object.keys(Guest.schema.obj).map((key) => ({
+						[`string_${key}`]: {
+							$regex: new RegExp(filters.search.replace(/[#-.]|[[-^]|[?|{}]/g, "\\$&")),
+
+							$options: "i",
+						},
+					})),
 				},
 			},
 		);
