@@ -40,6 +40,7 @@ const authenticateTokenSocket = async (socket, next) => {
 		const token = authHeader?.split(" ")[1];
 
 		if (token == null) {
+			
 			return next(new UnauthorizedError("Authorization Token Missing", {}));
 		}
 

@@ -106,12 +106,12 @@ const create = async (req, res, next) => {
 
 		// TODO: Move to sms.service
 		// Send message to the guest
-		const message = `Welcome to ${property.name}, Your guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/login?token=${accessToken}`;
-		await twilioService.sendAccessLink(
-			propertyId,
-			`${newGuest.countryCode + newGuest.phoneNumber}`,
-			message,
-		);
+		// const message = `Welcome to ${property.name}, Your guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/login?token=${accessToken}`;
+		// await twilioService.sendAccessLink(
+		// 	propertyId,
+		// 	`${newGuest.countryCode + newGuest.phoneNumber}`,
+		// 	message,
+		// );
 		// TODO: Workflow message trigger
 		// if (sendMessage === true) {
 		// }

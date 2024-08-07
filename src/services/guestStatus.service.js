@@ -292,6 +292,7 @@ const update = async (guestId, guestStatus, session, role = "admin") => {
 			guestId: ["Guest is not allowed to update status"],
 		});
 	}
+
 	return updatedGuestStatus;
 };
 

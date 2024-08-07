@@ -53,7 +53,6 @@ const sendsms = async (req, res, next) => {
 // useless
 const incomingMessage = async (req, res, next) => {
 	try {
-		console.log(req.body);
 		const twiml = new MessagingResponse();
 		// TODO: Move code to service
 		const property = await Property.findOne({
@@ -64,7 +63,6 @@ const incomingMessage = async (req, res, next) => {
 			propertyId: property._id,
 		});
 
-		
 		const newMessage = new Message({
 			guestId: guest._id,
 			propertyId: property._id,
@@ -77,7 +75,7 @@ const incomingMessage = async (req, res, next) => {
 		});
 		const savedMessage = await newMessage.save();
 		// twiml.message("Welcome to Onelyk \n https://www.onelyk.com");
-		return res.status(200)
+		return res.status(200);
 	} catch (e) {
 		if (e instanceof APIError) {
 			return next(e);

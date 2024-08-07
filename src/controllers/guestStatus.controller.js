@@ -12,6 +12,7 @@ const {
 	InternalServerError,
 	APIError,
 	UnauthorizedError,
+	NotFoundError,
 } = require("../lib/CustomErrors");
 const { responseHandler } = require("../middlewares/response.middleware");
 const { validateStatusForGuest } = require("../utils/guestStatus.util");
@@ -150,19 +151,21 @@ const request = async (req, res, next) => {
 			guestId,
 			{ [request]: LATE_CHECK_OUT_STATUS.REQUESTED },
 			session,
-			req.user.role,
+			"guest",
 		);
 
 		if (!updatedGuestStatus) {
-			return responseHandler(res, {}, 404, "Guest Status Not Found");
+			throw new NotFoundError("Guest not found", {
+				guestId: ["Guest not found"],
+			});
 		}
 
 		const newMessage = await messageService.create(
 			{
 				propertyId: propertyId,
 				guestId: guestId,
-				senderId: propertyId,
-				receiverId: guestId,
+				senderId: guestId,
+				receiverId: propertyId,
 				content: `Request for ${request} has been made`,
 				messageTriggerType: messageTriggerType.AUTOMATIC,
 				messageType: messageType.REQUEST,
@@ -193,13 +196,20 @@ const request = async (req, res, next) => {
 
 		await session.commitTransaction();
 		await session.endSession();
+
+		return responseHandler(
+			res,
+			{ [request]: LATE_CHECK_OUT_STATUS.REQUESTED },
+			200,
+			"Request made successfully",
+		);
 	} catch (e) {
 		await session.abortTransaction();
 		await session.endSession();
 		if (e instanceof APIError) {
 			return next(e);
 		}
-		return next(new InternalServerError());
+		return next(new InternalServerError(e.message));
 	}
 };
 

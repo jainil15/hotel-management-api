@@ -42,7 +42,6 @@ const twilioAuth = async (req, res, next) => {
 };
 
 const twilioAuthV2 = async (req, res, next) => {
-	console.log(`${process.env.TWILIO_CALLBACK_URL}${req.originalUrl}`);
 	try {
 		const twilioSignature = req.headers["x-twilio-signature"];
 		const twilioAccount = await twilioAccountService.findOne({

@@ -49,10 +49,10 @@ router.put(
 
 router.post(
 	"/:propertyId/:guestId/request",
-	authenticateToken,
-	checkPropertyAccess,
-	checkPermissions([ROLE.GUEST]),
-	checkGuestAccess,
+	// authenticateToken,
+	// checkPropertyAccess,
+	// checkPermissions([ROLE.GUEST]),
+	// checkGuestAccess,
 	guestStatusController.request,
 );
 

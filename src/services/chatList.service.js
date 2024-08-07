@@ -61,18 +61,32 @@ const getByPropertyId = async (propertyId) => {
 			$group: {
 				_id: "$propertyId",
 				chatLists: { $push: "$$ROOT" },
-				totalUnreadMessages: { $sum: "$unreadMessages" },
+				totalUnreadMessages: {
+					$sum: {
+						$cond: { if: { $gte: ["$unreadMessages", 1] }, then: 1, else: 0 },
+					},
+				},
 			},
 		},
 		{
 			$project: {
 				_id: 0,
 				propertyId: "$_id",
+
 				chatLists: {
 					$map: {
 						input: "$chatLists",
 						as: "chatList",
 						in: {
+							latestMessageTime: {
+								$cond: {
+									if: { $gt: [{ $size: "$$chatList.latestMessage" }, 0] },
+									then: {
+										$arrayElemAt: ["$$chatList.latestMessage.createdAt", 0],
+									},
+									else: null,
+								},
+							},
 							_id: "$$chatList._id",
 							propertyId: "$$chatList.propertyId",
 							guestId: "$$chatList.guestId",
@@ -115,10 +129,20 @@ const getByPropertyId = async (propertyId) => {
 				totalUnreadMessages: 1,
 			},
 		},
+		{
+			$addFields: {
+				chatLists: {
+					$sortArray: {
+						input: "$chatLists",
+						sortBy: { latestMessageTime: -1 },
+					},
+				},
+			},
+		},
 	];
 
 	const chatList = await ChatList.aggregate(pipeline);
-	return chatList;
+	return chatList[0];
 };
 
 /**

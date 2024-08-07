@@ -116,7 +116,7 @@ const receive = async (req, res, next) => {
 	const session = await mongoose.startSession();
 	session.startTransaction();
 	try {
-		console.log(req.body);
+		
 
 		logger.error(req.body);
 		const { From, To, Body, MessageSid } = req.body;
@@ -129,7 +129,7 @@ const receive = async (req, res, next) => {
 				phoneNumber: ["Twilio account found for the given phone number"],
 			});
 		}
-		console.log(To.substring(To.length - 10), From.substring(From.length - 10));
+		
 		const guest = await guestService.find({
 			propertyId: twilioAccount.propertyId,
 			phoneNumber: From.substring(From.length - 10),
