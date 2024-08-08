@@ -200,7 +200,7 @@ const subaccountBilling = async (client) => {
 /**
  * Get twilio client
  * @param {object} twilioAccount - twilio account object
- * @returns {import('twilio').Twilio} client - twilio client object
+ * @returns {Promise<import('twilio').Twilio>} client - twilio client object
  */
 const getTwilioClient = async (twilioAccount) => {
 	const client = twilio(accountSid, authToken, {

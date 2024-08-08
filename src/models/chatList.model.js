@@ -36,6 +36,10 @@ const UpdateChatListValidationSchema = z.object({
 	latestMessage: z.string().optional(),
 });
 
+/**
+ * @typedef {import("mongoose").Model<ChatList>} ChatList
+ * @typedef {typeof ChatList.schema.obj} ChatListType
+ */
 const ChatList = mongoose.model("ChatList", chatListSchema);
 
 module.exports = {

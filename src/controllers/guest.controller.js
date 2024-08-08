@@ -30,10 +30,15 @@ const {
 	APIError,
 	InternalServerError,
 	ValidationError,
+	NotFoundError,
 } = require("../lib/CustomErrors");
 
 const { validateStatus } = require("../utils/guestStatus.util");
 const { z } = require("zod");
+const {
+	guestStatusToTemplateOnCreate,
+	guestStatusToTemplateOnUpdate,
+} = require("../utils/guestStatustToTemplate");
 require("dotenv").config();
 
 const getAll = async (req, res, next) => {
@@ -115,46 +120,68 @@ const create = async (req, res, next) => {
 		// TODO: Workflow message trigger
 		// if (sendMessage === true) {
 		// }
+		await session.commitTransaction();
+		session.startTransaction();
+
 		// Send message to the guest according to the status
 		if (sendMessage === true) {
-			const twilioAccount =
-				await twilioAccountService.getByPropertyId(propertyId);
-			const twilioSubClient = twilioService.getTwilioClient(twilioAccount);
 			const messageTemplate =
 				await messageTemplateService.getByNameAndPropertyId(
-					newGuestStatus.currentStatus,
 					propertyId,
+					guestStatusToTemplateOnCreate(newGuestStatus),
 				);
-			const sentMessage = await smsService.send(
-				twilioSubClient,
-				twilioAccount.phoneNumber,
-				newGuest.phoneNumber,
-				messageTemplate.message,
-			);
-			const newMessage = await messageService.create(
-				{
-					propertyId: propertyId,
-					guestId: newGuest._id,
-					senderId: propertyId,
-					receiverId: newGuest._id,
-					content: sentMessage.body,
-					messageSid: sentMessage.sid,
-					messageType: messageType.SMS,
-					messageTriggerType: messageTriggerType.AUTOMATIC,
-					status: sentMessage.status,
-				},
-				session,
-			);
+			if (messageTemplate) {
+				console.log(messageTemplate);
+				const twilioAccount =
+					await twilioAccountService.getByPropertyId(propertyId);
+				const twilioSubClient =
+					await twilioService.getTwilioClient(twilioAccount);
+				const sentMessage = await smsService.send(
+					twilioSubClient,
+					`${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
+					`${newGuest.countryCode}${newGuest.phoneNumber}`,
+					messageTemplate.message,
+				);
+				const newMessage = await messageService.create(
+					{
+						propertyId: propertyId,
+						guestId: newGuest._id,
+						senderId: propertyId,
+						receiverId: newGuest._id,
+						content: sentMessage.body,
+						messageSid: sentMessage.sid,
+						messageType: messageType.SMS,
+						messageTriggerType: messageTriggerType.AUTOMATIC,
+						status: sentMessage.status,
+					},
+					session,
+				);
+				const updatedChatList =
+					await chatListService.updateAndIncUnreadMessages(
+						propertyId,
+						newGuest._id,
+						{
+							latestMessage: newMessage._id,
+						},
+						session,
+					);
+			}
 		}
 		await session.commitTransaction();
 		session.endSession();
 
 		// Trigger events
+		// Emit to guest list updated
 		req.app.io.to(`property:${propertyId}`).emit("guest:guestUpdate", {
 			guest: { ...newGuest._doc, status: { ...newGuestStatus._doc } },
 		});
+		// Emit to chat list updated
 		req.app.io.to(`property:${propertyId}`).emit("chatList:update", {
 			chatList: chatList,
+		});
+		// Emit to guest messages updated
+		req.app.io.to(`guest:${newGuest._id}`).emit("message:newMessage", {
+			message: {},
 		});
 
 		return responseHandler(
@@ -195,7 +222,7 @@ const update = async (req, res, next) => {
 	session.startTransaction();
 	try {
 		// TODO: add messageGuest
-		const { status, ...guest } = req.body;
+		const { sendMessage, status, ...guest } = req.body;
 		const propertyId = req.params.propertyId;
 		const guestId = req.params.guestId;
 		const guestResult = await UpdateGuestValidationSchema.safeParseAsync(guest);
@@ -218,13 +245,79 @@ const update = async (req, res, next) => {
 			status,
 			session,
 		);
+
+		const oldGuestStatus = await guestStatusService.getByGuestId(guestId);
+		// Send message to the guest according to the status
+		console.log(
+			await messageTemplateService.getByNameAndPropertyId(
+				propertyId,
+				guestStatusToTemplateOnUpdate(oldGuestStatus, updatedGuestStatus),
+			),
+		);
+		if (sendMessage === true) {
+			// Get Message Template
+			const messageTemplate =
+				await messageTemplateService.getByNameAndPropertyId(
+					propertyId,
+					guestStatusToTemplateOnUpdate(oldGuestStatus, updatedGuestStatus),
+				);
+			// Send Message
+			if (messageTemplate) {
+				const twilioAccount =
+					await twilioAccountService.getByPropertyId(propertyId);
+				if (!twilioAccount) {
+					throw new NotFoundError("Twilio account not found", {
+						propertyId: ["Twilio account not found for this property"],
+					});
+				}
+
+				const twilioSubClient = await twilioService.getTwilioClient(twilioAccount);
+
+				const sentMessage = await smsService.send(
+					twilioSubClient,
+					`${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
+					`${updatedGuest.countryCode}${updatedGuest.phoneNumber}`,
+					messageTemplate.message,
+				);
+
+				const newMessage = await messageService.create(
+					{
+						propertyId: propertyId,
+						guestId: updatedGuest._id,
+						senderId: propertyId,
+						receiverId: updatedGuest._id,
+						content: sentMessage.body,
+						messageSid: sentMessage.sid,
+						messageType: messageType.SMS,
+						messageTriggerType: messageTriggerType.AUTOMATIC,
+						status: sentMessage.status,
+					},
+					session,
+				);
+
+				await chatListService.updateAndIncUnreadMessages(
+					propertyId,
+					updatedGuest._id,
+					{
+						latestMessage: newMessage._id,
+					},
+					session,
+				);
+			}
+		}
+
 		await session.commitTransaction();
 		session.endSession();
+
+		// Trigger events
+		// Emit to guest list updated
 		req.app.io.to(`property:${propertyId}`).emit("guest:guestUpdate", {
 			guest: { ...updatedGuest._doc, status: updatedGuestStatus },
 		});
+		// Emit to chat list updated
 		req.app.io.to(`property:${propertyId}`).emit("chatList:update", {});
-
+		// Emit to guest messages updated
+		req.app.io.to(`guest:${guestId}`).emit("message:newMessage", {});
 		return responseHandler(
 			res,
 			{
@@ -239,9 +332,7 @@ const update = async (req, res, next) => {
 		if (e instanceof APIError) {
 			return next(e);
 		}
-		return next(
-			new InternalServerError("Internal server error while updating"),
-		);
+		return next(new InternalServerError(e.message));
 	}
 };
 

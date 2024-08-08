@@ -1,3 +1,4 @@
+const { NotFoundError } = require("../lib/CustomErrors");
 const { TwilioAccount } = require("../models/twilioAccount.model");
 
 /**
@@ -6,8 +7,9 @@ const { TwilioAccount } = require("../models/twilioAccount.model");
  * @returns {Promise<TwilioAccount>} - The twilio account
  */
 const getByPropertyId = async (propertyId) => {
-  const twilioAccount = await TwilioAccount.findOne({ propertyId: propertyId });
-  return twilioAccount;
+	const twilioAccount = await TwilioAccount.findOne({ propertyId: propertyId });
+	
+	return twilioAccount;
 };
 
 /**
@@ -16,7 +18,7 @@ const getByPropertyId = async (propertyId) => {
  * @returns {Promise<TwilioAccount>} - The list of twilio account
  */
 const findOne = async (filter) => {
-  return await TwilioAccount.findOne(filter);
+	return await TwilioAccount.findOne(filter);
 };
 
 module.exports = { getByPropertyId, findOne };

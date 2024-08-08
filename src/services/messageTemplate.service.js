@@ -3,6 +3,10 @@ const {
 	MESSAGE_TEMPLATE_TYPES,
 } = require("../constants/messageTemplate.contant");
 const { MessageTemplate } = require("../models/messageTemplates.model");
+const {
+	guestStatusToTemplateOnCreate,
+	guestStatusToTemplateOnUpdate,
+} = require("../utils/guestStatustToTemplate");
 
 /**
  * Create default message templates
@@ -25,6 +29,13 @@ const createDefaults = async (propertyId, session) => {
 			messageTemplates.push(await newMessageTemplate.save({ session }));
 		}
 	}
+	const newMessageTemplate = new MessageTemplate({
+		propertyId,
+		type: MESSAGE_TEMPLATE_TYPES.DEFAULT,
+		name: "Early Check In Accepted and Late Check Out Accepted",
+		message: "Your early check in and late check out request is accepted",
+	});
+	messageTemplates.push(await newMessageTemplate.save({ session }));
 	return messageTemplates;
 };
 
@@ -89,11 +100,11 @@ const update = async (
 
 /**
  * Get message template by name and propertyId
- * @param {string} name - The message template name
  * @param {string} propertyId - The property id
+ * @param {string} name - The message template name
  * @returns {Promise<MessageTemplate>} - The message template
  */
-const getByNameAndPropertyId = async (name, propertyId) => {
+const getByNameAndPropertyId = async (propertyId, name) => {
 	const messageTemplate = await MessageTemplate.findOne({
 		name,
 		propertyId,
@@ -131,6 +142,26 @@ const updateAll = async (propertyId, messageTemplates, session) => {
 	return updatedMessageTemplates;
 };
 
+/**
+ * Get message template by status
+ * @param {string} propertyId - The property id
+ * @param {import('../models/guestStatus.model').GuestStatusType} status - The message template status
+ * @param {Function} convertStatusToName - The function to convert status to name
+ * @returns {Promise<import('../models/messageTemplates.model').MessageTemplateType>} - The message template
+ */
+const getMessageTemplateByStatus = async (
+	propertyId,
+	status,
+	convertStatusToName,
+) => {
+	const messageTemplateName = convertStatusToName(status);
+	const messageTemplate = await MessageTemplate.findOne({
+		propertyId: propertyId,
+		name: messageTemplateName,
+	});
+	return messageTemplate;
+};
+
 module.exports = {
 	getAll,
 	create,
@@ -140,4 +171,5 @@ module.exports = {
 	createDefaults,
 	getByNameAndPropertyId,
 	updateAll,
+	getMessageTemplateByStatus,
 };

@@ -149,7 +149,7 @@ const getByPropertyId = async (propertyId) => {
  * Update a chat list
  * @param {string} propertyId - propertyId
  * @param {string} guestId - guestId
- * @param {object} chatList - chatList
+ * @param {import('../models/chatList.model').ChatListType} chatList - chatList
  * @param {object} session - mongoose session
  * @returns {Promise<ChatList>} - chatList
  */
@@ -181,11 +181,10 @@ const remove = async (propertyId, guestId, session) => {
  * Update and increment unread messages
  * @param {string} propertyId - propertyId
  * @param {string} guestId - guestId
- * @param {object} chatList - chatList
+ * @param {import('../models/chatList.model').ChatListType} chatList - chatList
  * @param {object} session - mongoose session
  * @returns {Promise<ChatList>} - chatList
  */
-
 const updateAndIncUnreadMessages = async (
 	propertyId,
 	guestId,

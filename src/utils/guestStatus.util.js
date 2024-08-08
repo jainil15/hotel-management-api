@@ -21,6 +21,7 @@ const AllowedStatus = {
 		reservationStatus: ["Confirmed"],
 		preArrivalStatus: ["Not Applied", "Applied"],
 		earlyCheckInStatus: ["Not Requested", "Requested", "Accepted", "Declined"],
+		lateCheckOutStatus: ["Not Requested", "Requested", "Accepted", "Declined"],
 	},
 	"Checked Out": {
 		lateCheckOutStatus: ["Not Requested", "Requested", "Accepted", "Declined"],
@@ -51,12 +52,6 @@ const validateUpdate = (currentGuestStatus, updateGuestStatus) => {
 				if (
 					currentGuestStatus.reservationStatus === RESERVATION_STATUS.CONFIRMED
 				) {
-					if (
-						currentGuestStatus.lateCheckOutStatus !==
-						updateGuestStatus.lateCheckOutStatus
-					) {
-						return false;
-					}
 				}
 
 				return true;
