@@ -7,6 +7,7 @@ const {
 	NotFoundError,
 } = require("../lib/CustomErrors");
 const messageTemplateService = require("../services/messageTemplate.service");
+const guestStatusService = require("../services/guestStatus.service");
 const { responseHandler } = require("../middlewares/response.middleware");
 const {
 	MessageTemplateValidationSchema,
@@ -15,6 +16,14 @@ const {
 	UpdateManyMessageTemplateValidationSchema,
 	CreateCustomMessageTemplateValidationSchema,
 } = require("../models/messageTemplates.model");
+
+const {
+	guestStatusToTemplateOnUpdate,
+	guestStatusToTemplateOnCreate,
+} = require("../utils/guestStatustToTemplate");
+const {
+	UpdateGuestStatusValidationSchema,
+} = require("../models/guestStatus.model");
 
 const create = async (req, res, next) => {
 	const session = await mongoose.startSession();
@@ -299,4 +308,80 @@ const createAllDefaultTemplates = async (req, res, next) => {
 	}
 };
 
-module.exports = { create, getById, getAll, update, remove, updateAll };
+const getMessageTemplateByStatusForCreate = async (req, res, next) => {
+	try {
+		const { propertyId } = req.params;
+		const status = req.body;
+		console.log("propertyId", propertyId, status);
+		const statusResult = UpdateGuestStatusValidationSchema.safeParse(status);
+		if (!statusResult.success) {
+			throw new ValidationError("Validation Error", {
+				...statusResult.error.flatten().fieldErrors,
+			});
+		}
+		console.log(guestStatusToTemplateOnCreate(status));
+		const messageTemplate = await messageTemplateService.getByNameAndPropertyId(
+			propertyId,
+			guestStatusToTemplateOnCreate(status),
+		);
+		return responseHandler(res, { messageTemplate: messageTemplate });
+	} catch (e) {
+		if (e instanceof APIError) {
+			return next(e);
+		}
+		return next(new InternalServerError(e.message));
+	}
+};
+
+const getMessageTemplateByStatusForUpdate = async (req, res, next) => {
+	const session = await mongoose.startSession();
+	session.startTransaction();
+	try {
+		const { propertyId, guestId } = req.params;
+		const status = req.body;
+
+		const resultStatus = UpdateGuestStatusValidationSchema.safeParse(status);
+		if (!resultStatus.success) {
+			throw new ValidationError("Validation Error", {
+				...resultStatus.error.flatten().fieldErrors,
+			});
+		}
+
+		const oldGuestStatus = await guestStatusService.getByGuestId(guestId);
+		const newGuestStatus = await guestStatusService.update(
+			guestId,
+			status,
+			session,
+		);
+
+		console.log(guestStatusToTemplateOnUpdate(oldGuestStatus, newGuestStatus));
+
+		const messageTemplate = await messageTemplateService.getByNameAndPropertyId(
+			propertyId,
+			guestStatusToTemplateOnUpdate(oldGuestStatus, newGuestStatus),
+		);
+
+    await session.abortTransaction();
+		session.endSession();
+		return responseHandler(res, { messageTemplate: messageTemplate });
+	} catch (e) {
+		await session.abortTransaction();
+		session.endSession();
+		if (e instanceof APIError) {
+			return next(e);
+		}
+		return next(new InternalServerError(e.message));
+	}
+};
+
+module.exports = {
+	create,
+	getById,
+	getAll,
+	update,
+	remove,
+	updateAll,
+	createAllDefaultTemplates,
+	getMessageTemplateByStatusForCreate,
+	getMessageTemplateByStatusForUpdate,
+};

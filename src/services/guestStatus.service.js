@@ -40,7 +40,7 @@ const create = async (propertyId, guestId, status, session) => {
 		const savedGuestStatus = await newGuestStatus.save({ session });
 		return savedGuestStatus;
 	} catch (e) {
-		throw new Error("Error while creating guest status");
+		throw new Error(e.message);
 	}
 };
 

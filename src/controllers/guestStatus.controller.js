@@ -166,7 +166,7 @@ const request = async (req, res, next) => {
 				guestId: guestId,
 				senderId: guestId,
 				receiverId: propertyId,
-				content: `Request for ${request} has been made`,
+				content: `${request}`,
 				messageTriggerType: messageTriggerType.AUTOMATIC,
 				messageType: messageType.REQUEST,
 				status: "delivered",

@@ -74,14 +74,46 @@ const guestStatusToTemplateOnCreate = (status) => {
  * @returns {string} - The message template name
  */
 const guestStatusToTemplateOnUpdate = (oldStatus, newStatus) => {
+	// If current status is changed
 	if (oldStatus.currentStatus !== newStatus.currentStatus) {
+		// If the guest is checked out
 		if (newStatus.currentStatus === GUEST_CURRENT_STATUS.CHECKED_OUT) {
+			if (oldStatus.lateCheckOutStatus !== newStatus.lateCheckOutStatus) {
+				if (newStatus.lateCheckOutStatus === LATE_CHECK_OUT_STATUS.ACCEPTED) {
+					return "Late Check Out Accepted";
+				}
+			}
 			return "Checked Out";
 		}
+		// If the guest is checked in
 		if (newStatus.currentStatus === GUEST_CURRENT_STATUS.IN_HOUSE) {
+			if (
+				oldStatus.earlyCheckInStatus !== newStatus.earlyCheckInStatus &&
+				oldStatus.lateCheckOutStatus !== newStatus.lateCheckOutStatus
+			) {
+				if (
+					newStatus.earlyCheckInStatus === EARLY_CHECK_IN_STATUS.ACCEPTED &&
+					newStatus.lateCheckOutStatus === LATE_CHECK_OUT_STATUS.ACCEPTED
+				) {
+					return "Early Check In Accepted and Late Check Out Accepted";
+				}
+			}
+			if (oldStatus.earlyCheckInStatus !== newStatus.earlyCheckInStatus) {
+				if (newStatus.earlyCheckInStatus === EARLY_CHECK_IN_STATUS.ACCEPTED) {
+					return "Early Check In Accepted";
+				}
+			}
+			if (oldStatus.lateCheckOutStatus !== newStatus.lateCheckOutStatus) {
+				if (newStatus.lateCheckOutStatus === LATE_CHECK_OUT_STATUS.ACCEPTED) {
+					return "Late Check Out Accepted";
+				}
+			}
 			return "Checked In";
 		}
 	}
+
+	// If current status is the same
+	// If the reservation status is changed
 	if (oldStatus.reservationStatus !== newStatus.reservationStatus) {
 		if (newStatus.reservationStatus === RESERVATION_STATUS.CANCELLED) {
 			return "Reservation Cancelled";
