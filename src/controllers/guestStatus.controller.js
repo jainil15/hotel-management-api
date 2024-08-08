@@ -2,6 +2,7 @@ const { default: mongoose } = require("mongoose");
 const guestStatusService = require("../services/guestStatus.service");
 const messageService = require("../services/message.service");
 const chatListService = require("../services/chatList.service");
+const checkInOutRequestService = require("../services/checkInOutRequest.service");
 const {
 	GuestStatusValidationSchema,
 	UpdateGuestStatusValidationSchema,
@@ -21,6 +22,7 @@ const { LATE_CHECK_OUT_STATUS } = require("../constants/guestStatus.contant");
 const {
 	messageTriggerType,
 	messageType,
+	requestType,
 } = require("../constants/message.constant");
 
 const create = async (req, res, next) => {
@@ -136,7 +138,7 @@ const request = async (req, res, next) => {
 	session.startTransaction();
 	try {
 		const { propertyId, guestId } = req.params;
-		const { request } = req.body;
+		const { request, dateTime } = req.body;
 
 		const requestResult = z
 			.enum(["lateCheckOut", "earlyCheckIn"])
@@ -159,14 +161,24 @@ const request = async (req, res, next) => {
 				guestId: ["Guest not found"],
 			});
 		}
-
+		const newCheckInOutRequest = await checkInOutRequestService.create(
+			propertyId,
+			guestId,
+			{
+				requestType: request,
+				earlyCheckInDateTime: updatedGuestStatus.earlyCheckInDateTime,
+				lateCheckOutDateTime: updatedGuestStatus.lateCheckOutDateTime,
+			},
+			session,
+		);
 		const newMessage = await messageService.create(
 			{
 				propertyId: propertyId,
 				guestId: guestId,
 				senderId: guestId,
 				receiverId: propertyId,
-				content: `${request}`,
+				content: `Request for ${requestType[request]} has been made`,
+				requestId: newCheckInOutRequest._id,
 				messageTriggerType: messageTriggerType.AUTOMATIC,
 				messageType: messageType.REQUEST,
 				status: "delivered",

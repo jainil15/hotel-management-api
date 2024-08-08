@@ -42,6 +42,10 @@ const guestSchema = new Schema(
 	{ timestamps: true },
 );
 
+/**
+ * @typedef {import("mongoose").Model<Guest>} Guest
+ * @typedef {typeof Guest.schema.obj} GuestType
+ */
 const Guest = mongoose.model("Guest", guestSchema);
 
 const GuestValidationScehma = z.object({
@@ -86,12 +90,14 @@ const CreateGuestValidationSchema = z
 			message: "Invalid country code format",
 		}),
 		source: z.string(),
-		checkIn: z.string().refine(
-			(val) => datetimeregex.test(val) && !Number.isNaN(Date.parse(val)),
-			{
-				message: "Invalid date format",
-			},
-		),
+		checkIn: z
+			.string()
+			.refine(
+				(val) => datetimeregex.test(val) && !Number.isNaN(Date.parse(val)),
+				{
+					message: "Invalid date format",
+				},
+			),
 		checkOut: z
 			.string()
 			.refine(

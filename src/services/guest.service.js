@@ -37,7 +37,7 @@ const getByGuestId = async (guestId) => {
  * Get guest by id
  * @param {string} guestId - guest id
  * @param {string} propertyId - property id
- * @returns {object} guest - guest object
+ * @returns {Promise<import('../models/guest.model').GuestType>} guest - guest object
  */
 const getById = async (guestId, propertyId) => {
 	const guest = await Guest.findOne({ _id: guestId, propertyId: propertyId });

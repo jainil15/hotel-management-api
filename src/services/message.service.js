@@ -1,3 +1,4 @@
+const { default: mongoose } = require("mongoose");
 const { NotFoundError } = require("../lib/CustomErrors");
 const { Message } = require("../models/message.model");
 
@@ -20,10 +21,34 @@ const create = async (message, session) => {
  * @returns {Promise<Message[]>} - The list of messages
  */
 const getAll = async (propertyId, guestId) => {
-	const messages = await Message.find({
-		propertyId: propertyId,
-		guestId: guestId,
-	});
+	const messages = await Message.aggregate([
+		{
+			$match: {
+				propertyId: new mongoose.Types.ObjectId(propertyId),
+				guestId: new mongoose.Types.ObjectId(guestId),
+			},
+		},
+		{
+			$lookup: {
+				from: "checkinoutrequests",
+				localField: "requestId",
+				foreignField: "_id",
+				as: "request",
+			},
+		},
+		{
+			$unwind: {
+				path: "$request",
+				preserveNullAndEmptyArrays: true,
+			},
+		},
+		{
+			$project: {
+				requestId: 0,
+			},
+		},
+	]);
+
 	return messages;
 };
 
@@ -35,11 +60,35 @@ const getAll = async (propertyId, guestId) => {
  * @returns {Promise<Message>} - The message
  */
 const getById = async (messageId, propertyId, guestId) => {
-	const message = await Message.findOne({
-		_id: messageId,
-		propertyId: propertyId,
-		guestId: guestId,
-	});
+	const message = await Message.aggregate([
+		{
+			$match: {
+				_id: new mongoose.Types.ObjectId(messageId),
+				propertyId: new mongoose.Types.ObjectId(propertyId),
+				guestId: new mongoose.Types.ObjectId(guestId),
+			},
+		},
+		{
+			$lookup: {
+				from: "checkinoutrequests",
+				localField: "requestId",
+				foreignField: "_id",
+				as: "request",
+			},
+		},
+		{
+			$unwind: {
+				path: "$request",
+				preserveNullAndEmptyArrays: true,
+			},
+		},
+		{
+			$project: {
+				requestId: 0,
+			},
+		},
+	]);
+
 	if (!message) {
 		throw new NotFoundError("Message not found", {
 			messageId: ["Message not found for the given id"],

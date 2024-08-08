@@ -8,4 +8,11 @@ const messageTriggerType = {
 	AUTOMATIC: "Automatic",
 };
 
-module.exports = { messageType, messageTriggerType };
+const requestType = {
+	earlyCheckIn: "Early Check In",
+	lateCheckOut: "Late Check Out",
+};
+
+
+
+module.exports = { messageType, messageTriggerType, requestType };

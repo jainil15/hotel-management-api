@@ -46,4 +46,14 @@ const zodCustomDateValidation = (date, path) => {
 		.safeParse(date);
 };
 
-module.exports = { compareDate, dateValidation, zodCustomDateValidation };
+/**
+ * Compare two dates
+ * @param {Date} date1 - date1
+ * @param {Date} date2 - date2
+ * @returns {boolean} - Value indicating if date1 is greater than date2
+ */
+const compareDateGt = (date1, date2) => {
+	return date1 > date2;
+};
+
+module.exports = { compareDate, dateValidation, zodCustomDateValidation, compareDateGt };

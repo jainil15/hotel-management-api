@@ -19,7 +19,7 @@ const guestStatusRoutes = require("../routes/guestStatus.route");
 const messageTemplateRoutes = require("../routes/messageTemplate.route");
 const chatListRoutes = require("../routes/chatList.route");
 const smsRoutes = require("../routes/sms.route");
-
+const checkInOutRequestRoutes = require("../routes/checkInOutRequest.route");
 // Socket imports
 const guestSocket = require("../sockets/guest.socket");
 
@@ -108,6 +108,7 @@ const createApp = () => {
 	app.use("/messageTemplate", messageTemplateRoutes);
 	app.use("/chatList", chatListRoutes);
 	app.use("/sms", smsRoutes);
+	app.use("/checkInOutRequest", checkInOutRequestRoutes);
 
 	// Health Check
 	app.get("/health", (req, res, next) => {
