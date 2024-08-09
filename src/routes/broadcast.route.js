@@ -24,6 +24,14 @@ router.put(
 );
 
 router.get(
+	"/:propertyId/:broadcastId",
+	authenticateToken,
+	checkPropertyAccess,
+	checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
+	broadcastController.getById,
+);
+
+router.get(
 	"/:propertyId",
 	authenticateToken,
 	checkPropertyAccess,

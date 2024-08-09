@@ -1,5 +1,4 @@
 const { default: mongoose } = require("mongoose");
-const { NotFoundError } = require("../lib/CustomErrors");
 const { Broadcast } = require("../models/broadcast.model");
 
 /**
@@ -109,14 +108,41 @@ const getAllBroadcasts = async (propertyId) => {
  * @returns {Promise<import('../models/broadcast.model').BroadcastType>} - The broadcast
  */
 const getById = async (broadcastId) => {
-	const broadcast = await Broadcast.findOne({ _id: broadcastId }).populate(
-		"broadcastMessageIds",
-	);
-	if (!broadcast) {
-		throw new NotFoundError("Broadcast not found", {
-			broadcastId: ["Broadcast not found for the given id"],
-		});
-	}
+	const broadcast = await Broadcast.aggregate([
+		{
+			$match: {
+				_id: new mongoose.Types.ObjectId(broadcastId),
+			},
+		},
+		{
+			$lookup: {
+				from: "broadcastmessages",
+				localField: "broadcastMessageIds",
+				foreignField: "_id",
+				as: "broadcastMessages",
+			},
+		},
+
+		{
+			$project: {
+				broadcastMessageIds: 0,
+			},
+		},
+		{
+			$limit: 1,
+		},
+	]);
+
+	return broadcast[0];
+};
+
+/**
+ * Get broadcast by filters
+ * @param {object} filters - The filters to filter broadcasts
+ * @returns {Promise<import('../models/broadcast.model').BroadcastType>} - The broadcast
+ */
+const findOne = async (filters) => {
+	const broadcast = await Broadcast.findOne(filters);
 	return broadcast;
 };
 
@@ -127,4 +153,5 @@ module.exports = {
 	addMessages,
 	getById,
 	getAllBroadcasts,
+	findOne,
 };

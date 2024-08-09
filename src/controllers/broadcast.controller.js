@@ -253,4 +253,17 @@ const getAllByPropertyId = async (req, res, next) => {
 	}
 };
 
-module.exports = { create, update, sendMessage, getAllByPropertyId };
+const getById = async (req, res, next) => {
+	try {
+		const { broadcastId } = req.params;
+		const broadcast = await broadcastService.getById(broadcastId);
+		return responseHandler(res, { broadcast: broadcast });
+	} catch (e) {
+		if (e instanceof APIError) {
+			return next(e);
+		}
+		return next(new InternalServerError(e.message));
+	}
+};
+
+module.exports = { create, update, sendMessage, getAllByPropertyId, getById };
