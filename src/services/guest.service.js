@@ -123,7 +123,7 @@ const getAllGuestsWithStatus = async (propertyId) => {
 const getPhoneNumbers = async (guestIds) => {
 	const phoneNumbers = await Guest.find(
 		{ _id: { $in: guestIds } },
-		{ phoneNumber: 1 },
+		{ phoneNumber: 1, countryCode: 1 },
 	);
 	return phoneNumbers;
 };

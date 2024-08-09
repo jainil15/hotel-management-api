@@ -5,6 +5,7 @@ const messageType = {
 
 const messageTriggerType = {
 	MANUAL: "Manual",
+	BROADCAST: "Broadcast",
 	AUTOMATIC: "Automatic",
 };
 

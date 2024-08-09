@@ -9,6 +9,10 @@ const {
 	TWILIO_ACCOUNT_SID,
 	TWILIO_AUTH_TOKEN,
 } = require("../constants/twilio.constant");
+const {
+	messageTriggerType,
+	messageType,
+} = require("../constants/message.constant");
 require("dotenv").config();
 
 /**
@@ -103,20 +107,19 @@ const broadcastMessage = async (propertyId, guestIds, body, session) => {
 			to: `${guestPhoneNumber.countryCode}${guestPhoneNumber.phoneNumber}`,
 			statusCallback: process.env.TWILIO_STATUS_CALLBACK,
 		});
-		const newMessage = new messageService(
+		const newMessage = await messageService.create(
 			{
 				propertyId: propertyId,
 				guestId: guestPhoneNumber._id,
 				senderId: propertyId,
 				receiverId: guestPhoneNumber._id,
 				content: body,
-				messageTriggerType: "Manual",
-				messageType: "Broadcast",
+				messageTriggerType: messageTriggerType.BROADCAST,
+				messageType: messageType.SMS,
 				messageSid: message.sid,
 			},
 			session,
 		);
-		await newMessages.save({ session: session });
 		newMessages.push(newMessage);
 	}
 	return newMessages;

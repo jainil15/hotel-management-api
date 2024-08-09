@@ -17,9 +17,10 @@ const broadcastSchema = new Schema(
 				required: true,
 			},
 		],
-		messages: [
+		broadcastMessageIds: [
 			{
-				type: String,
+				type: Schema.Types.ObjectId,
+				ref: "BroadcastMessage",
 				required: true,
 			},
 		],
