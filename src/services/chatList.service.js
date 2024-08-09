@@ -108,6 +108,8 @@ const getByPropertyId = async (propertyId) => {
 								email: "$$chatList.guest.email",
 								active: "$$chatList.guest.active",
 								currentStatus: "$$chatList.guest.currentStatus",
+								createdAt: "$$chatList.guest.createdAt",
+								updatedAt: "$$chatList.guest.updatedAt",
 								lateCheckOutStatus: "$$chatList.guest.lateCheckOutStatus",
 								earlyCheckInStatus: "$$chatList.guest.earlyCheckInStatus",
 								reservationStatus: "$$chatList.guest.reservationStatus",
