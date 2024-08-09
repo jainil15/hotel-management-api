@@ -138,6 +138,12 @@ const createSubaccount = async (propertyId) => {
 	return newTwilioAccount;
 };
 
+
+/**
+ * Get toll free verification status
+ * @param {string} propertyId - property id
+ * @returns {string} status - toll free verification status
+ */
 const getTollFreeVerificationStatus = async (propertyId) => {
 	// Check if property exists
 	const property = await Property.findById(propertyId);

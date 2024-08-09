@@ -34,6 +34,10 @@ const CreateBroadcastValidationSchema = z.object({
 	messages: z.array(z.string()),
 });
 
+/**
+ * @typedef {import("mongoose").Model<Broadcast>} Broadcast
+ * @typedef {typeof Broadcast.schema.obj} BroadcastType
+ */
 const Broadcast = mongoose.model("Broadcast", broadcastSchema);
 
 module.exports = { Broadcast, CreateBroadcastValidationSchema };

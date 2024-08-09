@@ -1,10 +1,11 @@
+const { default: mongoose } = require("mongoose");
 const { NotFoundError } = require("../lib/CustomErrors");
 const { Broadcast } = require("../models/broadcast.model");
 
 /**
  * Get all broadcasts by propertyId
  * @param {string} propertyId - The propertyId to filter broadcasts
- * @returns {Promise<Broadcast[]>} - The list of broadcasts
+ * @returns {Promise<import('../models/broadcast.model').BroadcastType[]>} - The list of broadcasts
  */
 const getByPropertyId = async (propertyId) => {
 	const broadcasts = await Broadcast.find({ propertyId: propertyId });
@@ -36,7 +37,7 @@ const create = async (propertyId, guestIds, broadcastMessageId, session) => {
  * @param {string} broadcastId - The broadcastId to update
  * @param {Broadcast} broadcast - The updated broadcast
  * @param {object} session - The mongoose session
- * @returns {Promise<Broadcast>} - The updated broadcast
+ * @returns {Promise<import('../models/broadcast.model').BroadcastType>} - The updated broadcast
  */
 const update = async (propertyId, broadcastId, broadcast, session) => {
 	const updatedBroadcast = await Broadcast.findOneAndUpdate(
@@ -54,7 +55,7 @@ const update = async (propertyId, broadcastId, broadcast, session) => {
  * @param {string} broadcastId - The broadcastId to update
  * @param {string} broadcastMessageId - The list of messages
  * @param {object} session - The mongoose session
- * @returns {Promise<Broadcast>} - The updated broadcast
+ * @returns {Promise<import('../models/broadcast.model').BroadcastType>} - The updated broadcast
  */
 const addMessages = async (
 	propertyId,
@@ -74,19 +75,38 @@ const addMessages = async (
 /**
  * Get all broadcasts
  * @param {string} propertyId - The propertyId to filter broadcasts
- * @returns {Promise<Broadcast[]>} - The list of broadcasts
+ * @returns {Promise<import('../models/broadcast.model').BroadcastType[]>} - The list of broadcasts
  */
 const getAllBroadcasts = async (propertyId) => {
-	const broadcasts = await Broadcast.find({ propertyId: propertyId }).populate(
-		"broadcastMessageIds",
-	);
+	const broadcasts = await Broadcast.aggregate([
+		{
+			$match: {
+				propertyId: new mongoose.Types.ObjectId(propertyId),
+			},
+		},
+		{
+			$lookup: {
+				from: "broadcastmessages",
+				localField: "broadcastMessageIds",
+				foreignField: "_id",
+				as: "broadcastMessages",
+			},
+		},
+
+		{
+			$project: {
+				broadcastMessageIds: 0,
+			},
+		},
+	]);
+
 	return broadcasts;
 };
 
 /**
  * Get broadcast by id
  * @param {string} broadcastId - The broadcastId to filter broadcasts
- * @returns {Promise<Broadcast>} - The broadcast
+ * @returns {Promise<import('../models/broadcast.model').BroadcastType>} - The broadcast
  */
 const getById = async (broadcastId) => {
 	const broadcast = await Broadcast.findOne({ _id: broadcastId }).populate(

@@ -251,6 +251,6 @@ const getAllByPropertyId = async (req, res, next) => {
 		}
 		return next(new InternalServerError(e.message));
 	}
-}
+};
 
 module.exports = { create, update, sendMessage, getAllByPropertyId };
