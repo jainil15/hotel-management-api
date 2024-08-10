@@ -26,7 +26,7 @@ const create = async (guestId, session) => {
 /**
  * Get a guest token by guestId
  * @param {string} guestId - The guestId to filter guest tokens
- * @returns {Promise<GuestToken>} - The guest token
+ * @returns {Promise<import('../models/guestToken.model').GuestTokenType>} - The guest token
  */
 const getByGuestId = async (guestId) => {
 	const guestToken = GuestToken.findOne({ guestId });
@@ -36,7 +36,7 @@ const getByGuestId = async (guestId) => {
 /**
  * Get a guest token by token
  * @param {string} token - The token to filter guest tokens
- * @returns {Promise<GuestToken>} - The guest token
+ * @returns {Promise<import('../models/guestToken.model').GuestTokenType>} - The guest token
  */
 const getByToken = async (token) => {
 	const guestToken = GuestToken.findOne({ token });
@@ -46,7 +46,7 @@ const getByToken = async (token) => {
 /**
  * Find a guest token by filters
  * @param {object} filters - The filters to find guest tokens
- * @returns {Promise<GuestToken>} - The guest token
+ * @returns {Promise<import('../models/guestToken.model').GuestTokenType>} - The guest token
  */
 const find = async (filters) => {
 	const guestToken = await GuestToken.findOne(filters);
@@ -56,7 +56,7 @@ const find = async (filters) => {
 /**
  * Delete a guest token by guestId
  * @param {string} guestId - The guestId to filter guest tokens
- * @returns {Promise<GuestToken>} - The deleted guest token
+ * @returns {Promise<import('../models/guestToken.model').GuestTokenType>} - The guest token
  */
 const deleteByGuestId = async (guestId) => {
 	const guestToken = await GuestToken.findOneAndDelete({ guestId });

@@ -19,7 +19,8 @@ echo MONGO_URL_CLUSTER=$MONGO_URL_CLUSTER >> .env
 
 
 # Twilio credentials 2
-
+echo TWILIO_SMS_URL=$TWILIO_SMS_URL >> .env
+echo TWILIO_VOICE_URL=$TWILIO_VOICE_URL >> .env
 echo TWILIO_STATUS_CALLBACK=$TWILIO_STATUS_CALLBACK >> .env
  
 # Nodemiler credentials
