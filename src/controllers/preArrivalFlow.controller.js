@@ -29,6 +29,13 @@ const getByPropertyId = async (req, res, next) => {
 	}
 };
 
+/**
+ * Update pre arrival flow by property id
+ * @param {import('express').Request } req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {import('express').Response} - The response
+ */
 const update = async (req, res, next) => {
 	const { propertyId } = req.params;
 	const preArrivalFlow = req.body;

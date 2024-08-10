@@ -6,7 +6,7 @@ const { ChatList } = require("../models/chatList.model");
  * @param {string} propertyId - propertyId
  * @param {string} guestId - guestId
  * @param {object} session - mongoose session
- * @returns {Promise<ChatList>} - chatList
+ * @returns {Promise<import('../models/chatList.model').ChatListType>} - chatList
  */
 const create = async (propertyId, guestId, session) => {
 	const newChatList = new ChatList({
@@ -20,7 +20,7 @@ const create = async (propertyId, guestId, session) => {
 /**
  * Get chat list by propertyId
  * @param {string} propertyId - propertyId
- * @returns {Promise<ChatList>} - chatList
+ * @returns {Promise<import('../models/chatList.model').ChatListType[]>} - chatList
  */
 const getByPropertyId = async (propertyId) => {
 	const pipeline = [
@@ -63,6 +63,7 @@ const getByPropertyId = async (propertyId) => {
 				chatLists: { $push: "$$ROOT" },
 				totalUnreadMessages: {
 					$sum: {
+						// biome-ignore lint/suspicious/noThenProperty: <explanation>
 						$cond: { if: { $gte: ["$unreadMessages", 1] }, then: 1, else: 0 },
 					},
 				},
@@ -81,6 +82,7 @@ const getByPropertyId = async (propertyId) => {
 							latestMessageTime: {
 								$cond: {
 									if: { $gt: [{ $size: "$$chatList.latestMessage" }, 0] },
+									// biome-ignore lint/suspicious/noThenProperty: <explanation>
 									then: {
 										$arrayElemAt: ["$$chatList.latestMessage.createdAt", 0],
 									},
@@ -153,7 +155,7 @@ const getByPropertyId = async (propertyId) => {
  * @param {string} guestId - guestId
  * @param {import('../models/chatList.model').ChatListType} chatList - chatList
  * @param {object} session - mongoose session
- * @returns {Promise<ChatList>} - chatList
+ * @returns {Promise<import('../models/chatList.model').ChatListType>} - chatList
  */
 const update = async (propertyId, guestId, chatList, session) => {
 	const updatedChatList = await ChatList.findOneAndUpdate(
@@ -169,7 +171,7 @@ const update = async (propertyId, guestId, chatList, session) => {
  * @param {string} propertyId - propertyId
  * @param {string} guestId - guestId
  * @param {object} session - mongoose session
- * @returns {Promise<ChatList>} - chatList
+ * @returns {Promise<import('../models/chatList.model').ChatListType>} - chatList
  */
 const remove = async (propertyId, guestId, session) => {
 	const chatList = await ChatList.findOneAndDelete(
@@ -185,7 +187,7 @@ const remove = async (propertyId, guestId, session) => {
  * @param {string} guestId - guestId
  * @param {import('../models/chatList.model').ChatListType} chatList - chatList
  * @param {object} session - mongoose session
- * @returns {Promise<ChatList>} - chatList
+ * @returns {Promise<import('../models/chatList.model').ChatListType>} - chatList
  */
 const updateAndIncUnreadMessages = async (
 	propertyId,

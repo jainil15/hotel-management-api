@@ -22,6 +22,14 @@ const {
 } = require("../constants/message.constant");
 const { responseHandler } = require("../middlewares/response.middleware");
 const { compareDateGt } = require("../utils/dateCompare");
+
+/**
+ * Create check in out request
+ * @param {import('express').Request } req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {import('express').Response} - The response
+ */
 const create = async (req, res, next) => {
 	const session = await mongoose.startSession();
 	session.startTransaction();

@@ -19,7 +19,13 @@ const { responseHandler } = require("../middlewares/response.middleware");
 const { GuestSession } = require("../models/guestSession.model");
 const { Guest } = require("../models/guest.model");
 
-// Get access token
+/**
+ * Get access token
+ * @param {import('express').Request } req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {import('express').Response} - The response
+ */
 const getAccessToken = async (req, res, next) => {
 	try {
 		// Validate request query
@@ -40,7 +46,7 @@ const getAccessToken = async (req, res, next) => {
 		// Get session
 		const session = await authService.getSession(req.query.email);
 		// Get refresh token from cookies
-		const refreshToken = req.cookies["refreshToken"];
+		const refreshToken = req.cookies.refreshToken;
 		// Check if refresh token exists
 		if (!refreshToken) {
 			return next(new UnauthorizedError("Refresh token not found", {}));
@@ -78,6 +84,13 @@ const getAccessToken = async (req, res, next) => {
 	}
 };
 
+/**
+ * Verify otp
+ * @param {import('express').Request } req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {import('express').Response} - The response
+ */
 const verifyOtp = async (req, res, next) => {
 	try {
 		const { email, otp } = req.body;
@@ -123,6 +136,14 @@ const verifyOtp = async (req, res, next) => {
 		return next(new InternalServerError());
 	}
 };
+
+/**
+ * Resend otp
+ * @param {import('express').Request } req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {import('express').Response} - The response
+ */
 const resendOtp = async (req, res, next) => {
 	try {
 		const { email } = req.body;
@@ -162,6 +183,13 @@ const resendOtp = async (req, res, next) => {
 	}
 };
 
+/**
+ * Generate guest access token
+ * @param {import('express').Request } req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {import('express').Response} - The response
+ */
 const genreateGuestAccessToken = async (req, res, next) => {
 	try {
 		const guestId = req.params.guestId;
@@ -179,6 +207,13 @@ const genreateGuestAccessToken = async (req, res, next) => {
 	}
 };
 
+/**
+ * Guest login with token
+ * @param {import('express').Request } req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {import('express').Response} - The response
+ */
 const guestLoginWithToken = async (req, res, next) => {
 	try {
 		const { token } = req.params;
@@ -215,7 +250,7 @@ const isLoggedIn = async (req, res, next) => {
 // Unsecure
 const refreshGuestAccessToken = (req, res, next) => {
 	try {
-		const accessToken = req.headers["authorization"].split(" ")[1];
+		const accessToken = req.headers.authorization.split(" ")[1];
 		if (!accessToken) {
 			throw new UnauthorizedError("Refresh token not found", {});
 		}

@@ -41,6 +41,13 @@ const {
 } = require("../utils/guestStatustToTemplate");
 require("dotenv").config();
 
+/**
+ * Get all guests by property id
+ * @param {import('express').Request } req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {import('express').Response} - The response
+ */
 const getAll = async (req, res, next) => {
 	try {
 		const guests = await guestService.getAll(req.params.propertyId);
@@ -53,6 +60,13 @@ const getAll = async (req, res, next) => {
 	}
 };
 
+/**
+ * Create a new guest
+ * @param {import('express').Request } req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {import('express').Response} - The response
+ */
 const create = async (req, res, next) => {
 	const session = await mongoose.startSession();
 	session.startTransaction();
@@ -200,6 +214,13 @@ const create = async (req, res, next) => {
 	}
 };
 
+/**
+ * Get guest by id
+ * @param {import('express').Request } req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {import('express').Response} - The response
+ */
 const getById = async (req, res, next) => {
 	try {
 		const guestId = req.params.guestId;
@@ -217,6 +238,13 @@ const getById = async (req, res, next) => {
 	}
 };
 
+/**
+ * Update guest by id
+ * @param {import('express').Request } req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {import('express').Response} - The response
+ */
 const update = async (req, res, next) => {
 	const session = await mongoose.startSession();
 	session.startTransaction();
@@ -271,7 +299,8 @@ const update = async (req, res, next) => {
 					});
 				}
 
-				const twilioSubClient = await twilioService.getTwilioClient(twilioAccount);
+				const twilioSubClient =
+					await twilioService.getTwilioClient(twilioAccount);
 
 				const sentMessage = await smsService.send(
 					twilioSubClient,
@@ -336,6 +365,13 @@ const update = async (req, res, next) => {
 	}
 };
 
+/**
+ * Remove guest by id
+ * @param {import('express').Request } req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {import('express').Response} - The response
+ */
 const remove = async (req, res, next) => {
 	const session = await mongoose.startSession();
 	session.startTransaction();
@@ -376,6 +412,13 @@ const remove = async (req, res, next) => {
 	}
 };
 
+/**
+ * Get all guests with status
+ * @param {import('express').Request } req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {import('express').Response} - The response
+ */
 const getAllGuestsWithStatus = async (req, res, next) => {
 	try {
 		const filters = req.query;

@@ -25,6 +25,13 @@ const {
 	requestType,
 } = require("../constants/message.constant");
 
+/**
+ * Create guest status
+ * @param {import('express').Request } req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {import('express').Response} - The response
+ */
 const create = async (req, res, next) => {
 	const session = await mongoose.startSession();
 	session.startTransaction();
@@ -66,6 +73,13 @@ const create = async (req, res, next) => {
 	}
 };
 
+/**
+ * Get guest status by guest id
+ * @param {import('express').Request } req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {import('express').Response} - The response
+ */
 const getByGuestId = async (req, res, next) => {
 	try {
 		const { guestId } = req.params;
@@ -82,6 +96,13 @@ const getByGuestId = async (req, res, next) => {
 	}
 };
 
+/**
+ * Update guest status by guest id
+ * @param {import('express').Request } req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {import('express').Response} - The response
+ */
 const update = async (req, res, next) => {
 	const session = await mongoose.startSession();
 	session.startTransaction();
@@ -133,6 +154,13 @@ const update = async (req, res, next) => {
 	}
 };
 
+/**
+ * Create check in out request by guestId
+ * @param {import('express').Request } req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {import('express').Response} - The response
+ */
 const request = async (req, res, next) => {
 	const session = await mongoose.startSession();
 	session.startTransaction();

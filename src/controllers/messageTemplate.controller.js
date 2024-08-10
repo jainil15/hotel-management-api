@@ -25,6 +25,13 @@ const {
 	UpdateGuestStatusValidationSchema,
 } = require("../models/guestStatus.model");
 
+/**
+ * Create message template
+ * @param {import('express').Request } req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {import('express').Response} - The response
+ */
 const create = async (req, res, next) => {
 	const session = await mongoose.startSession();
 	session.startTransaction();
@@ -79,6 +86,13 @@ const create = async (req, res, next) => {
 	}
 };
 
+/**
+ * Get all message templates by property id
+ * @param {import('express').Request } req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {import('express').Response} - The response
+ */
 const getAll = async (req, res, next) => {
 	try {
 		const { propertyId } = req.params;
@@ -92,6 +106,13 @@ const getAll = async (req, res, next) => {
 	}
 };
 
+/**
+ * Get message template by id
+ * @param {import('express').Request } req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {import('express').Response} - The response
+ */
 const getById = async (req, res, next) => {
 	try {
 		const { propertyId, messageTemplateId } = req.params;
@@ -108,6 +129,13 @@ const getById = async (req, res, next) => {
 	}
 };
 
+/**
+ * Update message template by id
+ * @param {import('express').Request } req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {import('express').Response} - The response
+ */
 const update = async (req, res, next) => {
 	const session = await mongoose.startSession();
 	session.startTransaction();
@@ -146,6 +174,13 @@ const update = async (req, res, next) => {
 	}
 };
 
+/**
+ * Remove message template by id
+ * @param {import('express').Request } req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {import('express').Response} - The response
+ */
 const remove = async (req, res, next) => {
 	const session = await mongoose.startSession();
 	session.startTransaction();
@@ -218,7 +253,9 @@ const updateAll = async (req, res, next) => {
 		//   session
 		// );
 
+		// biome-ignore lint/style/useConst: <explanation>
 		let updatedMessageTemplates = [];
+		// biome-ignore lint/style/useConst: <explanation>
 		for (let messageTemplate of messageTemplateResult.data) {
 			let updatedMessageTemplate;
 			if (messageTemplate._id) {
@@ -308,6 +345,13 @@ const createAllDefaultTemplates = async (req, res, next) => {
 	}
 };
 
+/**
+ * Get message template by status for create
+ * @param {import('express').Request } req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {import('express').Response} - The response
+ */
 const getMessageTemplateByStatusForCreate = async (req, res, next) => {
 	try {
 		const { propertyId } = req.params;
@@ -333,6 +377,13 @@ const getMessageTemplateByStatusForCreate = async (req, res, next) => {
 	}
 };
 
+/**
+ * Get message template by status for update
+ * @param {import('express').Request } req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {import('express').Response} - The response
+ */
 const getMessageTemplateByStatusForUpdate = async (req, res, next) => {
 	const session = await mongoose.startSession();
 	session.startTransaction();
@@ -361,7 +412,7 @@ const getMessageTemplateByStatusForUpdate = async (req, res, next) => {
 			guestStatusToTemplateOnUpdate(oldGuestStatus, newGuestStatus),
 		);
 
-    await session.abortTransaction();
+		await session.abortTransaction();
 		session.endSession();
 		return responseHandler(res, { messageTemplate: messageTemplate });
 	} catch (e) {

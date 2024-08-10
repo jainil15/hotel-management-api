@@ -20,7 +20,14 @@ const {
 	InternalServerError,
 } = require("../lib/CustomErrors");
 const { responseHandler } = require("../middlewares/response.middleware");
-// Registering new User
+
+/**
+ * Register new user
+ * @param {import('express').Request } req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {import('express').Response} - The response
+ */
 const register = async (req, res, next) => {
 	const session = await mongoose.startSession();
 	session.startTransaction();
@@ -76,7 +83,13 @@ const register = async (req, res, next) => {
 	}
 };
 
-// Login
+/**
+ * User login
+ * @param {import('express').Request } req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {import('express').Response} - The response
+ */
 const login = async (req, res, next) => {
 	try {
 		// get email and password from body
@@ -142,7 +155,13 @@ const login = async (req, res, next) => {
 	}
 };
 
-// Logout
+/**
+ * Logout
+ * @param {import('express').Request } req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {import('express').Response} - The response
+ */
 const logout = async (req, res, next) => {
 	try {
 		// delete session and clear refresh token
@@ -157,7 +176,13 @@ const logout = async (req, res, next) => {
 	}
 };
 
-// Get User
+/**
+ * Get user details
+ * @param {import('express').Request } req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {import('express').Response} - The response
+ */
 const getUser = async (req, res, next) => {
 	const { iat, exp, ...user } = req.user;
 	try {
@@ -170,7 +195,13 @@ const getUser = async (req, res, next) => {
 	}
 };
 
-// Create user
+/**
+ * Create new user
+ * @param {import('express').Request } req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {import('express').Response} - The response
+ */
 const create = async (req, res, next) => {
 	try {
 		const user = req.body;

@@ -12,6 +12,10 @@ const extraUserDetailsSchema = new Schema(
 
 extraUserDetailsSchema.index({ userId: 1 }, { unique: true });
 
+/**
+ * @typedef {import("mongoose").Model<ExtraUserDetails>} ExtraUserDetails
+ * @typedef {typeof ExtraUserDetails.schema.obj} ExtraUserDetailsType
+ */
 const ExtraUserDetails = mongoose.model(
   "ExtraUserDetails",
   extraUserDetailsSchema,

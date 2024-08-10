@@ -21,6 +21,10 @@ const preArrivalSchema = new Schema(
 );
 preArrivalSchema.index({ guestId: 1 }, { unique: true });
 
+/**
+ * @typedef {import("mongoose").Model<PreArrival>} PreArrival
+ * @typedef {typeof PreArrival.schema.obj} PreArrivalType
+ */
 const PreArrival = mongoose.model("PreArrival", preArrivalSchema);
 PreArrival.init().then(() => {
 	logger.info("Initialized PreArrival model ");

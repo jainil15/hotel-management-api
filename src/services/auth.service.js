@@ -7,7 +7,7 @@ require("dotenv").config();
 /**
  * Create a new session
  * @param {object} user - The user object
- * @returns {Promise<Session>} - The saved session
+ * @returns {Promise<import('../models/session.model').SessionType>} - The saved session
  */
 const createSession = async (user) => {
 	// Check if session already exists
@@ -25,7 +25,7 @@ const createSession = async (user) => {
 /**
  * Get a session by email
  * @param {string} email - The email to filter session
- * @returns {Promise<Session>} - The session
+ * @returns {Promise<import('../models/session.model').SessionType>} - The session
  */
 const getSession = async (email) => {
 	// Find the session by email
@@ -41,7 +41,7 @@ const getSession = async (email) => {
 /**
  * Delete a session by email
  * @param {string} email - The email to filter session
- * @returns {Promise<Session>} - The deleted session
+ * @returns {Promise<import('../models/session.model').SessionType>} - The deleted session
  */
 const deleteSession = async (email) => {
 	// Find the session by email
@@ -60,7 +60,7 @@ const deleteSession = async (email) => {
 /**
  * Decode a refresh token
  * @param {string} refreshToken - The refresh token
- * @returns {Promise<object>} - The decoded token
+ * @returns {Promise<string>} - The decoded token
  */
 const decodeRefreshToken = async (refreshToken) => {
 	const decoded = await jwt.verify(
@@ -74,7 +74,7 @@ const decodeRefreshToken = async (refreshToken) => {
 /**
  * Decode an access token
  * @param {string} accessToken - The access token
- * @returns {Promise<object>} - The decoded token
+ * @returns {Promise<string>} - The decoded token
  */
 const decodeAccessToken = async (accessToken) => {
 	const decoded = await jwt.verify(
@@ -86,7 +86,7 @@ const decodeAccessToken = async (accessToken) => {
 
 /**
  * Generate a guest access token
- * @param {object} guest - The guest object
+ * @param {import('../models/guest.model').GuestType} guest - The guest object
  * @param {string} expiry - The expiry time
  * @returns {string} - The access token
  */

@@ -18,6 +18,13 @@ const {
 	messageType,
 } = require("../constants/message.constant");
 
+/**
+ * Create broadcast message and send message to all guests in the broadcast
+ * @param {import('express').Request} req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {Promise<import('express').Response>} - The response
+ */
 const create = async (req, res, next) => {
 	const session = await mongoose.startSession();
 	session.startTransaction();
@@ -114,6 +121,13 @@ const create = async (req, res, next) => {
 	}
 };
 
+/**
+ * Update broadcast by id
+ * @param {import('express').Request} req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {Promise<import('express').Response>} - The response
+ */
 const update = async (req, res, next) => {
 	try {
 		const { propertyId, broadcastId } = req.params;
@@ -132,6 +146,13 @@ const update = async (req, res, next) => {
 	}
 };
 
+/**
+ * Send message to all guests in a broadcast
+ * @param {import('express').Request} req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {Promise<import('express').Response>} - The response
+ */
 const sendMessage = async (req, res, next) => {
 	const session = await mongoose.startSession();
 	session.startTransaction();
@@ -240,6 +261,13 @@ const sendMessage = async (req, res, next) => {
 	}
 };
 
+/**
+ * Get all broadcasts by property id
+ * @param {import('express').Request} req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {Promise<import('express').Response>} - The response
+ */
 const getAllByPropertyId = async (req, res, next) => {
 	try {
 		const { propertyId } = req.params;
@@ -253,6 +281,13 @@ const getAllByPropertyId = async (req, res, next) => {
 	}
 };
 
+/**
+ * Get broadcast by id
+ * @param {import('express').Request} req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {Promise<import('express').Response>} - The response
+ */
 const getById = async (req, res, next) => {
 	try {
 		const { broadcastId } = req.params;

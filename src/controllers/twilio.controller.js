@@ -30,6 +30,13 @@ const {
 	TWILIO_AUTH_TOKEN,
 } = require("../constants/twilio.constant");
 
+/**
+ * Get phone numbers from Twilio
+ * @param {import('express').Request } req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {import('express').Response} - The response
+ */
 const getPhoneNumbers = async (req, res, next) => {
 	try {
 		const country = req.query.country;
@@ -47,6 +54,13 @@ const getPhoneNumbers = async (req, res, next) => {
 	}
 };
 
+/**
+ * Buy phone number from Twilio
+ * @param {import('express').Request } req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {import('express').Response} - The response
+ */
 const buyPhoneNumber = async (req, res, next) => {
 	try {
 		const propertyId = req.params.propertyId;
@@ -97,6 +111,13 @@ const buyPhoneNumber = async (req, res, next) => {
 	}
 };
 
+/**
+ * Create subaccount for Twilio
+ * @param {import('express').Request } req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {import('express').Response} - The response
+ */
 const createSubaccount = async (req, res, next) => {
 	try {
 		const propertyId = req.params.propertyId;
@@ -120,6 +141,14 @@ const createSubaccount = async (req, res, next) => {
 	}
 };
 
+
+/**
+ * Get toll free verification status from Twilio
+ * @param {import('express').Request } req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {import('express').Response} - The response
+ */
 const getTollFreeVerificationStatus = async (req, res, next) => {
 	try {
 		const propertyId = req.params.propertyId;
@@ -136,6 +165,15 @@ const getTollFreeVerificationStatus = async (req, res, next) => {
 	}
 };
 
+
+/**
+ * Send message to guest from property - Maybe not used
+ * @deprecated 
+ * @param {import('express').Request } req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {import('express').Response} - The response
+ */
 const sendMessage = async (req, res, next) => {
 	const session = await mongoose.startSession();
 	session.startTransaction();
@@ -160,6 +198,15 @@ const sendMessage = async (req, res, next) => {
 	}
 };
 
+
+/**
+ * Incoming message from Twilio - Maybe not used
+ * @deprecated
+ * @param {import('express').Request } req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {import('express').Response} - The response
+ */
 const incomingMessage = async (req, res, next) => {
 	const session = await mongoose.startSession();
 	session.startTransaction();
@@ -230,6 +277,14 @@ const incomingMessage = async (req, res, next) => {
 	}
 };
 
+
+/**
+ * Get subaccount billing from Twilio
+ * @param {import('express').Request } req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {import('express').Response} - The response
+ */
 const subaccountBilling = async (req, res, next) => {
 	try {
 		const { propertyId } = req.params;
