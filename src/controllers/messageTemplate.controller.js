@@ -356,14 +356,14 @@ const getMessageTemplateByStatusForCreate = async (req, res, next) => {
 	try {
 		const { propertyId } = req.params;
 		const status = req.body;
-		console.log("propertyId", propertyId, status);
+		
 		const statusResult = UpdateGuestStatusValidationSchema.safeParse(status);
 		if (!statusResult.success) {
 			throw new ValidationError("Validation Error", {
 				...statusResult.error.flatten().fieldErrors,
 			});
 		}
-		console.log(guestStatusToTemplateOnCreate(status));
+		
 		const messageTemplate = await messageTemplateService.getByNameAndPropertyId(
 			propertyId,
 			guestStatusToTemplateOnCreate(status),
@@ -405,7 +405,7 @@ const getMessageTemplateByStatusForUpdate = async (req, res, next) => {
 			session,
 		);
 
-		console.log(guestStatusToTemplateOnUpdate(oldGuestStatus, newGuestStatus));
+		
 
 		const messageTemplate = await messageTemplateService.getByNameAndPropertyId(
 			propertyId,

@@ -26,7 +26,7 @@ const guestSchema = new Schema(
 		countryCode: { type: String, required: true },
 		phoneNumber: { type: String, required: true },
 		source: { type: String, required: true },
-		checkIn: { type: Date, required: true },
+		checkIn: { type: Date, required: true, },
 		checkOut: { type: Date, required: true },
 		confirmationNumber: { type: String, required: true },
 		roomNumber: { type: String },
@@ -37,6 +37,8 @@ const guestSchema = new Schema(
 	},
 	{ timestamps: true },
 );
+
+
 
 /**
  * @typedef {import("mongoose").Model<Guest>} Guest
@@ -182,6 +184,7 @@ const UpdateGuestValidationSchema = z
 			});
 		}
 	});
+
 Guest.init().then(() => {
 	logger.info("Initialized Guest Model");
 });

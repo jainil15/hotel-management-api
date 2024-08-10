@@ -207,7 +207,9 @@ const getAllGuestWithStatusv2 = async (propertyId, filters) => {
 				$match: {
 					$or: Object.keys(Guest.schema.obj).map((key) => ({
 						[`string_${key}`]: {
-							$regex: new RegExp(filters.search.replace(/[#-.]|[[-^]|[?|{}]/g, "\\$&")),
+							$regex: new RegExp(
+								filters.search.replace(/[#-.]|[[-^]|[?|{}]/g, "\\$&"),
+							),
 
 							$options: "i",
 						},
@@ -268,7 +270,7 @@ const update = async (guestId, guestStatus, session, role = "admin") => {
 			guestId: ["Guest not found"],
 		});
 	}
-	if (!validateUpdate(oldGuestStatus, updatedGuestStatus)) {
+	if (!validateUpdate(oldGuestStatus._doc, updatedGuestStatus._doc)) {
 		throw new ValidationError("Invalid Status", {
 			currentStatus: ["Invalid Status"],
 		});

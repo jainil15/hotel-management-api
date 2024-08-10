@@ -70,13 +70,19 @@ const getById = async (guestId, propertyId) => {
  * @returns {object} updatedGuest - updated guest object
  */
 const update = async (guest, propertyId, guestId, session) => {
+	if (guest.checkIn) {
+		guest.checkIn = new Date(guest.checkIn);
+	}
+	if (guest.checkOut) {
+		guest.checkOut = new Date(guest.checkOut);
+	}
 	const updatedGuest = await Guest.findOneAndUpdate(
 		{ _id: guestId, propertyId: propertyId },
 		{
 			...guest,
 			propertyId: propertyId,
 		},
-		{ session: session },
+		{ session: session, new: true },
 	);
 	if (!updatedGuest) {
 		throw new NotFoundError("Guest not found", {

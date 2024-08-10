@@ -184,7 +184,7 @@ const sendMessage = async (req, res, next) => {
 
 		const twilioSubClient = await twilioService.getTwilioClient(twilioAccount);
 		const guestPhoneNumbers = await guestService.getPhoneNumbers(guestIds);
-		console.log(guestPhoneNumbers);
+		
 
 		const newBroadcastMessage = await broadcastMessageService.create(
 			propertyId,

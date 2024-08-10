@@ -10,12 +10,15 @@ const { GuestStatus } = require("../models/guestStatus.model");
 const AllowStatusForCurrentStatus = {
 	"In House": ["preArrivalStatus", "earlyCheckInStatus"],
 	Reservation: ["reservationStatus", "earlyCheckInStatus", "preArrivalStatus"],
-	"Checked Out": [],
+	"Checked Out": ["lateCheckOutStatus"],
 };
 
 const AllowedStatus = {
 	Reservation: {
 		reservationStatus: ["Confirmed", "Cancelled"],
+		preArrivalStatus: ["Not Applied", "Applied"],
+		earlyCheckInStatus: ["Not Requested", "Requested", "Accepted", "Declined"],
+		lateCheckOutStatus: ["Not Requested", "Requested", "Accepted", "Declined"],
 	},
 	"In House": {
 		reservationStatus: ["Confirmed"],
@@ -85,11 +88,21 @@ const validateUpdate = (currentGuestStatus, updateGuestStatus) => {
 				return true;
 		}
 	}
-	return validateStatus(updateGuestStatus);
+	return validateStatusV2(currentGuestStatus, updateGuestStatus);
 };
+const IGNORE_KEYS = [
+	"currentStatus",
+	"_id",
+	"guestId",
+	"__v",
+	"createdAt",
+	"updatedAt",
+	"propertyId",
+];
 
 /**
  * Perform validation on guest status
+ * @deprecated - use validateStatusV2 instead
  * @param {object} guestStatus - guest status
  * @returns {boolean} - true if valid, false otherwise
  */
@@ -103,6 +116,35 @@ const validateStatus = (guestStatus) => {
 			if (!status[key].includes(guestStatus[key])) {
 				return false;
 			}
+		} else if (!IGNORE_KEYS.includes(key)) {
+			return false;
+		}
+	}
+	return true;
+};
+
+/**
+ * Perform validation on update guest status v2
+ * @param {import('../models/guestStatus.model.js').GuestStatusType} oldGuestStatus - old guest status
+ * @param {import('../models/guestStatus.model.js').GuestStatusType} newGuestStatus - new guest status
+ * @returns {boolean} - true if valid, false otherwise
+ */
+const validateStatusV2 = (oldGuestStatus, newGuestStatus) => {
+	const currentStatus = newGuestStatus.currentStatus;
+	const allowedStatus = AllowStatusForCurrentStatus[currentStatus];
+
+	for (const key in newGuestStatus) {
+		if (allowedStatus.includes(key)) {
+			if (oldGuestStatus[key] !== newGuestStatus[key]) {
+				if (!AllowedStatus[currentStatus][key].includes(newGuestStatus[key])) {
+					return false;
+				}
+			}
+		} else if (
+			!IGNORE_KEYS.includes(key) &&
+			oldGuestStatus[key] !== newGuestStatus[key]
+		) {
+			return false;
 		}
 	}
 	return true;

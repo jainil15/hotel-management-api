@@ -145,7 +145,7 @@ const create = async (req, res, next) => {
 					guestStatusToTemplateOnCreate(newGuestStatus),
 				);
 			if (messageTemplate) {
-				console.log(messageTemplate);
+				
 				const twilioAccount =
 					await twilioAccountService.getByPropertyId(propertyId);
 				const twilioSubClient =
@@ -259,9 +259,12 @@ const update = async (req, res, next) => {
 		if (!guestResult.success || !statusResult.success) {
 			throw new ValidationError("Validation Error", {
 				...guestResult?.error?.flatten().fieldErrors,
-				...guestResult?.error?.flatten().fieldErrors,
+				...statusResult?.error?.flatten().fieldErrors,
 			});
 		}
+	
+		
+
 		const updatedGuest = await guestService.update(
 			guest,
 			propertyId,
@@ -276,12 +279,7 @@ const update = async (req, res, next) => {
 
 		const oldGuestStatus = await guestStatusService.getByGuestId(guestId);
 		// Send message to the guest according to the status
-		console.log(
-			await messageTemplateService.getByNameAndPropertyId(
-				propertyId,
-				guestStatusToTemplateOnUpdate(oldGuestStatus, updatedGuestStatus),
-			),
-		);
+		
 		if (sendMessage === true) {
 			// Get Message Template
 			const messageTemplate =
@@ -290,6 +288,7 @@ const update = async (req, res, next) => {
 					guestStatusToTemplateOnUpdate(oldGuestStatus, updatedGuestStatus),
 				);
 			// Send Message
+		
 			if (messageTemplate) {
 				const twilioAccount =
 					await twilioAccountService.getByPropertyId(propertyId);
