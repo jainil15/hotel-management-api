@@ -4,7 +4,14 @@ const {
 	APIError,
 	InternalServerError,
 } = require("../lib/CustomErrors");
-// Authenticate Token middleware
+
+/**
+ * Authenticate Token middleware
+ * @param {import("express").Request} req - Request object
+ * @param {import("express").Response} res - Response object
+ * @param {import("express").NextFunction} next - Next function
+ * @returns {Function} next - Next function
+ */
 const authenticateToken = async (req, res, next) => {
 	try {
 		// Get the token from the header
@@ -31,6 +38,12 @@ const authenticateToken = async (req, res, next) => {
 	}
 };
 
+/**
+ * Authenticate Token middleware for socket
+ * @param {import("socket.io").Socket} socket - Socket object
+ * @param {Function} next - Next function
+ * @returns {Function} next - Next function
+ */
 const authenticateTokenSocket = async (socket, next) => {
 	try {
 		// Get the token from the handshake headers
@@ -40,7 +53,6 @@ const authenticateTokenSocket = async (socket, next) => {
 		const token = authHeader?.split(" ")[1];
 
 		if (token == null) {
-			
 			return next(new UnauthorizedError("Authorization Token Missing", {}));
 		}
 

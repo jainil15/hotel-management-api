@@ -16,10 +16,6 @@ const {
 const { CreateGuestStatusValidationSchema } = require("./guestStatus.model");
 const Schema = mongoose.Schema;
 
-/**
- * Guest Schema
- * @class Guest
- */
 const guestSchema = new Schema(
 	{
 		propertyId: {

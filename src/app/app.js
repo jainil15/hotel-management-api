@@ -7,13 +7,14 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const helmet = require("helmet");
 const responseTime = require("response-time");
+
 // Routes imports
 const userRoutes = require("../routes/user.route");
 const authRoutes = require("../routes/auth.route");
 const propertyRoutes = require("../routes/property.route");
 const guestRoutes = require("../routes/guest.route");
 const messageRoutes = require("../routes/message.route");
-const twilioRoutes = require("../routes/twilio.route"); 
+const twilioRoutes = require("../routes/twilio.route");
 const countryRoutes = require("../routes/country.route");
 const guestStatusRoutes = require("../routes/guestStatus.route");
 const messageTemplateRoutes = require("../routes/messageTemplate.route");
@@ -21,6 +22,8 @@ const chatListRoutes = require("../routes/chatList.route");
 const smsRoutes = require("../routes/sms.route");
 const checkInOutRequestRoutes = require("../routes/checkInOutRequest.route");
 const broadcastRoutes = require("../routes/broadcast.route");
+const preArrivalFlowRoutes = require("../routes/preArrivalFlow.route");
+
 // Socket imports
 const guestSocket = require("../sockets/guest.socket");
 
@@ -64,7 +67,6 @@ const theme = new SwaggerTheme();
 // Setup
 const PORT = process.env.PORT || 8000;
 
-// Connect().then();
 /**
  * Create express app
  * @returns {import("express").Application} - Express app
@@ -111,6 +113,8 @@ const createApp = () => {
 	app.use("/sms", smsRoutes);
 	app.use("/checkInOutRequest", checkInOutRequestRoutes);
 	app.use("/broadcast", broadcastRoutes);
+	// app.use("/preArrivalFlow", preArrivalFlowRoutes);
+
 	// Health Check
 	app.get("/health", (req, res, next) => {
 		return responseHandler(res, {}, 200, "Server is running");

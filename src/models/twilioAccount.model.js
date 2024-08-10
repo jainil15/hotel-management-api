@@ -47,6 +47,11 @@ const TwilioValidationSchema = z.object({
     .optional(),
   phoneNumberSid: z.string().optional(),
 });
+
+/**
+ * @typedef {import("mongoose").Model<TwilioAccount>} TwilioAccount
+ * @typedef {typeof TwilioAccount.schema.obj} TwilioAccountType
+ */
 const TwilioAccount = mongoose.model("TwilioAccount", twilioAccountSchema);
 TwilioAccount.init().then(() => {
   logger.info("Initialized TwilioAccount Model");

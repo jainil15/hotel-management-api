@@ -41,6 +41,13 @@ const twilioAuth = async (req, res, next) => {
 	}
 };
 
+/**
+ * Twilio Auth Middleware V2
+ * @param {import('express').Request} req - request object
+ * @param {import('express').Response} res - response object
+ * @param {import('express').NextFunction} next - next middleware
+ * @returns {void}
+ */
 const twilioAuthV2 = async (req, res, next) => {
 	try {
 		const twilioSignature = req.headers["x-twilio-signature"];

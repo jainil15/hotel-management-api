@@ -37,6 +37,10 @@ const SettingValidationSchema = z.object({
 	automateLateCheckoutMessage: z.string().optional(),
 });
 
+/**
+ * @typedef {import("mongoose").Model<Setting>} Setting
+ * @typedef {typeof Setting.schema.obj} SettingType
+ */
 const Setting = mongoose.model("Setting", settingSchema);
 
 module.exports = { Setting, SettingValidationSchema };

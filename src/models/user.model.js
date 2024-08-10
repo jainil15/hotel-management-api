@@ -32,6 +32,10 @@ const UserValidationSchema = z.object({
   active: z.boolean().optional(),
 });
 
+/**
+ * @typedef {import("mongoose").Model<User>} User
+ * @typedef {typeof User.schema.obj} UserType
+ */
 const User = mongoose.model("User", userSchema);
 
 module.exports = { User, UserValidationSchema };
