@@ -55,13 +55,11 @@ module.exports = (io, socket) => {
 			payload.guestId,
 			payload.propertyId,
 		);
+
 		if (!guest) {
 			return io
 				.to(`property:${payload.propertyId}`)
-				.emit(
-					"error",
-					NotFoundError("Guest not found", { guestId: "Guest not found" }),
-				);
+				.emit("error", "Guest not found");
 		}
 		socket.join(`guest:${payload.guestId}`);
 	};
@@ -78,7 +76,7 @@ module.exports = (io, socket) => {
 			payload.guestId,
 			payload.propertyId,
 		);
-		
+
 		if (!guest) {
 			return io
 				.to(`property:${payload.propertyId}`)

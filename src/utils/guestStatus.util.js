@@ -38,6 +38,7 @@ const AllowedStatus = {
  * @returns {boolean} - true if valid, false otherwise
  */
 const validateUpdate = (currentGuestStatus, updateGuestStatus) => {
+	console.log(currentGuestStatus, updateGuestStatus)
 	if (currentGuestStatus.currentStatus === updateGuestStatus.currentStatus) {
 		switch (currentGuestStatus.currentStatus) {
 			case GUEST_CURRENT_STATUS.RESERVED:
@@ -68,6 +69,7 @@ const validateUpdate = (currentGuestStatus, updateGuestStatus) => {
 					currentGuestStatus.earlyCheckInStatus !==
 						updateGuestStatus.earlyCheckInStatus
 				) {
+					console.log("should be false")
 					return false;
 				}
 				return true;

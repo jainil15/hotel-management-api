@@ -17,5 +17,40 @@ router.post(
 	checkGuestAccess,
 	checkInOutRequestController.create,
 );
+router.patch(
+	"/:propertyId/:guestId/:checkInOutRequestId",
+	authenticateToken,
+	checkPropertyAccess,
+	checkPermissions([ROLE.GUEST, ROLE.ADMIN, ROLE.FRONTDESK]),
+	checkGuestAccess,
+	checkInOutRequestController.updateRequestStatus,
+);
+
+router.get(
+	"/:propertyId/:guestId",
+	authenticateToken,
+	checkPropertyAccess,
+	checkPermissions([ROLE.GUEST, ROLE.ADMIN, ROLE.FRONTDESK]),
+	checkGuestAccess,
+	checkInOutRequestController.getAll,
+);
+
+router.get(
+	"/:propertyId/:guestId/requestType",
+	authenticateToken,
+	checkPropertyAccess,
+	checkPermissions([ROLE.GUEST, ROLE.ADMIN, ROLE.FRONTDESK]),
+	checkGuestAccess,
+	checkInOutRequestController.getByRequestType,
+);
+
+router.get(
+	"/:propertyId/:guestId/:checkInOutRequestId",
+	authenticateToken,
+	checkPropertyAccess,
+	checkPermissions([ROLE.GUEST, ROLE.ADMIN, ROLE.FRONTDESK]),
+	checkGuestAccess,
+	checkInOutRequestController.getById,
+);
 
 module.exports = router;

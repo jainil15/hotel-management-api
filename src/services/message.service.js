@@ -118,4 +118,5 @@ const updateStatus = async (messageSid, status, session) => {
 	return updatedMessage;
 };
 
+
 module.exports = { create, getAll, getById, updateStatus };

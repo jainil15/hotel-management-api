@@ -161,6 +161,23 @@ const getMessageTemplateByStatus = async (
 	return messageTemplate;
 };
 
+/**
+ * Update message template by name
+ * @param {string} propertyId - The property id
+ * @param {string} name - The message template name
+ * @param {object} messageTemplate - The updated message template
+ * @param {object} session - The mongoose session
+ * @returns {Promise<import('../models/messageTemplates.model').MessageTemplateType>} - The updated message template
+ */
+const updateByName = async (propertyId, name, messageTemplate, session) => {
+	const updatedMessageTemplate = await MessageTemplate.findOneAndUpdate(
+		{ propertyId, name },
+		messageTemplate,
+		{ new: true, session: session },
+	);
+	return updatedMessageTemplate;
+};
+
 module.exports = {
 	getAll,
 	create,
@@ -171,4 +188,5 @@ module.exports = {
 	getByNameAndPropertyId,
 	updateAll,
 	getMessageTemplateByStatus,
+	updateByName,
 };

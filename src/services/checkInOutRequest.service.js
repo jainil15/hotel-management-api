@@ -65,9 +65,57 @@ const findOne = async (propertyId, guestId, filter) => {
 	return checkInOutRequest;
 };
 
+/**
+ * Update check in/out request
+ * @param {string} propertyId - The property id
+ * @param {string} checkInOutRequestId - The check in/out request id
+ * @param {import('../models/checkInOutRequest.model').CheckInOutRequestType} checkInOutRequestStatus - The status of the request
+ * @param {object} session - The mongoose session
+ *  @returns {Promise<import('../models/checkInOutRequest.model').CheckInOutRequestType>} - The updated check in/out request
+ */
+const updateRequestStatus = async (
+	propertyId,
+	checkInOutRequestId,
+	checkInOutRequestStatus,
+	session,
+) => {
+	const updatedCheckInOutRequest = await CheckInOutRequest.findOneAndUpdate(
+		{
+			propertyId: propertyId,
+			_id: checkInOutRequestId,
+		},
+
+		checkInOutRequestStatus,
+
+		{
+			new: true,
+			session: session,
+		},
+	);
+	return updatedCheckInOutRequest;
+};
+
+/**
+ * Get check in/out request by status
+ * @param {string} propertyId - The property id
+ * @param {string} guestId - The guest id
+ * @param {import('../models/checkInOutRequest.model').CheckInOutRequestType} requestType - The status of the request
+ * @returns {Promise<import('../models/checkInOutRequest.model').CheckInOutRequestType>} - The check in/out request
+ */
+const getByRequestType = async (propertyId, guestId, requestType) => {
+	const checkInOutRequest = await CheckInOutRequest.findOne({
+		propertyId: propertyId,
+		guestId: guestId,
+		requestType: requestType,
+	});
+	return checkInOutRequest;
+};
+
 module.exports = {
 	create,
 	getByPropertyId,
 	getByPropertyIdAndGuestId,
 	findOne,
+	updateRequestStatus,
+	getByRequestType,
 };

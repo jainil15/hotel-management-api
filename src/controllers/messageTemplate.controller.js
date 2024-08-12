@@ -24,6 +24,9 @@ const {
 const {
 	UpdateGuestStatusValidationSchema,
 } = require("../models/guestStatus.model");
+const {
+	MESSAGE_TEMPLATE_TYPES,
+} = require("../constants/messageTemplate.contant");
 
 /**
  * Create message template
@@ -204,6 +207,8 @@ const remove = async (req, res, next) => {
 			"Message Template removed successfully",
 		);
 	} catch (e) {
+		await session.abortTransaction();
+		session.endSession();
 		if (e instanceof APIError) {
 			return next(e);
 		}
@@ -212,7 +217,7 @@ const remove = async (req, res, next) => {
 };
 
 /**
- * Update all
+ * Update all messate template at once :: bulk update, create, remove
  * @param {import("express").Request} req - request object
  * @param {import("express").Response} res - response object
  * @param {import("express").NextFunction} next - next function
@@ -258,7 +263,27 @@ const updateAll = async (req, res, next) => {
 		// biome-ignore lint/style/useConst: <explanation>
 		for (let messageTemplate of messageTemplateResult.data) {
 			let updatedMessageTemplate;
-			if (messageTemplate._id) {
+			console.log("messageTemplate", messageTemplate);
+			if (messageTemplate.type === MESSAGE_TEMPLATE_TYPES.DEFAULT) {
+				const oldMessageTemplate = await messageTemplateService.getById(
+					propertyId,
+					messageTemplate._id,
+				);
+				console.log(oldMessageTemplate);
+				if (oldMessageTemplate.name === messageTemplate.name) {
+					updatedMessageTemplate = await messageTemplateService.update(
+						propertyId,
+						messageTemplate._id,
+						messageTemplate,
+						session,
+					);
+				} else {
+					throw new ValidationError("Validation Error", {
+						[`[${messageTemplates.map((m) => m._id).indexOf(messageTemplate._id)}]`]:
+							["Cannot update default message template name"],
+					});
+				}
+			} else if (messageTemplate._id) {
 				updatedMessageTemplate = await messageTemplateService.update(
 					propertyId,
 					messageTemplate._id,
@@ -268,8 +293,8 @@ const updateAll = async (req, res, next) => {
 			} else {
 				updatedMessageTemplate =
 					await messageTemplateService.getByNameAndPropertyId(
-						messageTemplate.name,
 						propertyId,
+						messageTemplate.name,
 					);
 				const createMessageTemplateResult =
 					await CreateCustomMessageTemplateValidationSchema.safeParseAsync(
@@ -298,7 +323,14 @@ const updateAll = async (req, res, next) => {
 			}
 			updatedMessageTemplates.push(updatedMessageTemplate);
 		}
-
+		const getAllTemplates = await messageTemplateService.getAll(propertyId);
+		for (const template of getAllTemplates) {
+			if (!updatedMessageTemplates.some((t) => t._id.equals(template._id))) {
+				if (template.type === MESSAGE_TEMPLATE_TYPES.CUSTOM) {
+					await messageTemplateService.remove(template._id, session);
+				}
+			}
+		}
 		await session.commitTransaction();
 		session.endSession();
 		return responseHandler(
@@ -356,14 +388,14 @@ const getMessageTemplateByStatusForCreate = async (req, res, next) => {
 	try {
 		const { propertyId } = req.params;
 		const status = req.body;
-		
+
 		const statusResult = UpdateGuestStatusValidationSchema.safeParse(status);
 		if (!statusResult.success) {
 			throw new ValidationError("Validation Error", {
 				...statusResult.error.flatten().fieldErrors,
 			});
 		}
-		
+
 		const messageTemplate = await messageTemplateService.getByNameAndPropertyId(
 			propertyId,
 			guestStatusToTemplateOnCreate(status),
@@ -404,8 +436,6 @@ const getMessageTemplateByStatusForUpdate = async (req, res, next) => {
 			status,
 			session,
 		);
-
-		
 
 		const messageTemplate = await messageTemplateService.getByNameAndPropertyId(
 			propertyId,

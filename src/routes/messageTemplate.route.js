@@ -80,7 +80,6 @@ router.post(
 	messageTemplateController.createAllDefaultTemplates,
 );
 
-
 router.post(
 	"/:propertyId/:guestId/updateStatus",
 	authenticateToken,
@@ -88,5 +87,14 @@ router.post(
 	checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
 	messageTemplateController.getMessageTemplateByStatusForUpdate,
 );
+
+/**
+ * @deprecated
+ * @description This route is deprecated and will be removed in future versions
+ */
+// router.get(
+// 	"/default/create/:propertyId",
+// 	messageTemplateController.createAllDefaultTemplates,
+// );
 
 module.exports = router;

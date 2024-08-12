@@ -8,13 +8,18 @@ const {
 } = require("../lib/CustomErrors");
 const {
 	CreateCheckInOutRequestValidationSchema,
+	UpdateRequestStatusValidationSchema,
 } = require("../models/checkInOutRequest.model");
 const messageService = require("../services/message.service");
 const guestStatusService = require("../services/guestStatus.service");
 const checkInOutRequestService = require("../services/checkInOutRequest.service");
 const guestService = require("../services/guest.service");
 const chatListService = require("../services/chatList.service");
-const { LATE_CHECK_OUT_STATUS } = require("../constants/guestStatus.contant");
+const {
+	LATE_CHECK_OUT_STATUS,
+	GUEST_REQUEST,
+	REQUEST_STATUS,
+} = require("../constants/guestStatus.contant");
 const {
 	messageType,
 	messageTriggerType,
@@ -22,6 +27,8 @@ const {
 } = require("../constants/message.constant");
 const { responseHandler } = require("../middlewares/response.middleware");
 const { compareDateGt } = require("../utils/dateCompare");
+const { z } = require("zod");
+const { validateUpdate } = require("../utils/guestStatus.util");
 
 /**
  * Create check in out request
@@ -90,15 +97,21 @@ const create = async (req, res, next) => {
 				requestType: ["Invalid request type"],
 			});
 		}
+		const oldGuestStatus = await guestStatusService.getByGuestId(guestId);
 
 		const updatedGuestStatus = await guestStatusService.update(
 			guestId,
 			{
-				[`${checkInOutRequest.requestType}Status`]:
-					LATE_CHECK_OUT_STATUS.REQUESTED,
+				[`${checkInOutRequest.requestType}Status`]: REQUEST_STATUS.REQUESTED,
 			},
 			session,
 		);
+
+		if (!validateUpdate(oldGuestStatus._doc, updatedGuestStatus._doc)) {
+			throw new ValidationError("Invalid Status", {
+				currentStatus: ["Invalid Status"],
+			});
+		}
 
 		const newCheckInOutRequest = await checkInOutRequestService.create(
 			propertyId,
@@ -137,7 +150,7 @@ const create = async (req, res, next) => {
 			chatList: updatedChatList,
 		});
 
-		req.app.io.to(`property:${propertyId}`).emit("message:newMessage", {
+		req.app.io.to(`guest:${guestId}`).emit("message:newMessage", {
 			message: newMessage,
 		});
 
@@ -156,6 +169,149 @@ const create = async (req, res, next) => {
 	}
 };
 
+const updateRequestStatus = async (req, res, next) => {
+	const session = await mongoose.startSession();
+	session.startTransaction();
+	try {
+		const { propertyId, guestId, checkInOutRequestId } = req.params;
+		const checkInOutRequest = req.body;
+
+		const checkInOutRequestResult =
+			UpdateRequestStatusValidationSchema.safeParse(checkInOutRequest);
+		if (!checkInOutRequestResult.success) {
+			throw new ValidationError(
+				"Validation Error",
+				checkInOutRequestResult.error.flatten().fieldErrors,
+			);
+		}
+
+		const existingCheckInOutRequest = await checkInOutRequestService.findOne(
+			propertyId,
+			guestId,
+			{ _id: checkInOutRequestId },
+		);
+
+		if (!existingCheckInOutRequest) {
+			throw new NotFoundError("Request not found", {
+				checkInOutRequestId: ["Request not found"],
+			});
+		}
+
+		const existingGuestStatus = await guestService.getById(guestId, propertyId);
+		if (!existingGuestStatus) {
+			throw new NotFoundError("Guest not found", {
+				guestId: ["Guest not found"],
+			});
+		}
+		const updatedCheckInOutRequest =
+			await checkInOutRequestService.updateRequestStatus(
+				propertyId,
+				checkInOutRequestId,
+				checkInOutRequestResult.data,
+				session,
+			);
+		const oldGuestStatus = await guestStatusService.getByGuestId(guestId);
+		const updatedGuestStatus = await guestStatusService.update(
+			guestId,
+			{
+				[`${updatedCheckInOutRequest.requestType}Status`]:
+					checkInOutRequest.requestStatus,
+			},
+			session,
+		);
+		if (!validateUpdate(oldGuestStatus._doc, updatedGuestStatus._doc)) {
+			throw new ValidationError("Invalid Status", {
+				currentStatus: ["Invalid Status"],
+			});
+		}
+
+		await session.commitTransaction();
+		await session.endSession();
+
+		req.app.io.to(`guest:${guestId}`).emit("message:newMessage", {});
+
+		req.app.io.to(`property:${propertyId}`).emit("guest:guestStatusUpdate", {
+			guestStatus: updatedGuestStatus,
+		});
+
+		return responseHandler(res, { checkInOutRequest: updatedCheckInOutRequest });
+	} catch (e) {
+		await session.abortTransaction();
+		session.endSession();
+		if (e instanceof APIError) {
+			return next(e);
+		}
+		return next(new InternalServerError(e.message));
+	}
+};
+
+const getAll = async (req, res, next) => {
+	try {
+		const { propertyId, guestId } = req.params;
+		const checkInOutRequests =
+			await checkInOutRequestService.getByPropertyIdAndGuestId(
+				propertyId,
+				guestId,
+			);
+		return responseHandler(res, { checkInOutRequests: checkInOutRequests });
+	} catch (e) {
+		if (e instanceof APIError) {
+			return next(e);
+		}
+		return next(new InternalServerError(e.message));
+	}
+};
+
+const getById = async (req, res, next) => {
+	try {
+		const { propertyId, guestId, checkInOutRequestId } = req.params;
+		console.log(propertyId, guestId, checkInOutRequestId);
+		const checkInOutRequest = await checkInOutRequestService.findOne(
+			propertyId,
+			guestId,
+			{
+				_id: checkInOutRequestId,
+			},
+		);
+
+		return responseHandler(res, { checkInOutRequest: checkInOutRequest });
+	} catch (e) {
+		if (e instanceof APIError) {
+			return next(e);
+		}
+		return next(new InternalServerError(e.message));
+	}
+};
+
+/**
+ * Get check in out request by status
+ * @param {import('express').Request} req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {import('express').Response} - The response
+ */
+const getByRequestType = async (req, res, next) => {
+	try {
+		const { propertyId, guestId } = req.params;
+		const { requestType } = req.query;
+		const checkInOutRequests = await checkInOutRequestService.getByRequestType(
+			propertyId,
+			guestId,
+			requestType,
+		);
+		return responseHandler(res, { checkInOutRequests: checkInOutRequests });
+	} catch (e) {
+		if (e instanceof APIError) {
+			return next(e);
+		}
+		return next(new InternalServerError(e.message));
+	}
+};
+
 module.exports = {
 	create,
+	updateRequestStatus,
+	getAll,
+	getById,
+	getByRequestType,
 };
