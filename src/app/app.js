@@ -113,7 +113,7 @@ const createApp = () => {
 	app.use("/sms", smsRoutes);
 	app.use("/checkInOutRequest", checkInOutRequestRoutes);
 	app.use("/broadcast", broadcastRoutes);
-	// app.use("/preArrivalFlow", preArrivalFlowRoutes);
+	app.use("/preArrivalFlow", preArrivalFlowRoutes);
 
 	// Health Check
 	app.get("/health", (req, res, next) => {

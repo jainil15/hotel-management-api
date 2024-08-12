@@ -14,6 +14,13 @@ router.post(
 	checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
 	broadcastController.create,
 );
+router.post(
+	"/:propertyId/doveryting",
+	authenticateToken,
+	checkPropertyAccess,
+	checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
+	broadcastController.doeverything,
+);
 
 router.put(
 	"/:propertyId/:broadcastId/send",
