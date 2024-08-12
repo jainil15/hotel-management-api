@@ -3,5 +3,4 @@ const cookieOptions = {
 	secure: true,
 	sameSite: "None",
 };
-
 module.exports = cookieOptions;
