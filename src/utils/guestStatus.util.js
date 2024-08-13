@@ -31,13 +31,17 @@ const AllowedStatus = {
   },
 };
 
+const validateUpdate = (currentGuestStatus, updateGuestStatus) => {
+  return true;
+};
+
 /**
  * Perform validation on update guest status
  * @param {import('../models/guestStatus.model.js').GuestStatusType} currentGuestStatus - current guest status
  * @param {import('../models/guestStatus.model.js').GuestStatusType} updateGuestStatus - updated guest status
  * @returns {boolean} - true if valid, false otherwise
  */
-const validateUpdate = (currentGuestStatus, updateGuestStatus) => {
+const validateUpdatev3 = (currentGuestStatus, updateGuestStatus) => {
   console.log(currentGuestStatus, updateGuestStatus);
   if (currentGuestStatus.currentStatus === updateGuestStatus.currentStatus) {
     switch (currentGuestStatus.currentStatus) {
@@ -187,4 +191,9 @@ const validateStatusForGuest = (currentGuestStatus, updatedGuestStatus) => {
   return true;
 };
 
-module.exports = { validateUpdate, validateStatus, validateStatusForGuest };
+module.exports = {
+  validateUpdate,
+  validateStatus,
+  validateStatusForGuest,
+  validateUpdatev3,
+};

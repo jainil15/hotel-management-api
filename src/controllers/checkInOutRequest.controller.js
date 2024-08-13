@@ -28,7 +28,7 @@ const {
 const { responseHandler } = require("../middlewares/response.middleware");
 const { compareDateGt } = require("../utils/dateCompare");
 const { z } = require("zod");
-const { validateUpdate } = require("../utils/guestStatus.util");
+const { validateUpdate, validateUpdatev3 } = require("../utils/guestStatus.util");
 
 /**
  * Create check in out request
@@ -107,7 +107,7 @@ const create = async (req, res, next) => {
 			session,
 		);
 
-		if (!validateUpdate(oldGuestStatus._doc, updatedGuestStatus._doc)) {
+		if (!validateUpdatev3(oldGuestStatus._doc, updatedGuestStatus._doc)) {
 			throw new ValidationError("Invalid Status", {
 				currentStatus: ["Invalid Status"],
 			});
@@ -219,7 +219,7 @@ const updateRequestStatus = async (req, res, next) => {
 			},
 			session,
 		);
-		if (!validateUpdate(oldGuestStatus._doc, updatedGuestStatus._doc)) {
+		if (!validateUpdatev3(oldGuestStatus._doc, updatedGuestStatus._doc)) {
 			throw new ValidationError("Invalid Status", {
 				currentStatus: ["Invalid Status"],
 			});
