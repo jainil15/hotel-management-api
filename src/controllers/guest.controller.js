@@ -17,6 +17,7 @@ const twilioService = require("../services/twilio.service");
 const twilioAccountService = require("../services/twilioAccount.service");
 const chatListService = require("../services/chatList.service");
 const propertyService = require("../services/property.service");
+const checkInOutRequestService = require("../services/checkInOutRequest.service");
 const {
 	CreateGuestStatusValidationSchema,
 	UpdateGuestStatusValidationSchema,
@@ -39,6 +40,10 @@ const {
 	guestStatusToTemplateOnCreate,
 	guestStatusToTemplateOnUpdate,
 } = require("../utils/guestStatustToTemplate");
+const {
+	GUEST_REQUEST,
+	REQUEST_STATUS,
+} = require("../constants/guestStatus.contant");
 require("dotenv").config();
 
 /**
@@ -145,7 +150,6 @@ const create = async (req, res, next) => {
 					guestStatusToTemplateOnCreate(newGuestStatus),
 				);
 			if (messageTemplate) {
-				
 				const twilioAccount =
 					await twilioAccountService.getByPropertyId(propertyId);
 				const twilioSubClient =
@@ -262,8 +266,6 @@ const update = async (req, res, next) => {
 				...statusResult?.error?.flatten().fieldErrors,
 			});
 		}
-	
-		
 
 		const updatedGuest = await guestService.update(
 			guest,
@@ -271,15 +273,15 @@ const update = async (req, res, next) => {
 			guestId,
 			session,
 		);
+		const oldGuestStatus = await guestStatusService.getByGuestId(guestId);
 		const updatedGuestStatus = await guestStatusService.update(
 			guestId,
 			status,
 			session,
 		);
 
-		const oldGuestStatus = await guestStatusService.getByGuestId(guestId);
 		// Send message to the guest according to the status
-		
+
 		if (sendMessage === true) {
 			// Get Message Template
 			const messageTemplate =
@@ -288,7 +290,7 @@ const update = async (req, res, next) => {
 					guestStatusToTemplateOnUpdate(oldGuestStatus, updatedGuestStatus),
 				);
 			// Send Message
-		
+
 			if (messageTemplate) {
 				const twilioAccount =
 					await twilioAccountService.getByPropertyId(propertyId);

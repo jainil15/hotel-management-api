@@ -225,6 +225,8 @@ const updateRequestStatus = async (req, res, next) => {
 			});
 		}
 
+		
+
 		await session.commitTransaction();
 		await session.endSession();
 

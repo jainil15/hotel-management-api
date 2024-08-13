@@ -275,7 +275,7 @@ const update = async (guestId, guestStatus, session, role = "admin") => {
       currentStatus: ["Invalid Status"],
     });
   }
-
+  
   if (
     role === "guest" &&
     !validateStatusForGuest(oldGuestStatus._doc, updatedGuestStatus._doc)
