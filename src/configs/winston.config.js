@@ -30,9 +30,9 @@ const logger = winston.createLogger({
     format.prettyPrint({ colorize: true, depth: 3 }),
     format.printf(
       (info) =>
-        `[${info.level == "INFO" ? "INFO" : "HTTP"}] [${info.timestamp}] ${info.message}`
+        `[${info.level == "INFO" ? "INFO" : "HTTP"}] [${info.timestamp}] ${info.message}`,
     ),
-    format.colorize({ all: true })
+    format.colorize({ all: true }),
   ),
 
   transports: [
@@ -52,12 +52,12 @@ const logger = winston.createLogger({
 });
 // winston.addColors(customColors);
 
-if (process.env.NODE_ENV !== "production") {
+if (process.env.NODE_ENV === "production") {
   logger.add(
     new transports.File({
       filename: "logs/combined.log",
       format: format.combine(format.uncolorize(), format.json()),
-    })
+    }),
   );
 }
 

@@ -7,11 +7,11 @@ const { PreArrivalFlow } = require("../models/preArrivalFlow.model");
  * @returns {Promise<import('../models/preArrivalFlow.model').PreArrivalFlowType>} - The new pre arrival flow
  */
 const createDefault = async (propertyId, session) => {
-	const defaultPreArrivalFlow = new PreArrivalFlow({
-		propertyId: propertyId,
-	});
-	await defaultPreArrivalFlow.save({ session: session });
-	return defaultPreArrivalFlow;
+  const defaultPreArrivalFlow = new PreArrivalFlow({
+    propertyId: propertyId,
+  });
+  await defaultPreArrivalFlow.save({ session: session });
+  return defaultPreArrivalFlow;
 };
 
 /**
@@ -22,12 +22,12 @@ const createDefault = async (propertyId, session) => {
  * @returns {Promise<import('../models/preArrivalFlow.model').PreArrivalFlowType>} - The new pre arrival flow
  */
 const create = async (propertyId, preArrivalFlow, session) => {
-	const newPreArrivalFlow = new PreArrivalFlow({
-		...preArrivalFlow,
-		propertyId: propertyId,
-	});
-	await newPreArrivalFlow.save({ session: session });
-	return newPreArrivalFlow;
+  const newPreArrivalFlow = new PreArrivalFlow({
+    ...preArrivalFlow,
+    propertyId: propertyId,
+  });
+  await newPreArrivalFlow.save({ session: session });
+  return newPreArrivalFlow;
 };
 
 /**
@@ -38,12 +38,22 @@ const create = async (propertyId, preArrivalFlow, session) => {
  * @returns {Promise<import('../models/preArrivalFlow.model').PreArrivalFlowType>} - The updated pre arrival flow
  */
 const update = async (propertyId, preArrivalFlow, session) => {
-	const updatedPreArrivalFlow = await PreArrivalFlow.findOneAndUpdate(
-		{ propertyId: propertyId },
-		preArrivalFlow,
-		{ new: true, session: session },
-	);
-	return updatedPreArrivalFlow;
+  const updatedPreArrivalFlow = await PreArrivalFlow.findOneAndUpdate(
+    { propertyId: propertyId },
+    preArrivalFlow,
+    { new: true, session: session },
+  );
+  return updatedPreArrivalFlow;
 };
 
-module.exports = { createDefault, create, update };
+/**
+ * Get pre arrival flow by property id
+ * @param {string} propertyId - The propertyId to filter pre arrival flows
+ * @returns {Promise<import('../models/preArrivalFlow.model').PreArrivalFlowType>} - The pre arrival flow
+ */
+const getByPropertyId = async (propertyId) => {
+  const preArrivalFlow = await PreArrivalFlow.findOne({ propertyId });
+  return preArrivalFlow;
+};
+
+module.exports = { createDefault, create, update, getByPropertyId };

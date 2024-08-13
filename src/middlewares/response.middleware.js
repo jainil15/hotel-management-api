@@ -13,14 +13,14 @@ const responseHandler = async (
   res,
   payload,
   statusCode = 200,
-  message = "Success"
+  message = "Success",
 ) => {
   return res.status(statusCode).json({
     statusCode: statusCode,
     result: payload,
     status: "success",
     type: Object.keys(RESPONSE_STATUS).find(
-      (key) => RESPONSE_STATUS[key] === statusCode
+      (key) => RESPONSE_STATUS[key] === statusCode,
     ),
     message: message,
   });

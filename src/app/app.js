@@ -24,6 +24,7 @@ const checkInOutRequestRoutes = require("../routes/checkInOutRequest.route");
 const broadcastRoutes = require("../routes/broadcast.route");
 const preArrivalFlowRoutes = require("../routes/preArrivalFlow.route");
 const settingRoutes = require("../routes/setting.route");
+const preArrivalRoutes = require("../routes/preArrival.route");
 // Socket imports
 const guestSocket = require("../sockets/guest.socket");
 
@@ -115,6 +116,7 @@ const createApp = () => {
   app.use("/broadcast", broadcastRoutes);
   app.use("/preArrivalFlow", preArrivalFlowRoutes);
   app.use("/setting", settingRoutes);
+  app.use("/preArrival", preArrivalRoutes);
   // Health Check
   app.get("/health", (req, res, next) => {
     return responseHandler(res, {}, 200, "Server is running");

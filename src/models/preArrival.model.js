@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const { z } = require("zod");
 const logger = require("../configs/winston.config");
-const { phoneregex } = require("../constants/regex.constant");
+const { phoneregex, datetimeregex } = require("../constants/regex.constant");
 const Schema = mongoose.Schema;
 /**
  * propertyId: {
@@ -38,10 +38,10 @@ const preArrivalSchema = new Schema(
 preArrivalSchema.index({ guestId: 1 }, { unique: true });
 
 const CreatePreArrivalValidationSchema = z.object({
-  phoneNumer: z
+  phoneNumber: z
     .string()
     .refine((val) => phoneregex.test(val), {
-      message: "Invalid date format",
+      message: "Invalid phone number format",
     })
     .optional(),
   emailAddress: z.string().email().optional(),
@@ -58,8 +58,19 @@ const CreatePreArrivalValidationSchema = z.object({
   licensePlateNo: z.string().optional(),
   specialRequests: z.string().optional(),
   policyAccepted: z.boolean().optional(),
-  signatureImgUrl: z.string().optional(),
   consentToText: z.boolean().optional(),
+  signatureImg: z
+    .array(
+      z
+        .any()
+        .refine((val) => val.size < MAX_FILE_SIZE, {
+          message: "File size too large",
+        })
+        .refine((val) => checkImageType(val.mimetype), {
+          message: "Invalid file type",
+        }),
+    )
+    .length(1),
 });
 
 /**

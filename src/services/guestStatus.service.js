@@ -278,7 +278,7 @@ const update = async (guestId, guestStatus, session, role = "admin") => {
 
   if (
     role === "guest" &&
-    !validateStatusForGuest(oldGuestStatus, updatedGuestStatus)
+    !validateStatusForGuest(oldGuestStatus._doc, updatedGuestStatus._doc)
   ) {
     throw new ForbiddenError("Forbidden to update status", {
       guestId: ["Guest is not allowed to update status"],

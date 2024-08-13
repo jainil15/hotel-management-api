@@ -13,7 +13,7 @@ router.post(
   "/:propertyId/:guestId",
   authenticateToken,
   checkPropertyAccess,
-  checkPermissions([ROLE.GUEST]),
+  checkPermissions([ROLE.GUEST, ROLE.ADMIN, ROLE.FRONTDESK]),
   checkGuestAccess,
   preArrivalController.create,
 );
