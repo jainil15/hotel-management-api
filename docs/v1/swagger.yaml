@@ -3,15 +3,17 @@ x-stoplight:
   id: qwywpxxlzuzxl
 info:
   title: Onelyk Swagger UI
-  version: '1.0'
+  version: "1.0"
   summary: Onelyk Api
   description: Onelyk Api
 servers:
-  - url: http://localhost:3000
+  - url: "http://localhost:4000"
+    description: MY DEV
+  - url: "http://localhost:3000"
     description: Local
-  - url: https://mvx7d4vf-3000.inc1.devtunnels.ms
+  - url: "https://mvx7d4vf-3000.inc1.devtunnels.ms"
     description: Devtunnel
-  - url: https://testhotelapi.onelyk.com
+  - url: "https://testhotelapi.onelyk.com"
     description: Testing (PROD)
 paths:
   /user/register:
@@ -19,14 +21,14 @@ paths:
       summary: User Registration
       operationId: regiester-user
       responses:
-        '200':
-          $ref: '#/components/responses/Register'
-        '400':
-          $ref: '#/components/responses/Error'
-        '500':
-          $ref: '#/components/responses/Error'
+        "200":
+          $ref: "#/components/responses/Register"
+        "400":
+          $ref: "#/components/responses/Error"
+        "500":
+          $ref: "#/components/responses/Error"
       requestBody:
-        $ref: '#/components/requestBodies/Register'
+        $ref: "#/components/requestBodies/Register"
       description: Register new user
       x-stoplight:
         id: 7xhk6wcrsm2m3
@@ -41,15 +43,15 @@ paths:
       tags:
         - User
       responses:
-        '200':
-          $ref: '#/components/responses/Login'
-        '500':
-          $ref: '#/components/responses/Error'
+        "200":
+          $ref: "#/components/responses/Login"
+        "500":
+          $ref: "#/components/responses/Error"
       operationId: login-user
       x-stoplight:
         id: 8m90dlv0xc09x
       requestBody:
-        $ref: '#/components/requestBodies/Login'
+        $ref: "#/components/requestBodies/Login"
   /auth/accessToken:
     get:
       summary: Request AccessToken
@@ -70,16 +72,16 @@ paths:
           description: Valid Refresh token
       tags:
         - Auth
-      description: ''
+      description: ""
     parameters: []
   /auth/verifyOtp:
     post:
       summary: Verify OTP
       responses:
-        '200':
-          $ref: '#/components/responses/Login'
-        '500':
-          $ref: '#/components/responses/Error'
+        "200":
+          $ref: "#/components/responses/Login"
+        "500":
+          $ref: "#/components/responses/Error"
       operationId: post-auth-verifyOtp
       x-stoplight:
         id: 2mys6pc0tw9tn
@@ -108,7 +110,7 @@ paths:
       tags:
         - User
       responses:
-        '200':
+        "200":
           description: OK
           content: {}
       operationId: post-user-logout
@@ -127,7 +129,7 @@ paths:
         id: ztlhlwiajutbr
       security:
         - Bearer: []
-  /user/{propertyId}:
+  "/user/{propertyId}":
     parameters:
       - schema:
           type: string
@@ -137,13 +139,13 @@ paths:
     post:
       summary: Create User
       responses:
-        '200':
-          $ref: '#/components/responses/User'
+        "200":
+          $ref: "#/components/responses/User"
       operationId: post-user-propertyId
       x-stoplight:
         id: jrjx090obmx3q
       requestBody:
-        $ref: '#/components/requestBodies/User'
+        $ref: "#/components/requestBodies/User"
       security:
         - Bearer: []
       tags:
@@ -154,19 +156,19 @@ paths:
       tags:
         - Property
       responses:
-        '200':
-          $ref: '#/components/responses/PropertyResponse'
+        "200":
+          $ref: "#/components/responses/PropertyResponse"
         4XX:
-          $ref: '#/components/responses/Error'
+          $ref: "#/components/responses/Error"
         5XX:
-          $ref: '#/components/responses/Error'
+          $ref: "#/components/responses/Error"
       operationId: Create-Property
       x-stoplight:
         id: ryjalcd5tmwuq
       security:
         - Bearer: []
       requestBody:
-        $ref: '#/components/requestBodies/CreateProperty'
+        $ref: "#/components/requestBodies/CreateProperty"
     get:
       summary: Get all properties associated with user
       tags:
@@ -193,7 +195,7 @@ paths:
           name: country
       tags:
         - Twilio
-  /twilio/{propertyId}/buyPhoneNumber:
+  "/twilio/{propertyId}/buyPhoneNumber":
     parameters:
       - schema:
           type: string
@@ -205,7 +207,7 @@ paths:
       tags:
         - Twilio
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -228,7 +230,7 @@ paths:
       operationId: post-twilio-propertyId-buyPhoneNumber
       x-stoplight:
         id: r0xyiornttr0a
-      description: ''
+      description: ""
       requestBody:
         content:
           application/json:
@@ -243,7 +245,7 @@ paths:
                     id: c4sii266sgyvi
       security:
         - Bearer: []
-  /twilio/{propertyId}/createSubaccount:
+  "/twilio/{propertyId}/createSubaccount":
     parameters:
       - schema:
           type: string
@@ -255,7 +257,7 @@ paths:
       tags:
         - Twilio
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -286,7 +288,7 @@ paths:
       tags:
         - Auth
       responses:
-        '200':
+        "200":
           description: Email Sent
           headers: {}
           content:
@@ -315,7 +317,7 @@ paths:
                   type: string
                   x-stoplight:
                     id: b35muo8oajf1m
-  /property/{propertyId}:
+  "/property/{propertyId}":
     parameters:
       - schema:
           type: string
@@ -327,8 +329,8 @@ paths:
       tags:
         - Property
       responses:
-        '200':
-          $ref: '#/components/responses/PropertyResponse'
+        "200":
+          $ref: "#/components/responses/PropertyResponse"
       operationId: get-property-propertyId
       x-stoplight:
         id: jqjeu1hs5q8ry
@@ -340,7 +342,7 @@ paths:
       tags:
         - Country
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -362,7 +364,7 @@ paths:
       operationId: get-country
       x-stoplight:
         id: eahvalgj8q15t
-  /country/{country}/states:
+  "/country/{country}/states":
     parameters:
       - schema:
           type: string
@@ -375,7 +377,7 @@ paths:
       tags:
         - Country
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -397,7 +399,7 @@ paths:
       operationId: get-country-countryId-states
       x-stoplight:
         id: yewamkjrance5
-  /country/{country}/timezones:
+  "/country/{country}/timezones":
     parameters:
       - schema:
           type: string
@@ -410,7 +412,7 @@ paths:
       tags:
         - Country
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -438,7 +440,7 @@ paths:
       operationId: get-country-countryId-timezone
       x-stoplight:
         id: cr2z17dg4genl
-  /country/{country}/{zipcode}:
+  "/country/{country}/{zipcode}":
     parameters:
       - schema:
           type: string
@@ -457,7 +459,7 @@ paths:
       tags:
         - Country
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -497,20 +499,20 @@ paths:
                     result:
                       zipcodes:
                         country_code: US
-                        zipcode: '84765'
+                        zipcode: "84765"
                         place: Santa Clara
                         state: Utah
                         state_code: UT
                         province: Washington
-                        province_code: '053'
-                        community: ''
-                        community_code: ''
-                        latitude: '37.1282'
-                        longitude: '-113.676'
+                        province_code: "053"
+                        community: ""
+                        community_code: ""
+                        latitude: "37.1282"
+                        longitude: "-113.676"
       operationId: get-country-countrycode-zipcode
       x-stoplight:
         id: rt0gmfe39ejzk
-  /country/{country}/{state}/cities:
+  "/country/{country}/{state}/cities":
     parameters:
       - schema:
           type: string
@@ -529,7 +531,7 @@ paths:
       tags:
         - Country
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -556,7 +558,7 @@ paths:
       operationId: get-country-country-state-cities
       x-stoplight:
         id: z3giqx0o6pq65
-  /twilio/{propertyId}/tollFreeVerificationStatus:
+  "/twilio/{propertyId}/tollFreeVerificationStatus":
     parameters:
       - schema:
           type: string
@@ -568,7 +570,7 @@ paths:
       tags:
         - Twilio
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -589,21 +591,21 @@ paths:
         id: es0glpjzixbxx
       security:
         - Bearer: []
-  /guest/{propertyId}:
+  "/guest/{propertyId}":
     post:
       summary: Create guest with Status
       tags:
         - Guest
       responses:
-        '200':
-          $ref: '#/components/responses/CreateGuest'
+        "200":
+          $ref: "#/components/responses/CreateGuest"
       operationId: post-guest-propertyId
       x-stoplight:
         id: vyo5rxdr47cse
       security:
         - Bearer: []
       requestBody:
-        $ref: '#/components/requestBodies/CreateGuest'
+        $ref: "#/components/requestBodies/CreateGuest"
     parameters:
       - schema:
           type: string
@@ -643,12 +645,12 @@ paths:
         - schema:
             type: string
           in: query
-          name: name
-          description: Search by Name
+          name: search
+          description: Search by any value
           allowEmptyValue: true
       security:
         - Bearer: []
-  /guest/{propertyId}/{guestId}:
+  "/guest/{propertyId}/{guestId}":
     parameters:
       - schema:
           type: string
@@ -665,13 +667,13 @@ paths:
       tags:
         - Guest
       responses:
-        '200':
-          $ref: '#/components/responses/CreateGuest'
+        "200":
+          $ref: "#/components/responses/CreateGuest"
       operationId: put-guest-propertyId-guestId
       x-stoplight:
         id: 8qsp31nk6963h
       requestBody:
-        $ref: '#/components/requestBodies/CreateGuest'
+        $ref: "#/components/requestBodies/CreateGuest"
       security:
         - Bearer: []
     get:
@@ -679,14 +681,14 @@ paths:
       tags:
         - Guest
       responses:
-        '200':
-          $ref: '#/components/responses/CreateGuest'
+        "200":
+          $ref: "#/components/responses/CreateGuest"
       operationId: get-guest-propertyId-guestId
       x-stoplight:
         id: wnosjabi6hyhh
       security:
         - Bearer: []
-  /messageTemplate/{propertyId}:
+  "/messageTemplate/{propertyId}":
     parameters:
       - schema:
           type: string
@@ -695,32 +697,30 @@ paths:
         required: true
     get:
       summary: Get all message templates
-      tags:
-        - MessageTemplate
       responses: {}
       operationId: get-messageTemplate-propertyId
       x-stoplight:
         id: e0b6uci3sccc4
       security:
         - Bearer: []
+      tags:
+        - Message Template
     post:
       summary: Create message template
-      tags:
-        - MessageTemplate
       responses:
-        '200':
-          $ref: '#/components/responses/CreateMessageTemplate'
+        "200":
+          $ref: "#/components/responses/CreateMessageTemplate"
       operationId: post-messageTemplate-propertyId
       x-stoplight:
         id: g3ds5i6zexgku
       security:
         - Bearer: []
       requestBody:
-        $ref: '#/components/requestBodies/CreateMessageTemplate'
+        $ref: "#/components/requestBodies/CreateMessageTemplate"
+      tags:
+        - Message Template
     put:
       summary: Update All Templates
-      tags:
-        - MessageTemplate
       responses: {}
       operationId: put-messageTemplate-propertyId
       x-stoplight:
@@ -732,11 +732,116 @@ paths:
           application/json:
             schema:
               type: array
+              x-examples:
+                Example 1:
+                  - _id: 66b4a001ebd75d6d388ab50d
+                    propertyId: 66a2125d50a317d5ffa691ad
+                    type: Default
+                    name: Checked In
+                    message: You are checked in
+                    active: true
+                    createdAt: "2024-08-08T10:37:53.351Z"
+                    updatedAt: "2024-08-08T10:37:53.351Z"
+                    __v: 0
+                  - _id: 66b4a001ebd75d6d388ab50f
+                    propertyId: 66a2125d50a317d5ffa691ad
+                    type: Default
+                    name: Checked Out
+                    message: You are checked out
+                    active: true
+                    createdAt: "2024-08-08T10:37:53.379Z"
+                    updatedAt: "2024-08-08T10:37:53.379Z"
+                    __v: 0
+                  - _id: 66b4a001ebd75d6d388ab505
+                    propertyId: 66a2125d50a317d5ffa691ad
+                    type: Default
+                    name: Early Check In Accepted
+                    message: Your early check in request is accepted
+                    active: true
+                    createdAt: "2024-08-08T10:37:53.241Z"
+                    updatedAt: "2024-08-08T10:37:53.241Z"
+                    __v: 0
+                  - _id: 66b4a001ebd75d6d388ab511
+                    propertyId: 66a2125d50a317d5ffa691ad
+                    type: Default
+                    name: Early Check In Accepted and Late Check Out Accepted
+                    message: Your early check in and late check out request is accepted
+                    active: true
+                    createdAt: "2024-08-08T10:37:53.406Z"
+                    updatedAt: "2024-08-08T10:37:53.406Z"
+                    __v: 0
+                  - _id: 66b4a001ebd75d6d388ab503
+                    propertyId: 66a2125d50a317d5ffa691ad
+                    type: Default
+                    name: Early Check In Declined
+                    message: Your early check in request is declined
+                    active: true
+                    createdAt: "2024-08-08T10:37:53.213Z"
+                    updatedAt: "2024-08-08T10:37:53.213Z"
+                    __v: 0
+                  - _id: 66b4a001ebd75d6d388ab509
+                    propertyId: 66a2125d50a317d5ffa691ad
+                    type: Default
+                    name: Late Check Out Accepted
+                    message: Your late check out request is accepted
+                    active: true
+                    createdAt: "2024-08-08T10:37:53.295Z"
+                    updatedAt: "2024-08-08T10:37:53.295Z"
+                    __v: 0
+                  - _id: 66b4a001ebd75d6d388ab507
+                    propertyId: 66a2125d50a317d5ffa691ad
+                    type: Default
+                    name: Late Check Out Declined
+                    message: Your late check out request is declined
+                    active: true
+                    createdAt: "2024-08-08T10:37:53.268Z"
+                    updatedAt: "2024-08-08T10:37:53.268Z"
+                    __v: 0
+                  - _id: 66b4a001ebd75d6d388ab501
+                    propertyId: 66a2125d50a317d5ffa691ad
+                    type: Default
+                    name: Reservation Cancelled
+                    message: Your reservation is cancelled
+                    active: true
+                    createdAt: "2024-08-08T10:37:53.172Z"
+                    updatedAt: "2024-08-08T10:37:53.172Z"
+                    __v: 0
+                  - _id: 66b4a001ebd75d6d388ab50b
+                    propertyId: 66a2125d50a317d5ffa691ad
+                    type: Default
+                    name: Reservation Confirmed
+                    message: Your reservation is confirmed
+                    active: true
+                    createdAt: "2024-08-08T10:37:53.323Z"
+                    updatedAt: "2024-08-08T10:37:53.323Z"
+                    __v: 0
               items:
-                x-stoplight:
-                  id: z5onaoqwf2qy0
                 type: object
-  /messageTemplate/{propertyId}/{messageTemplateId}:
+                required:
+                  - name
+                  - message
+                properties:
+                  _id:
+                    type: string
+                  propertyId:
+                    type: string
+                  type:
+                    type: string
+                  name:
+                    type: string
+                  message:
+                    type: string
+                  active:
+                    type: boolean
+                  createdAt:
+                    type: string
+                  updatedAt:
+                    type: string
+                  __v:
+                    type: integer
+      tags:
+        - Message Template
+  "/messageTemplate/{propertyId}/{messageTemplateId}":
     parameters:
       - schema:
           type: string
@@ -750,41 +855,41 @@ paths:
         required: true
     get:
       summary: Get message template
-      tags:
-        - MessageTemplate
       responses: {}
       operationId: get-messageTemplate-propertyId-messageTemplateId
       x-stoplight:
         id: oeymus6t9tc1d
       security:
         - Bearer: []
+      tags:
+        - Message Template
     put:
       summary: Update message template
-      tags:
-        - MessageTemplate
       responses:
-        '200':
-          $ref: '#/components/responses/CreateMessageTemplate'
+        "200":
+          $ref: "#/components/responses/CreateMessageTemplate"
       operationId: put-messageTemplate-propertyId-messageTemplateId
       x-stoplight:
         id: fg4p64kkk534l
       security:
         - Bearer: []
       requestBody:
-        $ref: '#/components/requestBodies/CreateMessageTemplate'
+        $ref: "#/components/requestBodies/CreateMessageTemplate"
+      tags:
+        - Message Template
     delete:
       summary: Delete message template
-      tags:
-        - MessageTemplate
       responses:
-        '200':
+        "200":
           description: OK
       operationId: delete-messageTemplate-propertyId-messageTemplateId
       x-stoplight:
         id: uqjzynq8v29vm
       security:
         - Bearer: []
-  /guestStatus/{propertyId}/{guestId}:
+      tags:
+        - Message Template
+  "/guestStatus/{propertyId}/{guestId}":
     parameters:
       - schema:
           type: string
@@ -801,8 +906,8 @@ paths:
       tags:
         - Guest Status
       responses:
-        '200':
-          $ref: '#/components/responses/GuestStatus'
+        "200":
+          $ref: "#/components/responses/GuestStatus"
       operationId: get-guestStatus-propertyId-guestId
       x-stoplight:
         id: 01sisp96036vu
@@ -813,16 +918,16 @@ paths:
       tags:
         - Guest Status
       responses:
-        '200':
-          $ref: '#/components/responses/GuestStatus'
+        "200":
+          $ref: "#/components/responses/GuestStatus"
       operationId: put-guestStatus-propertyId-guestId
       x-stoplight:
         id: wdogp9jz9ub4g
       requestBody:
-        $ref: '#/components/requestBodies/UpdateGuestStatus'
+        $ref: "#/components/requestBodies/UpdateGuestStatus"
       security:
         - Bearer: []
-  /auth/guestAccessToken/{guestId}:
+  "/auth/guestAccessToken/{guestId}":
     parameters:
       - schema:
           type: string
@@ -839,7 +944,7 @@ paths:
       operationId: get-auth-guestAccessToken-guestId
       x-stoplight:
         id: ikrvbejxoka8j
-  /auth/guestLogin/{token}:
+  "/auth/guestLogin/{token}":
     parameters:
       - schema:
           type: string
@@ -854,7 +959,7 @@ paths:
       operationId: post-auth-guestLogin-token
       x-stoplight:
         id: rotvyvzh8vujs
-  /chatList/{propertyId}:
+  "/chatList/{propertyId}":
     parameters:
       - schema:
           type: string
@@ -866,8 +971,8 @@ paths:
       tags:
         - Chat List
       responses:
-        '200':
-          $ref: '#/components/responses/ChatLists'
+        "200":
+          $ref: "#/components/responses/ChatLists"
       operationId: get-chatList-propertyId
       x-stoplight:
         id: c1jevyn62i63u
@@ -876,7 +981,7 @@ paths:
       x-request-id: null
       requestBody:
         content: {}
-  /chatList/{propertyId}/{guestId}:
+  "/chatList/{propertyId}/{guestId}":
     parameters:
       - schema:
           type: string
@@ -893,7 +998,7 @@ paths:
       tags:
         - Chat List
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -935,14 +1040,14 @@ paths:
       tags:
         - Chat List
       responses:
-        '200':
+        "200":
           description: OK
       operationId: delete-chatList-propertyId-guestId
       x-stoplight:
         id: pkregn22omv90
       security:
         - Bearer: []
-  /sms/send/{propertyId}/{guestId}:
+  "/sms/send/{propertyId}/{guestId}":
     parameters:
       - schema:
           type: string
@@ -959,7 +1064,7 @@ paths:
       tags:
         - Message
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -969,12 +1074,905 @@ paths:
       operationId: post-sms-send-propertyId-guestId
       x-stoplight:
         id: 3dvs5ezcalz4w
-      description: This endpoint will send sms to the guest and store the message in
-        db and will emit socket event message:newMessage
+      description: "This endpoint will send sms to the guest and store the message in db and will emit socket event message:newMessage"
       security:
         - Bearer: []
       requestBody:
-        $ref: '#/components/requestBodies/SendSMS'
+        $ref: "#/components/requestBodies/SendSMS"
+  "/message/{propertyId}/{guestId}":
+    parameters:
+      - schema:
+          type: string
+        name: propertyId
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: guestId
+        in: path
+        required: true
+    get:
+      summary: Get all messages
+      tags:
+        - Message
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                  result:
+                    type: object
+                    properties:
+                      messages:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            _id:
+                              type: string
+                            guestId:
+                              type: string
+                            propertyId:
+                              type: string
+                            senderId:
+                              type: string
+                            receiverId:
+                              type: string
+                            content:
+                              type: string
+                            messageType:
+                              type: string
+                            messageTriggerType:
+                              type: string
+                            status:
+                              type: string
+                            createdAt:
+                              type: string
+                            updatedAt:
+                              type: string
+                            __v:
+                              type: integer
+                            request:
+                              type: object
+                              properties:
+                                _id:
+                                  type: string
+                                propertyId:
+                                  type: string
+                                guestId:
+                                  type: string
+                                requestType:
+                                  type: string
+                                lateCheckOutDateTime:
+                                  type: string
+                                createdAt:
+                                  type: string
+                                updatedAt:
+                                  type: string
+                                __v:
+                                  type: integer
+                  status:
+                    type: string
+                  type:
+                    type: string
+                  message:
+                    type: string
+                x-examples:
+                  Example 1:
+                    statusCode: 200
+                    result:
+                      messages:
+                        - _id: 66b5245bdaf1ced95550913b
+                          guestId: 66a3a20a9f0302c6f2612861
+                          propertyId: 66a2174cf74f8664b0bb207d
+                          senderId: 66a3a20a9f0302c6f2612861
+                          receiverId: 66a2174cf74f8664b0bb207d
+                          content: Late Check Out Request
+                          messageType: Request
+                          messageTriggerType: Automatic
+                          status: sent
+                          createdAt: "2024-08-08T20:02:35.635Z"
+                          updatedAt: "2024-08-08T20:02:35.635Z"
+                          __v: 0
+                          request:
+                            _id: 66b5245bdaf1ced955509139
+                            propertyId: 66a2174cf74f8664b0bb207d
+                            guestId: 66a3a20a9f0302c6f2612861
+                            requestType: lateCheckOut
+                            lateCheckOutDateTime: "2028-10-02T14:30:00.000Z"
+                            createdAt: "2024-08-08T20:02:35.623Z"
+                            updatedAt: "2024-08-08T20:02:35.623Z"
+                            __v: 0
+                    status: success
+                    type: SUCCESS
+                    message: Success
+      operationId: get-message-propertyId
+      x-stoplight:
+        id: 1zr2m3hgcvsss
+      security:
+        - Bearer: []
+  /sms/receive:
+    post:
+      summary: Mock Twilio receive endpoint request
+      tags:
+        - Message
+      responses: {}
+      operationId: post-sms-receive
+      x-stoplight:
+        id: jwesxn6m492m6
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ApiVersion:
+                  type: string
+                SmsSid:
+                  type: string
+                SmsStatus:
+                  type: string
+                SmsMessageSid:
+                  type: string
+                NumSegments:
+                  type: string
+                ToState:
+                  type: string
+                From:
+                  type: string
+                MessageSid:
+                  type: string
+                AccountSid:
+                  type: string
+                ToCity:
+                  type: string
+                FromCountry:
+                  type: string
+                ToZip:
+                  type: string
+                FromCity:
+                  type: string
+                To:
+                  type: string
+                FromZip:
+                  type: string
+                ToCountry:
+                  type: string
+                Body:
+                  type: string
+                NumMedia:
+                  type: string
+                FromState:
+                  type: string
+              x-examples:
+                Example 1:
+                  ApiVersion: "2010-04-01"
+                  SmsSid: SM16739f1418878a986c4c0e10d6706226
+                  SmsStatus: received
+                  SmsMessageSid: SM16739f1418878a986c4c0e10d6706226
+                  NumSegments: "1"
+                  ToState: ""
+                  From: "+13177242610"
+                  MessageSid: SM16739f1418878a986c4c0e10d6706226
+                  AccountSid: AC62314fff86d31005acaa2f2d33040f3b
+                  ToCity: ""
+                  FromCountry: US
+                  ToZip: ""
+                  FromCity: INDIANAPOLIS
+                  To: "+18447958020"
+                  FromZip: "46204"
+                  ToCountry: US
+                  Body: Hi
+                  NumMedia: "0"
+                  FromState: IN
+            examples:
+              Example 1:
+                value:
+                  ApiVersion: "2010-04-01"
+                  SmsSid: SM16739f1418878a986c4c0e10d6706226
+                  SmsStatus: received
+                  SmsMessageSid: SM16739f1418878a986c4c0e10d6706226
+                  NumSegments: "1"
+                  ToState: ""
+                  From: "+13177242610"
+                  MessageSid: SM16739f1418878a986c4c0e10d6706226
+                  AccountSid: AC62314fff86d31005acaa2f2d33040f3b
+                  ToCity: ""
+                  FromCountry: US
+                  ToZip: ""
+                  FromCity: INDIANAPOLIS
+                  To: "+18447958020"
+                  FromZip: "46204"
+                  ToCountry: US
+                  Body: Hi
+                  NumMedia: "0"
+                  FromState: IN
+  "/messageTemplate/{propertyId}/createStatus":
+    parameters:
+      - schema:
+          type: string
+        name: propertyId
+        in: path
+        required: true
+    post:
+      summary: Get message template based on the status
+      tags:
+        - Message Template
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                  result:
+                    type: object
+                    properties:
+                      messageTemplate:
+                        type: object
+                        properties:
+                          _id:
+                            type: string
+                          propertyId:
+                            type: string
+                          type:
+                            type: string
+                          name:
+                            type: string
+                          message:
+                            type: string
+                          active:
+                            type: boolean
+                          createdAt:
+                            type: string
+                          updatedAt:
+                            type: string
+                          __v:
+                            type: integer
+                  status:
+                    type: string
+                  type:
+                    type: string
+                  message:
+                    type: string
+                x-examples:
+                  Example 1:
+                    statusCode: 200
+                    result:
+                      messageTemplate:
+                        _id: 66b4a001ebd75d6d388ab511
+                        propertyId: 66a2125d50a317d5ffa691ad
+                        type: Default
+                        name: Early Check In Accepted and Late Check Out Accepted
+                        message: Your early check in and late check out request is accepted
+                        active: true
+                        createdAt: "2024-08-08T10:37:53.406Z"
+                        updatedAt: "2024-08-08T10:37:53.406Z"
+                        __v: 0
+                    status: success
+                    type: SUCCESS
+                    message: Success
+      operationId: get-messageTemplate-propertyId-createStatus
+      x-stoplight:
+        id: ccsnv1xosmm80
+      requestBody:
+        $ref: "#/components/requestBodies/UpdateGuestStatus"
+      security:
+        - Bearer: []
+  "/messageTemplate/{propertyId}/{guestId}/updateStatus":
+    parameters:
+      - schema:
+          type: string
+        name: propertyId
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: guestId
+        in: path
+        required: true
+    post:
+      summary: Get message template for updating guest status
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                  result:
+                    type: object
+                    properties:
+                      messageTemplate:
+                        type: object
+                        properties:
+                          _id:
+                            type: string
+                          propertyId:
+                            type: string
+                          type:
+                            type: string
+                          name:
+                            type: string
+                          message:
+                            type: string
+                          active:
+                            type: boolean
+                          createdAt:
+                            type: string
+                          updatedAt:
+                            type: string
+                          __v:
+                            type: integer
+                  status:
+                    type: string
+                  type:
+                    type: string
+                  message:
+                    type: string
+                x-examples:
+                  Example 1:
+                    statusCode: 200
+                    result:
+                      messageTemplate:
+                        _id: 66b4a001ebd75d6d388ab511
+                        propertyId: 66a2125d50a317d5ffa691ad
+                        type: Default
+                        name: Early Check In Accepted and Late Check Out Accepted
+                        message: Your early check in and late check out request is accepted
+                        active: true
+                        createdAt: "2024-08-08T10:37:53.406Z"
+                        updatedAt: "2024-08-08T10:37:53.406Z"
+                        __v: 0
+                    status: success
+                    type: SUCCESS
+                    message: Success
+      operationId: get-messageTemplate-propertyId-updateStatus
+      x-stoplight:
+        id: fvyjhh9dflh0r
+      security:
+        - Bearer: []
+      requestBody:
+        $ref: "#/components/requestBodies/UpdateGuestStatus"
+      tags:
+        - Message Template
+  "/checkInOutRequest/{propertyId}/{guestId}":
+    parameters:
+      - schema:
+          type: string
+        name: propertyId
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: guestId
+        in: path
+        required: true
+    post:
+      summary: Early/Late Check In Out Request
+      tags:
+        - Check In Out Request
+      responses:
+        "200":
+          description: OK
+      operationId: get-checkInOutRequest-propertyId-guestId
+      x-stoplight:
+        id: ilnlvsfismz5i
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                requestType:
+                  x-stoplight:
+                    id: oidoyb6icyhuo
+                  enum:
+                    - lateCheckOut
+                    - earlyCheckIn
+                lateCheckOutDateTime:
+                  type: string
+                  x-stoplight:
+                    id: plb6udbozu6gv
+                  format: date-time
+                earlyCheckInDateTime:
+                  type: string
+                  x-stoplight:
+                    id: 7o978whftsas3
+                  format: date-time
+      security:
+        - Bearer: []
+    get:
+      summary: Get all check In Out request
+      tags:
+        - Check In Out Request
+      responses: {}
+      operationId: get-all-checkInOutRequest-propertyId-guestId
+      x-stoplight:
+        id: z7xnq43j0eq7y
+      security:
+        - Bearer: []
+  "/broadcast/{propertyid}":
+    parameters:
+      - schema:
+          type: string
+        name: propertyid
+        in: path
+        required: true
+    post:
+      summary: Creating broadcast
+      tags:
+        - Broadcast
+      responses:
+        "200":
+          description: OK
+      operationId: get-broadcast-propertyid
+      x-stoplight:
+        id: c6lgighj3k0ty
+      security:
+        - Bearer: []
+      requestBody:
+        $ref: "#/components/requestBodies/CreateBroadcast"
+    get:
+      summary: Get all broadcasts for the property
+      tags:
+        - Broadcast
+      responses: {}
+      operationId: get-broadcastid-propertyid
+      x-stoplight:
+        id: km7267q0muup8
+      security:
+        - Bearer: []
+  "/broadcast/{propertyId}/{broadcastId}/send":
+    parameters:
+      - schema:
+          type: string
+        name: propertyId
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: broadcastId
+        in: path
+        required: true
+    put:
+      summary: Send messages to broadast
+      tags:
+        - Broadcast
+      responses:
+        "200":
+          description: OK
+      operationId: get-broadcast-propertyId-broadcastId
+      x-stoplight:
+        id: mmhwelk4osmn9
+      security:
+        - Bearer: []
+      requestBody:
+        $ref: "#/components/requestBodies/SendMessageBroadcast"
+  "/broadcast/{propertyId}/{broadcastId}":
+    parameters:
+      - schema:
+          type: string
+        name: propertyId
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: broadcastId
+        in: path
+        required: true
+    get:
+      summary: Get broadcast by Id
+      responses:
+        "200":
+          description: OK
+      operationId: get-broadcast-by-propertyId-broadcastId
+      x-stoplight:
+        id: dk7igvwzvombn
+      tags:
+        - Broadcast
+      security:
+        - Bearer: []
+  "/checkInOutRequest/{propertyId}/{guestId}/{checkInOutRequestId}":
+    patch:
+      summary: Update request status
+      tags:
+        - Check In Out Request
+      responses:
+        "200":
+          description: OK
+      operationId: patch-checkInOutRequest-propertyId-guestId-checkInOutRequestId
+      x-stoplight:
+        id: q5j6a63z1nl9g
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                requestStatus:
+                  x-stoplight:
+                    id: alz7egf6ij8cr
+                  enum:
+                    - Requested
+                    - Accepted
+                    - Declined
+      security:
+        - Bearer: []
+    parameters:
+      - schema:
+          type: string
+        name: propertyId
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: guestId
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: checkInOutRequestId
+        in: path
+        required: true
+    get:
+      summary: Get by check in out request id
+      tags:
+        - Check In Out Request
+      responses: {}
+      operationId: get-checkInOutRequest-propertyId-guestId-checkInOutRequestId
+      x-stoplight:
+        id: 6835ch78otf6v
+      security:
+        - Bearer: []
+  "/checkInOutRequest/{propertyId}/{guestId}/requestType":
+    parameters:
+      - schema:
+          type: string
+        name: propertyId
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: guestId
+        in: path
+        required: true
+    get:
+      summary: Get check In Out Request by Request Type
+      tags:
+        - Check In Out Request
+      responses: {}
+      operationId: get-checkInOutRequest-propertyId-guestId-requestType
+      x-stoplight:
+        id: nj7f4n6nn7rbt
+      security:
+        - Bearer: []
+      parameters:
+        - schema:
+            type: string
+            enum:
+              - lateCheckOut
+              - earlyCheckIn
+          in: query
+          name: requestType
+          description: Request Type
+  "/broadcast/{propertyId}/createupdatesend":
+    post:
+      summary: Create Update Send Message ALL IN ONE!
+      tags:
+        - Broadcast
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  idk:
+                    type: object
+                    x-stoplight:
+                      id: mhn7r3jo5al9l
+                    additionalProperties: {}
+      operationId: post-broadcast-propertyId-badapi
+      x-stoplight:
+        id: 6gubnnstr8r1j
+      security:
+        - Bearer: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                broadcastId:
+                  type: string
+                  x-stoplight:
+                    id: dtf4ox00rhum2
+                guestIds:
+                  type: array
+                  x-stoplight:
+                    id: v56dmi82yfhjo
+                  items: {}
+                body:
+                  type: string
+                  x-stoplight:
+                    id: c2mwnc43low8t
+    parameters:
+      - schema:
+          type: string
+        name: propertyId
+        in: path
+        required: true
+  "/setting/{propertyId}":
+    parameters:
+      - schema:
+          type: string
+        name: propertyId
+        in: path
+        required: true
+    get:
+      summary: Get property by Id
+      tags:
+        - Setting
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                  result:
+                    type: object
+                    properties:
+                      setting:
+                        type: object
+                        properties:
+                          _id:
+                            type: string
+                          propertyId:
+                            type: string
+                          timezone:
+                            type: string
+                          standardCheckinTime:
+                            type: string
+                          standardCheckoutTime:
+                            type: string
+                          automaticNewDay:
+                            type: boolean
+                          defaultNewDayTime:
+                            type: string
+                          __v:
+                            type: integer
+                  status:
+                    type: string
+                  type:
+                    type: string
+                  message:
+                    type: string
+                x-examples:
+                  Example 1:
+                    statusCode: 200
+                    result:
+                      setting:
+                        _id: 66a2125d50a317d5ffa691b2
+                        propertyId: 66a2125d50a317d5ffa691ad
+                        timezone: "UTC-08:00"
+                        standardCheckinTime: "15:00"
+                        standardCheckoutTime: "20:00"
+                        automaticNewDay: true
+                        defaultNewDayTime: "00:00"
+                        __v: 0
+                    status: success
+                    type: SUCCESS
+                    message: Success
+      operationId: get-setting-propertyId
+      x-stoplight:
+        id: hxv8j5nnlnie0
+      security:
+        - Bearer: []
+  "/preArrival/{propertyId}/{guestId}":
+    parameters:
+      - schema:
+          type: string
+        name: propertyId
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: guestId
+        in: path
+        required: true
+    post:
+      summary: Create prearrival
+      tags:
+        - Pre Arrival
+      responses: {}
+      operationId: post-preArrival-propertyId-guestId
+      x-stoplight:
+        id: g4tsqk9vtb6fu
+      requestBody:
+        $ref: "#/components/requestBodies/CreatePreArrival"
+      security:
+        - Bearer: []
+  "/preArrivalFlow/{propertyId}":
+    parameters:
+      - schema:
+          type: string
+        name: propertyId
+        in: path
+        required: true
+    get:
+      summary: Get by property Id
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                  result:
+                    type: object
+                    properties:
+                      preArrivalFlow:
+                        type: object
+                        properties:
+                          propertyId:
+                            type: string
+                          phoneNumber:
+                            type: boolean
+                          emailAddress:
+                            type: boolean
+                          arrivalTime:
+                            type: boolean
+                          vehicleMakeModelColor:
+                            type: boolean
+                          licensePlateNo:
+                            type: boolean
+                          specialRequests:
+                            type: boolean
+                          policies:
+                            type: boolean
+                          policyLink:
+                            type: string
+                          extraPolicies:
+                            type: array
+                            items:
+                              type: object
+                              properties: {}
+                          _id:
+                            type: string
+                          __v:
+                            type: integer
+                  status:
+                    type: string
+                  type:
+                    type: string
+                  message:
+                    type: string
+                x-examples:
+                  Example 1:
+                    statusCode: 200
+                    result:
+                      preArrivalFlow:
+                        propertyId: 66a2125d50a317d5ffa691ad
+                        phoneNumber: true
+                        emailAddress: true
+                        arrivalTime: true
+                        vehicleMakeModelColor: true
+                        licensePlateNo: true
+                        specialRequests: true
+                        policies: true
+                        policyLink: "https://www.onelyk.com/privacy"
+                        extraPolicies: []
+                        _id: 66bb30238bc82a454e80af1b
+                        __v: 0
+                    status: success
+                    type: SUCCESS
+                    message: Success
+      operationId: get-preArrivalFlow-propertyId
+      x-stoplight:
+        id: 0br0cy02qmfkk
+      tags:
+        - Pre Arrival Flow
+      security:
+        - Bearer: []
+    post:
+      summary: Create Defaults
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                  result:
+                    type: object
+                    properties:
+                      preArrivalFlow:
+                        type: object
+                        properties:
+                          propertyId:
+                            type: string
+                          phoneNumber:
+                            type: boolean
+                          emailAddress:
+                            type: boolean
+                          arrivalTime:
+                            type: boolean
+                          vehicleMakeModelColor:
+                            type: boolean
+                          licensePlateNo:
+                            type: boolean
+                          specialRequests:
+                            type: boolean
+                          policies:
+                            type: boolean
+                          policyLink:
+                            type: string
+                          extraPolicies:
+                            type: array
+                            items:
+                              type: object
+                              properties: {}
+                          _id:
+                            type: string
+                          __v:
+                            type: integer
+                  status:
+                    type: string
+                  type:
+                    type: string
+                  message:
+                    type: string
+                x-examples:
+                  Example 1:
+                    statusCode: 200
+                    result:
+                      preArrivalFlow:
+                        propertyId: 66a2125d50a317d5ffa691ad
+                        phoneNumber: true
+                        emailAddress: true
+                        arrivalTime: true
+                        vehicleMakeModelColor: true
+                        licensePlateNo: true
+                        specialRequests: true
+                        policies: true
+                        policyLink: "https://www.onelyk.com/privacy"
+                        extraPolicies: []
+                        _id: 66bb30238bc82a454e80af1b
+                        __v: 0
+                    status: success
+                    type: SUCCESS
+                    message: Success
+      operationId: post-preArrivalFlow-propertyId
+      x-stoplight:
+        id: fkmih2fs9r8qx
+      deprecated: true
+      tags:
+        - Pre Arrival Flow
+      security:
+        - Bearer: []
 components:
   schemas:
     User:
@@ -1081,7 +2079,7 @@ components:
           type: string
           x-stoplight:
             id: asmx1af0fxhrn
-      description: ''
+      description: ""
     Property:
       type: object
       x-examples:
@@ -1089,20 +2087,20 @@ components:
           _id: 6698ccbc3bfa38a274593d9b
           name: Onelyk Test Property
           email: jainilpatel145@gmail.com
-          phoneNumber: '1234567890'
-          website: https://www.onelyk.com
+          phoneNumber: "1234567890"
+          website: "https://www.onelyk.com"
           about: This is a onelyk test property
           country: United States
           state: New York
           city: New York
           address: 55 Street
-          countryCode: '+1'
+          countryCode: "+1"
           active: true
-          createdAt: '2024-07-18T08:05:16.703Z'
-          updatedAt: '2024-07-18T08:05:16.735Z'
+          createdAt: "2024-07-18T08:05:16.703Z"
+          updatedAt: "2024-07-18T08:05:16.735Z"
           __v: 0
-          coverUrl: https://onelyk-images-bucket.s3.amazonaws.com/property/6698ccbc3bfa38a274593d9b/cover/cover.jpg
-          logoUrl: https://onelyk-images-bucket.s3.amazonaws.com/property/6698ccbc3bfa38a274593d9b/logo/logo.jpg
+          coverUrl: "https://onelyk-images-bucket.s3.amazonaws.com/property/6698ccbc3bfa38a274593d9b/cover/cover.jpg"
+          logoUrl: "https://onelyk-images-bucket.s3.amazonaws.com/property/6698ccbc3bfa38a274593d9b/logo/logo.jpg"
       properties:
         _id:
           type: string
@@ -1148,36 +2146,36 @@ components:
         Example 1:
           _id: 669106a217122df7b4875582
           propertyId: 669bb5387629e1fff5cb35a5
-          countryCode: '+1'
-          phoneNumber: '9191229133'
+          countryCode: "+1"
+          phoneNumber: "9191229133"
           source: Source of the guest
-          checkIn: '2024-07-23T23:35:00.000Z'
-          checkOut: '2024-07-16T23:35:00.000Z'
-          confirmationNumber: '9325923593259325'
+          checkIn: "2024-07-23T23:35:00.000Z"
+          checkOut: "2024-07-16T23:35:00.000Z"
+          confirmationNumber: "9325923593259325"
           roomNumber: C-8
           firstName: Jon
           lastName: Doe
           email: user@gmail.com
           active: true
-          createdAt: '2024-07-12T10:34:10.279Z'
-          updatedAt: '2024-07-12T10:34:10.279Z'
+          createdAt: "2024-07-12T10:34:10.279Z"
+          updatedAt: "2024-07-12T10:34:10.279Z"
           __v: 0
       examples:
         - _id: 669106a217122df7b4875582
           propertyId: 669bb5387629e1fff5cb35a5
-          countryCode: '+1'
-          phoneNumber: '9191229133'
+          countryCode: "+1"
+          phoneNumber: "9191229133"
           source: Source of the guest
-          checkIn: '2024-07-23T23:35:00.000Z'
-          checkOut: '2024-07-16T23:35:00.000Z'
-          confirmationNumber: '9325923593259325'
+          checkIn: "2024-07-23T23:35:00.000Z"
+          checkOut: "2024-07-16T23:35:00.000Z"
+          confirmationNumber: "9325923593259325"
           roomNumber: C-8
           firstName: Jon
           lastName: Doe
           email: user@gmail.com
           active: true
-          createdAt: '2024-07-12T10:34:10.279Z'
-          updatedAt: '2024-07-12T10:34:10.279Z'
+          createdAt: "2024-07-12T10:34:10.279Z"
+          updatedAt: "2024-07-12T10:34:10.279Z"
           __v: 0
       required:
         - _id
@@ -1254,8 +2252,8 @@ components:
           earlyCheckInStatus: Not Requested
           reservationStatus: Confirmed
           preArrivalStatus: Not Applied
-          createdAt: '2024-07-22T17:47:59.118Z'
-          updatedAt: '2024-07-22T17:47:59.118Z'
+          createdAt: "2024-07-22T17:47:59.118Z"
+          updatedAt: "2024-07-22T17:47:59.118Z"
           __v: 0
     ChatList:
       title: ChatList
@@ -1325,8 +2323,8 @@ components:
           examples:
             Example 1:
               value:
-                email: jainil1235@gmail.com
-                password: '123456'
+                email: jainil.patel@onelyk.com
+                password: "123456"
       description: User Login request
     User:
       content:
@@ -1469,7 +2467,7 @@ components:
         application/json:
           schema:
             type: object
-      description: ''
+      description: ""
     CreateGuest:
       content:
         application/json:
@@ -1479,19 +2477,19 @@ components:
               Example 1:
                 _id: 669106a217122df7b4875582
                 propertyId: 669bb5387629e1fff5cb35a5
-                countryCode: '+1'
-                phoneNumber: '9191229133'
+                countryCode: "+1"
+                phoneNumber: "9191229133"
                 source: Source of the guest
-                checkIn: '2024-07-23T23:35:00.000Z'
-                checkOut: '2024-07-16T23:35:00.000Z'
-                confirmationNumber: '9325923593259325'
+                checkIn: "2024-07-23T23:35:00.000Z"
+                checkOut: "2024-07-16T23:35:00.000Z"
+                confirmationNumber: "9325923593259325"
                 roomNumber: C-8
                 firstName: Jon
                 lastName: Doe
                 email: user@gmail.com
                 active: true
-                createdAt: '2024-07-12T10:34:10.279Z'
-                updatedAt: '2024-07-12T10:34:10.279Z'
+                createdAt: "2024-07-12T10:34:10.279Z"
+                updatedAt: "2024-07-12T10:34:10.279Z"
                 __v: 0
             properties:
               countryCode:
@@ -1563,12 +2561,12 @@ components:
           examples:
             Example 1:
               value:
-                countryCode: '+1'
-                phoneNumber: '1234567890'
+                countryCode: "+1"
+                phoneNumber: "1234567890"
                 source: Booking.com
-                checkIn: '2019-08-24T14:15:22Z'
-                checkOut: '2019-08-25T14:15:22Z'
-                confirmationNumber: '123456789012'
+                checkIn: "2019-08-24T14:15:22Z"
+                checkOut: "2019-08-25T14:15:22Z"
+                confirmationNumber: "123456789012"
                 roomNumber: C-102
                 firstName: First
                 lastName: Last
@@ -1592,9 +2590,9 @@ components:
                 message: You are checked out
                 active: true
                 createdAt:
-                  $date: '2024-07-27T10:19:39.608Z'
+                  $date: "2024-07-27T10:19:39.608Z"
                 updatedAt:
-                  $date: '2024-07-27T10:19:39.608Z'
+                  $date: "2024-07-27T10:19:39.608Z"
                 __v: 0
             required:
               - name
@@ -1620,7 +2618,7 @@ components:
                 x-stoplight:
                   id: jt2v990rm57vz
                 enum:
-                  - Reservation Confirmed
+                  - Reservation
                   - In House
                   - Checked Out
               lateCheckOutStatus:
@@ -1690,6 +2688,71 @@ components:
                 type: string
                 x-stoplight:
                   id: ll83edx2qxdwc
+    CreateBroadcast:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              body:
+                type: string
+                x-stoplight:
+                  id: cuely00u0akq3
+              guestIds:
+                type: array
+                x-stoplight:
+                  id: i2cquuqsg4gnk
+                items:
+                  x-stoplight:
+                    id: q0ucvttje6iu6
+                  type: string
+    SendMessageBroadcast:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              body:
+                type: string
+                x-stoplight:
+                  id: 1sy8am5kslfko
+    CreatePreArrival:
+      content:
+        application/json:
+          schema:
+            type: object
+            x-examples:
+              Example 1:
+                phoneNumber: string
+                emailAddress: string
+                arrivalTime: date
+                vehicleMakeModelColor: Honda Elevate EV
+                licensePlateNo: BC18351
+                specialRequests: My special request
+                policyAccepted: true
+                signatureImgUrl: "https://imageurl"
+                consentToText: true
+            properties:
+              phoneNumber:
+                type: string
+              emailAddress:
+                type: string
+                format: email
+              arrivalTime:
+                type: string
+                format: date-time
+              vehicleMakeModelColor:
+                type: string
+              licensePlateNo:
+                type: string
+              specialRequests:
+                type: string
+              policyAccepted:
+                type: boolean
+              consentToText:
+                type: boolean
+              signatureImgUrl:
+                type: string
   responses:
     Login:
       description: Login response
@@ -1704,7 +2767,7 @@ components:
                 type: object
                 properties:
                   user:
-                    $ref: '#/components/schemas/UserWithoutPassword'
+                    $ref: "#/components/schemas/UserWithoutPassword"
                     x-stoplight:
                       id: tx2oe7mwhw59e
                   accessToken:
@@ -1743,7 +2806,7 @@ components:
                     - Zipcode not found
                 type: BAD_REQUEST
                 message: Invalid zip code
-                stack: ''
+                stack: ""
             required:
               - status
               - statusCode
@@ -1769,7 +2832,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/UserWithoutPassword'
+            $ref: "#/components/schemas/UserWithoutPassword"
     PropertyResponse:
       description: Property Response
       content:
@@ -1824,7 +2887,7 @@ components:
           schema:
             type: object
             properties:
-              '':
+              "":
                 type: string
                 x-stoplight:
                   id: l1ju0k5o5khvd
@@ -1902,19 +2965,19 @@ components:
                   guest:
                     _id: 669106a217122df7b4875582
                     propertyId: 669bb5387629e1fff5cb35a5
-                    countryCode: '+1'
-                    phoneNumber: '9191229133'
+                    countryCode: "+1"
+                    phoneNumber: "9191229133"
                     source: Source of the guest
-                    checkIn: '2024-07-23T23:35:00.000Z'
-                    checkOut: '2024-07-16T23:35:00.000Z'
-                    confirmationNumber: '9325923593259325'
+                    checkIn: "2024-07-23T23:35:00.000Z"
+                    checkOut: "2024-07-16T23:35:00.000Z"
+                    confirmationNumber: "9325923593259325"
                     roomNumber: C-8
                     firstName: Jon
                     lastName: Doe
                     email: user@gmail.com
                     active: true
-                    createdAt: '2024-07-12T10:34:10.279Z'
-                    updatedAt: '2024-07-12T10:34:10.279Z'
+                    createdAt: "2024-07-12T10:34:10.279Z"
+                    updatedAt: "2024-07-12T10:34:10.279Z"
                     __v: 0
                     status:
                       _id: 669e9b4fecb5b6613114ed8e
@@ -1924,8 +2987,8 @@ components:
                       earlyCheckInStatus: Not Requested
                       reservationStatus: Confirmed
                       preArrivalStatus: Not Applied
-                      createdAt: '2024-07-22T17:47:59.118Z'
-                      updatedAt: '2024-07-22T17:47:59.118Z'
+                      createdAt: "2024-07-22T17:47:59.118Z"
+                      updatedAt: "2024-07-22T17:47:59.118Z"
                       __v: 0
     CreateMessageTemplate:
       description: Example response
@@ -1945,9 +3008,9 @@ components:
                 message: You are checked out
                 active: true
                 createdAt:
-                  $date: '2024-07-27T10:19:39.608Z'
+                  $date: "2024-07-27T10:19:39.608Z"
                 updatedAt:
-                  $date: '2024-07-27T10:19:39.608Z'
+                  $date: "2024-07-27T10:19:39.608Z"
                 __v: 0
             properties:
               _id:
@@ -1983,7 +3046,7 @@ components:
             type: object
             properties:
               result:
-                $ref: '#/components/schemas/GuestStatus'
+                $ref: "#/components/schemas/GuestStatus"
                 x-stoplight:
                   id: 4ow7yqky33eyp
               message:
@@ -2088,16 +3151,16 @@ components:
                         guestId: 66a3a20a9f0302c6f2612861
                         unreadMessages: 0
                         latestMessage: []
-                        createdAt: '2024-08-04T07:32:04.990Z'
-                        updatedAt: '2024-08-04T07:32:04.990Z'
+                        createdAt: "2024-08-04T07:32:04.990Z"
+                        updatedAt: "2024-08-04T07:32:04.990Z"
                         guest:
                           _id: 66a3a20a9f0302c6f2612861
-                          countryCode: '+1'
-                          phoneNumber: '1234567890'
+                          countryCode: "+1"
+                          phoneNumber: "1234567890"
                           source: Booking.com
-                          checkIn: '2024-07-29T08:45:00.000Z'
-                          checkOut: '2024-08-09T08:45:00.000Z'
-                          confirmationNumber: '123456789012'
+                          checkIn: "2024-07-29T08:45:00.000Z"
+                          checkOut: "2024-08-09T08:45:00.000Z"
+                          confirmationNumber: "123456789012"
                           roomNumber: C-102
                           firstName: First
                           lastName: Last
@@ -2112,3 +3175,15 @@ components:
                 status: success
                 type: SUCCESS
                 message: Success
+x-request-id: null
+tags:
+  - name: Auth
+  - name: Chat List
+  - name: Country
+  - name: Guest
+  - name: Guest Status
+  - name: Message
+  - name: Message Template
+  - name: Property
+  - name: Twilio
+  - name: User

@@ -5,7 +5,8 @@
   "scripts": {
     "test": "docker compose -f docker-compose-mongo-test-cluster.yml up -d && jest",
     "dev": "nodemon index.js",
-    "watch": "bun run --watch index.js"
+    "watch": "bun run --watch index.js",
+    "watch-dev": "PORT=4000 bun run --watch index.js"
   },
   "author": "",
   "license": "ISC",
