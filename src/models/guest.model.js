@@ -85,7 +85,7 @@ const CreateGuestValidationSchema = z
     countryCode: z.string().refine((val) => countrycoderegex.test(val), {
       message: "Invalid country code format",
     }),
-    source: z.string(),
+    source: z.string().optional(),
     checkIn: z
       .string()
       .refine(
@@ -102,7 +102,7 @@ const CreateGuestValidationSchema = z
           message: "Invalid date format",
         },
       ),
-    confirmationNumber: z.string().min(3).max(255),
+    confirmationNumber: z.string().min(3).max(255).optional(),
     roomNumber: z.string().optional(),
     firstName: z.string().optional(),
     lastName: z.string().optional(),
