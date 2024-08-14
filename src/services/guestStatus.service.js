@@ -240,9 +240,16 @@ const getAllGuestWithStatusv2 = async (propertyId, filters) => {
         reservationStatus: 1,
         preArrivalStatus: 1,
       },
+      updatedAt: 1,
+      createdAt: 1,
     },
   });
-
+  // sort :: In future if we want to sort the guest based on some field ::
+  guestPipeline.push({
+    $sort: {
+      updatedAt: -1,
+    },
+  });
   const guests = await Guest.aggregate(guestPipeline);
   return guests;
 };
@@ -275,7 +282,7 @@ const update = async (guestId, guestStatus, session, role = "admin") => {
       currentStatus: ["Invalid Status"],
     });
   }
-  
+
   if (
     role === "guest" &&
     !validateStatusForGuest(oldGuestStatus._doc, updatedGuestStatus._doc)
