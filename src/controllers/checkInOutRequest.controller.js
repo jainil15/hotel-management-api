@@ -10,6 +10,7 @@ const {
   CreateCheckInOutRequestValidationSchema,
   UpdateRequestStatusValidationSchema,
 } = require("../models/checkInOutRequest.model");
+const messageTemplateService = require("../services/messageTemplate.service");
 const messageService = require("../services/message.service");
 const guestStatusService = require("../services/guestStatus.service");
 const checkInOutRequestService = require("../services/checkInOutRequest.service");
@@ -31,6 +32,10 @@ const {
   validateUpdate,
   validateUpdatev3,
 } = require("../utils/guestStatus.util");
+const {
+  guestStatusToTemplate,
+  guestStatusToTemplateOnUpdate,
+} = require("../utils/guestStatustToTemplate");
 
 /**
  * Create check in out request
@@ -236,16 +241,33 @@ const updateRequestStatus = async (req, res, next) => {
         session,
       );
     }
+    const messageTemplateName = guestStatusToTemplateOnUpdate(
+      oldGuestStatus,
+      updatedGuestStatus,
+    );
+    const oldGuest = await guestService.getById(guestId, propertyId);
+    const messageTemplate = await messageTemplateService.getByNameAndPropertyId(
+      propertyId,
+      messageTemplateName,
+    );
+    if (!messageTemplate) {
+      await session.commitTransaction();
+      session.endSession();
+      req.app.io.to(`property:${propertyId}`).emit("guest:guestStatusUpdate", {
+        guestStatus: updatedGuestStatus,
+      });
+      return responseHandler(res, {
+        checkInOutRequest: updatedCheckInOutRequest,
+      });
+    }
     const twilioAccount =
       await twilioAccountService.getByPropertyId(propertyId);
     const twilioSubClient = await twilioService.getTwilioClient(twilioAccount);
     const sentSms = await smsService.send(
       twilioSubClient,
       `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
-      `${updatedGuest.countryCode}${updatedGuest.phoneNumber}`,
-      `Your ${requestType[updatedCheckInOutRequest.requestType]} request is ${
-        updatedCheckInOutRequest.requestStatus
-      }`,
+      `${oldGuest.countryCode}${oldGuest.phoneNumber}`,
+      messageTemplate.message,
     );
     const newMessage = await messageService.create(
       {
@@ -253,10 +275,10 @@ const updateRequestStatus = async (req, res, next) => {
         guestId: guestId,
         senderId: propertyId,
         receiverId: guestId,
-        content: sentSms.body,
+        content: messageTemplate.message,
         messageTriggerType: messageTriggerType.AUTOMATIC,
         messageType: messageType.SMS,
-        messageSid: message.sid,
+        messageSid: sentSms.sid,
       },
       session,
     );
