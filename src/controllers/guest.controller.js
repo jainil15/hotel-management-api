@@ -85,6 +85,7 @@ const create = async (req, res, next) => {
     const guestResult = CreateGuestValidationSchema.safeParse(guest);
     const statusResult = CreateGuestStatusValidationSchema.safeParse(status);
     const sendMessageResult = z.boolean().optional().safeParse(sendMessage);
+
     // Validate guest and status
     if (
       !guestResult.success ||
