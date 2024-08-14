@@ -7,13 +7,13 @@ const userSchema = new Schema(
   {
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
+    email: { type: String, required: true, unique: true, lowercase: true },
     password_hash: { type: String, required: true },
     phoneNumber: { type: String },
     role: { type: String, required: true },
     active: { type: Boolean, default: true },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 userSchema.index({ email: 1 }, { unique: true });
 
