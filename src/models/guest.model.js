@@ -52,7 +52,7 @@ const GuestValidationScehma = z.object({
   countryCode: z.string().refine((val) => countrycoderegex.test(val), {
     message: "Invalid country code format",
   }),
-  source: z.string().optional(),
+  source: z.string().min(1).optional(),
   checkIn: z
     .string()
     .refine(
@@ -69,10 +69,10 @@ const GuestValidationScehma = z.object({
         message: "Invalid date format",
       },
     ),
-  confirmationNumber: z.string().min(3).max(255),
-  roomNumber: z.string().optional(),
-  firstName: z.string(),
-  lastName: z.string(),
+  confirmationNumber: z.string().min(1).max(255).optional(),
+  roomNumber: z.string().min(1).optional(),
+  firstName: z.string().min(1),
+  lastName: z.string().min(1),
   email: z.string().email().optional(),
   active: z.boolean().optional(),
 });
@@ -85,7 +85,7 @@ const CreateGuestValidationSchema = z
     countryCode: z.string().refine((val) => countrycoderegex.test(val), {
       message: "Invalid country code format",
     }),
-    source: z.string().optional(),
+    source: z.string().min(1).optional(),
     checkIn: z
       .string()
       .refine(
@@ -102,10 +102,10 @@ const CreateGuestValidationSchema = z
           message: "Invalid date format",
         },
       ),
-    confirmationNumber: z.string().min(3).max(255).optional(),
-    roomNumber: z.string().optional(),
-    firstName: z.string(),
-    lastName: z.string(),
+    confirmationNumber: z.string().min(1).max(255).optional(),
+    roomNumber: z.string().min(1).optional(),
+    firstName: z.string().min(1),
+    lastName: z.string().min(1),
     email: z.string().email().optional(),
     active: z.boolean().optional(),
   })
@@ -140,7 +140,7 @@ const UpdateGuestValidationSchema = z
         message: "Invalid country code format",
       })
       .optional(),
-    source: z.string().optional(),
+    source: z.string().min(1).optional(),
     checkIn: z
       .string()
       .refine(
@@ -159,10 +159,10 @@ const UpdateGuestValidationSchema = z
         },
       )
       .optional(),
-    confirmationNumber: z.string().min(3).max(255).optional(),
-    roomNumber: z.string().min(3).max(255).optional(),
-    firstName: z.string().optional(),
-    lastName: z.string().optional(),
+    confirmationNumber: z.string().min(1).max(255).optional(),
+    roomNumber: z.string().min(1).max(255).optional(),
+    firstName: z.string().min(1).optional(),
+    lastName: z.string().min(1).optional(),
     email: z.string().email().optional(),
     active: z.boolean().optional(),
   })
