@@ -56,4 +56,13 @@ const getByPropertyId = async (propertyId) => {
   return preArrivalFlow;
 };
 
-module.exports = { createDefault, create, update, getByPropertyId };
+/**
+ * Remove a pre arrival flow
+ * @param {string} propertyId - The propertyId to filter pre arrival flows
+ * @param {object} session - The mongoose session
+ * @returns {Promise<void>}
+ */
+const remove = async (propertyId, session) => {
+  await PreArrivalFlow.deleteOne({ propertyId }, { session: session });
+};
+module.exports = { createDefault, create, update, remove, getByPropertyId };

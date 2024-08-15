@@ -17,6 +17,11 @@ const create = async (propertyId, guestId, preArrival, session) => {
   return newPreArrival;
 };
 
+/**
+ * Get pre arrival by id
+ * @param {string} preArrivalId - The pre arrival id
+ * @returns {Promise<import('../models/preArrival.model').PreArrivalType>} - The pre arrival
+ */
 const getById = async (preArrivalId) => {
   const preArrival = await PreArrival.findById(preArrivalId);
   return preArrival;
