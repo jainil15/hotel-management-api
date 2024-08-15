@@ -43,6 +43,7 @@ const {
 const {
   GUEST_REQUEST,
   REQUEST_STATUS,
+  GUEST_CURRENT_STATUS,
 } = require("../constants/guestStatus.contant");
 const { compareDate } = require("../utils/dateCompare");
 require("dotenv").config();
@@ -85,17 +86,35 @@ const create = async (req, res, next) => {
     const guestResult = CreateGuestValidationSchema.safeParse(guest);
     const statusResult = CreateGuestStatusValidationSchema.safeParse(status);
     const sendMessageResult = z.boolean().optional().safeParse(sendMessage);
-
+    console.log(guest.roomNumber);
+    const roomNumberResult =
+      status.currentStatus === GUEST_CURRENT_STATUS.RESERVED
+        ? z.string().optional().safeParse(status.roomNumber)
+        : z
+            .string()
+            .optional()
+            .superRefine((args, ctx) => {
+              if (guest.roomNumber === undefined) {
+                ctx.addIssue({
+                  path: ["roomNumber"],
+                  code: "invalid_room_number",
+                  message: "Room number is required",
+                });
+              }
+            })
+            .safeParse(status.roomNumber);
     // Validate guest and status
     if (
       !guestResult.success ||
       !statusResult.success ||
-      !sendMessageResult.success
+      !sendMessageResult.success ||
+      !roomNumberResult.success
     ) {
       throw new ValidationError("Validation Error", {
         ...guestResult?.error?.flatten().fieldErrors,
         ...statusResult?.error?.flatten().fieldErrors,
         ...sendMessageResult?.error?.flatten().fieldErrors,
+        ...roomNumberResult?.error?.flatten().fieldErrors,
       });
     }
 
