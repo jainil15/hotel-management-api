@@ -141,8 +141,8 @@ const create = async (req, res, next) => {
     // TODO: Workflow message trigger
     // if (sendMessage === true) {
     // }
-    await session.commitTransaction();
-    session.startTransaction();
+    //await session.commitTransaction();
+    //session.startTransaction();
 
     // Send message to the guest according to the status
     if (sendMessage === true) {
