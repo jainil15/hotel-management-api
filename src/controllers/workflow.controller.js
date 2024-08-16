@@ -1,6 +1,7 @@
 const homeFlowService = require("../services/homeFlow.service");
 const addOnsFlowService = require("../services/addOnsFlow.service");
 const preArrivalFlowService = require("../services/preArrivalFlow.service");
+const workflowService = require("../services/workflow.service");
 const {
   APIError,
   InternalServerError,
@@ -24,15 +25,8 @@ const createDefaults = async (req, res, next) => {
   session.startTransaction();
   try {
     const { propertyId } = req.params;
-    const newHomeFlow = await homeFlowService.create(propertyId, {}, session);
-    const newAddOnsFlow = await addOnsFlowService.create(
+    const defaultWorkflow = await workflowService.createDefaults(
       propertyId,
-      {},
-      session,
-    );
-    const newPreArrivalFlow = await preArrivalFlowService.create(
-      propertyId,
-      {},
       session,
     );
     await session.commitTransaction();
@@ -40,9 +34,7 @@ const createDefaults = async (req, res, next) => {
     return responseHandler(
       res,
       {
-        homeFlow: newHomeFlow,
-        addOnsFlow: newAddOnsFlow,
-        preArrivalFlow: newPreArrivalFlow,
+        workflow: defaultWorkflow,
       },
       201,
       "Defaults created successfully",

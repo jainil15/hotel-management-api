@@ -106,6 +106,7 @@ HomeFlow.init().then(() => {
 });
 module.exports = {
   HomeFlow,
+  frequentlyAskedQuestionsSchema,
   UpdateHomeFlowValidationSchema,
   CreateHomeFlowValidationSchema,
 };
