@@ -13,8 +13,6 @@ const settingSchema = new Schema(
     automaticNewDay: { type: Boolean, default: true },
     defaultNewDayTime: { type: String, required: true },
     manualNewDay: { type: Date },
-    earlyCheckInTime: { type: String },
-    lateCheckOutTime: { type: String },
   },
   { timestamps: true },
 );
@@ -32,12 +30,6 @@ const SettingValidationSchema = z.object({
     message: "Invalid time format",
   }),
   manualNewDay: z.date().optional(),
-  earlyCheckInTime: z.string().refine((val) => timeregex.test(val), {
-    message: "Invalid time format",
-  }),
-  lateCheckOutTime: z.string().refine((val) => timeregex.test(val), {
-    message: "Invalid time format",
-  }),
 });
 /**
  * @typedef {import("mongoose").Model<Setting>} Setting

@@ -1,18 +1,18 @@
 const { default: mongoose } = require("mongoose");
 const {
-	ValidationError,
-	APIError,
-	InternalServerError,
-	ConflictError,
-	NotFoundError,
+  ValidationError,
+  APIError,
+  InternalServerError,
+  ConflictError,
+  NotFoundError,
 } = require("../lib/CustomErrors");
 const { responseHandler } = require("../middlewares/response.middleware");
 const { PropertyValidationSchema } = require("../models/property.model");
 const { SettingValidationSchema } = require("../models/setting.model");
 const propertyService = require("../services/property.service");
 const messageTemplateService = require("../services/messageTemplate.service");
+const workflowService = require("../services/workflow.service");
 const checkImageType = require("../utils/checkType");
-
 
 /**
  * Create property
@@ -22,75 +22,78 @@ const checkImageType = require("../utils/checkType");
  * @returns {import('express').Response} - The response
  */
 const create = async (req, res, next) => {
-	const session = await mongoose.startSession();
-	session.startTransaction();
-	try {
-		const {
-			standardCheckinTime,
-			standardCheckoutTime,
-			timezone,
-			defaultNewDayTime,
-			...property
-		} = req.body;
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const {
+      standardCheckinTime,
+      standardCheckoutTime,
+      timezone,
+      defaultNewDayTime,
+      ...property
+    } = req.body;
 
-		// validation errors
-		const result = PropertyValidationSchema.safeParse({
-			...property,
-			logo: req.files.logo,
-			cover: req.files.cover,
-		});
-		const settingResult = SettingValidationSchema.safeParse({
-			standardCheckinTime,
-			standardCheckoutTime,
-			timezone,
-			defaultNewDayTime,
-		});
-		// validation errors
-		if (!result.success || !settingResult.success) {
-			throw new ValidationError("Validation Error", {
-				...result?.error?.flatten().fieldErrors,
-				...settingResult?.error?.flatten().fieldErrors,
-			});
-		}
+    // validation errors
+    const result = PropertyValidationSchema.safeParse({
+      ...property,
+      logo: req.files.logo,
+      cover: req.files.cover,
+    });
+    const settingResult = SettingValidationSchema.safeParse({
+      standardCheckinTime,
+      standardCheckoutTime,
+      timezone,
+      defaultNewDayTime,
+    });
+    // validation errors
+    if (!result.success || !settingResult.success) {
+      throw new ValidationError("Validation Error", {
+        ...result?.error?.flatten().fieldErrors,
+        ...settingResult?.error?.flatten().fieldErrors,
+      });
+    }
 
-		// check if email already exists
-		const oldProperty = await propertyService.getByEmail(property.email);
-		if (oldProperty) {
-			throw new ConflictError("Property with this email already exists", {
-				email: ["Property with this email already exists"],
-			});
-		}
-		// create new property
-		const newProperty = await propertyService.create(
-			property,
-			req.files,
-			req.user,
-			settingResult.data,
-			session,
-		);
+    // check if email already exists
+    const oldProperty = await propertyService.getByEmail(property.email);
+    if (oldProperty) {
+      throw new ConflictError("Property with this email already exists", {
+        email: ["Property with this email already exists"],
+      });
+    }
+    // create new property
+    const newProperty = await propertyService.create(
+      property,
+      req.files,
+      req.user,
+      settingResult.data,
+      session,
+    );
 
-		const defaultTemplates = await messageTemplateService.createDefaults(
-			newProperty._id,
-			session,
-		);
-		await session.commitTransaction();
-		session.endSession();
-		return responseHandler(
-			res,
-			{ property: newProperty },
-			201,
-			"Property created",
-		);
-	} catch (e) {
-		await session.abortTransaction();
-		session.endSession();
-		if (e instanceof APIError) {
-			return next(e);
-		}
-		return next(new InternalServerError(e.message));
-	}
+    const defaultTemplates = await messageTemplateService.createDefaults(
+      newProperty._id,
+      session,
+    );
+    const defaultWorkflow = await workflowService.createDefaults(
+      newProperty._id,
+      session,
+    );
+    await session.commitTransaction();
+    session.endSession();
+    return responseHandler(
+      res,
+      { property: newProperty },
+      201,
+      "Property created",
+    );
+  } catch (e) {
+    await session.abortTransaction();
+    session.endSession();
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError(e.message));
+  }
 };
-
 
 /**
  * Get all properties of a user
@@ -100,20 +103,19 @@ const create = async (req, res, next) => {
  * @returns {import('express').Response} - The response
  */
 const getAll = async (req, res, next) => {
-	try {
-		const properties = await propertyService.getAll(req.user);
-		if (!properties) {
-			throw new NotFoundError("No properties found", {});
-		}
-		return responseHandler(res, { properties: properties });
-	} catch (e) {
-		if (e instanceof APIError) {
-			return next(e);
-		}
-		return next(new InternalServerError());
-	}
+  try {
+    const properties = await propertyService.getAll(req.user);
+    if (!properties) {
+      throw new NotFoundError("No properties found", {});
+    }
+    return responseHandler(res, { properties: properties });
+  } catch (e) {
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError());
+  }
 };
-
 
 /**
  * Get property by id
@@ -123,19 +125,18 @@ const getAll = async (req, res, next) => {
  * @returns {import('express').Response} - The response
  */
 const getById = async (req, res, next) => {
-	try {
-		const propertyId = req.params.propertyId;
+  try {
+    const propertyId = req.params.propertyId;
 
-		const property = await propertyService.getById(propertyId);
-		return responseHandler(res, { property: property });
-	} catch (e) {
-		if (e instanceof APIError) {
-			return next(e);
-		}
-		return next(new InternalServerError());
-	}
+    const property = await propertyService.getById(propertyId);
+    return responseHandler(res, { property: property });
+  } catch (e) {
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError());
+  }
 };
-
 
 /**
  * Update property by id
@@ -145,29 +146,28 @@ const getById = async (req, res, next) => {
  * @returns {import('express').Response} - The response
  */
 const update = async (req, res, next) => {
-	try {
-		const property = req.body;
-		const propertyId = req.params.propertyId;
-		const result = PropertyValidationSchema.safeParse({
-			...property,
-		});
-		// validation errors
-		if (!result.success) {
-			throw new ValidationError(
-				"Validation Error",
-				result.error.flatten().fieldErrors,
-			);
-		}
-		const updatedProperty = await propertyService.update(property, propertyId);
-		return responseHandler(res, { property: updatedProperty });
-	} catch (e) {
-		if (e instanceof APIError) {
-			return next(e);
-		}
-		return next(new InternalServerError());
-	}
+  try {
+    const property = req.body;
+    const propertyId = req.params.propertyId;
+    const result = PropertyValidationSchema.safeParse({
+      ...property,
+    });
+    // validation errors
+    if (!result.success) {
+      throw new ValidationError(
+        "Validation Error",
+        result.error.flatten().fieldErrors,
+      );
+    }
+    const updatedProperty = await propertyService.update(property, propertyId);
+    return responseHandler(res, { property: updatedProperty });
+  } catch (e) {
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError());
+  }
 };
-
 
 /**
  * Remove property by id
@@ -177,16 +177,16 @@ const update = async (req, res, next) => {
  * @returns {import('express').Response} - The response
  */
 const remove = async (req, res, next) => {
-	try {
-		const propertyId = req.params.propertyId;
-		const removedProperty = await propertyService.remove(propertyId);
-		return responseHandler(res, { property: removedProperty });
-	} catch (e) {
-		if (e instanceof APIError) {
-			return next(e);
-		}
-		return next(new InternalServerError());
-	}
+  try {
+    const propertyId = req.params.propertyId;
+    const removedProperty = await propertyService.remove(propertyId);
+    return responseHandler(res, { property: removedProperty });
+  } catch (e) {
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError());
+  }
 };
 
 module.exports = { create, getAll, getById, update, remove };
