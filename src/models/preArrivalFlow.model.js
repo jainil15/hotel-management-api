@@ -26,7 +26,7 @@ const preArrivalFlowSchema = new Schema(
         "Primary policy regarding refund and important points displayed here",
     },
     policyLink: { type: String, default: "Policy link with bottom sheet" },
-    extraPolicies: [{ type: String }],
+    extraPolicies: { type: [String], default: [] },
   },
   { timestamps: true },
 );

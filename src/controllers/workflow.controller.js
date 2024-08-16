@@ -16,6 +16,9 @@ const {
   UpdatePreArrivalValidationSchema,
 } = require("../models/preArrivalFlow.model");
 
+/**
+ * @deprecated
+ */
 const createDefaults = async (req, res, next) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -88,6 +91,9 @@ const removeDefaults = async (req, res, next) => {
   }
 };
 
+/**
+ * Get workflow by propertyId
+ */
 const getByPropertyId = async (req, res, next) => {
   try {
     const { propertyId } = req.params;
@@ -171,4 +177,5 @@ module.exports = {
   createDefaults,
   removeDefaults,
   getByPropertyId,
+  update,
 };

@@ -447,13 +447,13 @@ const update = async (req, res, next) => {
 
     // Trigger events
     // Emit to guest list updated
-    req.app.io.to(`property: ${propertyId}`).emit("guest:guestUpdate", {
+    req.app.io.to(`property:${propertyId}`).emit("guest:guestUpdate", {
       guest: { ...updatedGuest._doc, status: updatedGuestStatus },
     });
     // Emit to chat list updated
-    req.app.io.to(`property: ${propertyId}`).emit("chatList:update", {});
+    req.app.io.to(`property:${propertyId}`).emit("chatList:update", {});
     // Emit to guest messages updated
-    req.app.io.to(`guest: ${guestId}`).emit("message:newMessage", {});
+    req.app.io.to(`guest:${guestId}`).emit("message:newMessage", {});
     return responseHandler(
       res,
       {
@@ -500,10 +500,10 @@ const remove = async (req, res, next) => {
       session,
     );
 
-    req.app.io.to(`property: ${propertyId}`).emit("guest:guestUpdate", {
+    req.app.io.to(`property:${propertyId}`).emit("guest:guestUpdate", {
       guest: { ...removedGuest._doc, status: removedGuestStatus },
     });
-    req.app.io.to(`property: ${propertyId}`).emit("chatList:update", {
+    req.app.io.to(`property:${propertyId}`).emit("chatList:update", {
       chatList: removedChatList,
     });
     await session.commitTransaction();

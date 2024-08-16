@@ -204,16 +204,54 @@ const getAllGuestWithStatusv2 = async (propertyId, filters) => {
         }, {}),
       },
       {
-        $match: {
-          $or: Object.keys(Guest.schema.obj).map((key) => ({
-            [`string_${key}`]: {
-              $regex: new RegExp(
-                filters.search.replace(/[#-.]|[[-^]|[?|{}]/g, "\\$&"),
-              ),
-
-              $options: "i",
+        $addFields: Object.keys(GuestStatus.schema.obj).reduce((acc, key) => {
+          acc[`string_status_${key}`] = {
+            $cond: {
+              if: { $in: [{ $type: `$status.${key}` }, ["date", "objectId"]] },
+              // biome-ignore lint/suspicious/noThenProperty: <explanation>
+              then: {
+                $dateToString: {
+                  format: "%d:%m:%YT%H:%M",
+                  date: `$status.${key}`,
+                },
+              },
+              else: {
+                $concat: [
+                  `${key
+                    .split(/(?=[A-Z])/)
+                    .slice(0, key.split(/(?=[A-Z])/).length - 1)
+                    .join(" ")} `,
+                  `$status.${key}`,
+                ],
+              },
             },
-          })),
+          };
+          return acc;
+        }, {}),
+      },
+
+      {
+        $match: {
+          $or: [
+            ...Object.keys(Guest.schema.obj).map((key) => ({
+              [`string_${key}`]: {
+                $regex: new RegExp(
+                  filters.search.replace(/[#-.]|[[-^]|[?|{}]/g, "\\$&"),
+                ),
+
+                $options: "i",
+              },
+            })),
+            ...Object.keys(GuestStatus.schema.obj).map((key) => ({
+              [`string_status_${key}`]: {
+                $regex: new RegExp(
+                  filters.search.replace(/[#-.]|[[-^]|[?|{}]/g, "\\$&"),
+                ),
+
+                $options: "i",
+              },
+            })),
+          ],
         },
       },
     );

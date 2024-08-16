@@ -3,7 +3,20 @@ const { z } = require("zod");
 const logger = require("../configs/winston.config");
 
 const Schema = require("mongoose").Schema;
-
+const amenitiesSchema = new Schema(
+  {
+    name: { type: String, required: true },
+    enabled: { type: Boolean, default: true },
+  },
+  { _id: false },
+);
+const frequentlyAskedQuestionsSchema = new Schema(
+  {
+    question: { type: String, required: true },
+    answer: { type: String, required: true },
+  },
+  { _id: false },
+);
 const homeFlowSchema = new Schema(
   {
     propertyId: {
@@ -11,20 +24,44 @@ const homeFlowSchema = new Schema(
       ref: "Property",
       required: true,
     },
-    ammenities: [
-      {
-        name: { type: String, required: true },
-        iconUrl: { type: String, required: true },
-        enabled: { type: Boolean, default: true },
-      },
-    ],
+    amenities: {
+      type: [amenitiesSchema],
+      default: [
+        {
+          name: "Breakfast Included",
+          enabled: true,
+        },
+        {
+          name: "24/7 Front Desk",
+          enabled: true,
+        },
+        {
+          name: "Free WiFi",
+          enabled: true,
+        },
+        {
+          name: "HouseKeeping",
+          enabled: true,
+        },
+        {
+          name: "Air conditioning",
+          enabled: true,
+        },
+        {
+          name: "Parking Available",
+          enabled: true,
+        },
+        {
+          name: "Luggage Storage",
+          enabled: true,
+        },
+      ],
+    },
     frequentlyAskedQuestionsEnabled: { type: Boolean, default: true },
-    frequentlyAskedQuestions: [
-      {
-        question: { type: String, required: true },
-        answer: { type: String, required: true },
-      },
-    ],
+    frequentlyAskedQuestions: {
+      type: [frequentlyAskedQuestionsSchema],
+      default: [],
+    },
   },
   { timestamps: true },
 );
@@ -40,7 +77,7 @@ const HomeFlow = mongoose.model("HomeFlow", homeFlowSchema);
 const CreateHomeFlowValidationSchema = z.object({
   ammenities: z.array({
     name: z.string(),
-    iconUrl: z.string(),
+    enabled: z.boolean(),
   }),
   frequentlyAskedQuestionsEnabled: z.boolean().optional(),
   frequentlyAskedQuestions: z.array({
