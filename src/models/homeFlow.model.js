@@ -60,7 +60,12 @@ const homeFlowSchema = new Schema(
     frequentlyAskedQuestionsEnabled: { type: Boolean, default: true },
     frequentlyAskedQuestions: {
       type: [frequentlyAskedQuestionsSchema],
-      default: [],
+      default: [
+        {
+          question: "What time is standard check in?",
+          answer: "Check-out is at 3:00 PM.",
+        },
+      ],
     },
   },
   { timestamps: true },

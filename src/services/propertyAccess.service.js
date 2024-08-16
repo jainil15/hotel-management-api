@@ -8,11 +8,11 @@ const PropertyAccess = require("../models/propertyaccess.model");
  * @returns {Promise<PropertyAccess>} - The new property access
  */
 const create = async (userId, propertyId, role) => {
-	const newPropertyAccess = new PropertyAccess({
-		propertyId: propertyId,
-		userId: userId,
-	});
-	return newPropertyAccess;
+  const newPropertyAccess = new PropertyAccess({
+    propertyId: propertyId,
+    userId: userId,
+  });
+  return newPropertyAccess;
 };
 
 /**
@@ -21,8 +21,8 @@ const create = async (userId, propertyId, role) => {
  * @returns {Promise<PropertyAccess[]>} - The list of property access
  */
 const getByUserId = async (userId) => {
-	const propertyAccess = await PropertyAccess.find({ userId: userId });
-	return propertyAccess;
+  const propertyAccess = await PropertyAccess.find({ userId: userId });
+  return propertyAccess;
 };
 
 /**
@@ -31,8 +31,8 @@ const getByUserId = async (userId) => {
  * @returns {Promise<PropertyAccess[]>} - The list of property access
  */
 const getByPropertyId = async (propertyId) => {
-	const propertyAccess = await PropertyAccess.find({ propertyId: propertyId });
-	return propertyAccess;
+  const propertyAccess = await PropertyAccess.find({ propertyId: propertyId });
+  return propertyAccess;
 };
 
 /**
@@ -42,16 +42,16 @@ const getByPropertyId = async (propertyId) => {
  * @returns {Promise<PropertyAccess>} - The property access
  */
 const getByPropertyIdAndUserId = async (propertyId, userId) => {
-	const propertyAccess = await PropertyAccess.findOne({
-		propertyId: propertyId,
-		userId: userId,
-	});
-	return propertyAccess;
+  const propertyAccess = await PropertyAccess.findOne({
+    propertyId: propertyId,
+    userId: userId,
+  });
+  return propertyAccess;
 };
 
 module.exports = {
-	create,
-	getByUserId,
-	getByPropertyId,
-	getByPropertyIdAndUserId,
+  create,
+  getByUserId,
+  getByPropertyId,
+  getByPropertyIdAndUserId,
 };

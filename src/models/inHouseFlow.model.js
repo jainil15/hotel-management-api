@@ -14,8 +14,13 @@ const inHouseFlowSchema = new Schema(
     },
     frequentlyAskedQuestionsEnabled: { type: Boolean, default: true },
     frequentlyAskedQuestions: {
-      type: frequentlyAskedQuestionsSchema,
-      default: [],
+      type: [frequentlyAskedQuestionsSchema],
+      default: [
+        {
+          question: "What time is standard check out?",
+          answer: "Check out is at 11:00 AM.",
+        },
+      ],
     },
   },
   { timestamps: true },
@@ -47,4 +52,8 @@ const UpdateInHouseFlowValidationSchema = z.object({
 InHouseFlow.init().then(() => {
   logger.info("Initialized InHouseFlow Model");
 });
-module.exports = { InHouseFlow };
+module.exports = {
+  InHouseFlow,
+  CreateInHouseFlowValidationSchema,
+  UpdateInHouseFlowValidationSchema,
+};

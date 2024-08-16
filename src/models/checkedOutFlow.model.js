@@ -14,7 +14,12 @@ const checkedOutFlowSchema = new Schema(
     frequentlyAskedQuestionsEnabled: { type: Boolean, default: true },
     frequentlyAskedQuestions: {
       type: [frequentlyAskedQuestionsSchema],
-      default: [],
+      default: [
+        {
+          question: "What time is standard check out?",
+          answer: "Check-out is at 11:00 AM.",
+        },
+      ],
     },
   },
   { timestamps: true },

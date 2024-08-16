@@ -64,10 +64,7 @@ const removeDefaults = async (req, res, next) => {
   session.startTransaction();
   try {
     const { propertyId } = req.params;
-    await homeFlowService.remove(propertyId, session);
-    await addOnsFlowService.remove(propertyId, session);
-    await preArrivalFlowService.remove(propertyId, session);
-
+    await workflowService.removeDefaults(propertyId, session);
     await session.commitTransaction();
     session.endSession();
 
