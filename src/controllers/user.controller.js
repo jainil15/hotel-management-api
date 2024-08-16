@@ -184,7 +184,7 @@ const logout = async (req, res, next) => {
  * @returns {import('express').Response} - The response
  */
 const getUser = async (req, res, next) => {
-  const { user } = req.user;
+  const user = req.user;
   try {
     return responseHandler(res, { user }, 200, "User Found");
   } catch (e) {
