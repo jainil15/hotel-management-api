@@ -36,19 +36,23 @@ const CheckedOutFlow = require("mongoose").model(
 
 const CreateCheckedOutFlowValidationSchema = z.object({
   frequentlyAskedQuestionsEnabled: z.boolean(),
-  frequentlyAskedQuestions: z.array({
-    question: z.string(),
-    answer: z.string(),
-  }),
+  frequentlyAskedQuestions: z.array(
+    z.object({
+      question: z.string(),
+      answer: z.string(),
+    }),
+  ),
 });
 
 const UpdateCheckedOutFlowValidationSchema = z.object({
   frequentlyAskedQuestionsEnabled: z.boolean().optional(),
   frequentlyAskedQuestions: z
-    .array({
-      question: z.string(),
-      answer: z.string(),
-    })
+    .array(
+      z.object({
+        question: z.string(),
+        answer: z.string(),
+      }),
+    )
     .optional(),
 });
 

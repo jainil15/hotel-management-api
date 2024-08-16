@@ -75,37 +75,59 @@ addOnsFlowSchema.index({ propertyId: 1 }, { unique: true });
 const AddOnsFlow = mongoose.model("AddOnsFlow", addOnsFlowSchema);
 
 const CreateAddOnsFlowValidationSchema = z.object({
-  customEarlyCheckInTimeEnabled: z.boolean().optional(),
-  customEarlyCheckInTime: z
-    .string()
-    .optional()
-    .refine((val) => timeregex.test(val), {
-      message: "Invalid time format",
+  customAddOns: z.array(
+    z.object({
+      name: z.string(),
+      description: z.string(),
+      paid: z.boolean(),
+      price: z.number().optional(),
+      enabled: z.boolean(),
+      default: z.boolean(),
     }),
-  customLateCheckOutTimeEnabled: z.boolean().optional(),
-  customLateCheckOutTime: z
-    .string()
-    .optional()
-    .refine((val) => timeregex.test(val), {
-      message: "Invalid time format",
+  ),
+  checkInOutAddOns: z.array(
+    z.object({
+      name: z.string(),
+      description: z.string(),
+      defaultTimeEnabled: z.boolean(),
+      defaultTiming: z.string().optional(),
+      customTiming: z.string(),
+      paid: z.boolean(),
+      price: z.number(),
+      enabled: z.boolean(),
+      default: z.boolean(),
     }),
+  ),
 });
 
 const UpdateAddOnsFlowValidationSchema = z.object({
-  customEarlyCheckInTimeEnabled: z.boolean().optional(),
-  customEarlyCheckInTime: z
-    .string()
-    .optional()
-    .refine((val) => timeregex.test(val), {
-      message: "Invalid time format",
-    }),
-  customLateCheckOutTimeEnabled: z.boolean().optional(),
-  customLateCheckOutTime: z
-    .string()
-    .optional()
-    .refine((val) => timeregex.test(val), {
-      message: "Invalid time format",
-    }),
+  customAddOns: z
+    .array(
+      z.object({
+        name: z.string().optional(),
+        description: z.string().optional(),
+        paid: z.boolean().optional(),
+        price: z.number().optional(),
+        enabled: z.boolean().optional(),
+        default: z.boolean().optional(),
+      }),
+    )
+    .optional(),
+  checkInOutAddOns: z
+    .array(
+      z.object({
+        name: z.string().optional(),
+        description: z.string().optional(),
+        defaultTimeEnabled: z.boolean().optional(),
+        defaultTiming: z.string().optional(),
+        customTiming: z.string().optional(),
+        paid: z.boolean().optional(),
+        price: z.number().optional(),
+        enabled: z.boolean().optional(),
+        default: z.boolean().optional(),
+      }),
+    )
+    .optional(),
 });
 
 AddOnsFlow.init().then(() => {

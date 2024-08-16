@@ -34,19 +34,23 @@ const InHouseFlow = mongoose.model("InHouseFlow", inHouseFlowSchema);
 
 const CreateInHouseFlowValidationSchema = z.object({
   frequentlyAskedQuestionsEnabled: z.boolean(),
-  frequentlyAskedQuestions: z.array({
-    question: z.string(),
-    answer: z.string(),
-  }),
+  frequentlyAskedQuestions: z.array(
+    z.object({
+      question: z.string(),
+      answer: z.string(),
+    }),
+  ),
 });
 
 const UpdateInHouseFlowValidationSchema = z.object({
   frequentlyAskedQuestionsEnabled: z.boolean().optional(),
   frequentlyAskedQuestions: z
-    .array({
-      question: z.string(),
-      answer: z.string(),
-    })
+    .array(
+      z.object({
+        question: z.string(),
+        answer: z.string(),
+      }),
+    )
     .optional(),
 });
 InHouseFlow.init().then(() => {

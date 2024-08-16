@@ -281,10 +281,31 @@ const update = async (req, res, next) => {
     const guestResult = await UpdateGuestValidationSchema.safeParseAsync(guest);
     const statusResult =
       await UpdateGuestStatusValidationSchema.safeParseAsync(status);
-    if (!guestResult.success || !statusResult.success) {
+    const roomNumberResult =
+      status.currentStatus === GUEST_CURRENT_STATUS.RESERVED
+        ? z.string().optional().safeParse(status.roomNumber)
+        : z
+            .string()
+            .optional()
+            .superRefine((args, ctx) => {
+              if (guest.roomNumber === undefined) {
+                ctx.addIssue({
+                  path: ["roomNumber"],
+                  code: "invalid_room_number",
+                  message: "Room number is required",
+                });
+              }
+            })
+            .safeParse(status.roomNumber);
+    if (
+      !guestResult.success ||
+      !statusResult.success ||
+      !roomNumberResult.success
+    ) {
       throw new ValidationError("Validation Error", {
         ...guestResult?.error?.flatten().fieldErrors,
         ...statusResult?.error?.flatten().fieldErrors,
+        ...roomNumberResult?.error?.flatten().fieldErrors,
       });
     }
 

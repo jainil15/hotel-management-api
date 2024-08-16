@@ -15,6 +15,14 @@ router.post(
   workflowController.createDefaults,
 );
 
+router.put(
+  "/:propertyId",
+  authenticateToken,
+  checkPropertyAccess,
+  checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
+  workflowController.update,
+);
+
 router.delete(
   "/:propertyId",
   authenticateToken,

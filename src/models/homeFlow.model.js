@@ -85,10 +85,12 @@ const CreateHomeFlowValidationSchema = z.object({
     enabled: z.boolean(),
   }),
   frequentlyAskedQuestionsEnabled: z.boolean().optional(),
-  frequentlyAskedQuestions: z.array({
-    question: z.string(),
-    answer: z.string(),
-  }),
+  frequentlyAskedQuestions: z.array(
+    z.object({
+      question: z.string(),
+      answer: z.string(),
+    }),
+  ),
 });
 
 const UpdateHomeFlowValidationSchema = z.object({
@@ -100,10 +102,12 @@ const UpdateHomeFlowValidationSchema = z.object({
     .optional(),
   frequentlyAskedQuestionsEnabled: z.boolean().optional(),
   frequentlyAskedQuestions: z
-    .array({
-      question: z.string().optional(),
-      answer: z.string().optional(),
-    })
+    .array(
+      z.object({
+        question: z.string().optional(),
+        answer: z.string().optional(),
+      }),
+    )
     .optional(),
 });
 HomeFlow.init().then(() => {
