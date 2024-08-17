@@ -93,23 +93,25 @@ const CreateHomeFlowValidationSchema = z.object({
   ),
 });
 
-const UpdateHomeFlowValidationSchema = z.object({
-  ammenities: z
-    .array({
-      name: z.string().optional(),
-      iconUrl: z.string().optional(),
-    })
-    .optional(),
-  frequentlyAskedQuestionsEnabled: z.boolean().optional(),
-  frequentlyAskedQuestions: z
-    .array(
-      z.object({
-        question: z.string().optional(),
-        answer: z.string().optional(),
-      }),
-    )
-    .optional(),
-});
+const UpdateHomeFlowValidationSchema = z
+  .object({
+    ammenities: z
+      .array({
+        name: z.string().optional(),
+        enabled: z.boolean().optional(),
+      })
+      .optional(),
+    frequentlyAskedQuestionsEnabled: z.boolean().optional(),
+    frequentlyAskedQuestions: z
+      .array(
+        z.object({
+          question: z.string().optional(),
+          answer: z.string().optional(),
+        }),
+      )
+      .optional(),
+  })
+  .optional();
 HomeFlow.init().then(() => {
   logger.info("Initialized HomeFlow Model");
 });

@@ -100,35 +100,37 @@ const CreateAddOnsFlowValidationSchema = z.object({
   ),
 });
 
-const UpdateAddOnsFlowValidationSchema = z.object({
-  customAddOns: z
-    .array(
-      z.object({
-        name: z.string().optional(),
-        description: z.string().optional(),
-        paid: z.boolean().optional(),
-        price: z.number().optional(),
-        enabled: z.boolean().optional(),
-        default: z.boolean().optional(),
-      }),
-    )
-    .optional(),
-  checkInOutAddOns: z
-    .array(
-      z.object({
-        name: z.string().optional(),
-        description: z.string().optional(),
-        defaultTimeEnabled: z.boolean().optional(),
-        defaultTiming: z.string().optional(),
-        customTiming: z.string().optional(),
-        paid: z.boolean().optional(),
-        price: z.number().optional(),
-        enabled: z.boolean().optional(),
-        default: z.boolean().optional(),
-      }),
-    )
-    .optional(),
-});
+const UpdateAddOnsFlowValidationSchema = z
+  .object({
+    customAddOns: z
+      .array(
+        z.object({
+          name: z.string().optional(),
+          description: z.string().optional(),
+          paid: z.boolean().optional(),
+          price: z.number().optional(),
+          enabled: z.boolean().optional(),
+          default: z.boolean().optional(),
+        }),
+      )
+      .optional(),
+    checkInOutAddOns: z
+      .array(
+        z.object({
+          name: z.string().optional(),
+          description: z.string().optional(),
+          defaultTimeEnabled: z.boolean().optional(),
+          defaultTiming: z.string().optional(),
+          customTiming: z.string().optional(),
+          paid: z.boolean().optional(),
+          price: z.number().optional(),
+          enabled: z.boolean().optional(),
+          default: z.boolean().optional(),
+        }),
+      )
+      .optional(),
+  })
+  .optional();
 
 AddOnsFlow.init().then(() => {
   logger.info("Initialized AddOnsFlow Model");

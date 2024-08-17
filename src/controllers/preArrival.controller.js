@@ -57,7 +57,6 @@ const create = async (req, res, next) => {
     if (existingPreArrival) {
       throw new ConflictError("Pre arrival already exists", {});
     }
-    console.log("preArrival", preArrivalResult.data);
     const newPreArrival = await preArrivalService.create(
       propertyId,
       guestId,

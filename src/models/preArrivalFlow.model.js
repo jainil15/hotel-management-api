@@ -39,20 +39,22 @@ preArrivalFlowSchema.index({ propertyId: 1 }, { unique: true });
  */
 const PreArrivalFlow = mongoose.model("PreArrivalFlow", preArrivalFlowSchema);
 
-const UpdatePreArrivalValidationSchema = z.object({
-  phoneNumber: z.boolean().optional(),
-  emailAddress: z.boolean().optional(),
-  arrivalTime: z.boolean().optional(),
-  vehicleMakeModelColor: z.boolean().optional(),
-  licensePlateNo: z.boolean().optional(),
-  specialRequests: z.boolean().optional(),
-  guestSignature: z.boolean().optional(),
-  guestIdProof: z.boolean().optional(),
-  policies: z.boolean().optional(),
-  primaryPolicy: z.string().optional(),
-  policyLink: z.string().optional(),
-  extraPolicies: z.array(z.string()).optional(),
-});
+const UpdatePreArrivalValidationSchema = z
+  .object({
+    phoneNumber: z.boolean().optional(),
+    emailAddress: z.boolean().optional(),
+    arrivalTime: z.boolean().optional(),
+    vehicleMakeModelColor: z.boolean().optional(),
+    licensePlateNo: z.boolean().optional(),
+    specialRequests: z.boolean().optional(),
+    guestSignature: z.boolean().optional(),
+    guestIdProof: z.boolean().optional(),
+    policies: z.boolean().optional(),
+    primaryPolicy: z.string().optional(),
+    policyLink: z.string().optional(),
+    extraPolicies: z.array(z.string()).optional(),
+  })
+  .optional();
 
 PreArrivalFlow.init().then(() => {
   logger.info("Initialized PreArrivalFlow Model");

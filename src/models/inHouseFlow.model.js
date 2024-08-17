@@ -42,17 +42,19 @@ const CreateInHouseFlowValidationSchema = z.object({
   ),
 });
 
-const UpdateInHouseFlowValidationSchema = z.object({
-  frequentlyAskedQuestionsEnabled: z.boolean().optional(),
-  frequentlyAskedQuestions: z
-    .array(
-      z.object({
-        question: z.string(),
-        answer: z.string(),
-      }),
-    )
-    .optional(),
-});
+const UpdateInHouseFlowValidationSchema = z
+  .object({
+    frequentlyAskedQuestionsEnabled: z.boolean().optional(),
+    frequentlyAskedQuestions: z
+      .array(
+        z.object({
+          question: z.string(),
+          answer: z.string(),
+        }),
+      )
+      .optional(),
+  })
+  .optional();
 InHouseFlow.init().then(() => {
   logger.info("Initialized InHouseFlow Model");
 });
