@@ -6,7 +6,9 @@ const {
   update,
   remove,
   getAllGuestsWithStatus,
+  getGuestById,
 } = require("../controllers/guest.controller");
+
 const { authenticateToken } = require("../middlewares/jwt.middleware");
 const {
   checkPropertyAccess,
@@ -16,19 +18,20 @@ const { ROLE } = require("../constants/role.constant");
 const { checkGuestAccess } = require("../middlewares/guestAccess.middleware");
 const router = Router();
 
+router.get("/getByGuestId/:guestId", getGuestById);
 router.post(
   "/:propertyId",
   authenticateToken,
   checkPropertyAccess,
   checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
-  create
+  create,
 );
 router.get(
   "/:propertyId",
   authenticateToken,
   checkPropertyAccess,
   checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
-  getAllGuestsWithStatus
+  getAllGuestsWithStatus,
 );
 
 router.get(
@@ -37,21 +40,21 @@ router.get(
   checkPropertyAccess,
   checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK, ROLE.GUEST]),
   checkGuestAccess,
-  getById
+  getById,
 );
 router.put(
   "/:propertyId/:guestId",
   authenticateToken,
   checkPropertyAccess,
   checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
-  update
+  update,
 );
 router.delete(
   "/:propertyId/:guestId",
   authenticateToken,
   checkPropertyAccess,
   checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
-  remove
+  remove,
 );
 
 module.exports = router;

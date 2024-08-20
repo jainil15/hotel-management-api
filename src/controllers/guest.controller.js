@@ -575,6 +575,24 @@ const getAllGuestsWithStatus = async (req, res, next) => {
   }
 };
 
+const getGuestById = async (req, res, next) => {
+  try {
+    const guestId = req.params.guestId;
+    const guest = await guestService.find({
+      _id: guestId,
+    });
+    const guestStatus = await guestStatusService.getByGuestId(guestId);
+    return responseHandler(res, {
+      guest: { ...guest._doc, status: guestStatus },
+    });
+  } catch (e) {
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError());
+  }
+};
+
 module.exports = {
   getAll,
   create,
@@ -582,4 +600,5 @@ module.exports = {
   update,
   remove,
   getAllGuestsWithStatus,
+  getGuestById,
 };

@@ -98,10 +98,15 @@ const getByPropertyId = async (req, res, next) => {
     const addOnsFlow = await addOnsFlowService.getByPropertyId(propertyId);
     const preArrivalFlow =
       await preArrivalFlowService.getByPropertyId(propertyId);
+    const inHouseFlow = await inHouseFlowService.getByPropertyId(propertyId);
+    const checkedOutFlow =
+      await checkedOutFlowService.getByPropertyId(propertyId);
     return responseHandler(res, {
       homeFlow,
       addOnsFlow,
       preArrivalFlow,
+      inHouseFlow,
+      checkedOutFlow,
     });
   } catch (e) {
     if (e instanceof APIError) {
