@@ -142,6 +142,15 @@ const create = async (req, res, next) => {
       session,
     );
 
+    const updatedChatList = await chatListService.updateAndIncUnreadMessages(
+      propertyId,
+      guestId,
+      {
+        latestMessage: newMessage._id,
+      },
+      session,
+    );
+
     await session.commitTransaction();
     await session.endSession();
 
@@ -159,6 +168,7 @@ const create = async (req, res, next) => {
 
     return responseHandler(res, { checkInOutRequest: newCheckInOutRequest });
   } catch (e) {
+    console.log(e);
     await session.abortTransaction();
     session.endSession();
     if (e instanceof APIError) {
