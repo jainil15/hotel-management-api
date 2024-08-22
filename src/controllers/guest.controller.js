@@ -44,6 +44,7 @@ const {
   GUEST_REQUEST,
   REQUEST_STATUS,
   GUEST_CURRENT_STATUS,
+  RESERVATION_STATUS,
 } = require("../constants/guestStatus.contant");
 const { compareDate } = require("../utils/dateCompare");
 require("dotenv").config();
@@ -118,6 +119,40 @@ const create = async (req, res, next) => {
       });
     }
 
+    const existingInHouseGuest = await guestService.findWithStatus(
+      {
+        phoneNumber: guest.phoneNumber,
+        countryCode: guest.countryCode,
+        propertyId: propertyId,
+      },
+      {
+        currentStatus: GUEST_CURRENT_STATUS.IN_HOUSE,
+        reservationStatus: RESERVATION_STATUS.CONFIRMED,
+      },
+    );
+    if (existingInHouseGuest.length > 0) {
+      console.log(existingInHouseGuest);
+      throw new ValidationError("Guest already exists with this phone number", {
+        phoneNumber: ["Guest already exists with this phone number"],
+      });
+    }
+    const existingReservedGuest = await guestService.findWithStatus(
+      {
+        phoneNumber: guest.phoneNumber,
+        countryCode: guest.countryCode,
+        propertyId: propertyId,
+      },
+      {
+        currentStatus: GUEST_CURRENT_STATUS.RESERVED,
+        reservationStatus: RESERVATION_STATUS.CONFIRMED,
+      },
+    );
+    if (existingReservedGuest.length > 0) {
+      console.log(existingReservedGuest);
+      throw new ValidationError("Guest already exists with this phone number", {
+        phoneNumber: ["Guest already exists with this phone number"],
+      });
+    }
     // Check if status is valid
     //if (!validateStatus(status)) {
     //  throw new ValidationError("Invalid Status", {
