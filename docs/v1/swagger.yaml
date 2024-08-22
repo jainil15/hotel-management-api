@@ -123,7 +123,72 @@ paths:
       summary: Get User
       tags:
         - User
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                  result:
+                    type: object
+                    properties:
+                      user:
+                        type: object
+                        properties:
+                          _id:
+                            type: string
+                          firstName:
+                            type: string
+                          lastName:
+                            type: string
+                          email:
+                            type: string
+                          phoneNumber:
+                            type: string
+                          role:
+                            type: string
+                          active:
+                            type: boolean
+                          createdAt:
+                            type: string
+                          updatedAt:
+                            type: string
+                          __v:
+                            type: integer
+                          iat:
+                            type: integer
+                          exp:
+                            type: integer
+                  status:
+                    type: string
+                  type:
+                    type: string
+                  message:
+                    type: string
+                x-examples:
+                  Example 1:
+                    statusCode: 200
+                    result:
+                      user:
+                        _id: 66a2115f50a317d5ffa691a6
+                        firstName: Jainil
+                        lastName: Patel
+                        email: jainil.patel@onelyk.com
+                        phoneNumber: "+919104470843"
+                        role: admin
+                        active: true
+                        createdAt: "2024-07-25T08:48:31.741Z"
+                        updatedAt: "2024-07-25T08:48:31.741Z"
+                        __v: 0
+                        iat: 1723796934
+                        exp: 1723883334
+                    status: success
+                    type: SUCCESS
+                    message: User Found
       operationId: get-user
       x-stoplight:
         id: ztlhlwiajutbr
@@ -334,6 +399,18 @@ paths:
       operationId: get-property-propertyId
       x-stoplight:
         id: jqjeu1hs5q8ry
+      security:
+        - Bearer: []
+    put:
+      summary: Update property with property Id
+      tags:
+        - Property
+      responses: {}
+      operationId: put-property-propertyId
+      x-stoplight:
+        id: 1ng4lp3kroxlz
+      requestBody:
+        $ref: "#/components/requestBodies/CreateProperty"
       security:
         - Bearer: []
   /country:
@@ -1528,7 +1605,277 @@ paths:
       summary: Get all broadcasts for the property
       tags:
         - Broadcast
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                  result:
+                    type: object
+                    properties:
+                      broadcasts:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            _id:
+                              type: string
+                            propertyId:
+                              type: string
+                            guestIds:
+                              type: array
+                              items:
+                                type: string
+                            messages:
+                              type: array
+                              items:
+                                type: string
+                            createdAt:
+                              type: string
+                            updatedAt:
+                              type: string
+                            __v:
+                              type: integer
+                            broadcastMessages:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  _id:
+                                    type: string
+                                  propertyId:
+                                    type: string
+                                  guestIds:
+                                    type: array
+                                    items:
+                                      type: string
+                                  content:
+                                    type: string
+                                  createdAt:
+                                    type: string
+                                  updatedAt:
+                                    type: string
+                                  __v:
+                                    type: integer
+                  status:
+                    type: string
+                  type:
+                    type: string
+                  message:
+                    type: string
+                x-examples:
+                  Example 1:
+                    statusCode: 200
+                    result:
+                      broadcasts:
+                        - _id: 66b5b55e90c6d0753d267c81
+                          propertyId: 66a2125d50a317d5ffa691ad
+                          guestIds:
+                            - 66acca651de282a48bd8d837
+                          messages:
+                            - string
+                            - string 2
+                            - string 2
+                          createdAt: "2024-08-09T06:21:18.818Z"
+                          updatedAt: "2024-08-09T07:12:46.100Z"
+                          __v: 0
+                          broadcastMessages: []
+                        - _id: 66b5c512b5ecd9b7af1ef1de
+                          propertyId: 66a2125d50a317d5ffa691ad
+                          guestIds:
+                            - 66acca651de282a48bd8d837
+                          createdAt: "2024-08-09T07:28:18.411Z"
+                          updatedAt: "2024-08-09T07:28:34.728Z"
+                          __v: 0
+                          broadcastMessages:
+                            - _id: 66b5c510b5ecd9b7af1ef1d9
+                              propertyId: 66a2125d50a317d5ffa691ad
+                              guestIds:
+                                - 66acca651de282a48bd8d837
+                              content: string
+                              createdAt: "2024-08-09T07:28:16.989Z"
+                              updatedAt: "2024-08-09T07:28:16.989Z"
+                              __v: 0
+                            - _id: 66b5c522b5ecd9b7af1ef1e9
+                              propertyId: 66a2125d50a317d5ffa691ad
+                              guestIds:
+                                - 66acca651de282a48bd8d837
+                              content: string 2
+                              createdAt: "2024-08-09T07:28:34.298Z"
+                              updatedAt: "2024-08-09T07:28:34.298Z"
+                              __v: 0
+                        - _id: 66b5d27c99045a1d5940cc37
+                          propertyId: 66a2125d50a317d5ffa691ad
+                          guestIds:
+                            - 66b5d25999045a1d5940cc20
+                            - 66acca651de282a48bd8d837
+                          createdAt: "2024-08-09T08:25:32.286Z"
+                          updatedAt: "2024-08-09T08:25:32.286Z"
+                          __v: 0
+                          broadcastMessages:
+                            - _id: 66b5d27a99045a1d5940cc2f
+                              propertyId: 66a2125d50a317d5ffa691ad
+                              guestIds:
+                                - 66b5d25999045a1d5940cc20
+                                - 66acca651de282a48bd8d837
+                              content: string
+                              createdAt: "2024-08-09T08:25:30.245Z"
+                              updatedAt: "2024-08-09T08:25:30.245Z"
+                              __v: 0
+                        - _id: 66ba2dfab2693e1b35c9b49b
+                          propertyId: 66a2125d50a317d5ffa691ad
+                          guestIds:
+                            - 66acca651de282a48bd8d837
+                          createdAt: "2024-08-12T15:44:58.728Z"
+                          updatedAt: "2024-08-12T15:44:58.728Z"
+                          __v: 0
+                          broadcastMessages:
+                            - _id: 66ba2df9b2693e1b35c9b496
+                              propertyId: 66a2125d50a317d5ffa691ad
+                              guestIds:
+                                - 66acca651de282a48bd8d837
+                              content: string
+                              createdAt: "2024-08-12T15:44:57.274Z"
+                              updatedAt: "2024-08-12T15:44:57.274Z"
+                              __v: 0
+                        - _id: 66ba2e0eb2693e1b35c9b4aa
+                          propertyId: 66a2125d50a317d5ffa691ad
+                          guestIds:
+                            - 66acca651de282a48bd8d837
+                          createdAt: "2024-08-12T15:45:18.336Z"
+                          updatedAt: "2024-08-12T15:45:18.336Z"
+                          __v: 0
+                          broadcastMessages:
+                            - _id: 66ba2e0db2693e1b35c9b4a5
+                              propertyId: 66a2125d50a317d5ffa691ad
+                              guestIds:
+                                - 66acca651de282a48bd8d837
+                              content: string
+                              createdAt: "2024-08-12T15:45:17.900Z"
+                              updatedAt: "2024-08-12T15:45:17.900Z"
+                              __v: 0
+                        - _id: 66ba2e2cb2693e1b35c9b4b9
+                          propertyId: 66a2125d50a317d5ffa691ad
+                          guestIds:
+                            - 66acca651de282a48bd8d837
+                          createdAt: "2024-08-12T15:45:48.646Z"
+                          updatedAt: "2024-08-12T15:45:48.646Z"
+                          __v: 0
+                          broadcastMessages:
+                            - _id: 66ba2e2cb2693e1b35c9b4b4
+                              propertyId: 66a2125d50a317d5ffa691ad
+                              guestIds:
+                                - 66acca651de282a48bd8d837
+                              content: string22
+                              createdAt: "2024-08-12T15:45:48.198Z"
+                              updatedAt: "2024-08-12T15:45:48.198Z"
+                              __v: 0
+                        - _id: 66ba2e3db2693e1b35c9b4c8
+                          propertyId: 66a2125d50a317d5ffa691ad
+                          guestIds:
+                            - 66acca651de282a48bd8d837
+                          createdAt: "2024-08-12T15:46:05.095Z"
+                          updatedAt: "2024-08-12T15:46:05.095Z"
+                          __v: 0
+                          broadcastMessages:
+                            - _id: 66ba2e3cb2693e1b35c9b4c3
+                              propertyId: 66a2125d50a317d5ffa691ad
+                              guestIds:
+                                - 66acca651de282a48bd8d837
+                              content: string22
+                              createdAt: "2024-08-12T15:46:04.649Z"
+                              updatedAt: "2024-08-12T15:46:04.649Z"
+                              __v: 0
+                        - _id: 66ba2f108cc636c38268d8be
+                          propertyId: 66a2125d50a317d5ffa691ad
+                          guestIds:
+                            - 66acca651de282a48bd8d837
+                            - 66b5d25999045a1d5940cc20
+                          createdAt: "2024-08-12T15:49:36.349Z"
+                          updatedAt: "2024-08-12T16:01:28.721Z"
+                          __v: 0
+                          broadcastMessages:
+                            - _id: 66ba2f0f8cc636c38268d8b9
+                              propertyId: 66a2125d50a317d5ffa691ad
+                              guestIds:
+                                - 66acca651de282a48bd8d837
+                              content: string22
+                              createdAt: "2024-08-12T15:49:35.072Z"
+                              updatedAt: "2024-08-12T15:49:35.072Z"
+                              __v: 0
+                            - _id: 66ba30f88df66933f38e4746
+                              propertyId: 66a2125d50a317d5ffa691ad
+                              guestIds:
+                                - 66acca651de282a48bd8d837
+                              content: string22
+                              createdAt: "2024-08-12T15:57:44.142Z"
+                              updatedAt: "2024-08-12T15:57:44.142Z"
+                              __v: 0
+                            - _id: 66ba2ff8642c26b61cd69a1f
+                              propertyId: 66a2125d50a317d5ffa691ad
+                              guestIds:
+                                - 66acca651de282a48bd8d837
+                              content: string22
+                              createdAt: "2024-08-12T15:53:28.984Z"
+                              updatedAt: "2024-08-12T15:53:28.984Z"
+                              __v: 0
+                            - _id: 66ba31240d60e59cad264cf0
+                              propertyId: 66a2125d50a317d5ffa691ad
+                              guestIds:
+                                - 66acca651de282a48bd8d837
+                              content: string22
+                              createdAt: "2024-08-12T15:58:28.486Z"
+                              updatedAt: "2024-08-12T15:58:28.486Z"
+                              __v: 0
+                            - _id: 66ba31d5e1dcbefea07944c8
+                              propertyId: 66a2125d50a317d5ffa691ad
+                              guestIds:
+                                - 66acca651de282a48bd8d837
+                                - 66b5d25999045a1d5940cc20
+                              content: string22
+                              createdAt: "2024-08-12T16:01:25.733Z"
+                              updatedAt: "2024-08-12T16:01:25.733Z"
+                              __v: 0
+                            - _id: 66ba310c7663cd937222390e
+                              propertyId: 66a2125d50a317d5ffa691ad
+                              guestIds:
+                                - 66acca651de282a48bd8d837
+                              content: string22
+                              createdAt: "2024-08-12T15:58:04.115Z"
+                              updatedAt: "2024-08-12T15:58:04.115Z"
+                              __v: 0
+                            - _id: 66ba3156e1dcbefea07944b8
+                              propertyId: 66a2125d50a317d5ffa691ad
+                              guestIds:
+                                - 66acca651de282a48bd8d837
+                              content: string22
+                              createdAt: "2024-08-12T15:59:18.653Z"
+                              updatedAt: "2024-08-12T15:59:18.653Z"
+                              __v: 0
+                        - _id: 66ba3003642c26b61cd69a32
+                          propertyId: 66a2125d50a317d5ffa691ad
+                          guestIds:
+                            - 66acca651de282a48bd8d837
+                          createdAt: "2024-08-12T15:53:39.774Z"
+                          updatedAt: "2024-08-12T15:53:39.774Z"
+                          __v: 0
+                          broadcastMessages:
+                            - _id: 66ba3003642c26b61cd69a2d
+                              propertyId: 66a2125d50a317d5ffa691ad
+                              guestIds:
+                                - 66acca651de282a48bd8d837
+                              content: string22
+                              createdAt: "2024-08-12T15:53:39.342Z"
+                              updatedAt: "2024-08-12T15:53:39.342Z"
+                              __v: 0
+                    status: success
+                    type: SUCCESS
+                    message: Success
       operationId: get-broadcastid-propertyid
       x-stoplight:
         id: km7267q0muup8
@@ -1577,6 +1924,139 @@ paths:
       responses:
         "200":
           description: OK
+          headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                  result:
+                    type: object
+                    properties:
+                      broadcast:
+                        type: object
+                        properties:
+                          _id:
+                            type: string
+                          propertyId:
+                            type: string
+                          guestIds:
+                            type: array
+                            items:
+                              type: string
+                          createdAt:
+                            type: string
+                          updatedAt:
+                            type: string
+                          __v:
+                            type: integer
+                          broadcastMessages:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                _id:
+                                  type: string
+                                propertyId:
+                                  type: string
+                                guestIds:
+                                  type: array
+                                  items:
+                                    type: string
+                                content:
+                                  type: string
+                                createdAt:
+                                  type: string
+                                updatedAt:
+                                  type: string
+                                __v:
+                                  type: integer
+                          guests:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                _id:
+                                  type: string
+                                propertyId:
+                                  type: string
+                                countryCode:
+                                  type: string
+                                phoneNumber:
+                                  type: string
+                                source:
+                                  type: string
+                                checkIn:
+                                  type: string
+                                checkOut:
+                                  type: string
+                                confirmationNumber:
+                                  type: string
+                                roomNumber:
+                                  type: string
+                                firstName:
+                                  type: string
+                                lastName:
+                                  type: string
+                                email:
+                                  type: string
+                                active:
+                                  type: boolean
+                                createdAt:
+                                  type: string
+                                updatedAt:
+                                  type: string
+                                __v:
+                                  type: integer
+                  status:
+                    type: string
+                  type:
+                    type: string
+                  message:
+                    type: string
+                x-examples:
+                  Example 1:
+                    statusCode: 200
+                    result:
+                      broadcast:
+                        _id: 66ba3003642c26b61cd69a32
+                        propertyId: 66a2125d50a317d5ffa691ad
+                        guestIds:
+                          - 66acca651de282a48bd8d837
+                        createdAt: "2024-08-12T15:53:39.774Z"
+                        updatedAt: "2024-08-12T15:53:39.774Z"
+                        __v: 0
+                        broadcastMessages:
+                          - _id: 66ba3003642c26b61cd69a2d
+                            propertyId: 66a2125d50a317d5ffa691ad
+                            guestIds:
+                              - 66acca651de282a48bd8d837
+                            content: string22
+                            createdAt: "2024-08-12T15:53:39.342Z"
+                            updatedAt: "2024-08-12T15:53:39.342Z"
+                            __v: 0
+                        guests:
+                          - _id: 66acca651de282a48bd8d837
+                            propertyId: 66a2125d50a317d5ffa691ad
+                            countryCode: "+1"
+                            phoneNumber: "1234567890"
+                            source: Booking.com
+                            checkIn: "2019-08-24T14:15:22.000Z"
+                            checkOut: "2019-08-25T14:15:22.000Z"
+                            confirmationNumber: "123456789012"
+                            roomNumber: C-102
+                            firstName: First
+                            lastName: Last
+                            email: firstlast123@guest.com
+                            active: true
+                            createdAt: "2024-08-02T12:00:37.451Z"
+                            updatedAt: "2024-08-13T14:23:07.315Z"
+                            __v: 0
+                    status: success
+                    type: SUCCESS
+                    message: Success
       operationId: get-broadcast-by-propertyId-broadcastId
       x-stoplight:
         id: dk7igvwzvombn
@@ -1971,6 +2451,628 @@ paths:
       deprecated: true
       tags:
         - Pre Arrival Flow
+      security:
+        - Bearer: []
+  "/workflow/{propertyId}":
+    parameters:
+      - schema:
+          type: string
+        name: propertyId
+        in: path
+        required: true
+    post:
+      summary: Create default flows
+      responses:
+        "200":
+          description: OK
+      operationId: post-workflow-propertyId
+      x-stoplight:
+        id: bkqbgdymvgxja
+      deprecated: true
+      tags:
+        - Workflow
+      security:
+        - Bearer: []
+      x-internal: true
+    delete:
+      summary: Delete defaults
+      tags:
+        - Workflow
+      responses:
+        "204":
+          description: No Content
+      operationId: delete-workflow-propertyId
+      x-stoplight:
+        id: i17592xpbbm1t
+      x-internal: true
+      deprecated: true
+      security:
+        - Bearer: []
+    get:
+      summary: Get workflow by propertyId
+      tags:
+        - Workflow
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                  result:
+                    type: object
+                    properties:
+                      homeFlow:
+                        type: object
+                        properties:
+                          _id:
+                            type: string
+                          propertyId:
+                            type: string
+                          frequentlyAskedQuestionsEnabled:
+                            type: boolean
+                          amenities:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                                enabled:
+                                  type: boolean
+                          frequentlyAskedQuestions:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                question:
+                                  type: string
+                                answer:
+                                  type: string
+                          createdAt:
+                            type: string
+                          updatedAt:
+                            type: string
+                          __v:
+                            type: integer
+                      addOnsFlow:
+                        type: object
+                        properties:
+                          _id:
+                            type: string
+                          propertyId:
+                            type: string
+                          customAddOns:
+                            type: array
+                            items:
+                              type: object
+                              properties: {}
+                          checkInOutAddOns:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                                description:
+                                  type: string
+                                defaultTimeEnabled:
+                                  type: boolean
+                                defaultTiming:
+                                  type: string
+                                customTiming:
+                                  type: string
+                                paid:
+                                  type: boolean
+                                price:
+                                  type: integer
+                                enabled:
+                                  type: boolean
+                                default:
+                                  type: boolean
+                          createdAt:
+                            type: string
+                          updatedAt:
+                            type: string
+                          __v:
+                            type: integer
+                      preArrivalFlow:
+                        type: object
+                        properties:
+                          _id:
+                            type: string
+                          propertyId:
+                            type: string
+                          phoneNumber:
+                            type: boolean
+                          emailAddress:
+                            type: boolean
+                          arrivalTime:
+                            type: boolean
+                          vehicleMakeModelColor:
+                            type: boolean
+                          licensePlateNo:
+                            type: boolean
+                          specialRequests:
+                            type: boolean
+                          guestSignature:
+                            type: boolean
+                          guestIdProof:
+                            type: boolean
+                          policies:
+                            type: boolean
+                          primaryPolicy:
+                            type: string
+                          policyLink:
+                            type: string
+                          extraPolicies:
+                            type: array
+                            items:
+                              type: object
+                              properties: {}
+                          createdAt:
+                            type: string
+                          updatedAt:
+                            type: string
+                          __v:
+                            type: integer
+                      inHouseFlow:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            _id:
+                              type: string
+                            propertyId:
+                              type: string
+                            frequentlyAskedQuestionsEnabled:
+                              type: boolean
+                            frequentlyAskedQuestions:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  question:
+                                    type: string
+                                  answer:
+                                    type: string
+                            createdAt:
+                              type: string
+                            updatedAt:
+                              type: string
+                            __v:
+                              type: integer
+                      checkedOutFlow:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            _id:
+                              type: string
+                            propertyId:
+                              type: string
+                            frequentlyAskedQuestionsEnabled:
+                              type: boolean
+                            frequentlyAskedQuestions:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  question:
+                                    type: string
+                                  answer:
+                                    type: string
+                            createdAt:
+                              type: string
+                            updatedAt:
+                              type: string
+                            __v:
+                              type: integer
+                  status:
+                    type: string
+                  type:
+                    type: string
+                  message:
+                    type: string
+                x-examples:
+                  Example 1:
+                    statusCode: 200
+                    result:
+                      homeFlow:
+                        _id: 66c7241ca90a206439615a0f
+                        propertyId: 66a2174cf74f8664b0bb207d
+                        frequentlyAskedQuestionsEnabled: true
+                        amenities:
+                          - name: Breakfast Included
+                            enabled: true
+                          - name: 24/7 Front Desk
+                            enabled: true
+                          - name: Free WiFi
+                            enabled: true
+                          - name: HouseKeeping
+                            enabled: true
+                          - name: Air conditioning
+                            enabled: true
+                          - name: Parking Available
+                            enabled: true
+                          - name: Luggage Storage
+                            enabled: true
+                        frequentlyAskedQuestions:
+                          - question: What time is standard check in?
+                            answer: "Check-out is at 3:00 PM."
+                        createdAt: "2024-08-22T11:42:20.266Z"
+                        updatedAt: "2024-08-22T11:42:20.266Z"
+                        __v: 0
+                      addOnsFlow:
+                        _id: 66c7241ca90a206439615a11
+                        propertyId: 66a2174cf74f8664b0bb207d
+                        customAddOns: []
+                        checkInOutAddOns:
+                          - name: Early Check In
+                            description: Early Check In
+                            defaultTimeEnabled: true
+                            defaultTiming: "14:00"
+                            customTiming: "14:00"
+                            paid: false
+                            price: 0
+                            enabled: true
+                            default: true
+                          - name: Late Check Out
+                            description: Late Check Out
+                            defaultTimeEnabled: true
+                            defaultTiming: "12:00"
+                            customTiming: "12:00"
+                            paid: false
+                            price: 0
+                            enabled: true
+                            default: true
+                        createdAt: "2024-08-22T11:42:20.326Z"
+                        updatedAt: "2024-08-22T11:42:20.326Z"
+                        __v: 0
+                      preArrivalFlow:
+                        _id: 66c7241ca90a206439615a13
+                        propertyId: 66a2174cf74f8664b0bb207d
+                        phoneNumber: true
+                        emailAddress: true
+                        arrivalTime: true
+                        vehicleMakeModelColor: true
+                        licensePlateNo: true
+                        specialRequests: true
+                        guestSignature: true
+                        guestIdProof: true
+                        policies: true
+                        primaryPolicy: Primary policy regarding refund and important points displayed here
+                        policyLink: Policy link with bottom sheet
+                        extraPolicies: []
+                        createdAt: "2024-08-22T11:42:20.369Z"
+                        updatedAt: "2024-08-22T11:42:20.369Z"
+                        __v: 0
+                      inHouseFlow:
+                        - _id: 66c7241ca90a206439615a15
+                          propertyId: 66a2174cf74f8664b0bb207d
+                          frequentlyAskedQuestionsEnabled: true
+                          frequentlyAskedQuestions:
+                            - question: What time is standard check out?
+                              answer: "Check out is at 11:00 AM."
+                          createdAt: "2024-08-22T11:42:20.405Z"
+                          updatedAt: "2024-08-22T11:42:20.405Z"
+                          __v: 0
+                      checkedOutFlow:
+                        - _id: 66c7241ca90a206439615a17
+                          propertyId: 66a2174cf74f8664b0bb207d
+                          frequentlyAskedQuestionsEnabled: true
+                          frequentlyAskedQuestions:
+                            - question: What time is standard check out?
+                              answer: "Check-out is at 11:00 AM."
+                          createdAt: "2024-08-22T11:42:20.439Z"
+                          updatedAt: "2024-08-22T11:42:20.439Z"
+                          __v: 0
+                    status: success
+                    type: SUCCESS
+                    message: Success
+      operationId: get-workflow-propertyId
+      x-stoplight:
+        id: 7sl9ahy0izj7t
+      security:
+        - Bearer: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                statusCode:
+                  type: integer
+                result:
+                  type: object
+                  properties:
+                    homeFlow:
+                      type: object
+                      properties:
+                        _id:
+                          type: string
+                        propertyId:
+                          type: string
+                        frequentlyAskedQuestionsEnabled:
+                          type: boolean
+                        amenities:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                              enabled:
+                                type: boolean
+                        frequentlyAskedQuestions:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              question:
+                                type: string
+                              answer:
+                                type: string
+                        createdAt:
+                          type: string
+                        updatedAt:
+                          type: string
+                        __v:
+                          type: integer
+                    addOnsFlow:
+                      type: object
+                      properties:
+                        _id:
+                          type: string
+                        propertyId:
+                          type: string
+                        customAddOns:
+                          type: array
+                          items:
+                            type: object
+                            properties: {}
+                        checkInOutAddOns:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                              description:
+                                type: string
+                              defaultTimeEnabled:
+                                type: boolean
+                              defaultTiming:
+                                type: string
+                              customTiming:
+                                type: string
+                              paid:
+                                type: boolean
+                              price:
+                                type: integer
+                              enabled:
+                                type: boolean
+                              default:
+                                type: boolean
+                        createdAt:
+                          type: string
+                        updatedAt:
+                          type: string
+                        __v:
+                          type: integer
+                    preArrivalFlow:
+                      type: object
+                      properties:
+                        _id:
+                          type: string
+                        propertyId:
+                          type: string
+                        phoneNumber:
+                          type: boolean
+                        emailAddress:
+                          type: boolean
+                        arrivalTime:
+                          type: boolean
+                        vehicleMakeModelColor:
+                          type: boolean
+                        licensePlateNo:
+                          type: boolean
+                        specialRequests:
+                          type: boolean
+                        guestSignature:
+                          type: boolean
+                        guestIdProof:
+                          type: boolean
+                        policies:
+                          type: boolean
+                        primaryPolicy:
+                          type: string
+                        policyLink:
+                          type: string
+                        extraPolicies:
+                          type: array
+                          items:
+                            type: object
+                            properties: {}
+                        createdAt:
+                          type: string
+                        updatedAt:
+                          type: string
+                        __v:
+                          type: integer
+                    inHouseFlow:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          _id:
+                            type: string
+                          propertyId:
+                            type: string
+                          frequentlyAskedQuestionsEnabled:
+                            type: boolean
+                          frequentlyAskedQuestions:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                question:
+                                  type: string
+                                answer:
+                                  type: string
+                          createdAt:
+                            type: string
+                          updatedAt:
+                            type: string
+                          __v:
+                            type: integer
+                    checkedOutFlow:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          _id:
+                            type: string
+                          propertyId:
+                            type: string
+                          frequentlyAskedQuestionsEnabled:
+                            type: boolean
+                          frequentlyAskedQuestions:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                question:
+                                  type: string
+                                answer:
+                                  type: string
+                          createdAt:
+                            type: string
+                          updatedAt:
+                            type: string
+                          __v:
+                            type: integer
+                status:
+                  type: string
+                type:
+                  type: string
+                message:
+                  type: string
+              x-examples:
+                Example 1:
+                  statusCode: 200
+                  result:
+                    homeFlow:
+                      _id: 66c7241ca90a206439615a0f
+                      propertyId: 66a2174cf74f8664b0bb207d
+                      frequentlyAskedQuestionsEnabled: true
+                      amenities:
+                        - name: Breakfast Included
+                          enabled: true
+                        - name: 24/7 Front Desk
+                          enabled: true
+                        - name: Free WiFi
+                          enabled: true
+                        - name: HouseKeeping
+                          enabled: true
+                        - name: Air conditioning
+                          enabled: true
+                        - name: Parking Available
+                          enabled: true
+                        - name: Luggage Storage
+                          enabled: true
+                      frequentlyAskedQuestions:
+                        - question: What time is standard check in?
+                          answer: "Check-out is at 3:00 PM."
+                      createdAt: "2024-08-22T11:42:20.266Z"
+                      updatedAt: "2024-08-22T11:42:20.266Z"
+                      __v: 0
+                    addOnsFlow:
+                      _id: 66c7241ca90a206439615a11
+                      propertyId: 66a2174cf74f8664b0bb207d
+                      customAddOns: []
+                      checkInOutAddOns:
+                        - name: Early Check In
+                          description: Early Check In
+                          defaultTimeEnabled: true
+                          defaultTiming: "14:00"
+                          customTiming: "14:00"
+                          paid: false
+                          price: 0
+                          enabled: true
+                          default: true
+                        - name: Late Check Out
+                          description: Late Check Out
+                          defaultTimeEnabled: true
+                          defaultTiming: "12:00"
+                          customTiming: "12:00"
+                          paid: false
+                          price: 0
+                          enabled: true
+                          default: true
+                      createdAt: "2024-08-22T11:42:20.326Z"
+                      updatedAt: "2024-08-22T11:42:20.326Z"
+                      __v: 0
+                    preArrivalFlow:
+                      _id: 66c7241ca90a206439615a13
+                      propertyId: 66a2174cf74f8664b0bb207d
+                      phoneNumber: true
+                      emailAddress: true
+                      arrivalTime: true
+                      vehicleMakeModelColor: true
+                      licensePlateNo: true
+                      specialRequests: true
+                      guestSignature: true
+                      guestIdProof: true
+                      policies: true
+                      primaryPolicy: Primary policy regarding refund and important points displayed here
+                      policyLink: Policy link with bottom sheet
+                      extraPolicies: []
+                      createdAt: "2024-08-22T11:42:20.369Z"
+                      updatedAt: "2024-08-22T11:42:20.369Z"
+                      __v: 0
+                    inHouseFlow:
+                      - _id: 66c7241ca90a206439615a15
+                        propertyId: 66a2174cf74f8664b0bb207d
+                        frequentlyAskedQuestionsEnabled: true
+                        frequentlyAskedQuestions:
+                          - question: What time is standard check out?
+                            answer: "Check out is at 11:00 AM."
+                        createdAt: "2024-08-22T11:42:20.405Z"
+                        updatedAt: "2024-08-22T11:42:20.405Z"
+                        __v: 0
+                    checkedOutFlow:
+                      - _id: 66c7241ca90a206439615a17
+                        propertyId: 66a2174cf74f8664b0bb207d
+                        frequentlyAskedQuestionsEnabled: true
+                        frequentlyAskedQuestions:
+                          - question: What time is standard check out?
+                            answer: "Check-out is at 11:00 AM."
+                        createdAt: "2024-08-22T11:42:20.439Z"
+                        updatedAt: "2024-08-22T11:42:20.439Z"
+                        __v: 0
+                  status: success
+                  type: SUCCESS
+                  message: Success
+    put:
+      summary: Update workflow
+      tags:
+        - Workflow
+      responses:
+        "200":
+          description: OK
+      operationId: put-workflow-propertyId
+      x-stoplight:
+        id: xv0hk8xr5bgj4
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: {}
       security:
         - Bearer: []
 components:
@@ -2392,24 +3494,6 @@ components:
                 __v: Number
                 createdAt: Date
                 updatedAt: Date
-            required:
-              - name
-              - email
-              - phoneNumber
-              - website
-              - about
-              - logo
-              - cover
-              - country
-              - state
-              - city
-              - address
-              - countryCode
-              - standardCheckinTime
-              - standardCheckoutTime
-              - timezone
-              - defaultNewDayTime
-              - zipcode
             properties:
               name:
                 type: string
@@ -2461,6 +3545,26 @@ components:
                 type: string
                 x-stoplight:
                   id: w9poyxlogsn0q
+          examples:
+            Example 1:
+              value:
+                name: Test Property 2000
+                email: jainil@gmail.com
+                phoneNumber: "0123456789"
+                website: "https://www.onelyk.com"
+                about: About
+                country: United States
+                state: California
+                logo: ""
+                cover: ""
+                city: San Francisco
+                address: Some
+                zipcode: "94102"
+                countryCode: "+1"
+                timezone: "7:00 + GMT"
+                standardCheckinTime: "01:00"
+                standardCheckoutTime: "12:00"
+                defaultNewDayTime: "00:00"
       description: Create property Request
     PhoneNumber:
       content:
@@ -2753,6 +3857,195 @@ components:
                 type: boolean
               signatureImgUrl:
                 type: string
+    UpdateWorkflow:
+      content:
+        application/json:
+          schema:
+            type: object
+            x-examples:
+              Example 1:
+                homeFlow:
+                  frequentlyAskedQuestionsEnabled: true
+                  amenities:
+                    - name: Breakfast Included
+                      enabled: true
+                    - name: 24/7 Front Desk
+                      enabled: true
+                    - name: Free WiFi
+                      enabled: true
+                    - name: HouseKeeping
+                      enabled: true
+                    - name: Air conditioning
+                      enabled: true
+                    - name: Parking Available
+                      enabled: true
+                    - name: Luggage Storage
+                      enabled: true
+                  frequentlyAskedQuestions:
+                    - question: What time is standard check in?
+                      answer: "Check-out is at 3:00 PM."
+                addOnsFlow:
+                  propertyId: 66bf27e1136769c1817bfd92
+                  _id: 66bf2f23538b253ac8ff7212
+                  customAddOns: []
+                  checkInOutAddOns:
+                    - name: Early Check In
+                      description: Early Check In
+                      defaultTimeEnabled: true
+                      defaultTiming: "14:00"
+                      customTiming: "14:00"
+                      paid: false
+                      price: 0
+                      enabled: true
+                      default: true
+                    - name: Late Check Out
+                      description: Late Check Out
+                      defaultTimeEnabled: true
+                      defaultTiming: "12:00"
+                      customTiming: "12:00"
+                      paid: false
+                      price: 0
+                      enabled: true
+                      default: true
+                preArrivalFlow:
+                  phoneNumber: true
+                  emailAddress: true
+                  arrivalTime: true
+                  vehicleMakeModelColor: true
+                  licensePlateNo: true
+                  specialRequests: true
+                  guestSignature: true
+                  guestIdProof: true
+                  policies: true
+                  primaryPolicy: Primary policy regarding refund and important points displayed here
+                  policyLink: Policy link with bottom sheet
+                  extraPolicies: []
+                inHouseFlow:
+                  frequentlyAskedQuestionsEnabled: true
+                  frequentlyAskedQuestions:
+                    - question: What time is standard check out?
+                      answer: "Check out is at 11:00 AM."
+                checkedOutFlow:
+                  frequentlyAskedQuestionsEnabled: true
+                  frequentlyAskedQuestions:
+                    - question: What time is standard check out?
+                      answer: "Check-out is at 11:00 AM."
+            properties:
+              homeFlow:
+                type: object
+                properties:
+                  frequentlyAskedQuestionsEnabled:
+                    type: boolean
+                  amenities:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        enabled:
+                          type: boolean
+                  frequentlyAskedQuestions:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        question:
+                          type: string
+                        answer:
+                          type: string
+              addOnsFlow:
+                type: object
+                properties:
+                  propertyId:
+                    type: string
+                  _id:
+                    type: string
+                  customAddOns:
+                    type: array
+                    description: I will add this fields later
+                    items:
+                      type: object
+                  checkInOutAddOns:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        description:
+                          type: string
+                        defaultTimeEnabled:
+                          type: boolean
+                        defaultTiming:
+                          type: string
+                        customTiming:
+                          type: string
+                        paid:
+                          type: boolean
+                        price:
+                          type: integer
+                        enabled:
+                          type: boolean
+                        default:
+                          type: boolean
+              preArrivalFlow:
+                type: object
+                properties:
+                  phoneNumber:
+                    type: boolean
+                  emailAddress:
+                    type: boolean
+                  arrivalTime:
+                    type: boolean
+                  vehicleMakeModelColor:
+                    type: boolean
+                  licensePlateNo:
+                    type: boolean
+                  specialRequests:
+                    type: boolean
+                  guestSignature:
+                    type: boolean
+                  guestIdProof:
+                    type: boolean
+                  policies:
+                    type: boolean
+                  primaryPolicy:
+                    type: string
+                  policyLink:
+                    type: string
+                  extraPolicies:
+                    type: array
+                    items:
+                      type: object
+              inHouseFlow:
+                type: object
+                properties:
+                  frequentlyAskedQuestionsEnabled:
+                    type: boolean
+                  frequentlyAskedQuestions:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        question:
+                          type: string
+                        answer:
+                          type: string
+              checkedOutFlow:
+                type: object
+                properties:
+                  frequentlyAskedQuestionsEnabled:
+                    type: boolean
+                  frequentlyAskedQuestions:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        question:
+                          type: string
+                        answer:
+                          type: string
   responses:
     Login:
       description: Login response
@@ -2840,6 +4133,8 @@ components:
           schema:
             type: object
             properties:
+              statusCode:
+                type: integer
               result:
                 type: object
                 properties:
@@ -2866,6 +4161,8 @@ components:
                         type: string
                       address:
                         type: string
+                      zipcode:
+                        type: string
                       countryCode:
                         type: string
                       active:
@@ -2880,6 +4177,72 @@ components:
                         type: string
                       logoUrl:
                         type: string
+                  setting:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                      propertyId:
+                        type: string
+                      timezone:
+                        type: string
+                      standardCheckinTime:
+                        type: string
+                      standardCheckoutTime:
+                        type: string
+                      automaticNewDay:
+                        type: boolean
+                      defaultNewDayTime:
+                        type: string
+                      createdAt:
+                        type: string
+                      updatedAt:
+                        type: string
+                      __v:
+                        type: integer
+              status:
+                type: string
+              type:
+                type: string
+              message:
+                type: string
+            x-examples:
+              Example 1:
+                statusCode: 200
+                result:
+                  property:
+                    _id: 66bf279e6ee917a0d4096707
+                    name: Test Property 2000
+                    email: jainil@gmail.com
+                    phoneNumber: "0123456789"
+                    website: "https://www.onelyk.com"
+                    about: About
+                    country: United States
+                    state: California
+                    city: San Francisco
+                    address: Some
+                    zipcode: "94102"
+                    countryCode: "+1"
+                    active: true
+                    createdAt: "2024-08-16T10:19:10.369Z"
+                    updatedAt: "2024-08-22T20:33:41.007Z"
+                    __v: 0
+                    coverUrl: "https://onelyk-images-bucket.s3.amazonaws.com/property/66bf279e6ee917a0d4096707/cover/test.png"
+                    logoUrl: "https://onelyk-images-bucket.s3.amazonaws.com/property/66bf279e6ee917a0d4096707/logo/test.png"
+                  setting:
+                    _id: 66bf279e6ee917a0d409670c
+                    propertyId: 66bf279e6ee917a0d4096707
+                    timezone: "7:00 + GMT"
+                    standardCheckinTime: "01:00"
+                    standardCheckoutTime: "12:00"
+                    automaticNewDay: true
+                    defaultNewDayTime: "00:00"
+                    createdAt: "2024-08-16T10:19:10.434Z"
+                    updatedAt: "2024-08-22T20:33:44.191Z"
+                    __v: 0
+                status: success
+                type: SUCCESS
+                message: Success
     GetAllPropertyResponse:
       description: All property response
       content:
@@ -3175,9 +4538,289 @@ components:
                 status: success
                 type: SUCCESS
                 message: Success
+    Workflow:
+      description: Example response
+      content:
+        application/json:
+          schema:
+            type: object
+            x-examples:
+              Example 1:
+                statusCode: 201
+                result:
+                  workflow:
+                    homeFlow:
+                      propertyId: 66a2125d50a317d5ffa691ad
+                      frequentlyAskedQuestionsEnabled: true
+                      _id: 66bf1bd7c1767cd998642e8b
+                      amenities:
+                        - name: Breakfast Included
+                          enabled: true
+                        - name: 24/7 Front Desk
+                          enabled: true
+                        - name: Free WiFi
+                          enabled: true
+                        - name: HouseKeeping
+                          enabled: true
+                        - name: Air conditioning
+                          enabled: true
+                        - name: Parking Available
+                          enabled: true
+                        - name: Luggage Storage
+                          enabled: true
+                      frequentlyAskedQuestions:
+                        - question: What time is standard check in?
+                          answer: "Check-out is at 3:00 PM."
+                      createdAt: "2024-08-16T09:28:55.368Z"
+                      updatedAt: "2024-08-16T09:28:55.368Z"
+                      __v: 0
+                    addOnsFlow:
+                      propertyId: 66a2125d50a317d5ffa691ad
+                      _id: 66bf1bd7c1767cd998642e8d
+                      customAddOns: []
+                      checkInOutAddOns:
+                        - name: Early Check In
+                          description: Early Check In
+                          defaultTimeEnabled: true
+                          defaultTiming: "14:00"
+                          customTiming: "14:00"
+                          paid: false
+                          price: 0
+                          enabled: true
+                          default: true
+                        - name: Late Check Out
+                          description: Late Check Out
+                          defaultTimeEnabled: true
+                          defaultTiming: "12:00"
+                          customTiming: "12:00"
+                          paid: false
+                          price: 0
+                          enabled: true
+                          default: true
+                      createdAt: "2024-08-16T09:28:55.408Z"
+                      updatedAt: "2024-08-16T09:28:55.408Z"
+                      __v: 0
+                    preArrivalFlow:
+                      propertyId: 66a2125d50a317d5ffa691ad
+                      phoneNumber: true
+                      emailAddress: true
+                      arrivalTime: true
+                      vehicleMakeModelColor: true
+                      licensePlateNo: true
+                      specialRequests: true
+                      guestSignature: true
+                      guestIdProof: true
+                      policies: true
+                      primaryPolicy: Primary policy regarding refund and important points displayed here
+                      policyLink: Policy link with bottom sheet
+                      extraPolicies: []
+                      _id: 66bf1bd7c1767cd998642e8f
+                      createdAt: "2024-08-16T09:28:55.440Z"
+                      updatedAt: "2024-08-16T09:28:55.440Z"
+                      __v: 0
+                    inHouseFlow:
+                      propertyId: 66a2125d50a317d5ffa691ad
+                      frequentlyAskedQuestionsEnabled: true
+                      _id: 66bf1bd7c1767cd998642e91
+                      frequentlyAskedQuestions:
+                        - question: What time is standard check out?
+                          answer: "Check out is at 11:00 AM."
+                      createdAt: "2024-08-16T09:28:55.470Z"
+                      updatedAt: "2024-08-16T09:28:55.470Z"
+                      __v: 0
+                    checkedOutFlow:
+                      propertyId: 66a2125d50a317d5ffa691ad
+                      frequentlyAskedQuestionsEnabled: true
+                      _id: 66bf1bd7c1767cd998642e93
+                      frequentlyAskedQuestions:
+                        - question: What time is standard check out?
+                          answer: "Check-out is at 11:00 AM."
+                      createdAt: "2024-08-16T09:28:55.504Z"
+                      updatedAt: "2024-08-16T09:28:55.504Z"
+                      __v: 0
+                status: success
+                type: CREATED
+                message: Defaults created successfully
+            properties:
+              statusCode:
+                type: integer
+              result:
+                type: object
+                properties:
+                  workflow:
+                    type: object
+                    properties:
+                      homeFlow:
+                        type: object
+                        properties:
+                          propertyId:
+                            type: string
+                          frequentlyAskedQuestionsEnabled:
+                            type: boolean
+                          _id:
+                            type: string
+                          amenities:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                                enabled:
+                                  type: boolean
+                          frequentlyAskedQuestions:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                question:
+                                  type: string
+                                answer:
+                                  type: string
+                          createdAt:
+                            type: string
+                          updatedAt:
+                            type: string
+                          __v:
+                            type: integer
+                      addOnsFlow:
+                        type: object
+                        properties:
+                          propertyId:
+                            type: string
+                          _id:
+                            type: string
+                          customAddOns:
+                            type: array
+                            description: "I will add fields later "
+                            items:
+                              type: object
+                          checkInOutAddOns:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                                description:
+                                  type: string
+                                defaultTimeEnabled:
+                                  type: boolean
+                                defaultTiming:
+                                  type: string
+                                customTiming:
+                                  type: string
+                                paid:
+                                  type: boolean
+                                price:
+                                  type: integer
+                                enabled:
+                                  type: boolean
+                                default:
+                                  type: boolean
+                          createdAt:
+                            type: string
+                          updatedAt:
+                            type: string
+                          __v:
+                            type: integer
+                      preArrivalFlow:
+                        type: object
+                        properties:
+                          propertyId:
+                            type: string
+                          phoneNumber:
+                            type: boolean
+                          emailAddress:
+                            type: boolean
+                          arrivalTime:
+                            type: boolean
+                          vehicleMakeModelColor:
+                            type: boolean
+                          licensePlateNo:
+                            type: boolean
+                          specialRequests:
+                            type: boolean
+                          guestSignature:
+                            type: boolean
+                          guestIdProof:
+                            type: boolean
+                          policies:
+                            type: boolean
+                          primaryPolicy:
+                            type: string
+                          policyLink:
+                            type: string
+                          extraPolicies:
+                            type: array
+                            items:
+                              type: string
+                          _id:
+                            type: string
+                          createdAt:
+                            type: string
+                          updatedAt:
+                            type: string
+                          __v:
+                            type: integer
+                      inHouseFlow:
+                        type: object
+                        properties:
+                          propertyId:
+                            type: string
+                          frequentlyAskedQuestionsEnabled:
+                            type: boolean
+                          _id:
+                            type: string
+                          frequentlyAskedQuestions:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                question:
+                                  type: string
+                                answer:
+                                  type: string
+                          createdAt:
+                            type: string
+                          updatedAt:
+                            type: string
+                          __v:
+                            type: integer
+                      checkedOutFlow:
+                        type: object
+                        properties:
+                          propertyId:
+                            type: string
+                          frequentlyAskedQuestionsEnabled:
+                            type: boolean
+                          _id:
+                            type: string
+                          frequentlyAskedQuestions:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                question:
+                                  type: string
+                                answer:
+                                  type: string
+                          createdAt:
+                            type: string
+                          updatedAt:
+                            type: string
+                          __v:
+                            type: integer
+              status:
+                type: string
+              type:
+                type: string
+              message:
+                type: string
 x-request-id: null
 tags:
   - name: Auth
+  - name: Broadcast
   - name: Chat List
   - name: Country
   - name: Guest
@@ -3187,3 +4830,4 @@ tags:
   - name: Property
   - name: Twilio
   - name: User
+  - name: Workflow

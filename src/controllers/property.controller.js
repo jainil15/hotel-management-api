@@ -7,10 +7,17 @@ const {
   NotFoundError,
 } = require("../lib/CustomErrors");
 const { responseHandler } = require("../middlewares/response.middleware");
-const { PropertyValidationSchema } = require("../models/property.model");
-const { SettingValidationSchema } = require("../models/setting.model");
+const {
+  PropertyValidationSchema,
+  UpdatePropertyValidationSchema,
+} = require("../models/property.model");
+const {
+  SettingValidationSchema,
+  UpdateSettingValidationSchema,
+} = require("../models/setting.model");
 const propertyService = require("../services/property.service");
 const messageTemplateService = require("../services/messageTemplate.service");
+const settingService = require("../services/setting.service");
 const workflowService = require("../services/workflow.service");
 const checkImageType = require("../utils/checkType");
 
@@ -54,10 +61,17 @@ const create = async (req, res, next) => {
     }
 
     // check if email already exists
-    const oldProperty = await propertyService.getByEmail(property.email);
+    let oldProperty = await propertyService.getByEmail(property.email);
     if (oldProperty) {
       throw new ConflictError("Property with this email already exists", {
         email: ["Property with this email already exists"],
+      });
+    }
+
+    oldProperty = await propertyService.find({ name: property.name });
+    if (oldProperty) {
+      throw new ConflictError("Property with this name already exists", {
+        name: ["Property with this name already exists"],
       });
     }
     // create new property
@@ -105,6 +119,7 @@ const create = async (req, res, next) => {
 const getAll = async (req, res, next) => {
   try {
     const properties = await propertyService.getAll(req.user);
+
     if (!properties) {
       throw new NotFoundError("No properties found", {});
     }
@@ -129,7 +144,8 @@ const getById = async (req, res, next) => {
     const propertyId = req.params.propertyId;
 
     const property = await propertyService.getById(propertyId);
-    return responseHandler(res, { property: property });
+    const setting = await settingService.getByPropertyId(propertyId);
+    return responseHandler(res, { property: property, setting: setting });
   } catch (e) {
     if (e instanceof APIError) {
       return next(e);
@@ -146,26 +162,71 @@ const getById = async (req, res, next) => {
  * @returns {import('express').Response} - The response
  */
 const update = async (req, res, next) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
   try {
-    const property = req.body;
+    const {
+      standardCheckinTime,
+      standardCheckoutTime,
+      timezone,
+      defaultNewDayTime,
+      ...property
+    } = req.body;
     const propertyId = req.params.propertyId;
-    const result = PropertyValidationSchema.safeParse({
+    const propertyResult = UpdatePropertyValidationSchema.safeParse({
       ...property,
     });
+    const settingResult = UpdateSettingValidationSchema.safeParse({
+      standardCheckinTime,
+      standardCheckoutTime,
+      timezone,
+      defaultNewDayTime,
+    });
+
     // validation errors
-    if (!result.success) {
-      throw new ValidationError(
-        "Validation Error",
-        result.error.flatten().fieldErrors,
-      );
+    if (!propertyResult.success || !settingResult.success) {
+      throw new ValidationError("Validation Error", {
+        ...propertyResult?.error?.flatten().fieldErrors,
+        ...settingResult?.error?.flatten().fieldErrors,
+      });
     }
-    const updatedProperty = await propertyService.update(property, propertyId);
-    return responseHandler(res, { property: updatedProperty });
+
+    const oldProperty = await propertyService.find({ name: property.name });
+    if (oldProperty) {
+      throw new ConflictError("Property with this name already exists", {
+        name: ["Property with this name already exists"],
+      });
+    }
+
+    const updatedSetting = await settingService.updateByPropertyId(
+      propertyId,
+      {
+        standardCheckinTime,
+        standardCheckoutTime,
+        timezone,
+        defaultNewDayTime,
+      },
+      session,
+    );
+    const updatedProperty = await propertyService.update(
+      propertyId,
+      property,
+      req.files,
+      session,
+    );
+    await session.commitTransaction();
+    session.endSession();
+    return responseHandler(res, {
+      property: updatedProperty,
+      setting: updatedSetting,
+    });
   } catch (e) {
+    await session.abortTransaction();
+    session.endSession();
     if (e instanceof APIError) {
       return next(e);
     }
-    return next(new InternalServerError());
+    return next(new InternalServerError(e.message));
   }
 };
 

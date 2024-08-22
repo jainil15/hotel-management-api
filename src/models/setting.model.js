@@ -31,6 +31,29 @@ const SettingValidationSchema = z.object({
   }),
   manualNewDay: z.date().optional(),
 });
+const UpdateSettingValidationSchema = z.object({
+  timezone: z.string().optional(),
+  standardCheckinTime: z
+    .string()
+    .optional()
+    .refine((val) => timeregex.test(val), {
+      message: "Invalid time format",
+    }),
+  standardCheckoutTime: z
+    .string()
+    .optional()
+    .refine((val) => timeregex.test(val), {
+      message: "Invalid time format",
+    }),
+  automaticNewDay: z.boolean().optional(),
+  defaultNewDayTime: z
+    .string()
+    .refine((val) => timeregex.test(val), {
+      message: "Invalid time format",
+    })
+    .optional(),
+  manualNewDay: z.date().optional(),
+});
 /**
  * @typedef {import("mongoose").Model<Setting>} Setting
  * @typedef {typeof Setting.schema.obj} SettingType
@@ -39,4 +62,8 @@ const Setting = mongoose.model("Setting", settingSchema);
 Setting.init().then(() => {
   logger.info("Initialized Setting Model");
 });
-module.exports = { Setting, SettingValidationSchema };
+module.exports = {
+  Setting,
+  SettingValidationSchema,
+  UpdateSettingValidationSchema,
+};
