@@ -181,10 +181,10 @@ const getAllGuestWithStatusv2 = async (propertyId, filters) => {
       {
         $addFields: {
           fullName: {
-            $concat: ["$firstName", "", "$lastName"],
+            $concat: ["$firstName", " ", "$lastName"],
           },
           reverseFullName: {
-            $concat: ["$lastName", "", "$firstName"],
+            $concat: ["$lastName", " ", "$firstName"],
           },
         },
       },
@@ -195,7 +195,7 @@ const getAllGuestWithStatusv2 = async (propertyId, filters) => {
               if: { $in: [{ $type: `$${key}` }, ["date", "objectId"]] },
               // biome-ignore lint/suspicious/noThenProperty: <explanation>
               then: {
-                $dateToString: { format: "%d:%m:%YT%H:%M", date: `$${key}` },
+                $dateToString: { format: "%d/%m/%YT%H:%M", date: `$${key}` },
               },
               else: { $toString: `$${key}` },
             },
@@ -211,7 +211,7 @@ const getAllGuestWithStatusv2 = async (propertyId, filters) => {
               // biome-ignore lint/suspicious/noThenProperty: <explanation>
               then: {
                 $dateToString: {
-                  format: "%d:%m:%YT%H:%M",
+                  format: "%d/%m/%YT%H:%M",
                   date: `$status.${key}`,
                 },
               },
@@ -251,6 +251,24 @@ const getAllGuestWithStatusv2 = async (propertyId, filters) => {
                 $options: "i",
               },
             })),
+            {
+              fullName: {
+                $regex: new RegExp(
+                  filters.search.replace(/[#-.]|[[-^]|[?|{}]/g, "\\$&"),
+                ),
+
+                $options: "i",
+              },
+            },
+            {
+              reverseFullName: {
+                $regex: new RegExp(
+                  filters.search.replace(/[#-.]|[[-^]|[?|{}]/g, "\\$&"),
+                ),
+
+                $options: "i",
+              },
+            },
           ],
         },
       },
