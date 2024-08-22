@@ -18,6 +18,7 @@ const twilioAccountService = require("../services/twilioAccount.service");
 const chatListService = require("../services/chatList.service");
 const propertyService = require("../services/property.service");
 const checkInOutRequestService = require("../services/checkInOutRequest.service");
+const guestSessionService = require("../services/guestSession.service");
 const {
   CreateGuestStatusValidationSchema,
   UpdateGuestStatusValidationSchema,
@@ -170,7 +171,12 @@ const create = async (req, res, next) => {
       status,
       session,
     );
-
+    // Create Guest Session
+    const guestSession = await guestSessionService.create(
+      propertyId,
+      newGuest._id,
+      session,
+    );
     // Create chat list
     const chatList = await chatListService.create(
       propertyId,
