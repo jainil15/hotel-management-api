@@ -306,7 +306,24 @@ const subaccountBilling = async (req, res, next) => {
     return next(new InternalServerError(e.message));
   }
 };
+const isTwilioSetup = async (req, res, next) => {
+  try {
+    const propertyId = req.params.propertyId;
+    const twilioAccount =
+      await twilioAccountService.getByPropertyId(propertyId);
 
+    if (twilioAccount.phoneNumber) {
+      return responseHandler(res, { isComplete: true });
+    }
+
+    return responseHandler(res, { isComplete: false });
+  } catch (e) {
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError());
+  }
+};
 module.exports = {
   getPhoneNumbers,
   buyPhoneNumber,
@@ -314,5 +331,6 @@ module.exports = {
   getTollFreeVerificationStatus,
   sendMessage,
   incomingMessage,
+  isTwilioSetup,
   subaccountBilling,
 };

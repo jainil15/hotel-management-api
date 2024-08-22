@@ -364,6 +364,14 @@ const remove = async (guestId, session) => {
   return guestStatus;
 };
 
+const findOneGuestWithStatus = async (propertyId, guestId) => {
+  const guest = await GuestStatus.findOne({
+    propertyId: propertyId,
+    guestId: guestId,
+  }).populate("guestId");
+  return guest;
+};
+
 module.exports = {
   create,
   remove,

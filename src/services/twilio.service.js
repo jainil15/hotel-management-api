@@ -113,7 +113,7 @@ const createSubaccount = async (propertyId) => {
   // Create Twilio Subaccount
   const twilioPropertySubaccount = await twilioClient.api.v2010.accounts.create(
     {
-      friendlyName: property.name,
+      friendlyName: propertyId,
     },
   );
   // Create Twilio Account

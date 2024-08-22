@@ -11,7 +11,11 @@ const router = Router();
 router.get("/", async (req, res, next) => {
   try {
     responseHandler(res, {
-      countries: countryFile.map((c) => ({ name: c.name, iso2: c.iso2 })),
+      countries: countryFile.map((c) => ({
+        name: c.name,
+        iso2: c.iso2,
+        phoneCode: `+${c.phone_code}`,
+      })),
     });
   } catch (e) {
     return next(new InternalServerError());
@@ -26,7 +30,7 @@ router.get("/:country/timezones", async (req, res, next) => {
       return next(
         new BadRequestError("Timezones not found", {
           timezones: ["Timezones not found"],
-        })
+        }),
       );
     }
     responseHandler(res, { timezones: timezone });
@@ -45,7 +49,7 @@ router.get("/:country/states", async (req, res, next) => {
       return next(
         new BadRequestError("States not found", {
           states: ["States not found"],
-        })
+        }),
       );
     }
     responseHandler(res, { states: states });
@@ -66,7 +70,9 @@ router.get("/:country/:state/cities", async (req, res, next) => {
         name: c.name,
       }));
     if (!cities) {
-      return next(new BadRequestError("Bad Request",{ cities: ["Cities not found"] }));
+      return next(
+        new BadRequestError("Bad Request", { cities: ["Cities not found"] }),
+      );
     }
     responseHandler(res, { cities: cities });
   } catch (e) {
@@ -80,14 +86,14 @@ router.get("/:country/:zipcode", async (req, res, next) => {
     const zipcode = req.params.zipcode;
 
     const zipcodes = zipcodeFile.find(
-      (c) => c.country_code === countryIso && c.zipcode === zipcode
+      (c) => c.country_code === countryIso && c.zipcode === zipcode,
     );
 
     if (!zipcodes) {
       return next(
         new BadRequestError("Invalid zip code", {
           zipcode: ["Zipcode not found"],
-        })
+        }),
       );
     }
     responseHandler(res, { zipcodes });

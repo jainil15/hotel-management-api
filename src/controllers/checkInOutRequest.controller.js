@@ -168,6 +168,7 @@ const create = async (req, res, next) => {
 
     return responseHandler(res, { checkInOutRequest: newCheckInOutRequest });
   } catch (e) {
+    console.log(e);
     await session.abortTransaction();
     session.endSession();
     if (e instanceof APIError) {

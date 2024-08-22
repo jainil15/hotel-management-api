@@ -38,11 +38,12 @@ propertySchema.index({ email: 1 }, { unique: true });
 
 const PropertyValidationSchema = z
   .object({
-    name: z.string().min(3).max(255),
+    name: z.string().min(1).max(255),
     email: z.string().email(),
     phoneNumber: z.string().refine((val) => nocountrycodephoneregex.test(val), {
       message: "Invalid phone number format",
     }),
+
     countryCode: z.string().refine((val) => countrycoderegex.test(val), {
       message: "Invalid country code format",
     }),
@@ -75,12 +76,90 @@ const PropertyValidationSchema = z
     country: z.string().min(1),
     state: z.string().min(1),
     city: z.string().min(1),
-    address: z.string().min(3),
+    address: z.string().min(1),
     zipcode: z.string().min(1),
   })
   .refine((val) => validateZipcode(val.country, val.state, val.zipcode), {
     path: ["zipcode"],
     message: "Invalid zipcode",
+  });
+
+const UpdatePropertyValidationSchema = z
+  .object({
+    name: z.string().min(1).max(255).optional(),
+    email: z.string().email().optional(),
+    phoneNumber: z
+      .string()
+      .refine((val) => nocountrycodephoneregex.test(val), {
+        message: "Invalid phone number format",
+      })
+      .optional(),
+    countryCode: z
+      .string()
+      .refine((val) => countrycoderegex.test(val), {
+        message: "Invalid country code format",
+      })
+      .optional(),
+    logo: z
+      .array(
+        z
+          .any()
+          .refine((val) => val.size < MAX_FILE_SIZE, {
+            message: "File size too large",
+          })
+          .refine((val) => checkImageType(val.mimetype), {
+            message: "Invalid file type",
+          }),
+      )
+      .length(1)
+      .optional(),
+    cover: z
+      .array(
+        z
+          .any()
+          .refine((val) => val.size < MAX_FILE_SIZE, {
+            message: "File size too large",
+          })
+          .refine((val) => checkImageType(val.mimetype), {
+            message: "Invalid file type",
+          }),
+      )
+      .length(1)
+      .optional(),
+    website: z.string().url().optional(),
+    about: z.string().min(1).optional(),
+    country: z.string().min(1).optional(),
+    state: z.string().min(1).optional(),
+    city: z.string().min(1).optional(),
+    address: z.string().min(1).optional(),
+    zipcode: z.string().min(1).optional(),
+  })
+  .superRefine((args, ctx) => {
+    if (args.zipcode) {
+      if (!args.country) {
+        ctx.addIssue({
+          path: ["country"],
+          message: "Country is required",
+        });
+      }
+      if (!args.state) {
+        ctx.addIssue({
+          path: ["state"],
+          message: "State is required",
+        });
+      }
+      if (validateZipcode(ctx.country, ctx.state, args.zipcode)) {
+        ctx.addIssue({
+          path: ["zipcode"],
+          message: "Invalid zipcode",
+        });
+      }
+    } else if (args.country || args.state) {
+      ctx.addIssue({
+        path: ["zipcode"],
+        message: "Zipcode is required",
+      });
+    }
   });
 
 /**
@@ -91,4 +170,8 @@ const Property = mongoose.model("Property", propertySchema);
 Property.init().then(() => {
   logger.info("Initialized Property Model");
 });
-module.exports = { Property, PropertyValidationSchema };
+module.exports = {
+  Property,
+  PropertyValidationSchema,
+  UpdatePropertyValidationSchema,
+};

@@ -23,34 +23,38 @@ router.post(
     { name: "logo", maxCount: 1 },
     { name: "cover", maxCount: 1 },
   ]),
-  create
+  create,
 );
 
 router.get(
   "/",
   authenticateToken,
   checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
-  getAll
+  getAll,
 );
 router.get(
   "/:propertyId",
   authenticateToken,
   checkPropertyAccess,
   checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
-  getById
+  getById,
 );
 router.put(
   "/:propertyId",
   authenticateToken,
   checkPropertyAccess,
   checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
-  update
+  upload.fields([
+    { name: "logo", maxCount: 1 },
+    { name: "cover", maxCount: 1 },
+  ]),
+  update,
 );
 router.delete(
   "/:propertyId",
   authenticateToken,
   checkPropertyAccess,
   checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
-  remove
+  remove,
 );
 module.exports = router;
