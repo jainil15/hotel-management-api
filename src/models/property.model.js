@@ -35,7 +35,6 @@ const propertySchema = new Schema(
 );
 
 propertySchema.index({ email: 1 }, { unique: true });
-propertySchema.index({ name: 1 }, { unique: true });
 
 const PropertyValidationSchema = z
   .object({

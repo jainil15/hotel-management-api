@@ -68,12 +68,6 @@ const create = async (req, res, next) => {
       });
     }
 
-    oldProperty = await propertyService.find({ name: property.name });
-    if (oldProperty) {
-      throw new ConflictError("Property with this name already exists", {
-        name: ["Property with this name already exists"],
-      });
-    }
     // create new property
     const newProperty = await propertyService.create(
       property,
@@ -188,13 +182,6 @@ const update = async (req, res, next) => {
       throw new ValidationError("Validation Error", {
         ...propertyResult?.error?.flatten().fieldErrors,
         ...settingResult?.error?.flatten().fieldErrors,
-      });
-    }
-
-    const oldProperty = await propertyService.find({ name: property.name });
-    if (oldProperty) {
-      throw new ConflictError("Property with this name already exists", {
-        name: ["Property with this name already exists"],
       });
     }
 
