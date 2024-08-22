@@ -19,7 +19,7 @@ const create = async (propertyId, inHouseFlow, session) => {
  * @returns {Promise<import('../models/inHouseFlow.model').InHouseFlowType>} - The InHouseFlow
  */
 const getByPropertyId = async (propertyId) => {
-  const inHouseFlow = await InHouseFlow.find({ propertyId });
+  const inHouseFlow = await InHouseFlow.findOne({ propertyId });
   return inHouseFlow;
 };
 

@@ -22,7 +22,7 @@ const create = async (propertyId, checkedOutFlow, session) => {
  * @returns {Promise<import('../models/checkedOutFlow.model').CheckedOutFlowType>} - The CheckedOutFlow
  */
 const getByPropertyId = async (propertyId) => {
-  const checkedOutFlow = await CheckedOutFlow.find({ propertyId });
+  const checkedOutFlow = await CheckedOutFlow.findOne({ propertyId });
   return checkedOutFlow;
 };
 
