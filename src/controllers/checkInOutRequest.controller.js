@@ -142,6 +142,15 @@ const create = async (req, res, next) => {
       session,
     );
 
+    const updatedChatList = await chatListService.updateAndIncUnreadMessages(
+      propertyId,
+      guestId,
+      {
+        latestMessage: newMessage._id,
+      },
+      session,
+    );
+
     await session.commitTransaction();
     await session.endSession();
 
@@ -233,7 +242,7 @@ const updateRequestStatus = async (req, res, next) => {
             .join("")
             .replace("C", "c")}`]:
             updatedCheckInOutRequest[
-              `${updatedCheckInOutRequest.requestType}DateTime`
+            `${updatedCheckInOutRequest.requestType}DateTime`
             ],
         },
         propertyId,

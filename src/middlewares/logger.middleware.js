@@ -10,7 +10,6 @@ const loggerMiddleware = (req, res, next) => {
   const initialUrl = req.url;
   const uuid = req.headers["x-request-id"];
   const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-
   // logger.info(`[REQUEST] ${req.method} ${req.url} [${uuid}]`);
   try {
     res.on("finish", () => {
@@ -18,8 +17,12 @@ const loggerMiddleware = (req, res, next) => {
 
       if (res.statusCode >= 400 && res.statusCode < 500) {
         logger.warn(log);
+        logger.warn(req.body);
+        logger.warn(res.contentBody);
       } else if (res.statusCode >= 500) {
         logger.error(log);
+        logger.error(req.body);
+        logger.error(res.contentBody);
       } else {
         logger.http(log);
       }

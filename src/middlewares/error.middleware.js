@@ -10,6 +10,7 @@ const { APIError, BadRequestError } = require("../lib/CustomErrors");
  * @returns {import("express").Response} - Response object
  */
 const errorMiddleware = async (err, req, res, next) => {
+  res.contentBody = err.error;
   return res.status(err.statusCode).json({
     status: "error",
     statusCode: err.statusCode || 500,
