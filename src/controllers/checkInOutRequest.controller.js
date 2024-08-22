@@ -243,7 +243,7 @@ const updateRequestStatus = async (req, res, next) => {
             .join("")
             .replace("C", "c")}`]:
             updatedCheckInOutRequest[
-              `${updatedCheckInOutRequest.requestType}DateTime`
+            `${updatedCheckInOutRequest.requestType}DateTime`
             ],
         },
         propertyId,
