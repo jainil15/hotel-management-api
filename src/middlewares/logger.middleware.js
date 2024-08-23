@@ -1,5 +1,4 @@
 const logger = require("../configs/winston.config");
-
 /**
  * Loggin middleware
  * @param {import('express').Request} req - request object
@@ -14,11 +13,14 @@ const loggerMiddleware = (req, res, next) => {
   try {
     res.on("finish", () => {
       const log = `| ${res.statusCode} | ${req.method} ${initialUrl} [${ip}] ${res.getHeader("x-response-time")} `;
-      const logBody = {
-        log: log,
-        request: req.body,
-        response: res.contentBody,
-      };
+      const logBody =
+        process.env.NODE_ENV === "production"
+          ? {
+              log: log,
+              request: req.body,
+              response: res.contentBody,
+            }
+          : log;
 
       if (res.statusCode >= 400 && res.statusCode < 500) {
         logger.warn(logBody);
