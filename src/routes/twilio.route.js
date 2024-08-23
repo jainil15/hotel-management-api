@@ -41,7 +41,19 @@ router.get(
   checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
   getTollFreeVerificationStatus,
 );
-router.get("/:propertyId/isTwilioSetup", twilioController.isTwilioSetup);
-router.get("/:propertyId/billing", twilioController.subaccountBilling);
+router.get(
+  "/:propertyId/isTwilioSetup",
+  authenticateToken,
+  checkPropertyAccess,
+  checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
+  twilioController.isTwilioSetup,
+);
+router.get(
+  "/:propertyId/billing",
+  authenticateToken,
+  checkPropertyAccess,
+  checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
+  twilioController.subaccountBilling,
+);
 
 module.exports = router;
