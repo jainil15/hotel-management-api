@@ -14,15 +14,16 @@ const loggerMiddleware = (req, res, next) => {
   try {
     res.on("finish", () => {
       const log = `| ${res.statusCode} | ${req.method} ${initialUrl} [${ip}] ${res.getHeader("x-response-time")} `;
+      const logBody = {
+        log: log,
+        request: req.body,
+        response: res.contentBody,
+      };
 
       if (res.statusCode >= 400 && res.statusCode < 500) {
-        logger.warn(log);
-        logger.warn(req.body);
-        logger.warn(res.contentBody);
+        logger.warn(logBody);
       } else if (res.statusCode >= 500) {
-        logger.error(log);
-        logger.error(req.body);
-        logger.error(res.contentBody);
+        logger.error(logBody);
       } else {
         logger.http(log);
       }

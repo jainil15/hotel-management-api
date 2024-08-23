@@ -1,4 +1,5 @@
-const { ForbiddenError } = require("../lib/CustomErrors");
+const { ForbiddenError, UnauthorizedError } = require("../lib/CustomErrors");
+const guestSessionService = require("../services/guestSession.service");
 
 /**
  * Check if the user has access to the guest
@@ -17,4 +18,16 @@ const checkGuestAccess = async (req, res, next) => {
   next();
 };
 
-module.exports = { checkGuestAccess };
+const authenticateGuest = async (req, res, next) => {
+  const { guestSessionId } = req.params;
+  if (!guestSessionId) {
+    return next(new UnauthorizedError("Unauthorized", {}));
+  }
+  const guestSession = await guestSessionService.getById(guestSessionId);
+  if (!guestSession) {
+    return next(new UnauthorizedError("Unauthorized", {}));
+  }
+  req.guestSession = guestSession;
+};
+
+module.exports = { checkGuestAccess, authenticateGuest };

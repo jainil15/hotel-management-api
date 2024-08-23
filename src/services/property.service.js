@@ -101,35 +101,46 @@ const getAll = async (user) => {
  * @returns {Promise<Property>} - The updated property
  */
 const update = async (propertyId, property, files, session) => {
-  const logo = files.logo[0];
-  const cover = files.cover[0];
-
-  const logoUrl = `https://${process.env.S3_IMAGES_BUCKET_NAME}.s3.amazonaws.com/property/${propertyId}/logo/${logo.originalname}`;
-  const coverUrl = `https://${process.env.S3_IMAGES_BUCKET_NAME}.s3.amazonaws.com/property/${propertyId}/cover/${cover.originalname}`;
+  if (files.logo) {
+    const logo = files.logo[0];
+    const logoUrl = `https://${process.env.S3_IMAGES_BUCKET_NAME}.s3.amazonaws.com/property/${propertyId}/logo/${logo.originalname}`;
+    property.logoUrl = logoUrl;
+  }
+  if (files.cover) {
+    const cover = files.cover[0];
+    const coverUrl = `https://${process.env.S3_IMAGES_BUCKET_NAME}.s3.amazonaws.com/property/${propertyId}/cover/${cover.originalname}`;
+    property.coverUrl = coverUrl;
+  }
 
   const updatedProperty = await Property.findByIdAndUpdate(
     propertyId,
     {
       ...property,
-      logoUrl,
-      coverUrl,
     },
     { new: true, session },
   );
-  // Upload to s3
   const client = new S3Client(awsS3Config);
-  const logoCommand = new PutObjectCommand({
-    Bucket: process.env.S3_IMAGES_BUCKET_NAME,
-    Key: `property/${propertyId}/logo/${logo.originalname}`,
-    Body: logo.buffer,
-  });
-  const coverCommand = new PutObjectCommand({
-    Bucket: process.env.S3_IMAGES_BUCKET_NAME,
-    Key: `property/${propertyId}/cover/${cover.originalname}`,
-    Body: cover.buffer,
-  });
-  await client.send(logoCommand);
-  await client.send(coverCommand);
+  // Upload to s3
+
+  if (files.logo) {
+    const logo = files.logo[0];
+    const logoCommand = new PutObjectCommand({
+      Bucket: process.env.S3_IMAGES_BUCKET_NAME,
+      Key: `property/${propertyId}/logo/${logo.originalname}`,
+      Body: logo.buffer,
+    });
+    await client.send(logoCommand);
+  }
+
+  if (files.cover) {
+    const cover = files.cover[0];
+    const coverCommand = new PutObjectCommand({
+      Bucket: process.env.S3_IMAGES_BUCKET_NAME,
+      Key: `property/${propertyId}/cover/${cover.originalname}`,
+      Body: cover.buffer,
+    });
+    await client.send(coverCommand);
+  }
 
   return updatedProperty;
 };

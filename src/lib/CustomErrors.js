@@ -12,7 +12,7 @@ class APIError extends Error {
     super(message);
     this.statusCode = statusCode;
     this.statusName = Object.keys(RESPONSE_STATUS).find(
-      (key) => RESPONSE_STATUS[key] === statusCode
+      (key) => RESPONSE_STATUS[key] === statusCode,
     );
     this.error = error;
   }
@@ -99,7 +99,7 @@ class InternalServerError extends APIError {
    */
   constructor(
     message = "Internal Server Error",
-    error = { server: ["Internal Server Error"] }
+    error = { server: ["Internal Server Error"] },
   ) {
     super(message, 500, error);
   }

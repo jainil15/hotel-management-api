@@ -35,16 +35,16 @@ const UpdateSettingValidationSchema = z.object({
   timezone: z.string().optional(),
   standardCheckinTime: z
     .string()
-    .optional()
     .refine((val) => timeregex.test(val), {
       message: "Invalid time format",
-    }),
+    })
+    .optional(),
   standardCheckoutTime: z
     .string()
-    .optional()
     .refine((val) => timeregex.test(val), {
       message: "Invalid time format",
-    }),
+    })
+    .optional(),
   automaticNewDay: z.boolean().optional(),
   defaultNewDayTime: z
     .string()
