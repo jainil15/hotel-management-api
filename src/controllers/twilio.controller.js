@@ -108,7 +108,7 @@ const buyPhoneNumber = async (req, res, next) => {
     if (e instanceof APIError) {
       return next(e);
     }
-    return next(new InternalServerError());
+    return next(new InternalServerError(e.message));
   }
 };
 
