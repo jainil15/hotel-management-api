@@ -313,10 +313,23 @@ const isTwilioSetup = async (req, res, next) => {
       await twilioAccountService.getByPropertyId(propertyId);
 
     if (twilioAccount.phoneNumber) {
-      return responseHandler(res, { isComplete: true });
+      return responseHandler(res, {
+        isComplete: true,
+        isSubaccountCreated: true,
+      });
     }
 
-    return responseHandler(res, { isComplete: false });
+    if (twilioAccount.sid) {
+      return responseHandler(res, {
+        isComplete: false,
+        isSubaccountCreated: true,
+      });
+    }
+
+    return responseHandler(res, {
+      isComplete: false,
+      isSubaccountCreated: false,
+    });
   } catch (e) {
     if (e instanceof APIError) {
       return next(e);
