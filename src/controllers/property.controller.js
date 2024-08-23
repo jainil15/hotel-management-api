@@ -210,6 +210,13 @@ const update = async (req, res, next) => {
   } catch (e) {
     await session.abortTransaction();
     session.endSession();
+    if (e.code === 11000) {
+      return next(
+        new ConflictError("Property with this email already exists", {
+          email: ["Property with this email already exists"],
+        }),
+      );
+    }
     if (e instanceof APIError) {
       return next(e);
     }
