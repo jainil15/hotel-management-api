@@ -20,7 +20,10 @@ const preArrivalService = require("../services/preArrival.service");
 const preArrivalFlowService = require("../services/preArrivalFlow.service");
 const { PRE_ARRIVAL_STATUS } = require("../constants/guestStatus.contant");
 const { ROLE } = require("../constants/role.constant");
-const { validatePreArrivalFlow } = require("../utils/preArrival.util");
+const {
+  validatePreArrivalFlow,
+  zodValidatePreArrivalFlow,
+} = require("../utils/preArrival.util");
 
 const {
   CreateCheckInOutRequestValidationSchema,
@@ -33,6 +36,9 @@ const {
   requestType,
   messageTriggerType,
 } = require("../constants/message.constant");
+const {
+  CreatePreArrivalValidationSchema,
+} = require("../models/preArrival.model");
 
 const getGuest = async (req, res, next) => {
   try {
@@ -211,7 +217,6 @@ const createCheckInOutRequest = async (req, res, next) => {
 
     return responseHandler(res, { checkInOutRequest: newCheckInOutRequest });
   } catch (e) {
-    console.log(e);
     await session.abortTransaction();
     session.endSession();
     if (e instanceof APIError) {
@@ -238,6 +243,13 @@ const getGuestWithStatus = async (req, res, next) => {
   }
 };
 
+/**
+ * Get guest status
+ * @param {import('express').Request} req - Request object
+ * @param {import('express').Response} res - Response object
+ * @param {import('express').NextFunction} next - Next function
+ * @returns {Promise<void>}
+ */
 const getGuestStatus = async (req, res, next) => {
   try {
     const { guestId } = req.guestSession;
@@ -266,6 +278,20 @@ const createPreArrival = async (req, res, next) => {
     const { propertyId, guestId } = req.guestSession;
     const preArrival = req.body;
 
+    preArrival.consentToText = preArrival.consentToText === "true";
+    preArrival.policyAccepted = preArrival.policyAccepted === "true";
+    preArrival.guestSignature = req?.files?.guestSignature;
+    preArrival.guestIdProof = req?.files?.guestIdProof;
+    if (preArrival.consentToText === false) {
+      throw new ValidationError("Input Validation Error", {
+        consentToText: ["Consent to text is required"],
+      });
+    }
+    if (preArrival.policyAccepted === false) {
+      throw new ValidationError("Input Validation Error", {
+        policyAccepted: ["Policy accepted is required"],
+      });
+    }
     const preArrivalResult =
       CreatePreArrivalValidationSchema.safeParse(preArrival);
 
@@ -276,13 +302,15 @@ const createPreArrival = async (req, res, next) => {
     }
     const preArrivalFlow =
       await preArrivalFlowService.getByPropertyId(propertyId);
-
-    if (!validatePreArrivalFlow(preArrivalFlow._doc, preArrival)) {
+    const validationResult = zodValidatePreArrivalFlow(
+      preArrivalFlow._doc,
+      preArrival,
+    );
+    if (!validationResult.success) {
       throw new ValidationError("Validation Error", {
-        preArrival: "Invalid pre arrival flow",
+        ...validationResult.error.flatten().fieldErrors,
       });
     }
-
     const existingGuest = await guestService.getByGuestId(guestId);
     if (!existingGuest) {
       throw new ForbiddenError("Guest does not exist", {});
@@ -292,18 +320,18 @@ const createPreArrival = async (req, res, next) => {
     if (existingPreArrival) {
       throw new ConflictError("Pre arrival already exists", {});
     }
-    const newPreArrival = await preArrivalService.create(
-      propertyId,
-      guestId,
-      preArrivalResult.data,
-      session,
-    );
 
     const updatedGuestStatus = await guestStatusService.update(
       guestId,
       { preArrival: PRE_ARRIVAL_STATUS.APPLIED },
       session,
-      ROLE.GUEST,
+    );
+
+    const newPreArrival = await preArrivalService.create(
+      propertyId,
+      guestId,
+      preArrivalResult.data,
+      session,
     );
 
     await session.commitTransaction();
@@ -323,6 +351,22 @@ const createPreArrival = async (req, res, next) => {
   }
 };
 
+const getCheckInOutRequest = async (req, res, next) => {
+  try {
+    const { propertyId, guestId } = req.guestSession;
+    const checkInOutRequest =
+      await checkInOutRequestService.getByPropertyIdAndGuestId(
+        propertyId,
+        guestId,
+      );
+    return responseHandler(res, checkInOutRequest);
+  } catch (e) {
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError(e.message));
+  }
+};
 module.exports = {
   getGuest,
   getWorkflow,
@@ -332,4 +376,5 @@ module.exports = {
   getGuestStatus,
   createCheckInOutRequest,
   createPreArrival,
+  getCheckInOutRequest,
 };

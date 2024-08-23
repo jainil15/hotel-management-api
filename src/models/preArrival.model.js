@@ -3,10 +3,10 @@ const { z } = require("zod");
 const logger = require("../configs/winston.config");
 const { phoneregex, datetimeregex } = require("../constants/regex.constant");
 const { MAX_FILE_SIZE } = require("../constants/file.constant");
+const checkImageType = require("../utils/checkType");
 const Schema = mongoose.Schema;
 /**
-const preArrivalFlowSchema = new Schema(
-  {
+      {
     propertyId: {
       type: Schema.Types.ObjectId,
       ref: "Property",
@@ -29,8 +29,6 @@ const preArrivalFlowSchema = new Schema(
     policyLink: { type: String, default: "Policy link with bottom sheet" },
     extraPolicies: { type: [String], default: [] },
   },
-  { timestamps: true },
-);
  */
 const preArrivalSchema = new Schema(
   {
@@ -90,7 +88,8 @@ const CreatePreArrivalValidationSchema = z.object({
           message: "Invalid file type",
         }),
     )
-    .length(1),
+    .length(1)
+    .optional(),
   guestIdProof: z
     .array(
       z
@@ -102,9 +101,10 @@ const CreatePreArrivalValidationSchema = z.object({
           message: "Invalid file type",
         }),
     )
-    .length(1),
-  policyAccepted: z.boolean().optional(),
-  consentToText: z.boolean().optional(),
+    .length(1)
+    .optional(),
+  policyAccepted: z.boolean(),
+  consentToText: z.boolean(),
 });
 
 /**

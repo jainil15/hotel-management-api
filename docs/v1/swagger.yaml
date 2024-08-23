@@ -3,17 +3,17 @@ x-stoplight:
   id: qwywpxxlzuzxl
 info:
   title: Onelyk Swagger UI
-  version: "1.0"
+  version: '1.0'
   summary: Onelyk Api
   description: Onelyk Api
 servers:
-  - url: "http://localhost:4000"
+  - url: 'http://localhost:4000'
     description: MY DEV
-  - url: "http://localhost:3000"
+  - url: 'http://localhost:3000'
     description: Local
-  - url: "https://mvx7d4vf-3000.inc1.devtunnels.ms"
+  - url: 'https://mvx7d4vf-3000.inc1.devtunnels.ms'
     description: Devtunnel
-  - url: "https://testhotelapi.onelyk.com"
+  - url: 'https://testhotelapi.onelyk.com'
     description: Testing (PROD)
 paths:
   /user/register:
@@ -21,14 +21,14 @@ paths:
       summary: User Registration
       operationId: regiester-user
       responses:
-        "200":
-          $ref: "#/components/responses/Register"
-        "400":
-          $ref: "#/components/responses/Error"
-        "500":
-          $ref: "#/components/responses/Error"
+        '200':
+          $ref: '#/components/responses/Register'
+        '400':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
       requestBody:
-        $ref: "#/components/requestBodies/Register"
+        $ref: '#/components/requestBodies/Register'
       description: Register new user
       x-stoplight:
         id: 7xhk6wcrsm2m3
@@ -43,15 +43,15 @@ paths:
       tags:
         - User
       responses:
-        "200":
-          $ref: "#/components/responses/Login"
-        "500":
-          $ref: "#/components/responses/Error"
+        '200':
+          $ref: '#/components/responses/Login'
+        '500':
+          $ref: '#/components/responses/Error'
       operationId: login-user
       x-stoplight:
         id: 8m90dlv0xc09x
       requestBody:
-        $ref: "#/components/requestBodies/Login"
+        $ref: '#/components/requestBodies/Login'
   /auth/accessToken:
     get:
       summary: Request AccessToken
@@ -72,16 +72,16 @@ paths:
           description: Valid Refresh token
       tags:
         - Auth
-      description: ""
+      description: ''
     parameters: []
   /auth/verifyOtp:
     post:
       summary: Verify OTP
       responses:
-        "200":
-          $ref: "#/components/responses/Login"
-        "500":
-          $ref: "#/components/responses/Error"
+        '200':
+          $ref: '#/components/responses/Login'
+        '500':
+          $ref: '#/components/responses/Error'
       operationId: post-auth-verifyOtp
       x-stoplight:
         id: 2mys6pc0tw9tn
@@ -110,7 +110,7 @@ paths:
       tags:
         - User
       responses:
-        "200":
+        '200':
           description: OK
           content: {}
       operationId: post-user-logout
@@ -124,7 +124,7 @@ paths:
       tags:
         - User
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -178,11 +178,11 @@ paths:
                         firstName: Jainil
                         lastName: Patel
                         email: jainil.patel@onelyk.com
-                        phoneNumber: "+919104470843"
+                        phoneNumber: '+919104470843'
                         role: admin
                         active: true
-                        createdAt: "2024-07-25T08:48:31.741Z"
-                        updatedAt: "2024-07-25T08:48:31.741Z"
+                        createdAt: '2024-07-25T08:48:31.741Z'
+                        updatedAt: '2024-07-25T08:48:31.741Z'
                         __v: 0
                         iat: 1723796934
                         exp: 1723883334
@@ -194,7 +194,7 @@ paths:
         id: ztlhlwiajutbr
       security:
         - Bearer: []
-  "/user/{propertyId}":
+  '/user/{propertyId}':
     parameters:
       - schema:
           type: string
@@ -204,13 +204,13 @@ paths:
     post:
       summary: Create User
       responses:
-        "200":
-          $ref: "#/components/responses/User"
+        '200':
+          $ref: '#/components/responses/User'
       operationId: post-user-propertyId
       x-stoplight:
         id: jrjx090obmx3q
       requestBody:
-        $ref: "#/components/requestBodies/User"
+        $ref: '#/components/requestBodies/User'
       security:
         - Bearer: []
       tags:
@@ -221,19 +221,19 @@ paths:
       tags:
         - Property
       responses:
-        "200":
-          $ref: "#/components/responses/PropertyResponse"
+        '200':
+          $ref: '#/components/responses/PropertyResponse'
         4XX:
-          $ref: "#/components/responses/Error"
+          $ref: '#/components/responses/Error'
         5XX:
-          $ref: "#/components/responses/Error"
+          $ref: '#/components/responses/Error'
       operationId: Create-Property
       x-stoplight:
         id: ryjalcd5tmwuq
       security:
         - Bearer: []
       requestBody:
-        $ref: "#/components/requestBodies/CreateProperty"
+        $ref: '#/components/requestBodies/CreateProperty'
     get:
       summary: Get all properties associated with user
       tags:
@@ -260,7 +260,7 @@ paths:
           name: country
       tags:
         - Twilio
-  "/twilio/{propertyId}/buyPhoneNumber":
+  '/twilio/{propertyId}/buyPhoneNumber':
     parameters:
       - schema:
           type: string
@@ -272,7 +272,7 @@ paths:
       tags:
         - Twilio
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -295,7 +295,7 @@ paths:
       operationId: post-twilio-propertyId-buyPhoneNumber
       x-stoplight:
         id: r0xyiornttr0a
-      description: ""
+      description: ''
       requestBody:
         content:
           application/json:
@@ -310,7 +310,7 @@ paths:
                     id: c4sii266sgyvi
       security:
         - Bearer: []
-  "/twilio/{propertyId}/createSubaccount":
+  '/twilio/{propertyId}/createSubaccount':
     parameters:
       - schema:
           type: string
@@ -322,7 +322,7 @@ paths:
       tags:
         - Twilio
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -353,7 +353,7 @@ paths:
       tags:
         - Auth
       responses:
-        "200":
+        '200':
           description: Email Sent
           headers: {}
           content:
@@ -382,7 +382,7 @@ paths:
                   type: string
                   x-stoplight:
                     id: b35muo8oajf1m
-  "/property/{propertyId}":
+  '/property/{propertyId}':
     parameters:
       - schema:
           type: string
@@ -394,8 +394,8 @@ paths:
       tags:
         - Property
       responses:
-        "200":
-          $ref: "#/components/responses/PropertyResponse"
+        '200':
+          $ref: '#/components/responses/PropertyResponse'
       operationId: get-property-propertyId
       x-stoplight:
         id: jqjeu1hs5q8ry
@@ -410,7 +410,87 @@ paths:
       x-stoplight:
         id: 1ng4lp3kroxlz
       requestBody:
-        $ref: "#/components/requestBodies/CreateProperty"
+        description: Shared Request
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              x-examples:
+                Example 1:
+                  name: Test Property 2000
+                  email: jainil@gmail.com
+                  phoneNumber: '0123456789'
+                  website: 'https://www.onelyk.com'
+                  about: About
+                  country: United States
+                  state: California
+                  logo: 'null'
+                  cover: ''
+                  city: San Francisco
+                  address: Some
+                  zipcode: '94102'
+                  countryCode: '+1'
+                  timezone: '7:00 + GMT,'
+                  standardCheckinTime: '01:00'
+                  standardCheckoutTime: '12:00'
+                  defaultNewDayTime: '00:00'
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                phoneNumber:
+                  type: string
+                website:
+                  type: string
+                about:
+                  type: string
+                country:
+                  type: string
+                state:
+                  type: string
+                logo:
+                  type: string
+                  format: binary
+                cover:
+                  type: string
+                  format: binary
+                city:
+                  type: string
+                address:
+                  type: string
+                zipcode:
+                  type: string
+                countryCode:
+                  type: string
+                timezone:
+                  type: string
+                standardCheckinTime:
+                  type: string
+                standardCheckoutTime:
+                  type: string
+                defaultNewDayTime:
+                  type: string
+            examples:
+              Example 1:
+                value:
+                  name: Test Property 2000
+                  email: jainil@gmail.com
+                  phoneNumber: '0123456789'
+                  website: 'https://www.onelyk.com'
+                  about: About
+                  country: United States
+                  state: California
+                  logo: 'null'
+                  cover: ''
+                  city: San Francisco
+                  address: Some
+                  zipcode: '94102'
+                  countryCode: '+1'
+                  timezone: '7:00 + GMT'
+                  standardCheckinTime: '01:00'
+                  standardCheckoutTime: '12:00'
+                  defaultNewDayTime: '00:00'
       security:
         - Bearer: []
   /country:
@@ -419,7 +499,7 @@ paths:
       tags:
         - Country
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -441,7 +521,7 @@ paths:
       operationId: get-country
       x-stoplight:
         id: eahvalgj8q15t
-  "/country/{country}/states":
+  '/country/{country}/states':
     parameters:
       - schema:
           type: string
@@ -454,7 +534,7 @@ paths:
       tags:
         - Country
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -476,7 +556,7 @@ paths:
       operationId: get-country-countryId-states
       x-stoplight:
         id: yewamkjrance5
-  "/country/{country}/timezones":
+  '/country/{country}/timezones':
     parameters:
       - schema:
           type: string
@@ -489,7 +569,7 @@ paths:
       tags:
         - Country
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -517,7 +597,7 @@ paths:
       operationId: get-country-countryId-timezone
       x-stoplight:
         id: cr2z17dg4genl
-  "/country/{country}/{zipcode}":
+  '/country/{country}/{zipcode}':
     parameters:
       - schema:
           type: string
@@ -536,7 +616,7 @@ paths:
       tags:
         - Country
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -576,20 +656,20 @@ paths:
                     result:
                       zipcodes:
                         country_code: US
-                        zipcode: "84765"
+                        zipcode: '84765'
                         place: Santa Clara
                         state: Utah
                         state_code: UT
                         province: Washington
-                        province_code: "053"
-                        community: ""
-                        community_code: ""
-                        latitude: "37.1282"
-                        longitude: "-113.676"
+                        province_code: '053'
+                        community: ''
+                        community_code: ''
+                        latitude: '37.1282'
+                        longitude: '-113.676'
       operationId: get-country-countrycode-zipcode
       x-stoplight:
         id: rt0gmfe39ejzk
-  "/country/{country}/{state}/cities":
+  '/country/{country}/{state}/cities':
     parameters:
       - schema:
           type: string
@@ -608,7 +688,7 @@ paths:
       tags:
         - Country
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -635,7 +715,7 @@ paths:
       operationId: get-country-country-state-cities
       x-stoplight:
         id: z3giqx0o6pq65
-  "/twilio/{propertyId}/tollFreeVerificationStatus":
+  '/twilio/{propertyId}/tollFreeVerificationStatus':
     parameters:
       - schema:
           type: string
@@ -647,7 +727,7 @@ paths:
       tags:
         - Twilio
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -668,21 +748,21 @@ paths:
         id: es0glpjzixbxx
       security:
         - Bearer: []
-  "/guest/{propertyId}":
+  '/guest/{propertyId}':
     post:
       summary: Create guest with Status
       tags:
         - Guest
       responses:
-        "200":
-          $ref: "#/components/responses/CreateGuest"
+        '200':
+          $ref: '#/components/responses/CreateGuest'
       operationId: post-guest-propertyId
       x-stoplight:
         id: vyo5rxdr47cse
       security:
         - Bearer: []
       requestBody:
-        $ref: "#/components/requestBodies/CreateGuest"
+        $ref: '#/components/requestBodies/CreateGuest'
     parameters:
       - schema:
           type: string
@@ -727,7 +807,7 @@ paths:
           allowEmptyValue: true
       security:
         - Bearer: []
-  "/guest/{propertyId}/{guestId}":
+  '/guest/{propertyId}/{guestId}':
     parameters:
       - schema:
           type: string
@@ -744,13 +824,13 @@ paths:
       tags:
         - Guest
       responses:
-        "200":
-          $ref: "#/components/responses/CreateGuest"
+        '200':
+          $ref: '#/components/responses/CreateGuest'
       operationId: put-guest-propertyId-guestId
       x-stoplight:
         id: 8qsp31nk6963h
       requestBody:
-        $ref: "#/components/requestBodies/CreateGuest"
+        $ref: '#/components/requestBodies/CreateGuest'
       security:
         - Bearer: []
     get:
@@ -758,14 +838,14 @@ paths:
       tags:
         - Guest
       responses:
-        "200":
-          $ref: "#/components/responses/CreateGuest"
+        '200':
+          $ref: '#/components/responses/CreateGuest'
       operationId: get-guest-propertyId-guestId
       x-stoplight:
         id: wnosjabi6hyhh
       security:
         - Bearer: []
-  "/messageTemplate/{propertyId}":
+  '/messageTemplate/{propertyId}':
     parameters:
       - schema:
           type: string
@@ -785,15 +865,15 @@ paths:
     post:
       summary: Create message template
       responses:
-        "200":
-          $ref: "#/components/responses/CreateMessageTemplate"
+        '200':
+          $ref: '#/components/responses/CreateMessageTemplate'
       operationId: post-messageTemplate-propertyId
       x-stoplight:
         id: g3ds5i6zexgku
       security:
         - Bearer: []
       requestBody:
-        $ref: "#/components/requestBodies/CreateMessageTemplate"
+        $ref: '#/components/requestBodies/CreateMessageTemplate'
       tags:
         - Message Template
     put:
@@ -817,8 +897,8 @@ paths:
                     name: Checked In
                     message: You are checked in
                     active: true
-                    createdAt: "2024-08-08T10:37:53.351Z"
-                    updatedAt: "2024-08-08T10:37:53.351Z"
+                    createdAt: '2024-08-08T10:37:53.351Z'
+                    updatedAt: '2024-08-08T10:37:53.351Z'
                     __v: 0
                   - _id: 66b4a001ebd75d6d388ab50f
                     propertyId: 66a2125d50a317d5ffa691ad
@@ -826,8 +906,8 @@ paths:
                     name: Checked Out
                     message: You are checked out
                     active: true
-                    createdAt: "2024-08-08T10:37:53.379Z"
-                    updatedAt: "2024-08-08T10:37:53.379Z"
+                    createdAt: '2024-08-08T10:37:53.379Z'
+                    updatedAt: '2024-08-08T10:37:53.379Z'
                     __v: 0
                   - _id: 66b4a001ebd75d6d388ab505
                     propertyId: 66a2125d50a317d5ffa691ad
@@ -835,8 +915,8 @@ paths:
                     name: Early Check In Accepted
                     message: Your early check in request is accepted
                     active: true
-                    createdAt: "2024-08-08T10:37:53.241Z"
-                    updatedAt: "2024-08-08T10:37:53.241Z"
+                    createdAt: '2024-08-08T10:37:53.241Z'
+                    updatedAt: '2024-08-08T10:37:53.241Z'
                     __v: 0
                   - _id: 66b4a001ebd75d6d388ab511
                     propertyId: 66a2125d50a317d5ffa691ad
@@ -844,8 +924,8 @@ paths:
                     name: Early Check In Accepted and Late Check Out Accepted
                     message: Your early check in and late check out request is accepted
                     active: true
-                    createdAt: "2024-08-08T10:37:53.406Z"
-                    updatedAt: "2024-08-08T10:37:53.406Z"
+                    createdAt: '2024-08-08T10:37:53.406Z'
+                    updatedAt: '2024-08-08T10:37:53.406Z'
                     __v: 0
                   - _id: 66b4a001ebd75d6d388ab503
                     propertyId: 66a2125d50a317d5ffa691ad
@@ -853,8 +933,8 @@ paths:
                     name: Early Check In Declined
                     message: Your early check in request is declined
                     active: true
-                    createdAt: "2024-08-08T10:37:53.213Z"
-                    updatedAt: "2024-08-08T10:37:53.213Z"
+                    createdAt: '2024-08-08T10:37:53.213Z'
+                    updatedAt: '2024-08-08T10:37:53.213Z'
                     __v: 0
                   - _id: 66b4a001ebd75d6d388ab509
                     propertyId: 66a2125d50a317d5ffa691ad
@@ -862,8 +942,8 @@ paths:
                     name: Late Check Out Accepted
                     message: Your late check out request is accepted
                     active: true
-                    createdAt: "2024-08-08T10:37:53.295Z"
-                    updatedAt: "2024-08-08T10:37:53.295Z"
+                    createdAt: '2024-08-08T10:37:53.295Z'
+                    updatedAt: '2024-08-08T10:37:53.295Z'
                     __v: 0
                   - _id: 66b4a001ebd75d6d388ab507
                     propertyId: 66a2125d50a317d5ffa691ad
@@ -871,8 +951,8 @@ paths:
                     name: Late Check Out Declined
                     message: Your late check out request is declined
                     active: true
-                    createdAt: "2024-08-08T10:37:53.268Z"
-                    updatedAt: "2024-08-08T10:37:53.268Z"
+                    createdAt: '2024-08-08T10:37:53.268Z'
+                    updatedAt: '2024-08-08T10:37:53.268Z'
                     __v: 0
                   - _id: 66b4a001ebd75d6d388ab501
                     propertyId: 66a2125d50a317d5ffa691ad
@@ -880,8 +960,8 @@ paths:
                     name: Reservation Cancelled
                     message: Your reservation is cancelled
                     active: true
-                    createdAt: "2024-08-08T10:37:53.172Z"
-                    updatedAt: "2024-08-08T10:37:53.172Z"
+                    createdAt: '2024-08-08T10:37:53.172Z'
+                    updatedAt: '2024-08-08T10:37:53.172Z'
                     __v: 0
                   - _id: 66b4a001ebd75d6d388ab50b
                     propertyId: 66a2125d50a317d5ffa691ad
@@ -889,8 +969,8 @@ paths:
                     name: Reservation Confirmed
                     message: Your reservation is confirmed
                     active: true
-                    createdAt: "2024-08-08T10:37:53.323Z"
-                    updatedAt: "2024-08-08T10:37:53.323Z"
+                    createdAt: '2024-08-08T10:37:53.323Z'
+                    updatedAt: '2024-08-08T10:37:53.323Z'
                     __v: 0
               items:
                 type: object
@@ -918,7 +998,7 @@ paths:
                     type: integer
       tags:
         - Message Template
-  "/messageTemplate/{propertyId}/{messageTemplateId}":
+  '/messageTemplate/{propertyId}/{messageTemplateId}':
     parameters:
       - schema:
           type: string
@@ -943,21 +1023,21 @@ paths:
     put:
       summary: Update message template
       responses:
-        "200":
-          $ref: "#/components/responses/CreateMessageTemplate"
+        '200':
+          $ref: '#/components/responses/CreateMessageTemplate'
       operationId: put-messageTemplate-propertyId-messageTemplateId
       x-stoplight:
         id: fg4p64kkk534l
       security:
         - Bearer: []
       requestBody:
-        $ref: "#/components/requestBodies/CreateMessageTemplate"
+        $ref: '#/components/requestBodies/CreateMessageTemplate'
       tags:
         - Message Template
     delete:
       summary: Delete message template
       responses:
-        "200":
+        '200':
           description: OK
       operationId: delete-messageTemplate-propertyId-messageTemplateId
       x-stoplight:
@@ -966,7 +1046,7 @@ paths:
         - Bearer: []
       tags:
         - Message Template
-  "/guestStatus/{propertyId}/{guestId}":
+  '/guestStatus/{propertyId}/{guestId}':
     parameters:
       - schema:
           type: string
@@ -983,8 +1063,8 @@ paths:
       tags:
         - Guest Status
       responses:
-        "200":
-          $ref: "#/components/responses/GuestStatus"
+        '200':
+          $ref: '#/components/responses/GuestStatus'
       operationId: get-guestStatus-propertyId-guestId
       x-stoplight:
         id: 01sisp96036vu
@@ -995,16 +1075,16 @@ paths:
       tags:
         - Guest Status
       responses:
-        "200":
-          $ref: "#/components/responses/GuestStatus"
+        '200':
+          $ref: '#/components/responses/GuestStatus'
       operationId: put-guestStatus-propertyId-guestId
       x-stoplight:
         id: wdogp9jz9ub4g
       requestBody:
-        $ref: "#/components/requestBodies/UpdateGuestStatus"
+        $ref: '#/components/requestBodies/UpdateGuestStatus'
       security:
         - Bearer: []
-  "/auth/guestAccessToken/{guestId}":
+  '/auth/guestAccessToken/{guestId}':
     parameters:
       - schema:
           type: string
@@ -1021,7 +1101,7 @@ paths:
       operationId: get-auth-guestAccessToken-guestId
       x-stoplight:
         id: ikrvbejxoka8j
-  "/auth/guestLogin/{token}":
+  '/auth/guestLogin/{token}':
     parameters:
       - schema:
           type: string
@@ -1036,7 +1116,7 @@ paths:
       operationId: post-auth-guestLogin-token
       x-stoplight:
         id: rotvyvzh8vujs
-  "/chatList/{propertyId}":
+  '/chatList/{propertyId}':
     parameters:
       - schema:
           type: string
@@ -1048,8 +1128,8 @@ paths:
       tags:
         - Chat List
       responses:
-        "200":
-          $ref: "#/components/responses/ChatLists"
+        '200':
+          $ref: '#/components/responses/ChatLists'
       operationId: get-chatList-propertyId
       x-stoplight:
         id: c1jevyn62i63u
@@ -1058,7 +1138,7 @@ paths:
       x-request-id: null
       requestBody:
         content: {}
-  "/chatList/{propertyId}/{guestId}":
+  '/chatList/{propertyId}/{guestId}':
     parameters:
       - schema:
           type: string
@@ -1075,7 +1155,7 @@ paths:
       tags:
         - Chat List
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -1117,14 +1197,14 @@ paths:
       tags:
         - Chat List
       responses:
-        "200":
+        '200':
           description: OK
       operationId: delete-chatList-propertyId-guestId
       x-stoplight:
         id: pkregn22omv90
       security:
         - Bearer: []
-  "/sms/send/{propertyId}/{guestId}":
+  '/sms/send/{propertyId}/{guestId}':
     parameters:
       - schema:
           type: string
@@ -1141,7 +1221,7 @@ paths:
       tags:
         - Message
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -1151,12 +1231,12 @@ paths:
       operationId: post-sms-send-propertyId-guestId
       x-stoplight:
         id: 3dvs5ezcalz4w
-      description: "This endpoint will send sms to the guest and store the message in db and will emit socket event message:newMessage"
+      description: 'This endpoint will send sms to the guest and store the message in db and will emit socket event message:newMessage'
       security:
         - Bearer: []
       requestBody:
-        $ref: "#/components/requestBodies/SendSMS"
-  "/message/{propertyId}/{guestId}":
+        $ref: '#/components/requestBodies/SendSMS'
+  '/message/{propertyId}/{guestId}':
     parameters:
       - schema:
           type: string
@@ -1173,7 +1253,7 @@ paths:
       tags:
         - Message
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -1253,17 +1333,17 @@ paths:
                           messageType: Request
                           messageTriggerType: Automatic
                           status: sent
-                          createdAt: "2024-08-08T20:02:35.635Z"
-                          updatedAt: "2024-08-08T20:02:35.635Z"
+                          createdAt: '2024-08-08T20:02:35.635Z'
+                          updatedAt: '2024-08-08T20:02:35.635Z'
                           __v: 0
                           request:
                             _id: 66b5245bdaf1ced955509139
                             propertyId: 66a2174cf74f8664b0bb207d
                             guestId: 66a3a20a9f0302c6f2612861
                             requestType: lateCheckOut
-                            lateCheckOutDateTime: "2028-10-02T14:30:00.000Z"
-                            createdAt: "2024-08-08T20:02:35.623Z"
-                            updatedAt: "2024-08-08T20:02:35.623Z"
+                            lateCheckOutDateTime: '2028-10-02T14:30:00.000Z'
+                            createdAt: '2024-08-08T20:02:35.623Z'
+                            updatedAt: '2024-08-08T20:02:35.623Z'
                             __v: 0
                     status: success
                     type: SUCCESS
@@ -1328,48 +1408,48 @@ paths:
                   type: string
               x-examples:
                 Example 1:
-                  ApiVersion: "2010-04-01"
+                  ApiVersion: '2010-04-01'
                   SmsSid: SM16739f1418878a986c4c0e10d6706226
                   SmsStatus: received
                   SmsMessageSid: SM16739f1418878a986c4c0e10d6706226
-                  NumSegments: "1"
-                  ToState: ""
-                  From: "+13177242610"
+                  NumSegments: '1'
+                  ToState: ''
+                  From: '+13177242610'
                   MessageSid: SM16739f1418878a986c4c0e10d6706226
                   AccountSid: AC62314fff86d31005acaa2f2d33040f3b
-                  ToCity: ""
+                  ToCity: ''
                   FromCountry: US
-                  ToZip: ""
+                  ToZip: ''
                   FromCity: INDIANAPOLIS
-                  To: "+18447958020"
-                  FromZip: "46204"
+                  To: '+18447958020'
+                  FromZip: '46204'
                   ToCountry: US
                   Body: Hi
-                  NumMedia: "0"
+                  NumMedia: '0'
                   FromState: IN
             examples:
               Example 1:
                 value:
-                  ApiVersion: "2010-04-01"
+                  ApiVersion: '2010-04-01'
                   SmsSid: SM16739f1418878a986c4c0e10d6706226
                   SmsStatus: received
                   SmsMessageSid: SM16739f1418878a986c4c0e10d6706226
-                  NumSegments: "1"
-                  ToState: ""
-                  From: "+13177242610"
+                  NumSegments: '1'
+                  ToState: ''
+                  From: '+13177242610'
                   MessageSid: SM16739f1418878a986c4c0e10d6706226
                   AccountSid: AC62314fff86d31005acaa2f2d33040f3b
-                  ToCity: ""
+                  ToCity: ''
                   FromCountry: US
-                  ToZip: ""
+                  ToZip: ''
                   FromCity: INDIANAPOLIS
-                  To: "+18447958020"
-                  FromZip: "46204"
+                  To: '+18447958020'
+                  FromZip: '46204'
                   ToCountry: US
                   Body: Hi
-                  NumMedia: "0"
+                  NumMedia: '0'
                   FromState: IN
-  "/messageTemplate/{propertyId}/createStatus":
+  '/messageTemplate/{propertyId}/createStatus':
     parameters:
       - schema:
           type: string
@@ -1381,7 +1461,7 @@ paths:
       tags:
         - Message Template
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -1431,8 +1511,8 @@ paths:
                         name: Early Check In Accepted and Late Check Out Accepted
                         message: Your early check in and late check out request is accepted
                         active: true
-                        createdAt: "2024-08-08T10:37:53.406Z"
-                        updatedAt: "2024-08-08T10:37:53.406Z"
+                        createdAt: '2024-08-08T10:37:53.406Z'
+                        updatedAt: '2024-08-08T10:37:53.406Z'
                         __v: 0
                     status: success
                     type: SUCCESS
@@ -1441,10 +1521,10 @@ paths:
       x-stoplight:
         id: ccsnv1xosmm80
       requestBody:
-        $ref: "#/components/requestBodies/UpdateGuestStatus"
+        $ref: '#/components/requestBodies/UpdateGuestStatus'
       security:
         - Bearer: []
-  "/messageTemplate/{propertyId}/{guestId}/updateStatus":
+  '/messageTemplate/{propertyId}/{guestId}/updateStatus':
     parameters:
       - schema:
           type: string
@@ -1459,7 +1539,7 @@ paths:
     post:
       summary: Get message template for updating guest status
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -1509,8 +1589,8 @@ paths:
                         name: Early Check In Accepted and Late Check Out Accepted
                         message: Your early check in and late check out request is accepted
                         active: true
-                        createdAt: "2024-08-08T10:37:53.406Z"
-                        updatedAt: "2024-08-08T10:37:53.406Z"
+                        createdAt: '2024-08-08T10:37:53.406Z'
+                        updatedAt: '2024-08-08T10:37:53.406Z'
                         __v: 0
                     status: success
                     type: SUCCESS
@@ -1521,10 +1601,10 @@ paths:
       security:
         - Bearer: []
       requestBody:
-        $ref: "#/components/requestBodies/UpdateGuestStatus"
+        $ref: '#/components/requestBodies/UpdateGuestStatus'
       tags:
         - Message Template
-  "/checkInOutRequest/{propertyId}/{guestId}":
+  '/checkInOutRequest/{propertyId}/{guestId}':
     parameters:
       - schema:
           type: string
@@ -1541,7 +1621,7 @@ paths:
       tags:
         - Check In Out Request
       responses:
-        "200":
+        '200':
           description: OK
       operationId: get-checkInOutRequest-propertyId-guestId
       x-stoplight:
@@ -1580,7 +1660,7 @@ paths:
         id: z7xnq43j0eq7y
       security:
         - Bearer: []
-  "/broadcast/{propertyid}":
+  '/broadcast/{propertyid}':
     parameters:
       - schema:
           type: string
@@ -1592,7 +1672,7 @@ paths:
       tags:
         - Broadcast
       responses:
-        "200":
+        '200':
           description: OK
       operationId: get-broadcast-propertyid
       x-stoplight:
@@ -1600,13 +1680,13 @@ paths:
       security:
         - Bearer: []
       requestBody:
-        $ref: "#/components/requestBodies/CreateBroadcast"
+        $ref: '#/components/requestBodies/CreateBroadcast'
     get:
       summary: Get all broadcasts for the property
       tags:
         - Broadcast
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -1681,16 +1761,16 @@ paths:
                             - string
                             - string 2
                             - string 2
-                          createdAt: "2024-08-09T06:21:18.818Z"
-                          updatedAt: "2024-08-09T07:12:46.100Z"
+                          createdAt: '2024-08-09T06:21:18.818Z'
+                          updatedAt: '2024-08-09T07:12:46.100Z'
                           __v: 0
                           broadcastMessages: []
                         - _id: 66b5c512b5ecd9b7af1ef1de
                           propertyId: 66a2125d50a317d5ffa691ad
                           guestIds:
                             - 66acca651de282a48bd8d837
-                          createdAt: "2024-08-09T07:28:18.411Z"
-                          updatedAt: "2024-08-09T07:28:34.728Z"
+                          createdAt: '2024-08-09T07:28:18.411Z'
+                          updatedAt: '2024-08-09T07:28:34.728Z'
                           __v: 0
                           broadcastMessages:
                             - _id: 66b5c510b5ecd9b7af1ef1d9
@@ -1698,24 +1778,24 @@ paths:
                               guestIds:
                                 - 66acca651de282a48bd8d837
                               content: string
-                              createdAt: "2024-08-09T07:28:16.989Z"
-                              updatedAt: "2024-08-09T07:28:16.989Z"
+                              createdAt: '2024-08-09T07:28:16.989Z'
+                              updatedAt: '2024-08-09T07:28:16.989Z'
                               __v: 0
                             - _id: 66b5c522b5ecd9b7af1ef1e9
                               propertyId: 66a2125d50a317d5ffa691ad
                               guestIds:
                                 - 66acca651de282a48bd8d837
                               content: string 2
-                              createdAt: "2024-08-09T07:28:34.298Z"
-                              updatedAt: "2024-08-09T07:28:34.298Z"
+                              createdAt: '2024-08-09T07:28:34.298Z'
+                              updatedAt: '2024-08-09T07:28:34.298Z'
                               __v: 0
                         - _id: 66b5d27c99045a1d5940cc37
                           propertyId: 66a2125d50a317d5ffa691ad
                           guestIds:
                             - 66b5d25999045a1d5940cc20
                             - 66acca651de282a48bd8d837
-                          createdAt: "2024-08-09T08:25:32.286Z"
-                          updatedAt: "2024-08-09T08:25:32.286Z"
+                          createdAt: '2024-08-09T08:25:32.286Z'
+                          updatedAt: '2024-08-09T08:25:32.286Z'
                           __v: 0
                           broadcastMessages:
                             - _id: 66b5d27a99045a1d5940cc2f
@@ -1724,15 +1804,15 @@ paths:
                                 - 66b5d25999045a1d5940cc20
                                 - 66acca651de282a48bd8d837
                               content: string
-                              createdAt: "2024-08-09T08:25:30.245Z"
-                              updatedAt: "2024-08-09T08:25:30.245Z"
+                              createdAt: '2024-08-09T08:25:30.245Z'
+                              updatedAt: '2024-08-09T08:25:30.245Z'
                               __v: 0
                         - _id: 66ba2dfab2693e1b35c9b49b
                           propertyId: 66a2125d50a317d5ffa691ad
                           guestIds:
                             - 66acca651de282a48bd8d837
-                          createdAt: "2024-08-12T15:44:58.728Z"
-                          updatedAt: "2024-08-12T15:44:58.728Z"
+                          createdAt: '2024-08-12T15:44:58.728Z'
+                          updatedAt: '2024-08-12T15:44:58.728Z'
                           __v: 0
                           broadcastMessages:
                             - _id: 66ba2df9b2693e1b35c9b496
@@ -1740,15 +1820,15 @@ paths:
                               guestIds:
                                 - 66acca651de282a48bd8d837
                               content: string
-                              createdAt: "2024-08-12T15:44:57.274Z"
-                              updatedAt: "2024-08-12T15:44:57.274Z"
+                              createdAt: '2024-08-12T15:44:57.274Z'
+                              updatedAt: '2024-08-12T15:44:57.274Z'
                               __v: 0
                         - _id: 66ba2e0eb2693e1b35c9b4aa
                           propertyId: 66a2125d50a317d5ffa691ad
                           guestIds:
                             - 66acca651de282a48bd8d837
-                          createdAt: "2024-08-12T15:45:18.336Z"
-                          updatedAt: "2024-08-12T15:45:18.336Z"
+                          createdAt: '2024-08-12T15:45:18.336Z'
+                          updatedAt: '2024-08-12T15:45:18.336Z'
                           __v: 0
                           broadcastMessages:
                             - _id: 66ba2e0db2693e1b35c9b4a5
@@ -1756,15 +1836,15 @@ paths:
                               guestIds:
                                 - 66acca651de282a48bd8d837
                               content: string
-                              createdAt: "2024-08-12T15:45:17.900Z"
-                              updatedAt: "2024-08-12T15:45:17.900Z"
+                              createdAt: '2024-08-12T15:45:17.900Z'
+                              updatedAt: '2024-08-12T15:45:17.900Z'
                               __v: 0
                         - _id: 66ba2e2cb2693e1b35c9b4b9
                           propertyId: 66a2125d50a317d5ffa691ad
                           guestIds:
                             - 66acca651de282a48bd8d837
-                          createdAt: "2024-08-12T15:45:48.646Z"
-                          updatedAt: "2024-08-12T15:45:48.646Z"
+                          createdAt: '2024-08-12T15:45:48.646Z'
+                          updatedAt: '2024-08-12T15:45:48.646Z'
                           __v: 0
                           broadcastMessages:
                             - _id: 66ba2e2cb2693e1b35c9b4b4
@@ -1772,15 +1852,15 @@ paths:
                               guestIds:
                                 - 66acca651de282a48bd8d837
                               content: string22
-                              createdAt: "2024-08-12T15:45:48.198Z"
-                              updatedAt: "2024-08-12T15:45:48.198Z"
+                              createdAt: '2024-08-12T15:45:48.198Z'
+                              updatedAt: '2024-08-12T15:45:48.198Z'
                               __v: 0
                         - _id: 66ba2e3db2693e1b35c9b4c8
                           propertyId: 66a2125d50a317d5ffa691ad
                           guestIds:
                             - 66acca651de282a48bd8d837
-                          createdAt: "2024-08-12T15:46:05.095Z"
-                          updatedAt: "2024-08-12T15:46:05.095Z"
+                          createdAt: '2024-08-12T15:46:05.095Z'
+                          updatedAt: '2024-08-12T15:46:05.095Z'
                           __v: 0
                           broadcastMessages:
                             - _id: 66ba2e3cb2693e1b35c9b4c3
@@ -1788,16 +1868,16 @@ paths:
                               guestIds:
                                 - 66acca651de282a48bd8d837
                               content: string22
-                              createdAt: "2024-08-12T15:46:04.649Z"
-                              updatedAt: "2024-08-12T15:46:04.649Z"
+                              createdAt: '2024-08-12T15:46:04.649Z'
+                              updatedAt: '2024-08-12T15:46:04.649Z'
                               __v: 0
                         - _id: 66ba2f108cc636c38268d8be
                           propertyId: 66a2125d50a317d5ffa691ad
                           guestIds:
                             - 66acca651de282a48bd8d837
                             - 66b5d25999045a1d5940cc20
-                          createdAt: "2024-08-12T15:49:36.349Z"
-                          updatedAt: "2024-08-12T16:01:28.721Z"
+                          createdAt: '2024-08-12T15:49:36.349Z'
+                          updatedAt: '2024-08-12T16:01:28.721Z'
                           __v: 0
                           broadcastMessages:
                             - _id: 66ba2f0f8cc636c38268d8b9
@@ -1805,32 +1885,32 @@ paths:
                               guestIds:
                                 - 66acca651de282a48bd8d837
                               content: string22
-                              createdAt: "2024-08-12T15:49:35.072Z"
-                              updatedAt: "2024-08-12T15:49:35.072Z"
+                              createdAt: '2024-08-12T15:49:35.072Z'
+                              updatedAt: '2024-08-12T15:49:35.072Z'
                               __v: 0
                             - _id: 66ba30f88df66933f38e4746
                               propertyId: 66a2125d50a317d5ffa691ad
                               guestIds:
                                 - 66acca651de282a48bd8d837
                               content: string22
-                              createdAt: "2024-08-12T15:57:44.142Z"
-                              updatedAt: "2024-08-12T15:57:44.142Z"
+                              createdAt: '2024-08-12T15:57:44.142Z'
+                              updatedAt: '2024-08-12T15:57:44.142Z'
                               __v: 0
                             - _id: 66ba2ff8642c26b61cd69a1f
                               propertyId: 66a2125d50a317d5ffa691ad
                               guestIds:
                                 - 66acca651de282a48bd8d837
                               content: string22
-                              createdAt: "2024-08-12T15:53:28.984Z"
-                              updatedAt: "2024-08-12T15:53:28.984Z"
+                              createdAt: '2024-08-12T15:53:28.984Z'
+                              updatedAt: '2024-08-12T15:53:28.984Z'
                               __v: 0
                             - _id: 66ba31240d60e59cad264cf0
                               propertyId: 66a2125d50a317d5ffa691ad
                               guestIds:
                                 - 66acca651de282a48bd8d837
                               content: string22
-                              createdAt: "2024-08-12T15:58:28.486Z"
-                              updatedAt: "2024-08-12T15:58:28.486Z"
+                              createdAt: '2024-08-12T15:58:28.486Z'
+                              updatedAt: '2024-08-12T15:58:28.486Z'
                               __v: 0
                             - _id: 66ba31d5e1dcbefea07944c8
                               propertyId: 66a2125d50a317d5ffa691ad
@@ -1838,31 +1918,31 @@ paths:
                                 - 66acca651de282a48bd8d837
                                 - 66b5d25999045a1d5940cc20
                               content: string22
-                              createdAt: "2024-08-12T16:01:25.733Z"
-                              updatedAt: "2024-08-12T16:01:25.733Z"
+                              createdAt: '2024-08-12T16:01:25.733Z'
+                              updatedAt: '2024-08-12T16:01:25.733Z'
                               __v: 0
                             - _id: 66ba310c7663cd937222390e
                               propertyId: 66a2125d50a317d5ffa691ad
                               guestIds:
                                 - 66acca651de282a48bd8d837
                               content: string22
-                              createdAt: "2024-08-12T15:58:04.115Z"
-                              updatedAt: "2024-08-12T15:58:04.115Z"
+                              createdAt: '2024-08-12T15:58:04.115Z'
+                              updatedAt: '2024-08-12T15:58:04.115Z'
                               __v: 0
                             - _id: 66ba3156e1dcbefea07944b8
                               propertyId: 66a2125d50a317d5ffa691ad
                               guestIds:
                                 - 66acca651de282a48bd8d837
                               content: string22
-                              createdAt: "2024-08-12T15:59:18.653Z"
-                              updatedAt: "2024-08-12T15:59:18.653Z"
+                              createdAt: '2024-08-12T15:59:18.653Z'
+                              updatedAt: '2024-08-12T15:59:18.653Z'
                               __v: 0
                         - _id: 66ba3003642c26b61cd69a32
                           propertyId: 66a2125d50a317d5ffa691ad
                           guestIds:
                             - 66acca651de282a48bd8d837
-                          createdAt: "2024-08-12T15:53:39.774Z"
-                          updatedAt: "2024-08-12T15:53:39.774Z"
+                          createdAt: '2024-08-12T15:53:39.774Z'
+                          updatedAt: '2024-08-12T15:53:39.774Z'
                           __v: 0
                           broadcastMessages:
                             - _id: 66ba3003642c26b61cd69a2d
@@ -1870,8 +1950,8 @@ paths:
                               guestIds:
                                 - 66acca651de282a48bd8d837
                               content: string22
-                              createdAt: "2024-08-12T15:53:39.342Z"
-                              updatedAt: "2024-08-12T15:53:39.342Z"
+                              createdAt: '2024-08-12T15:53:39.342Z'
+                              updatedAt: '2024-08-12T15:53:39.342Z'
                               __v: 0
                     status: success
                     type: SUCCESS
@@ -1881,7 +1961,7 @@ paths:
         id: km7267q0muup8
       security:
         - Bearer: []
-  "/broadcast/{propertyId}/{broadcastId}/send":
+  '/broadcast/{propertyId}/{broadcastId}/send':
     parameters:
       - schema:
           type: string
@@ -1898,7 +1978,7 @@ paths:
       tags:
         - Broadcast
       responses:
-        "200":
+        '200':
           description: OK
       operationId: get-broadcast-propertyId-broadcastId
       x-stoplight:
@@ -1906,8 +1986,8 @@ paths:
       security:
         - Bearer: []
       requestBody:
-        $ref: "#/components/requestBodies/SendMessageBroadcast"
-  "/broadcast/{propertyId}/{broadcastId}":
+        $ref: '#/components/requestBodies/SendMessageBroadcast'
+  '/broadcast/{propertyId}/{broadcastId}':
     parameters:
       - schema:
           type: string
@@ -1922,7 +2002,7 @@ paths:
     get:
       summary: Get broadcast by Id
       responses:
-        "200":
+        '200':
           description: OK
           headers: {}
           content:
@@ -2025,8 +2105,8 @@ paths:
                         propertyId: 66a2125d50a317d5ffa691ad
                         guestIds:
                           - 66acca651de282a48bd8d837
-                        createdAt: "2024-08-12T15:53:39.774Z"
-                        updatedAt: "2024-08-12T15:53:39.774Z"
+                        createdAt: '2024-08-12T15:53:39.774Z'
+                        updatedAt: '2024-08-12T15:53:39.774Z'
                         __v: 0
                         broadcastMessages:
                           - _id: 66ba3003642c26b61cd69a2d
@@ -2034,25 +2114,25 @@ paths:
                             guestIds:
                               - 66acca651de282a48bd8d837
                             content: string22
-                            createdAt: "2024-08-12T15:53:39.342Z"
-                            updatedAt: "2024-08-12T15:53:39.342Z"
+                            createdAt: '2024-08-12T15:53:39.342Z'
+                            updatedAt: '2024-08-12T15:53:39.342Z'
                             __v: 0
                         guests:
                           - _id: 66acca651de282a48bd8d837
                             propertyId: 66a2125d50a317d5ffa691ad
-                            countryCode: "+1"
-                            phoneNumber: "1234567890"
+                            countryCode: '+1'
+                            phoneNumber: '1234567890'
                             source: Booking.com
-                            checkIn: "2019-08-24T14:15:22.000Z"
-                            checkOut: "2019-08-25T14:15:22.000Z"
-                            confirmationNumber: "123456789012"
+                            checkIn: '2019-08-24T14:15:22.000Z'
+                            checkOut: '2019-08-25T14:15:22.000Z'
+                            confirmationNumber: '123456789012'
                             roomNumber: C-102
                             firstName: First
                             lastName: Last
                             email: firstlast123@guest.com
                             active: true
-                            createdAt: "2024-08-02T12:00:37.451Z"
-                            updatedAt: "2024-08-13T14:23:07.315Z"
+                            createdAt: '2024-08-02T12:00:37.451Z'
+                            updatedAt: '2024-08-13T14:23:07.315Z'
                             __v: 0
                     status: success
                     type: SUCCESS
@@ -2064,13 +2144,13 @@ paths:
         - Broadcast
       security:
         - Bearer: []
-  "/checkInOutRequest/{propertyId}/{guestId}/{checkInOutRequestId}":
+  '/checkInOutRequest/{propertyId}/{guestId}/{checkInOutRequestId}':
     patch:
       summary: Update request status
       tags:
         - Check In Out Request
       responses:
-        "200":
+        '200':
           description: OK
       operationId: patch-checkInOutRequest-propertyId-guestId-checkInOutRequestId
       x-stoplight:
@@ -2116,7 +2196,7 @@ paths:
         id: 6835ch78otf6v
       security:
         - Bearer: []
-  "/checkInOutRequest/{propertyId}/{guestId}/requestType":
+  '/checkInOutRequest/{propertyId}/{guestId}/requestType':
     parameters:
       - schema:
           type: string
@@ -2147,13 +2227,13 @@ paths:
           in: query
           name: requestType
           description: Request Type
-  "/broadcast/{propertyId}/createupdatesend":
+  '/broadcast/{propertyId}/createupdatesend':
     post:
       summary: Create Update Send Message ALL IN ONE!
       tags:
         - Broadcast
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -2195,7 +2275,7 @@ paths:
         name: propertyId
         in: path
         required: true
-  "/setting/{propertyId}":
+  '/setting/{propertyId}':
     parameters:
       - schema:
           type: string
@@ -2207,7 +2287,7 @@ paths:
       tags:
         - Setting
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -2251,11 +2331,11 @@ paths:
                       setting:
                         _id: 66a2125d50a317d5ffa691b2
                         propertyId: 66a2125d50a317d5ffa691ad
-                        timezone: "UTC-08:00"
-                        standardCheckinTime: "15:00"
-                        standardCheckoutTime: "20:00"
+                        timezone: 'UTC-08:00'
+                        standardCheckinTime: '15:00'
+                        standardCheckoutTime: '20:00'
                         automaticNewDay: true
-                        defaultNewDayTime: "00:00"
+                        defaultNewDayTime: '00:00'
                         __v: 0
                     status: success
                     type: SUCCESS
@@ -2265,7 +2345,7 @@ paths:
         id: hxv8j5nnlnie0
       security:
         - Bearer: []
-  "/preArrival/{propertyId}/{guestId}":
+  '/preArrival/{propertyId}/{guestId}':
     parameters:
       - schema:
           type: string
@@ -2286,10 +2366,10 @@ paths:
       x-stoplight:
         id: g4tsqk9vtb6fu
       requestBody:
-        $ref: "#/components/requestBodies/CreatePreArrival"
+        $ref: '#/components/requestBodies/CreatePreArrival'
       security:
         - Bearer: []
-  "/preArrivalFlow/{propertyId}":
+  '/preArrivalFlow/{propertyId}':
     parameters:
       - schema:
           type: string
@@ -2299,7 +2379,7 @@ paths:
     get:
       summary: Get by property Id
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -2360,7 +2440,7 @@ paths:
                         licensePlateNo: true
                         specialRequests: true
                         policies: true
-                        policyLink: "https://www.onelyk.com/privacy"
+                        policyLink: 'https://www.onelyk.com/privacy'
                         extraPolicies: []
                         _id: 66bb30238bc82a454e80af1b
                         __v: 0
@@ -2377,7 +2457,7 @@ paths:
     post:
       summary: Create Defaults
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -2438,7 +2518,7 @@ paths:
                         licensePlateNo: true
                         specialRequests: true
                         policies: true
-                        policyLink: "https://www.onelyk.com/privacy"
+                        policyLink: 'https://www.onelyk.com/privacy'
                         extraPolicies: []
                         _id: 66bb30238bc82a454e80af1b
                         __v: 0
@@ -2453,7 +2533,7 @@ paths:
         - Pre Arrival Flow
       security:
         - Bearer: []
-  "/workflow/{propertyId}":
+  '/workflow/{propertyId}':
     parameters:
       - schema:
           type: string
@@ -2463,7 +2543,7 @@ paths:
     post:
       summary: Create default flows
       responses:
-        "200":
+        '200':
           description: OK
       operationId: post-workflow-propertyId
       x-stoplight:
@@ -2479,7 +2559,7 @@ paths:
       tags:
         - Workflow
       responses:
-        "204":
+        '204':
           description: No Content
       operationId: delete-workflow-propertyId
       x-stoplight:
@@ -2493,7 +2573,7 @@ paths:
       tags:
         - Workflow
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -2702,9 +2782,9 @@ paths:
                             enabled: true
                         frequentlyAskedQuestions:
                           - question: What time is standard check in?
-                            answer: "Check-out is at 3:00 PM."
-                        createdAt: "2024-08-22T11:42:20.266Z"
-                        updatedAt: "2024-08-22T11:42:20.266Z"
+                            answer: 'Check-out is at 3:00 PM.'
+                        createdAt: '2024-08-22T11:42:20.266Z'
+                        updatedAt: '2024-08-22T11:42:20.266Z'
                         __v: 0
                       addOnsFlow:
                         _id: 66c7241ca90a206439615a11
@@ -2714,8 +2794,8 @@ paths:
                           - name: Early Check In
                             description: Early Check In
                             defaultTimeEnabled: true
-                            defaultTiming: "14:00"
-                            customTiming: "14:00"
+                            defaultTiming: '14:00'
+                            customTiming: '14:00'
                             paid: false
                             price: 0
                             enabled: true
@@ -2723,14 +2803,14 @@ paths:
                           - name: Late Check Out
                             description: Late Check Out
                             defaultTimeEnabled: true
-                            defaultTiming: "12:00"
-                            customTiming: "12:00"
+                            defaultTiming: '12:00'
+                            customTiming: '12:00'
                             paid: false
                             price: 0
                             enabled: true
                             default: true
-                        createdAt: "2024-08-22T11:42:20.326Z"
-                        updatedAt: "2024-08-22T11:42:20.326Z"
+                        createdAt: '2024-08-22T11:42:20.326Z'
+                        updatedAt: '2024-08-22T11:42:20.326Z'
                         __v: 0
                       preArrivalFlow:
                         _id: 66c7241ca90a206439615a13
@@ -2747,8 +2827,8 @@ paths:
                         primaryPolicy: Primary policy regarding refund and important points displayed here
                         policyLink: Policy link with bottom sheet
                         extraPolicies: []
-                        createdAt: "2024-08-22T11:42:20.369Z"
-                        updatedAt: "2024-08-22T11:42:20.369Z"
+                        createdAt: '2024-08-22T11:42:20.369Z'
+                        updatedAt: '2024-08-22T11:42:20.369Z'
                         __v: 0
                       inHouseFlow:
                         - _id: 66c7241ca90a206439615a15
@@ -2756,9 +2836,9 @@ paths:
                           frequentlyAskedQuestionsEnabled: true
                           frequentlyAskedQuestions:
                             - question: What time is standard check out?
-                              answer: "Check out is at 11:00 AM."
-                          createdAt: "2024-08-22T11:42:20.405Z"
-                          updatedAt: "2024-08-22T11:42:20.405Z"
+                              answer: 'Check out is at 11:00 AM.'
+                          createdAt: '2024-08-22T11:42:20.405Z'
+                          updatedAt: '2024-08-22T11:42:20.405Z'
                           __v: 0
                       checkedOutFlow:
                         - _id: 66c7241ca90a206439615a17
@@ -2766,9 +2846,9 @@ paths:
                           frequentlyAskedQuestionsEnabled: true
                           frequentlyAskedQuestions:
                             - question: What time is standard check out?
-                              answer: "Check-out is at 11:00 AM."
-                          createdAt: "2024-08-22T11:42:20.439Z"
-                          updatedAt: "2024-08-22T11:42:20.439Z"
+                              answer: 'Check-out is at 11:00 AM.'
+                          createdAt: '2024-08-22T11:42:20.439Z'
+                          updatedAt: '2024-08-22T11:42:20.439Z'
                           __v: 0
                     status: success
                     type: SUCCESS
@@ -2986,9 +3066,9 @@ paths:
                           enabled: true
                       frequentlyAskedQuestions:
                         - question: What time is standard check in?
-                          answer: "Check-out is at 3:00 PM."
-                      createdAt: "2024-08-22T11:42:20.266Z"
-                      updatedAt: "2024-08-22T11:42:20.266Z"
+                          answer: 'Check-out is at 3:00 PM.'
+                      createdAt: '2024-08-22T11:42:20.266Z'
+                      updatedAt: '2024-08-22T11:42:20.266Z'
                       __v: 0
                     addOnsFlow:
                       _id: 66c7241ca90a206439615a11
@@ -2998,8 +3078,8 @@ paths:
                         - name: Early Check In
                           description: Early Check In
                           defaultTimeEnabled: true
-                          defaultTiming: "14:00"
-                          customTiming: "14:00"
+                          defaultTiming: '14:00'
+                          customTiming: '14:00'
                           paid: false
                           price: 0
                           enabled: true
@@ -3007,14 +3087,14 @@ paths:
                         - name: Late Check Out
                           description: Late Check Out
                           defaultTimeEnabled: true
-                          defaultTiming: "12:00"
-                          customTiming: "12:00"
+                          defaultTiming: '12:00'
+                          customTiming: '12:00'
                           paid: false
                           price: 0
                           enabled: true
                           default: true
-                      createdAt: "2024-08-22T11:42:20.326Z"
-                      updatedAt: "2024-08-22T11:42:20.326Z"
+                      createdAt: '2024-08-22T11:42:20.326Z'
+                      updatedAt: '2024-08-22T11:42:20.326Z'
                       __v: 0
                     preArrivalFlow:
                       _id: 66c7241ca90a206439615a13
@@ -3031,8 +3111,8 @@ paths:
                       primaryPolicy: Primary policy regarding refund and important points displayed here
                       policyLink: Policy link with bottom sheet
                       extraPolicies: []
-                      createdAt: "2024-08-22T11:42:20.369Z"
-                      updatedAt: "2024-08-22T11:42:20.369Z"
+                      createdAt: '2024-08-22T11:42:20.369Z'
+                      updatedAt: '2024-08-22T11:42:20.369Z'
                       __v: 0
                     inHouseFlow:
                       - _id: 66c7241ca90a206439615a15
@@ -3040,9 +3120,9 @@ paths:
                         frequentlyAskedQuestionsEnabled: true
                         frequentlyAskedQuestions:
                           - question: What time is standard check out?
-                            answer: "Check out is at 11:00 AM."
-                        createdAt: "2024-08-22T11:42:20.405Z"
-                        updatedAt: "2024-08-22T11:42:20.405Z"
+                            answer: 'Check out is at 11:00 AM.'
+                        createdAt: '2024-08-22T11:42:20.405Z'
+                        updatedAt: '2024-08-22T11:42:20.405Z'
                         __v: 0
                     checkedOutFlow:
                       - _id: 66c7241ca90a206439615a17
@@ -3050,9 +3130,9 @@ paths:
                         frequentlyAskedQuestionsEnabled: true
                         frequentlyAskedQuestions:
                           - question: What time is standard check out?
-                            answer: "Check-out is at 11:00 AM."
-                        createdAt: "2024-08-22T11:42:20.439Z"
-                        updatedAt: "2024-08-22T11:42:20.439Z"
+                            answer: 'Check-out is at 11:00 AM.'
+                        createdAt: '2024-08-22T11:42:20.439Z'
+                        updatedAt: '2024-08-22T11:42:20.439Z'
                         __v: 0
                   status: success
                   type: SUCCESS
@@ -3062,7 +3142,7 @@ paths:
       tags:
         - Workflow
       responses:
-        "200":
+        '200':
           description: OK
       operationId: put-workflow-propertyId
       x-stoplight:
@@ -3075,6 +3155,438 @@ paths:
               properties: {}
       security:
         - Bearer: []
+  '/twilioAccount/{propertyId}':
+    parameters:
+      - schema:
+          type: string
+        name: propertyId
+        in: path
+        required: true
+    get:
+      summary: Get subaccount details
+      tags:
+        - Twilio Account
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                  result:
+                    type: object
+                    properties:
+                      phoneNumber:
+                        type: string
+                      countryCode:
+                        type: string
+                      propertyId:
+                        type: string
+                  status:
+                    type: string
+                  type:
+                    type: string
+                  message:
+                    type: string
+                x-examples:
+                  Example 1:
+                    statusCode: 200
+                    result:
+                      phoneNumber: '8447958020'
+                      countryCode: '+1'
+                      propertyId: 66a2125d50a317d5ffa691ad
+                    status: success
+                    type: SUCCESS
+                    message: Success
+      operationId: get-twilioAccount-propertyId
+      x-stoplight:
+        id: 7tncxvnm4h66e
+      security:
+        - Bearer: []
+  '/twilio/{propertyId}/isTwilioSetup':
+    parameters:
+      - schema:
+          type: string
+        name: propertyId
+        in: path
+        required: true
+    get:
+      summary: Is Twilio setup complete
+      tags:
+        - Twilio
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                  result:
+                    type: object
+                    properties:
+                      isComplete:
+                        type: boolean
+                      isSubaccountCreated:
+                        type: boolean
+                  status:
+                    type: string
+                  type:
+                    type: string
+                  message:
+                    type: string
+                x-examples:
+                  Example 1:
+                    statusCode: 200
+                    result:
+                      isComplete: false
+                      isSubaccountCreated: true
+                    status: success
+                    type: SUCCESS
+                    message: Success
+      operationId: get-twilio-propertyId-isTwilioSetup
+      x-stoplight:
+        id: i46y0rjgoo3qu
+      security:
+        - Bearer: []
+      requestBody:
+        content: {}
+  '/twilio/{propertyId}/billing':
+    parameters:
+      - schema:
+          type: string
+        name: propertyId
+        in: path
+        required: true
+    get:
+      summary: Temp billing for the twilio
+      tags:
+        - Twilio
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                  result:
+                    type: object
+                    properties:
+                      billing:
+                        type: number
+                  status:
+                    type: string
+                  type:
+                    type: string
+                  message:
+                    type: string
+                x-examples:
+                  Example 1:
+                    statusCode: 200
+                    result:
+                      billing: 6.655499999999999
+                    status: success
+                    type: SUCCESS
+                    message: Success
+      operationId: get-twilio-propertyId-billing
+      x-stoplight:
+        id: 1zuo5ig7rd8t9
+      security:
+        - Bearer: []
+  '/guestApi/{guestSessionId}/guest':
+    parameters:
+      - schema:
+          type: string
+        name: guestSessionId
+        in: path
+        required: true
+    get:
+      summary: Get guest
+      tags:
+        - Guest Api
+      responses:
+        '200':
+          $ref: '#/components/responses/CreateGuest'
+      operationId: get-guestApi-guestSessionId-guest
+      x-stoplight:
+        id: 942b1ge8svk2c
+  '/guestApi/{guestSessionId}/checkInOutRequest':
+    parameters:
+      - schema:
+          type: string
+        name: guestSessionId
+        in: path
+        required: true
+    post:
+      summary: Create Early Check In/ Late Check Out Request
+      responses: {}
+      operationId: post-guestApi-guestSessionId-checkInOutRequest
+      x-stoplight:
+        id: ktbx818kytv7w
+      tags:
+        - Guest Api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                requestType:
+                  type: string
+                  x-stoplight:
+                    id: d368wxzz4pjrs
+                lateCheckOutDateTime:
+                  type: string
+                  x-stoplight:
+                    id: 1ioq6wdh4l35a
+                earlyCheckInDateTime:
+                  type: string
+                  x-stoplight:
+                    id: tywtekknjgtbq
+    get:
+      summary: Get Early Check In/ Late Check Out Request
+      tags:
+        - Guest Api
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                  result:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        _id:
+                          type: string
+                        propertyId:
+                          type: string
+                        guestId:
+                          type: string
+                        requestStatus:
+                          type: string
+                        requestType:
+                          type: string
+                        lateCheckOutDateTime:
+                          type: string
+                        createdAt:
+                          type: string
+                        updatedAt:
+                          type: string
+                        __v:
+                          type: integer
+                  status:
+                    type: string
+                  type:
+                    type: string
+                  message:
+                    type: string
+                x-examples:
+                  Example 1:
+                    statusCode: 200
+                    result:
+                      - _id: 66c85d75f4b529b50d895d06
+                        propertyId: 66a2125d50a317d5ffa691ad
+                        guestId: 66c72f7c8610d881b822af99
+                        requestStatus: Requested
+                        requestType: lateCheckOut
+                        lateCheckOutDateTime: '2029-12-02T04:50:00.000Z'
+                        createdAt: '2024-08-23T09:59:17.454Z'
+                        updatedAt: '2024-08-23T09:59:17.454Z'
+                        __v: 0
+                    status: success
+                    type: SUCCESS
+                    message: Success
+      operationId: get-guestApi-guestSessionId-checkInOutRequest
+      x-stoplight:
+        id: thernhr5g62f3
+  '/guestApi/{guestSessionId}/workflow':
+    parameters:
+      - schema:
+          type: string
+        name: guestSessionId
+        in: path
+        required: true
+    get:
+      summary: Get workflow for the guest
+      tags:
+        - Guest Api
+      responses:
+        '200':
+          $ref: '#/components/responses/Workflow'
+      operationId: get-guestApi-guestSessionId-workflow
+      x-stoplight:
+        id: 883wn18pw5z5y
+  '/guestApi/{guestSessionId}/property':
+    parameters:
+      - schema:
+          type: string
+        name: guestSessionId
+        in: path
+        required: true
+    get:
+      summary: Get property of the guest
+      tags:
+        - Guest Api
+      responses:
+        '200':
+          description: Shared Response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                  result:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                      name:
+                        type: string
+                      email:
+                        type: string
+                      phoneNumber:
+                        type: string
+                      website:
+                        type: string
+                      about:
+                        type: string
+                      country:
+                        type: string
+                      state:
+                        type: string
+                      city:
+                        type: string
+                      address:
+                        type: string
+                      zipcode:
+                        type: string
+                      countryCode:
+                        type: string
+                      active:
+                        type: boolean
+                      createdAt:
+                        type: string
+                      updatedAt:
+                        type: string
+                      __v:
+                        type: integer
+                      coverUrl:
+                        type: string
+                      logoUrl:
+                        type: string
+                  status:
+                    type: string
+                  type:
+                    type: string
+                  message:
+                    type: string
+                x-examples:
+                  Example 1:
+                    statusCode: 200
+                    result:
+                      _id: 66a2125d50a317d5ffa691ad
+                      name: Onelyk
+                      email: jainil.patel@onelyk.com
+                      phoneNumber: '9104470843'
+                      website: 'https://www.onelyk.com'
+                      about: This is about
+                      country: United States
+                      state: California
+                      city: San Francisco
+                      address: 118 Tailor Street
+                      zipcode: '94102'
+                      countryCode: '+1'
+                      active: true
+                      createdAt: '2024-07-25T08:52:45.726Z'
+                      updatedAt: '2024-07-25T08:52:45.757Z'
+                      __v: 0
+                      coverUrl: 'https://onelyk-images-bucket.s3.amazonaws.com/property/66a2125d50a317d5ffa691ad/cover/cover.jpg'
+                      logoUrl: 'https://onelyk-images-bucket.s3.amazonaws.com/property/66a2125d50a317d5ffa691ad/logo/logo.jpg'
+                    status: success
+                    type: SUCCESS
+                    message: Success
+      operationId: get-guestApi-guestSessionId-property
+      x-stoplight:
+        id: rhgquzua65l6s
+  '/guestApi/{guestSessionId}/preArrival':
+    parameters:
+      - schema:
+          type: string
+        name: guestSessionId
+        in: path
+        required: true
+    post:
+      summary: Create prearrival
+      tags:
+        - Guest Api
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+      operationId: post-guestApi-guestSessionId-preArrival
+      x-stoplight:
+        id: z3p5epp2l0fjy
+      x-internal: false
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              x-examples:
+                Example 1:
+                  phoneNumber: ''
+                  emailAddress: ''
+                  arrivalTime: ''
+                  vehicleMakeModelColor: ''
+                  licensePlateNo: ''
+                  specialRequests: ''
+                  guestSignature: ''
+                  guestIdProof: ''
+                  policyAccepted: true
+                  consentToText: true
+              properties:
+                phoneNumber:
+                  type: string
+                emailAddress:
+                  type: string
+                arrivalTime:
+                  type: string
+                vehicleMakeModelColor:
+                  type: string
+                licensePlateNo:
+                  type: string
+                specialRequests:
+                  type: string
+                guestSignature:
+                  type: string
+                  format: binary
+                guestIdProof:
+                  type: string
+                  format: binary
+                policyAccepted:
+                  type: boolean
+                consentToText:
+                  type: boolean
 components:
   schemas:
     User:
@@ -3181,7 +3693,7 @@ components:
           type: string
           x-stoplight:
             id: asmx1af0fxhrn
-      description: ""
+      description: ''
     Property:
       type: object
       x-examples:
@@ -3189,20 +3701,20 @@ components:
           _id: 6698ccbc3bfa38a274593d9b
           name: Onelyk Test Property
           email: jainilpatel145@gmail.com
-          phoneNumber: "1234567890"
-          website: "https://www.onelyk.com"
+          phoneNumber: '1234567890'
+          website: 'https://www.onelyk.com'
           about: This is a onelyk test property
           country: United States
           state: New York
           city: New York
           address: 55 Street
-          countryCode: "+1"
+          countryCode: '+1'
           active: true
-          createdAt: "2024-07-18T08:05:16.703Z"
-          updatedAt: "2024-07-18T08:05:16.735Z"
+          createdAt: '2024-07-18T08:05:16.703Z'
+          updatedAt: '2024-07-18T08:05:16.735Z'
           __v: 0
-          coverUrl: "https://onelyk-images-bucket.s3.amazonaws.com/property/6698ccbc3bfa38a274593d9b/cover/cover.jpg"
-          logoUrl: "https://onelyk-images-bucket.s3.amazonaws.com/property/6698ccbc3bfa38a274593d9b/logo/logo.jpg"
+          coverUrl: 'https://onelyk-images-bucket.s3.amazonaws.com/property/6698ccbc3bfa38a274593d9b/cover/cover.jpg'
+          logoUrl: 'https://onelyk-images-bucket.s3.amazonaws.com/property/6698ccbc3bfa38a274593d9b/logo/logo.jpg'
       properties:
         _id:
           type: string
@@ -3248,36 +3760,36 @@ components:
         Example 1:
           _id: 669106a217122df7b4875582
           propertyId: 669bb5387629e1fff5cb35a5
-          countryCode: "+1"
-          phoneNumber: "9191229133"
+          countryCode: '+1'
+          phoneNumber: '9191229133'
           source: Source of the guest
-          checkIn: "2024-07-23T23:35:00.000Z"
-          checkOut: "2024-07-16T23:35:00.000Z"
-          confirmationNumber: "9325923593259325"
+          checkIn: '2024-07-23T23:35:00.000Z'
+          checkOut: '2024-07-16T23:35:00.000Z'
+          confirmationNumber: '9325923593259325'
           roomNumber: C-8
           firstName: Jon
           lastName: Doe
           email: user@gmail.com
           active: true
-          createdAt: "2024-07-12T10:34:10.279Z"
-          updatedAt: "2024-07-12T10:34:10.279Z"
+          createdAt: '2024-07-12T10:34:10.279Z'
+          updatedAt: '2024-07-12T10:34:10.279Z'
           __v: 0
       examples:
         - _id: 669106a217122df7b4875582
           propertyId: 669bb5387629e1fff5cb35a5
-          countryCode: "+1"
-          phoneNumber: "9191229133"
+          countryCode: '+1'
+          phoneNumber: '9191229133'
           source: Source of the guest
-          checkIn: "2024-07-23T23:35:00.000Z"
-          checkOut: "2024-07-16T23:35:00.000Z"
-          confirmationNumber: "9325923593259325"
+          checkIn: '2024-07-23T23:35:00.000Z'
+          checkOut: '2024-07-16T23:35:00.000Z'
+          confirmationNumber: '9325923593259325'
           roomNumber: C-8
           firstName: Jon
           lastName: Doe
           email: user@gmail.com
           active: true
-          createdAt: "2024-07-12T10:34:10.279Z"
-          updatedAt: "2024-07-12T10:34:10.279Z"
+          createdAt: '2024-07-12T10:34:10.279Z'
+          updatedAt: '2024-07-12T10:34:10.279Z'
           __v: 0
       required:
         - _id
@@ -3354,8 +3866,8 @@ components:
           earlyCheckInStatus: Not Requested
           reservationStatus: Confirmed
           preArrivalStatus: Not Applied
-          createdAt: "2024-07-22T17:47:59.118Z"
-          updatedAt: "2024-07-22T17:47:59.118Z"
+          createdAt: '2024-07-22T17:47:59.118Z'
+          updatedAt: '2024-07-22T17:47:59.118Z'
           __v: 0
     ChatList:
       title: ChatList
@@ -3426,7 +3938,7 @@ components:
             Example 1:
               value:
                 email: jainil.patel@onelyk.com
-                password: "123456"
+                password: '123456'
       description: User Login request
     User:
       content:
@@ -3494,6 +4006,24 @@ components:
                 __v: Number
                 createdAt: Date
                 updatedAt: Date
+            required:
+              - name
+              - email
+              - phoneNumber
+              - website
+              - about
+              - logo
+              - cover
+              - country
+              - state
+              - city
+              - address
+              - countryCode
+              - standardCheckinTime
+              - standardCheckoutTime
+              - timezone
+              - defaultNewDayTime
+              - zipcode
             properties:
               name:
                 type: string
@@ -3550,28 +4080,47 @@ components:
               value:
                 name: Test Property 2000
                 email: jainil@gmail.com
-                phoneNumber: "0123456789"
-                website: "https://www.onelyk.com"
+                phoneNumber: '0123456789'
+                website: 'https://www.onelyk.com'
                 about: About
                 country: United States
                 state: California
-                logo: ""
-                cover: ""
+                logo: 'null'
+                cover: ''
                 city: San Francisco
                 address: Some
-                zipcode: "94102"
-                countryCode: "+1"
-                timezone: "7:00 + GMT"
-                standardCheckinTime: "01:00"
-                standardCheckoutTime: "12:00"
-                defaultNewDayTime: "00:00"
+                zipcode: '94102'
+                countryCode: '+1'
+                timezone: '7:00 + GMT'
+                standardCheckinTime: '01:00'
+                standardCheckoutTime: '12:00'
+                defaultNewDayTime: '00:00'
+            Example 2:
+              value:
+                name: Test Property 2000
+                email: jainilpateltest@tmail.com
+                phoneNumber: '1234567890'
+                website: 'https://onelyk.com'
+                about: About
+                logo: ''
+                cover: ''
+                country: United States
+                state: California
+                city: San Francisco
+                address: Some Address
+                countryCode: '+1'
+                standardCheckinTime: '01:00'
+                standardCheckoutTime: '01:00'
+                timezone: '7:00 + GMT'
+                defaultNewDayTime: '00:00'
+                zipcode: '94102'
       description: Create property Request
     PhoneNumber:
       content:
         application/json:
           schema:
             type: object
-      description: ""
+      description: ''
     CreateGuest:
       content:
         application/json:
@@ -3581,19 +4130,19 @@ components:
               Example 1:
                 _id: 669106a217122df7b4875582
                 propertyId: 669bb5387629e1fff5cb35a5
-                countryCode: "+1"
-                phoneNumber: "9191229133"
+                countryCode: '+1'
+                phoneNumber: '9191229133'
                 source: Source of the guest
-                checkIn: "2024-07-23T23:35:00.000Z"
-                checkOut: "2024-07-16T23:35:00.000Z"
-                confirmationNumber: "9325923593259325"
+                checkIn: '2024-07-23T23:35:00.000Z'
+                checkOut: '2024-07-16T23:35:00.000Z'
+                confirmationNumber: '9325923593259325'
                 roomNumber: C-8
                 firstName: Jon
                 lastName: Doe
                 email: user@gmail.com
                 active: true
-                createdAt: "2024-07-12T10:34:10.279Z"
-                updatedAt: "2024-07-12T10:34:10.279Z"
+                createdAt: '2024-07-12T10:34:10.279Z'
+                updatedAt: '2024-07-12T10:34:10.279Z'
                 __v: 0
             properties:
               countryCode:
@@ -3665,12 +4214,12 @@ components:
           examples:
             Example 1:
               value:
-                countryCode: "+1"
-                phoneNumber: "1234567890"
+                countryCode: '+1'
+                phoneNumber: '1234567890'
                 source: Booking.com
-                checkIn: "2019-08-24T14:15:22Z"
-                checkOut: "2019-08-25T14:15:22Z"
-                confirmationNumber: "123456789012"
+                checkIn: '2019-08-24T14:15:22Z'
+                checkOut: '2019-08-25T14:15:22Z'
+                confirmationNumber: '123456789012'
                 roomNumber: C-102
                 firstName: First
                 lastName: Last
@@ -3694,9 +4243,9 @@ components:
                 message: You are checked out
                 active: true
                 createdAt:
-                  $date: "2024-07-27T10:19:39.608Z"
+                  $date: '2024-07-27T10:19:39.608Z'
                 updatedAt:
-                  $date: "2024-07-27T10:19:39.608Z"
+                  $date: '2024-07-27T10:19:39.608Z'
                 __v: 0
             required:
               - name
@@ -3834,7 +4383,7 @@ components:
                 licensePlateNo: BC18351
                 specialRequests: My special request
                 policyAccepted: true
-                signatureImgUrl: "https://imageurl"
+                signatureImgUrl: 'https://imageurl'
                 consentToText: true
             properties:
               phoneNumber:
@@ -3883,7 +4432,7 @@ components:
                       enabled: true
                   frequentlyAskedQuestions:
                     - question: What time is standard check in?
-                      answer: "Check-out is at 3:00 PM."
+                      answer: 'Check-out is at 3:00 PM.'
                 addOnsFlow:
                   propertyId: 66bf27e1136769c1817bfd92
                   _id: 66bf2f23538b253ac8ff7212
@@ -3892,8 +4441,8 @@ components:
                     - name: Early Check In
                       description: Early Check In
                       defaultTimeEnabled: true
-                      defaultTiming: "14:00"
-                      customTiming: "14:00"
+                      defaultTiming: '14:00'
+                      customTiming: '14:00'
                       paid: false
                       price: 0
                       enabled: true
@@ -3901,8 +4450,8 @@ components:
                     - name: Late Check Out
                       description: Late Check Out
                       defaultTimeEnabled: true
-                      defaultTiming: "12:00"
-                      customTiming: "12:00"
+                      defaultTiming: '12:00'
+                      customTiming: '12:00'
                       paid: false
                       price: 0
                       enabled: true
@@ -3924,12 +4473,12 @@ components:
                   frequentlyAskedQuestionsEnabled: true
                   frequentlyAskedQuestions:
                     - question: What time is standard check out?
-                      answer: "Check out is at 11:00 AM."
+                      answer: 'Check out is at 11:00 AM.'
                 checkedOutFlow:
                   frequentlyAskedQuestionsEnabled: true
                   frequentlyAskedQuestions:
                     - question: What time is standard check out?
-                      answer: "Check-out is at 11:00 AM."
+                      answer: 'Check-out is at 11:00 AM.'
             properties:
               homeFlow:
                 type: object
@@ -4060,7 +4609,7 @@ components:
                 type: object
                 properties:
                   user:
-                    $ref: "#/components/schemas/UserWithoutPassword"
+                    $ref: '#/components/schemas/UserWithoutPassword'
                     x-stoplight:
                       id: tx2oe7mwhw59e
                   accessToken:
@@ -4099,7 +4648,7 @@ components:
                     - Zipcode not found
                 type: BAD_REQUEST
                 message: Invalid zip code
-                stack: ""
+                stack: ''
             required:
               - status
               - statusCode
@@ -4125,7 +4674,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/UserWithoutPassword"
+            $ref: '#/components/schemas/UserWithoutPassword'
     PropertyResponse:
       description: Property Response
       content:
@@ -4214,31 +4763,31 @@ components:
                     _id: 66bf279e6ee917a0d4096707
                     name: Test Property 2000
                     email: jainil@gmail.com
-                    phoneNumber: "0123456789"
-                    website: "https://www.onelyk.com"
+                    phoneNumber: '0123456789'
+                    website: 'https://www.onelyk.com'
                     about: About
                     country: United States
                     state: California
                     city: San Francisco
                     address: Some
-                    zipcode: "94102"
-                    countryCode: "+1"
+                    zipcode: '94102'
+                    countryCode: '+1'
                     active: true
-                    createdAt: "2024-08-16T10:19:10.369Z"
-                    updatedAt: "2024-08-22T20:33:41.007Z"
+                    createdAt: '2024-08-16T10:19:10.369Z'
+                    updatedAt: '2024-08-22T20:33:41.007Z'
                     __v: 0
-                    coverUrl: "https://onelyk-images-bucket.s3.amazonaws.com/property/66bf279e6ee917a0d4096707/cover/test.png"
-                    logoUrl: "https://onelyk-images-bucket.s3.amazonaws.com/property/66bf279e6ee917a0d4096707/logo/test.png"
+                    coverUrl: 'https://onelyk-images-bucket.s3.amazonaws.com/property/66bf279e6ee917a0d4096707/cover/test.png'
+                    logoUrl: 'https://onelyk-images-bucket.s3.amazonaws.com/property/66bf279e6ee917a0d4096707/logo/test.png'
                   setting:
                     _id: 66bf279e6ee917a0d409670c
                     propertyId: 66bf279e6ee917a0d4096707
-                    timezone: "7:00 + GMT"
-                    standardCheckinTime: "01:00"
-                    standardCheckoutTime: "12:00"
+                    timezone: '7:00 + GMT'
+                    standardCheckinTime: '01:00'
+                    standardCheckoutTime: '12:00'
                     automaticNewDay: true
-                    defaultNewDayTime: "00:00"
-                    createdAt: "2024-08-16T10:19:10.434Z"
-                    updatedAt: "2024-08-22T20:33:44.191Z"
+                    defaultNewDayTime: '00:00'
+                    createdAt: '2024-08-16T10:19:10.434Z'
+                    updatedAt: '2024-08-22T20:33:44.191Z'
                     __v: 0
                 status: success
                 type: SUCCESS
@@ -4250,7 +4799,7 @@ components:
           schema:
             type: object
             properties:
-              "":
+              '':
                 type: string
                 x-stoplight:
                   id: l1ju0k5o5khvd
@@ -4328,19 +4877,19 @@ components:
                   guest:
                     _id: 669106a217122df7b4875582
                     propertyId: 669bb5387629e1fff5cb35a5
-                    countryCode: "+1"
-                    phoneNumber: "9191229133"
+                    countryCode: '+1'
+                    phoneNumber: '9191229133'
                     source: Source of the guest
-                    checkIn: "2024-07-23T23:35:00.000Z"
-                    checkOut: "2024-07-16T23:35:00.000Z"
-                    confirmationNumber: "9325923593259325"
+                    checkIn: '2024-07-23T23:35:00.000Z'
+                    checkOut: '2024-07-16T23:35:00.000Z'
+                    confirmationNumber: '9325923593259325'
                     roomNumber: C-8
                     firstName: Jon
                     lastName: Doe
                     email: user@gmail.com
                     active: true
-                    createdAt: "2024-07-12T10:34:10.279Z"
-                    updatedAt: "2024-07-12T10:34:10.279Z"
+                    createdAt: '2024-07-12T10:34:10.279Z'
+                    updatedAt: '2024-07-12T10:34:10.279Z'
                     __v: 0
                     status:
                       _id: 669e9b4fecb5b6613114ed8e
@@ -4350,8 +4899,8 @@ components:
                       earlyCheckInStatus: Not Requested
                       reservationStatus: Confirmed
                       preArrivalStatus: Not Applied
-                      createdAt: "2024-07-22T17:47:59.118Z"
-                      updatedAt: "2024-07-22T17:47:59.118Z"
+                      createdAt: '2024-07-22T17:47:59.118Z'
+                      updatedAt: '2024-07-22T17:47:59.118Z'
                       __v: 0
     CreateMessageTemplate:
       description: Example response
@@ -4371,9 +4920,9 @@ components:
                 message: You are checked out
                 active: true
                 createdAt:
-                  $date: "2024-07-27T10:19:39.608Z"
+                  $date: '2024-07-27T10:19:39.608Z'
                 updatedAt:
-                  $date: "2024-07-27T10:19:39.608Z"
+                  $date: '2024-07-27T10:19:39.608Z'
                 __v: 0
             properties:
               _id:
@@ -4409,7 +4958,7 @@ components:
             type: object
             properties:
               result:
-                $ref: "#/components/schemas/GuestStatus"
+                $ref: '#/components/schemas/GuestStatus'
                 x-stoplight:
                   id: 4ow7yqky33eyp
               message:
@@ -4514,16 +5063,16 @@ components:
                         guestId: 66a3a20a9f0302c6f2612861
                         unreadMessages: 0
                         latestMessage: []
-                        createdAt: "2024-08-04T07:32:04.990Z"
-                        updatedAt: "2024-08-04T07:32:04.990Z"
+                        createdAt: '2024-08-04T07:32:04.990Z'
+                        updatedAt: '2024-08-04T07:32:04.990Z'
                         guest:
                           _id: 66a3a20a9f0302c6f2612861
-                          countryCode: "+1"
-                          phoneNumber: "1234567890"
+                          countryCode: '+1'
+                          phoneNumber: '1234567890'
                           source: Booking.com
-                          checkIn: "2024-07-29T08:45:00.000Z"
-                          checkOut: "2024-08-09T08:45:00.000Z"
-                          confirmationNumber: "123456789012"
+                          checkIn: '2024-07-29T08:45:00.000Z'
+                          checkOut: '2024-08-09T08:45:00.000Z'
+                          confirmationNumber: '123456789012'
                           roomNumber: C-102
                           firstName: First
                           lastName: Last
@@ -4570,9 +5119,9 @@ components:
                           enabled: true
                       frequentlyAskedQuestions:
                         - question: What time is standard check in?
-                          answer: "Check-out is at 3:00 PM."
-                      createdAt: "2024-08-16T09:28:55.368Z"
-                      updatedAt: "2024-08-16T09:28:55.368Z"
+                          answer: 'Check-out is at 3:00 PM.'
+                      createdAt: '2024-08-16T09:28:55.368Z'
+                      updatedAt: '2024-08-16T09:28:55.368Z'
                       __v: 0
                     addOnsFlow:
                       propertyId: 66a2125d50a317d5ffa691ad
@@ -4582,8 +5131,8 @@ components:
                         - name: Early Check In
                           description: Early Check In
                           defaultTimeEnabled: true
-                          defaultTiming: "14:00"
-                          customTiming: "14:00"
+                          defaultTiming: '14:00'
+                          customTiming: '14:00'
                           paid: false
                           price: 0
                           enabled: true
@@ -4591,14 +5140,14 @@ components:
                         - name: Late Check Out
                           description: Late Check Out
                           defaultTimeEnabled: true
-                          defaultTiming: "12:00"
-                          customTiming: "12:00"
+                          defaultTiming: '12:00'
+                          customTiming: '12:00'
                           paid: false
                           price: 0
                           enabled: true
                           default: true
-                      createdAt: "2024-08-16T09:28:55.408Z"
-                      updatedAt: "2024-08-16T09:28:55.408Z"
+                      createdAt: '2024-08-16T09:28:55.408Z'
+                      updatedAt: '2024-08-16T09:28:55.408Z'
                       __v: 0
                     preArrivalFlow:
                       propertyId: 66a2125d50a317d5ffa691ad
@@ -4615,8 +5164,8 @@ components:
                       policyLink: Policy link with bottom sheet
                       extraPolicies: []
                       _id: 66bf1bd7c1767cd998642e8f
-                      createdAt: "2024-08-16T09:28:55.440Z"
-                      updatedAt: "2024-08-16T09:28:55.440Z"
+                      createdAt: '2024-08-16T09:28:55.440Z'
+                      updatedAt: '2024-08-16T09:28:55.440Z'
                       __v: 0
                     inHouseFlow:
                       propertyId: 66a2125d50a317d5ffa691ad
@@ -4624,9 +5173,9 @@ components:
                       _id: 66bf1bd7c1767cd998642e91
                       frequentlyAskedQuestions:
                         - question: What time is standard check out?
-                          answer: "Check out is at 11:00 AM."
-                      createdAt: "2024-08-16T09:28:55.470Z"
-                      updatedAt: "2024-08-16T09:28:55.470Z"
+                          answer: 'Check out is at 11:00 AM.'
+                      createdAt: '2024-08-16T09:28:55.470Z'
+                      updatedAt: '2024-08-16T09:28:55.470Z'
                       __v: 0
                     checkedOutFlow:
                       propertyId: 66a2125d50a317d5ffa691ad
@@ -4634,9 +5183,9 @@ components:
                       _id: 66bf1bd7c1767cd998642e93
                       frequentlyAskedQuestions:
                         - question: What time is standard check out?
-                          answer: "Check-out is at 11:00 AM."
-                      createdAt: "2024-08-16T09:28:55.504Z"
-                      updatedAt: "2024-08-16T09:28:55.504Z"
+                          answer: 'Check-out is at 11:00 AM.'
+                      createdAt: '2024-08-16T09:28:55.504Z'
+                      updatedAt: '2024-08-16T09:28:55.504Z'
                       __v: 0
                 status: success
                 type: CREATED
@@ -4692,7 +5241,7 @@ components:
                             type: string
                           customAddOns:
                             type: array
-                            description: "I will add fields later "
+                            description: 'I will add fields later '
                             items:
                               type: object
                           checkInOutAddOns:
@@ -4824,6 +5373,7 @@ tags:
   - name: Chat List
   - name: Country
   - name: Guest
+  - name: Guest Api
   - name: Guest Status
   - name: Message
   - name: Message Template
@@ -4831,3 +5381,4 @@ tags:
   - name: Twilio
   - name: User
   - name: Workflow
+
