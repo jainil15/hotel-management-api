@@ -18,7 +18,7 @@ const checkGuestAccess = async (req, res, next) => {
   next();
 };
 
-const authenticateGuest = async (req, res, next) => {
+const authenticateGuestSession = async (req, res, next) => {
   const { guestSessionId } = req.params;
   if (!guestSessionId) {
     return next(new UnauthorizedError("Unauthorized", {}));
@@ -28,6 +28,7 @@ const authenticateGuest = async (req, res, next) => {
     return next(new UnauthorizedError("Unauthorized", {}));
   }
   req.guestSession = guestSession;
+  next();
 };
 
-module.exports = { checkGuestAccess, authenticateGuest };
+module.exports = { checkGuestAccess, authenticateGuestSession };

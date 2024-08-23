@@ -1,7 +1,18 @@
 const router = require("express").Router();
+const guestApiController = require("../controllers/guestApi.controller");
+const {
+  authenticateGuestSession,
+} = require("../middlewares/guestAccess.middleware");
+const guestApiRouter = require("express").Router();
 
-const propertyController = require("../controllers/property.controller");
+router.get("/guest", guestApiController.getGuestWithStatus);
+router.get("/workflow", guestApiController.getWorkflow);
+router.get("/property", guestApiController.getProperty);
+router.get("/settings", guestApiController.getSettings);
+router.get("/guest/status", guestApiController.getGuestStatus);
+router.post("/checkInOutRequest", guestApiController.createCheckInOutRequest);
+router.post("/preArrival", guestApiController.createPreArrival);
 
-router.get("/property", propertyController.getById);
+guestApiRouter.use("/:guestSessionId", authenticateGuestSession, router);
 
-module.exports = router;
+module.exports = guestApiRouter;

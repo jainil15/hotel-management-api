@@ -311,7 +311,12 @@ const isTwilioSetup = async (req, res, next) => {
     const propertyId = req.params.propertyId;
     const twilioAccount =
       await twilioAccountService.getByPropertyId(propertyId);
-
+    if (!twilioAccount) {
+      return responseHandler(res, {
+        isComplete: false,
+        isSubaccountCreated: false,
+      });
+    }
     if (twilioAccount.phoneNumber) {
       return responseHandler(res, {
         isComplete: true,
@@ -334,7 +339,7 @@ const isTwilioSetup = async (req, res, next) => {
     if (e instanceof APIError) {
       return next(e);
     }
-    return next(new InternalServerError());
+    return next(new InternalServerError(e.message));
   }
 };
 module.exports = {

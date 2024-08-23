@@ -40,7 +40,24 @@ const removeDefaults = async (propertyId, session) => {
   await checkedOutFlowService.remove(propertyId, session);
 };
 
+/**
+ * Get all workflows for a property
+ * @param {string} propertyId
+ * @returns {Promise<import('../models/workflow.model').WorkflowType>} - The workflow
+ */
+const getByPropertyId = async (propertyId) => {
+  const homeFlow = await homeFlowService.getByPropertyId(propertyId);
+  const addOnsFlow = await addOnsFlowService.getByPropertyId(propertyId);
+  const preArrivalFlow =
+    await preArrivalFlowService.getByPropertyId(propertyId);
+  const inHouseFlow = await inHouseFlowService.getByPropertyId(propertyId);
+  const checkedOutFlow =
+    await checkedOutFlowService.getByPropertyId(propertyId);
+  return { homeFlow, addOnsFlow, preArrivalFlow, inHouseFlow, checkedOutFlow };
+};
+
 module.exports = {
   createDefaults,
   removeDefaults,
+  getByPropertyId,
 };
