@@ -19,6 +19,7 @@ const allowList = [
   "https://8l4qkmp2-3000.inc1.devtunnels.ms",
   "http://localhost:3001",
   "http://localhost:4000",
+  "https://guest.onelyk.com",
 ];
 
 const corsOptionsDelegate = (req, callback) => {
