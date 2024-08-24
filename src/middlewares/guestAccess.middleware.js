@@ -19,16 +19,20 @@ const checkGuestAccess = async (req, res, next) => {
 };
 
 const authenticateGuestSession = async (req, res, next) => {
-  const { guestSessionId } = req.params;
-  if (!guestSessionId) {
+  try {
+    const { guestSessionId } = req.params;
+    if (!guestSessionId) {
+      return next(new UnauthorizedError("Unauthorized", {}));
+    }
+    const guestSession = await guestSessionService.getById(guestSessionId);
+    if (!guestSession) {
+      return next(new UnauthorizedError("Unauthorized", {}));
+    }
+    req.guestSession = guestSession;
+    next();
+  } catch (e) {
     return next(new UnauthorizedError("Unauthorized", {}));
   }
-  const guestSession = await guestSessionService.getById(guestSessionId);
-  if (!guestSession) {
-    return next(new UnauthorizedError("Unauthorized", {}));
-  }
-  req.guestSession = guestSession;
-  next();
 };
 
 module.exports = { checkGuestAccess, authenticateGuestSession };

@@ -26,5 +26,4 @@ router.post(
 );
 
 guestApiRouter.use("/:guestSessionId", authenticateGuestSession, router);
-
 module.exports = guestApiRouter;

@@ -6,6 +6,7 @@ const {
   ValidationError,
   NotFoundError,
   ForbiddenError,
+  MongooseError,
 } = require("../lib/CustomErrors");
 const { responseHandler } = require("../middlewares/response.middleware");
 const guestService = require("../services/guest.service");
