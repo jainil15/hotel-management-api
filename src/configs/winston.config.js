@@ -52,7 +52,7 @@ const devLogger = winston.createLogger({
 });
 // winston.addColors(customColors);
 const prodLogger = winston.createLogger({
-  level: "info",
+  level: "debug",
   format: winston.format.combine(
     format((info) => {
       info.level = info.level.toUpperCase();
