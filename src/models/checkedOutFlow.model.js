@@ -44,20 +44,17 @@ const CreateCheckedOutFlowValidationSchema = z.object({
   ),
 });
 
-const UpdateCheckedOutFlowValidationSchema = z
-  .object({
-    frequentlyAskedQuestionsEnabled: z.boolean().optional(),
-    frequentlyAskedQuestions: z
-      .array(
-        z.object({
-          question: z.string(),
-          answer: z.string(),
-        }),
-      )
-      .optional(),
-    iconUrl: z.string().optional(),
-  })
-  .optional();
+const UpdateCheckedOutFlowValidationSchema = z.object({
+  frequentlyAskedQuestionsEnabled: z.boolean().optional(),
+  frequentlyAskedQuestions: z
+    .array(
+      z.object({
+        question: z.string(),
+        answer: z.string(),
+      }),
+    )
+    .optional(),
+});
 
 CheckedOutFlow.init().then(() => {
   logger.info("Initialized CheckedOutFlow Model");

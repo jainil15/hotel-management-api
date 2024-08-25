@@ -4,7 +4,13 @@ const { z } = require("zod");
 const logger = require("../configs/winston.config");
 
 const Schema = mongoose.Schema;
-
+const wifiDetailsSchema = new Schema(
+  {
+    wifiName: { type: String, required: true },
+    wifiInstructions: { type: String, required: true },
+  },
+  { _id: false },
+);
 const inHouseFlowSchema = new Schema(
   {
     propertyId: {
@@ -12,6 +18,22 @@ const inHouseFlowSchema = new Schema(
       ref: "Property",
       required: true,
     },
+
+    wifiDetailsEnabled: { type: Boolean, default: true },
+    wifiDetails: {
+      type: wifiDetailsSchema,
+      default: {
+        wifiName: "HotelWifi",
+        wifiInstructions: "Password",
+      },
+    },
+
+    clickableLinksOrButtonsEnabled: { type: Boolean, default: true },
+    clickableLinksOrButtons: {
+      type: [String],
+      default: ["https://www.onelyk.com"],
+    },
+
     frequentlyAskedQuestionsEnabled: { type: Boolean, default: true },
     frequentlyAskedQuestions: {
       type: [frequentlyAskedQuestionsSchema],
@@ -40,21 +62,36 @@ const CreateInHouseFlowValidationSchema = z.object({
       answer: z.string(),
     }),
   ),
+  wifiDetailsEnabled: z.boolean(),
+  wifiDetails: z.object({
+    wifiName: z.string(),
+    wifiInstructions: z.string(),
+  }),
+  clickableLinksOrButtonsEnabled: z.boolean(),
+  clickableLinksOrButtons: z.array(z.string()),
 });
 
-const UpdateInHouseFlowValidationSchema = z
-  .object({
-    frequentlyAskedQuestionsEnabled: z.boolean().optional(),
-    frequentlyAskedQuestions: z
-      .array(
-        z.object({
-          question: z.string(),
-          answer: z.string(),
-        }),
-      )
-      .optional(),
-  })
-  .optional();
+const UpdateInHouseFlowValidationSchema = z.object({
+  frequentlyAskedQuestionsEnabled: z.boolean().optional(),
+  frequentlyAskedQuestions: z
+    .array(
+      z.object({
+        question: z.string(),
+        answer: z.string(),
+      }),
+    )
+    .optional(),
+  wifiDetailsEnabled: z.boolean().optional(),
+  wifiDetails: z
+    .object({
+      wifiName: z.string(),
+      wifiInstructions: z.string(),
+    })
+    .optional(),
+  clickableLinksOrButtonsEnabled: z.boolean().optional(),
+  clickableLinksOrButtons: z.array(z.string()).optional(),
+});
+
 InHouseFlow.init().then(() => {
   logger.info("Initialized InHouseFlow Model");
 });
