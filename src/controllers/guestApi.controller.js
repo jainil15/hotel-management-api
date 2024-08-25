@@ -6,7 +6,6 @@ const {
   ValidationError,
   NotFoundError,
   ForbiddenError,
-  MongooseError,
 } = require("../lib/CustomErrors");
 const { responseHandler } = require("../middlewares/response.middleware");
 const guestService = require("../services/guest.service");
@@ -41,6 +40,13 @@ const {
   CreatePreArrivalValidationSchema,
 } = require("../models/preArrival.model");
 
+/**
+ * Get guest
+ * @param {import('express').Request} req - Request object
+ * @param {import('express').Response} res - Response object
+ * @param {import('express').NextFunction} next - Next function
+ * @returns {Promise<import('express').Response>} - Response object
+ */
 const getGuest = async (req, res, next) => {
   try {
     const guestId = req.guestSession.guestId;
@@ -55,6 +61,13 @@ const getGuest = async (req, res, next) => {
   }
 };
 
+/**
+ * Get workflow
+ * @param {import('express').Request} req - Request object
+ * @param {import('express').Response} res - Response object
+ * @param {import('express').NextFunction} next - Next function
+ * @returns {Promise<import('express').Response>} - Response object
+ */
 const getWorkflow = async (req, res, next) => {
   try {
     const propertyId = req.guestSession.propertyId;
@@ -68,6 +81,13 @@ const getWorkflow = async (req, res, next) => {
   }
 };
 
+/**
+ * Get property
+ * @param {import('express').Request} req - Request object
+ * @param {import('express').Response} res - Response object
+ * @param {import('express').NextFunction} next - Next function
+ * @returns {Promise<import('express').Response>} - Response object
+ */
 const getProperty = async (req, res, next) => {
   try {
     const propertyId = req.guestSession.propertyId;
@@ -81,6 +101,13 @@ const getProperty = async (req, res, next) => {
   }
 };
 
+/**
+ * Get settings
+ * @param {import('express').Request} req - Request object
+ * @param {import('express').Response} res - Response object
+ * @param {import('express').NextFunction} next - Next function
+ * @returns {Promise<import('express').Response>} - Response object
+ */
 const getSettings = async (req, res, next) => {
   try {
     const { propertyId } = req.guestSession;
@@ -94,6 +121,13 @@ const getSettings = async (req, res, next) => {
   }
 };
 
+/**
+ * Create check in out request
+ * @param {import('express').Request} req - Request object
+ * @param {import('express').Response} res - Response object
+ * @param {import('express').NextFunction} next - Next function
+ * @returns {Promise<import('express').Response>} - Response object
+ */
 const createCheckInOutRequest = async (req, res, next) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -111,7 +145,9 @@ const createCheckInOutRequest = async (req, res, next) => {
     const existingCheckInOutRequest = await checkInOutRequestService.findOne(
       propertyId,
       guestId,
-      { requestType: checkInOutRequest.requestType },
+      {
+        requestType: checkInOutRequest.requestType,
+      },
     );
     if (existingCheckInOutRequest) {
       throw new ConflictError("Similar request already exists", {
@@ -216,7 +252,9 @@ const createCheckInOutRequest = async (req, res, next) => {
       guestStatus: updatedGuestStatus,
     });
 
-    return responseHandler(res, { checkInOutRequest: newCheckInOutRequest });
+    return responseHandler(res, {
+      checkInOutRequest: newCheckInOutRequest,
+    });
   } catch (e) {
     await session.abortTransaction();
     session.endSession();
@@ -227,6 +265,13 @@ const createCheckInOutRequest = async (req, res, next) => {
   }
 };
 
+/**
+ * Get guest with status
+ * @param {import('express').Request} req - Request object
+ * @param {import('express').Response} res - Response object
+ * @param {import('express').NextFunction} next - Next function
+ * @returns {Promise<import('express').Response>} - Response object
+ */
 const getGuestWithStatus = async (req, res, next) => {
   try {
     const { propertyId, guestId } = req.guestSession;
@@ -249,7 +294,7 @@ const getGuestWithStatus = async (req, res, next) => {
  * @param {import('express').Request} req - Request object
  * @param {import('express').Response} res - Response object
  * @param {import('express').NextFunction} next - Next function
- * @returns {Promise<void>}
+ * @returns {Promise<import('express').Response>} - Response object
  */
 const getGuestStatus = async (req, res, next) => {
   try {
@@ -270,6 +315,7 @@ const getGuestStatus = async (req, res, next) => {
  * @param {import('express').Request} req - Request object
  * @param {import('express').Response} res - Response object
  * @param {import('express').NextFunction} next - Next function
+ * @returns {Promise<import('express').Response>} - Response object
  */
 const createPreArrival = async (req, res, next) => {
   const session = await mongoose.startSession();
@@ -352,6 +398,13 @@ const createPreArrival = async (req, res, next) => {
   }
 };
 
+/**
+ * Get check in out request
+ * @param {import('express').Request} req - Request object
+ * @param {import('express').Response} res - Response object
+ * @param {import('express').NextFunction} next - Next function
+ * @returns {Promise<import('express').Response>} - Response object
+ */
 const getCheckInOutRequest = async (req, res, next) => {
   try {
     const { propertyId, guestId } = req.guestSession;

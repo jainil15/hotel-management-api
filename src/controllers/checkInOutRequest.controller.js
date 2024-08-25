@@ -75,7 +75,6 @@ const create = async (req, res, next) => {
         guest: ["Guest not found"],
       });
     }
-
     if (checkInOutRequest.requestType === "earlyCheckIn") {
       if (
         compareDateGt(
@@ -243,7 +242,7 @@ const updateRequestStatus = async (req, res, next) => {
             .join("")
             .replace("C", "c")}`]:
             updatedCheckInOutRequest[
-            `${updatedCheckInOutRequest.requestType}DateTime`
+              `${updatedCheckInOutRequest.requestType}DateTime`
             ],
         },
         propertyId,

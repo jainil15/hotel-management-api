@@ -69,6 +69,8 @@ const getAll = async (req, res, next) => {
   }
 };
 
+
+
 /**
  * Create a new guest
  * @param {import('express').Request } req - The request
