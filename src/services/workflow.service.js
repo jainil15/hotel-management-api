@@ -56,6 +56,35 @@ const getByPropertyId = async (propertyId) => {
   return { homeFlow, addOnsFlow, preArrivalFlow, inHouseFlow, checkedOutFlow };
 };
 
+const update = async (propertyId, workflow, session) => {
+  const homeFlow = await homeFlowService.update(
+    propertyId,
+    workflow.homeFlow,
+    session,
+  );
+  const addOnsFlow = await addOnsFlowService.update(
+    propertyId,
+    workflow.addOnsFlow,
+    session,
+  );
+  const preArrivalFlow = await preArrivalFlowService.update(
+    propertyId,
+    workflow.preArrivalFlow,
+    session,
+  );
+  const inHouseFlow = await inHouseFlowService.update(
+    propertyId,
+    workflow.inHouseFlow,
+    session,
+  );
+  const checkedOutFlow = await checkedOutFlowService.update(
+    propertyId,
+    workflow.checkedOutFlow,
+    session,
+  );
+  return { homeFlow, addOnsFlow, preArrivalFlow, inHouseFlow, checkedOutFlow };
+};
+
 module.exports = {
   createDefaults,
   removeDefaults,

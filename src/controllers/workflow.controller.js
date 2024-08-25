@@ -155,29 +155,30 @@ const update = async (req, res, next) => {
       });
     }
 
+    console.log(homeFlowResult.data);
     const updatedHomeFlow = await homeFlowService.update(
       propertyId,
-      homeFlow,
+      homeFlowResult.data,
       session,
     );
     const updatedAddOnsFlow = await addOnsFlowService.update(
       propertyId,
-      addOnsFlow,
+      addOnsFlowResult.data,
       session,
     );
     const updatedPreArrivalFlow = await preArrivalFlowService.update(
       propertyId,
-      preArrivalFlow,
+      preArrivalFlowResult.data,
       session,
     );
     const updatedInHouseFlow = await inHouseFlowService.update(
       propertyId,
-      inHouseFlow,
+      inHouseFlowResult.data,
       session,
     );
     const updatedCheckedOutFlow = await checkedOutFlowService.update(
       propertyId,
-      checkedOutFlow,
+      checkedOutFlowResult.data,
       session,
     );
 

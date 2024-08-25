@@ -80,7 +80,7 @@ homeFlowSchema.index({ propertyId: 1 }, { unique: true });
 const HomeFlow = mongoose.model("HomeFlow", homeFlowSchema);
 
 const CreateHomeFlowValidationSchema = z.object({
-  ammenities: z.array({
+  amenities: z.array({
     name: z.string(),
     enabled: z.boolean(),
   }),
@@ -94,11 +94,13 @@ const CreateHomeFlowValidationSchema = z.object({
 });
 
 const UpdateHomeFlowValidationSchema = z.object({
-  ammenities: z
-    .array({
-      name: z.string().optional(),
-      enabled: z.boolean().optional(),
-    })
+  amenities: z
+    .array(
+      z.object({
+        name: z.string().optional(),
+        enabled: z.boolean().optional(),
+      }),
+    )
     .optional(),
   frequentlyAskedQuestionsEnabled: z.boolean().optional(),
   frequentlyAskedQuestions: z
