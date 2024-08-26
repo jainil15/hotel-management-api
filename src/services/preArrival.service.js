@@ -1,6 +1,7 @@
 const { awsS3Config } = require("../configs/aws.config");
 const { PreArrival } = require("../models/preArrival.model");
 const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+require("dotenv").config();
 /**
  * Create a new pre arrival
  * @param {string} propertyId - The property id

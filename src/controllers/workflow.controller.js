@@ -155,7 +155,6 @@ const update = async (req, res, next) => {
       });
     }
 
-    console.log(homeFlowResult.data);
     const updatedHomeFlow = await homeFlowService.update(
       propertyId,
       homeFlowResult.data,
