@@ -6,7 +6,8 @@ const supportedTypes = require("../constants/supportedTypes");
  * @returns {boolean} - Value indicating if the image type is supported
  */
 const checkImageType = (fileType) => {
-	return supportedTypes.includes(fileType);
+  console.log(`checkImageType: ${fileType}`);
+  return supportedTypes.includes(fileType);
 };
 
 module.exports = checkImageType;

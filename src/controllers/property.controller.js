@@ -166,6 +166,8 @@ const update = async (req, res, next) => {
       defaultNewDayTime,
       ...property
     } = req.body;
+    property.logo = req.files.logo;
+    property.cover = req.files.cover;
     const propertyId = req.params.propertyId;
     const propertyResult = UpdatePropertyValidationSchema.safeParse({
       ...property,
