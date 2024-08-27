@@ -46,6 +46,14 @@ const getAll = async (propertyId, guestId) => {
       },
     },
     {
+      $lookup: {
+        from: "addonsrequests",
+        localField: "addOnsRequestId",
+        foreignField: "_id",
+        as: "addOnsRequest",
+      },
+    },
+    {
       $unwind: {
         path: "$request",
         preserveNullAndEmptyArrays: true,

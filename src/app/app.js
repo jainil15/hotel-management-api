@@ -28,6 +28,7 @@ const preArrivalRoutes = require("../routes/preArrival.route");
 const workflowRoutes = require("../routes/workflow.route");
 const twilioAccountRoutes = require("../routes/twilioAccount.route");
 const guestApiRoutes = require("../routes/guestApi.route");
+const addOnsRequestRoutes = require("../routes/addOnsRequest.route");
 
 // Socket imports
 const guestSocket = require("../sockets/guest.socket");
@@ -124,6 +125,7 @@ const createApp = () => {
   app.use("/workflow", workflowRoutes);
   app.use("/twilioAccount", twilioAccountRoutes);
   app.use("/guestApi", guestApiRoutes);
+  app.use("/addOnsRequest", addOnsRequestRoutes);
   // Health Check
   app.get("/health", (req, res, next) => {
     return responseHandler(res, {}, 200, "Server is running");

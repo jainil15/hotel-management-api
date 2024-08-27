@@ -14,6 +14,7 @@ router.get("/property", guestApiController.getProperty);
 router.get("/settings", guestApiController.getSettings);
 router.get("/guest/status", guestApiController.getGuestStatus);
 router.get("/checkInOutRequest", guestApiController.getCheckInOutRequest);
+router.get("/addOns", guestApiController.getAddOns);
 
 router.post("/checkInOutRequest", guestApiController.createCheckInOutRequest);
 router.post(
@@ -25,5 +26,8 @@ router.post(
   guestApiController.createPreArrival,
 );
 
+router.post("/review", guestApiController.createReview);
+router.post("/addOnsRequest", guestApiController.createAddOnsRequest);
 guestApiRouter.use("/:guestSessionId", authenticateGuestSession, router);
+
 module.exports = guestApiRouter;

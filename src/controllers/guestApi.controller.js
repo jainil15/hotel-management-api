@@ -9,9 +9,12 @@ const {
 } = require("../lib/CustomErrors");
 const { responseHandler } = require("../middlewares/response.middleware");
 const guestService = require("../services/guest.service");
+const reviewService = require("../services/review.service");
+const addOnsRequestService = require("../services/addOnsRequest.service");
 const propertyService = require("../services/property.service");
 const workflowService = require("../services/workflow.service");
 const setttingService = require("../services/setting.service");
+const addOnsFlowService = require("../services/addOnsFlow.service");
 const checkInOutRequestService = require("../services/checkInOutRequest.service");
 const guestStatusService = require("../services/guestStatus.service");
 const messageService = require("../services/message.service");
@@ -39,6 +42,10 @@ const {
 const {
   CreatePreArrivalValidationSchema,
 } = require("../models/preArrival.model");
+const { CreateReviewValidationSchema } = require("../models/review.model");
+const {
+  CreateAddOnsRequestValidationSchema,
+} = require("../models/addOnsRequest.model");
 
 /**
  * Get guest
@@ -421,14 +428,148 @@ const getCheckInOutRequest = async (req, res, next) => {
     return next(new InternalServerError(e.message));
   }
 };
+
+/**
+ * Create review
+ * @param {import('express').Request} req - Request object
+ * @param {import('express').Response} res - Response object
+ * @param {import('express').NextFunction} next - Next function
+ * @returns {Promise<import('express').Response>} - Response object
+ */
+const createReview = async (req, res, next) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const { propertyId, guestId } = req.guestSession;
+    const review = req.body;
+    const reviewResult = CreateReviewValidationSchema.safeParse(review);
+    if (!reviewResult.success) {
+      throw new ValidationError(
+        "Validation Error",
+        reviewResult.error.flatten().fieldErrors,
+      );
+    }
+    const createdReview = await reviewService.create(
+      propertyId,
+      guestId,
+      review,
+      session,
+    );
+    await session.commitTransaction();
+    session.endSession();
+    return responseHandler(
+      res,
+      { review: createdReview },
+      201,
+      "Review Created",
+    );
+  } catch (e) {
+    await session.abortTransaction();
+    session.endSession();
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError(e.message));
+  }
+};
+
+const createAddOnsRequest = async (req, res, next) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const { propertyId, guestId } = req.guestSession;
+    const { name } = req.body;
+    const addOnsRequest = await addOnsFlowService.findOneAddOn(
+      propertyId,
+      name,
+    );
+    if (!addOnsRequest) {
+      throw new NotFoundError("Add Ons Request not found", {
+        addOnsRequest: ["Add Ons Request not found"],
+      });
+    }
+    const addOnsRequestResult =
+      CreateAddOnsRequestValidationSchema.safeParse(addOnsRequest);
+    if (!addOnsRequestResult.success) {
+      throw new ValidationError(
+        "Validation Error",
+        addOnsRequestResult.error.flatten().fieldErrors,
+      );
+    }
+    const createdAddOnsRequest = await addOnsRequestService.create(
+      propertyId,
+      guestId,
+      addOnsRequestResult.data,
+      session,
+    );
+    const newMessage = await messageService.create(
+      {
+        propertyId: propertyId,
+        guestId: guestId,
+        senderId: guestId,
+        receiverId: propertyId,
+        content: `Request for ${createdAddOnsRequest.name}`,
+        messageType: messageType.ADDONS_REQUEST,
+        messageTriggerType: messageTriggerType.AUTOMATIC,
+        addOnsRequestId: createdAddOnsRequest._id,
+      },
+      session,
+    );
+    const updatedChatList = await chatListService.updateAndIncUnreadMessages(
+      propertyId,
+      guestId,
+      {
+        latestMessage: newMessage._id,
+      },
+      session,
+    );
+
+    await session.commitTransaction();
+    session.endSession();
+    req.app.io.to(`property:${propertyId}`).emit("chatList:update", {
+      chatList: updatedChatList,
+    });
+    req.app.io.to(`guest:${guestId}`).emit("message:newMessage", {
+      message: newMessage,
+    });
+    return responseHandler(
+      res,
+      { addOnsRequest: createdAddOnsRequest },
+      201,
+      "Add Ons Request Created",
+    );
+  } catch (e) {
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError(e.message));
+  }
+};
+
+const getAddOns = async (req, res, next) => {
+  try {
+    const { propertyId } = req.guestSession;
+    const addOnsFlow = await addOnsFlowService.getByPropertyId(propertyId);
+    return responseHandler(res, addOnsFlow);
+  } catch (e) {
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError(e.message));
+  }
+};
+
 module.exports = {
   getGuest,
   getWorkflow,
   getProperty,
+  getAddOns,
   getSettings,
   getGuestWithStatus,
   getGuestStatus,
   createCheckInOutRequest,
   createPreArrival,
   getCheckInOutRequest,
+  createReview,
+  createAddOnsRequest,
 };

@@ -3,7 +3,7 @@ const { InHouseFlow } = require("../models/inHouseFlow.model");
 /**
  * Create a new InHouseFlow
  * @param {string} propertyId - The property id
- * @param {object} inHouseFlow - The inHouseFlow object
+ * @param {import('../models/inHouseFlow.model').InHouseFlowType} inHouseFlow - The inHouseFlow object
  * @param {object} session - The mongoose session
  * @returns {Promise<import('../models/inHouseFlow.model').InHouseFlowType>} - The saved InHouseFlow
  */
@@ -26,7 +26,7 @@ const getByPropertyId = async (propertyId) => {
 /**
  * Update InHouseFlow
  * @param {string} propertyId - The propertyId to filter InHouseFlow
- * @param {object} inHouseFlow - The inHouseFlow object
+ * @param {import('../models/inHouseFlow.model').InHouseFlowType} inHouseFlow - The inHouseFlow object
  * @returns {Promise<import('../models/inHouseFlow.model').InHouseFlowType>} - The updated InHouseFlow
  */
 const update = async (propertyId, inHouseFlow) => {

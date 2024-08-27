@@ -43,9 +43,23 @@ const remove = async (propertyId, session) => {
   );
 };
 
+/**
+ * @param {string} propertyId
+ * @param {object} filter
+ */
+const findOneAddOn = async (propertyId, name) => {
+  const addOnsFlow = await AddOnsFlow.findOne({
+    propertyId,
+  });
+
+  const addOn = addOnsFlow.customAddOns.find((addOn) => addOn.name === name);
+  return addOn;
+};
+
 module.exports = {
   getByPropertyId,
   create,
   remove,
   update,
+  findOneAddOn,
 };

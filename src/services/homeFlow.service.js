@@ -3,7 +3,7 @@ const { HomeFlow } = require("../models/homeFlow.model");
 /**
  * Get home flow by property id
  * @param {string} propertyId - property id
- * @returns {Promise<HomeFlowType>} - home flow
+ * @returns {Promise<import('../models/homeFlow.model').HomeFlowType>} - home flow
  */
 const getByPropertyId = async (propertyId) => {
   const homeFlow = await HomeFlow.findOne({ propertyId });
@@ -42,6 +42,12 @@ const update = async (propertyId, homeFlow, session) => {
   return updatedHomeFlow;
 };
 
+/**
+ * Remove home flow
+ * @param {string} propertyId - property id
+ * @param {import('mongoose').ClientSession} session - transaction session
+ * @return {Promise<void>} - void
+ */
 const remove = async (propertyId, session) => {
   await HomeFlow.deleteOne({ propertyId }, { session: session });
 };

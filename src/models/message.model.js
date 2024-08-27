@@ -2,53 +2,62 @@ const { request } = require("express");
 const mongoose = require("mongoose");
 const { z } = require("zod");
 const {
-	requestType,
-	messageTriggerType,
-	messageType,
+  requestType,
+  messageTriggerType,
+  messageType,
 } = require("../constants/message.constant");
 const Schema = mongoose.Schema;
 
 const messageSchema = new Schema(
-	{
-		guestId: { type: Schema.Types.ObjectId, ref: "Guest", required: true },
-		propertyId: {
-			type: Schema.Types.ObjectId,
-			ref: "Property",
-			required: true,
-		},
-		senderId: { type: Schema.Types.ObjectId, required: true },
-		receiverId: { type: Schema.Types.ObjectId, required: true },
-		content: { type: String, required: true },
-		messageType: { type: String, required: true },
-		requestId: { type: Schema.Types.ObjectId, ref: "CheckInOutRequest" },
-		messageTriggerType: { type: String, required: true },
-		status: { type: String, default: "sent" },
-		messageSid: { type: String },
-	},
-	{ timestamps: true, toJSON: { virtuals: true } },
+  {
+    guestId: { type: Schema.Types.ObjectId, ref: "Guest", required: true },
+    propertyId: {
+      type: Schema.Types.ObjectId,
+      ref: "Property",
+      required: true,
+    },
+    senderId: { type: Schema.Types.ObjectId, required: true },
+    receiverId: { type: Schema.Types.ObjectId, required: true },
+    content: { type: String, required: true },
+    messageType: { type: String, required: true },
+    requestId: { type: Schema.Types.ObjectId, ref: "CheckInOutRequest" },
+    addOnsRequestId: { type: Schema.Types.ObjectId, ref: "AddOnsRequest" },
+    messageTriggerType: { type: String, required: true },
+    status: { type: String, default: "sent" },
+    messageSid: { type: String },
+  },
+  { timestamps: true, toJSON: { virtuals: true } },
 );
 messageSchema.virtual("request", {
-	ref: "CheckInOutRequest",
-	localField: "requestId",
-	foreignField: "_id",
-	justOne: true,
+  ref: "CheckInOutRequest",
+  localField: "requestId",
+  foreignField: "_id",
+  justOne: true,
 });
+
+messageSchema.virtual("request", {
+  ref: "AddOnsRequest",
+  localField: "addOnsRequestId",
+  foreignField: "_id",
+  justOne: true,
+});
+
 const MessageValidationSchema = z.object({
-	propertyId: z.string(),
-	guestId: z.string(),
-	content: z.string(),
-	messageType: z.enum(Object.values(messageType)),
-	messageTriggerType: z.enum(Object.values(messageTriggerType)),
-	requestId: z.string().optional(),
+  propertyId: z.string(),
+  guestId: z.string(),
+  content: z.string(),
+  messageType: z.enum(Object.values(messageType)),
+  messageTriggerType: z.enum(Object.values(messageTriggerType)),
+  requestId: z.string().optional(),
 });
 
 const CreateMessageValidationSchema = z.object({
-	propertyId: z.string(),
-	guestId: z.string(),
-	content: z.string(),
-	messageType: z.enum(Object.values(messageType)),
-	messageTriggerType: z.enum(Object.values(messageTriggerType)),
-	requestId: z.string().optional(),
+  propertyId: z.string(),
+  guestId: z.string(),
+  content: z.string(),
+  messageType: z.enum(Object.values(messageType)),
+  messageTriggerType: z.enum(Object.values(messageTriggerType)),
+  requestId: z.string().optional(),
 });
 
 /**
@@ -57,7 +66,7 @@ const CreateMessageValidationSchema = z.object({
  */
 const Message = mongoose.model("Message", messageSchema);
 module.exports = {
-	Message,
-	MessageValidationSchema,
-	CreateMessageValidationSchema,
+  Message,
+  MessageValidationSchema,
+  CreateMessageValidationSchema,
 };
