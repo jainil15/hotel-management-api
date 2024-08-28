@@ -13,12 +13,12 @@ const smsService = require("../services/sms.service");
 const guestService = require("../services/guest.service");
 const guestStatusService = require("../services/guestStatus.service");
 const guestTokenService = require("../services/guestToken.service");
+const guestSessionService = require("../services/guestSession.service");
 const twilioService = require("../services/twilio.service");
 const twilioAccountService = require("../services/twilioAccount.service");
 const chatListService = require("../services/chatList.service");
 const propertyService = require("../services/property.service");
 const checkInOutRequestService = require("../services/checkInOutRequest.service");
-const guestSessionService = require("../services/guestSession.service");
 const {
   CreateGuestStatusValidationSchema,
   UpdateGuestStatusValidationSchema,
@@ -68,8 +68,6 @@ const getAll = async (req, res, next) => {
     return next(new InternalServerError());
   }
 };
-
-
 
 /**
  * Create a new guest
@@ -186,20 +184,15 @@ const create = async (req, res, next) => {
       session,
     );
 
-    // Password Less Login
-    // get access token for guest login
-    const accessToken = await guestTokenService.create(newGuest._id, session);
-    // Get property
-    const property = await propertyService.getById(propertyId);
-
-    // TODO: Move to sms.service
+    // todo: move to sms.service
     // Send message to the guest
-    // const message = `Welcome to ${property.name}, Your guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/login?token=${accessToken}`;
-    // await twilioService.sendAccessLink(
-    // 	propertyId,
-    // 	`${newGuest.countryCode + newGuest.phoneNumber}`,
-    // 	message,
-    // );
+    const guestProeperty = await propertyService.getById(propertyId);
+    const message = `Welcome to ${guestProeperty.name}, Your guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`;
+    await twilioService.sendAccessLink(
+      propertyId,
+      `${newGuest.countryCode + newGuest.phoneNumber}`,
+      message,
+    );
     // TODO: Workflow message trigger
     // if (sendMessage === true) {
     // }
