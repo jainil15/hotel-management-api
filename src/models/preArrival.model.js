@@ -44,7 +44,7 @@ const preArrivalSchema = new Schema(
     },
     phoneNumber: { type: String },
     emailAddress: { type: String },
-    arrivalTime: { type: Date },
+    arrivalTime: { type: String },
     vehicleMakeModelColor: { type: String },
     licensePlateNo: { type: String },
     specialRequests: { type: String },
@@ -65,15 +65,9 @@ const CreatePreArrivalValidationSchema = z.object({
     })
     .optional(),
   emailAddress: z.string().email().optional(),
-  arrivalTime: z
-    .string()
-    .refine(
-      (val) => datetimeregex.test(val) && !Number.isNaN(Date.parse(val)),
-      {
-        message: "Invalid date format",
-      },
-    )
-    .optional(),
+  arrivalTime: z.string().refine((val) => timeregex.test(val), {
+    message: "Invalid time format",
+  }),
   vehicleMakeModelColor: z.string().optional(),
   licensePlateNo: z.string().optional(),
   specialRequests: z.string().optional(),
