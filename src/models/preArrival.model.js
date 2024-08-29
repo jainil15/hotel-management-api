@@ -1,7 +1,11 @@
 const mongoose = require("mongoose");
 const { z } = require("zod");
 const logger = require("../configs/winston.config");
-const { phoneregex, datetimeregex } = require("../constants/regex.constant");
+const {
+  phoneregex,
+  datetimeregex,
+  timeregex,
+} = require("../constants/regex.constant");
 const { MAX_FILE_SIZE } = require("../constants/file.constant");
 const checkImageType = require("../utils/checkType");
 const Schema = mongoose.Schema;
