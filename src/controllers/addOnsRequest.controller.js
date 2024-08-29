@@ -23,8 +23,15 @@ const update = async (req, res, next) => {
     const { requestStatus } = req.body;
     console.log("requestStatus", requestStatus);
     const requestStatusResult = z
-      .enum([REQUEST_STATUS.ACCEPTED, REQUEST_STATUS.DECLINED])
-      .safeParse(requestStatus);
+      .object({
+        requestStatus: z.enum([
+          REQUEST_STATUS.ACCEPTED,
+          REQUEST_STATUS.DECLINED,
+        ]),
+      })
+      .safeParse({
+        requestStatus,
+      });
     if (!requestStatusResult.success) {
       throw new ValidationError(
         "Validation Error",
