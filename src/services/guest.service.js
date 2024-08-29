@@ -1,3 +1,4 @@
+const { default: mongoose } = require("mongoose");
 const logger = require("../configs/winston.config");
 const { NotFoundError } = require("../lib/CustomErrors");
 const { Guest } = require("../models/guest.model");
@@ -167,7 +168,11 @@ const findWithStatus = async (guestFilter, statusFilter) => {
   const pipeline = [
     {
       $match: {
-        propertyId: guestFilter.propertyId,
+        propertyId: new mongoose.Types.ObjectId(guestFilter.propertyId),
+      },
+    },
+    {
+      $match: {
         phoneNumber: guestFilter.phoneNumber,
         countryCode: guestFilter.countryCode,
       },

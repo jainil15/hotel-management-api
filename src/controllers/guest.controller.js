@@ -132,7 +132,6 @@ const create = async (req, res, next) => {
       },
     );
     if (existingInHouseGuest.length > 0) {
-      console.log(existingInHouseGuest);
       throw new ValidationError("Guest already exists with this phone number", {
         phoneNumber: ["Guest already exists with this phone number"],
       });
@@ -149,7 +148,6 @@ const create = async (req, res, next) => {
       },
     );
     if (existingReservedGuest.length > 0) {
-      console.log(existingReservedGuest);
       throw new ValidationError("Guest already exists with this phone number", {
         phoneNumber: ["Guest already exists with this phone number"],
       });
