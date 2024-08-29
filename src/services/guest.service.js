@@ -167,6 +167,7 @@ const findWithStatus = async (guestFilter, statusFilter) => {
   const pipeline = [
     {
       $match: {
+        propertyId: guestFilter.propertyId,
         phoneNumber: guestFilter.phoneNumber,
         countryCode: guestFilter.countryCode,
       },
