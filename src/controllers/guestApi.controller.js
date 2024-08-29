@@ -377,7 +377,7 @@ const createPreArrival = async (req, res, next) => {
 
     const updatedGuestStatus = await guestStatusService.update(
       guestId,
-      { preArrival: PRE_ARRIVAL_STATUS.APPLIED },
+      { preArrivalStatus: PRE_ARRIVAL_STATUS.APPLIED },
       session,
     );
 
