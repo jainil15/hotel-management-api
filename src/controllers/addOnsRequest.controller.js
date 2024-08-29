@@ -61,6 +61,24 @@ const update = async (req, res, next) => {
   }
 };
 
+const getAllByPropertyId = async (req, res, next) => {
+  try {
+    const { propertyId } = req.params;
+    const { requestStatus } = req.query;
+    const addOnsRequests = await addOnsRequestService.getAllByPropertyId(
+      propertyId,
+      requestStatus,
+    );
+    return responseHandler(res, { addOnsRequests });
+  } catch (e) {
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError(e.message));
+  }
+};
+
 module.exports = {
   update,
+  getAllByPropertyId,
 };

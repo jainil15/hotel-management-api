@@ -9,6 +9,14 @@ const {
   checkPermissions,
 } = require("../middlewares/propertyaccess.middleware");
 
+router.get(
+  "/:propertyId",
+  authenticateToken,
+  checkPropertyAccess,
+  checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
+  addOnsRequestController.getAllByPropertyId,
+);
+
 router.put(
   "/:propertyId/:guestId/:addOnsRequestId",
   authenticateToken,

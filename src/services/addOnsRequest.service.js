@@ -1,3 +1,4 @@
+const { default: mongoose } = require("mongoose");
 const { AddOnsRequest } = require("../models/addOnsRequest.model");
 
 /**
@@ -41,6 +42,13 @@ const update = async (
   return updatedAddOnsRequest;
 };
 
+/**
+ * Get Add Ons Request by Id
+ * @param {string} propertyId
+ * @param {string} guestId
+ * @param {string} addOnsRequestId
+ * @returns {Promise<import('../models/addOnsRequest.model').AddOnsRequestType>}
+ */
 const getById = async (propertyId, guestId, addOnsRequestId) => {
   const addOnsRequest = await AddOnsRequest.findOne({
     propertyId,
@@ -50,4 +58,34 @@ const getById = async (propertyId, guestId, addOnsRequestId) => {
   return addOnsRequest;
 };
 
-module.exports = { create, update, getById };
+/**
+ * Get all Add Ons Request by Property Id
+ * @param {string} propertyId - The property id
+ * @param {string} requestStatus - The request status
+ * @returns {Promise<import('../models/addOnsRequest.model').AddOnsRequestType[]>}
+ */
+const getAllByPropertyId = async (propertyId, requestStatus) => {
+  const pipeline = [
+    {
+      $match: {
+        propertyId: new mongoose.Types.ObjectId(propertyId),
+        requestStatus: requestStatus,
+      },
+    },
+    {
+      $lookup: {
+        from: "guests",
+        localField: "guestId",
+        foreignField: "_id",
+        as: "guest",
+      },
+    },
+    {
+      $unwind: "$guest",
+    },
+  ];
+  const addOnsRequests = await AddOnsRequest.aggregate(pipeline);
+  return addOnsRequests;
+};
+
+module.exports = { create, update, getById, getAllByPropertyId };
