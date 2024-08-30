@@ -15,6 +15,13 @@ const { z } = require("zod");
 const { responseHandler } = require("../middlewares/response.middleware");
 const { default: mongoose } = require("mongoose");
 
+/**
+ * Update the status of the add ons request
+ * @param {import('express).Request} req - Request
+ * @param {import('express).Response} res - Response
+ * @param {import('express).NextFunction} next - NextFunction
+ * @returns {Promise<import('express').Response>} - Response
+ */
 const update = async (req, res, next) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -68,6 +75,13 @@ const update = async (req, res, next) => {
   }
 };
 
+/**
+ * Get all add ons requests by property id
+ * @param {import('express').Request} req - Request
+ * @param {import('express').Response} res - Response
+ * @param {import('express').NextFunction} next - NextFunction
+ * @returns {Promise<import('express').Response>} - Response
+ */
 const getAllByPropertyId = async (req, res, next) => {
   try {
     const { propertyId } = req.params;

@@ -473,6 +473,13 @@ const createReview = async (req, res, next) => {
   }
 };
 
+/**
+ * Create add ons request
+ * @param {import('express').Request} req - Request object
+ * @param {import('express').Response} res - Response object
+ * @param {import('express').NextFunction} next - Next function
+ * @returns {Promise<import('express').Response>} - Response object
+ */
 const createAddOnsRequest = async (req, res, next) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -546,6 +553,13 @@ const createAddOnsRequest = async (req, res, next) => {
   }
 };
 
+/**
+ * Get add ons
+ * @param {import('express').Request} req - Request object
+ * @param {import('express').Response} res - Response object
+ * @param {import('express').NextFunction} next - Next function
+ * @returns {Promise<import('express').Response>} - Response object
+ */
 const getAddOns = async (req, res, next) => {
   try {
     const { propertyId } = req.guestSession;
