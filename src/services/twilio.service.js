@@ -91,7 +91,7 @@ const buyPhoneNumber = async (propertyId, phoneNumber, user) => {
   twilioAccount.phoneNumber = incomingPhoneNumber.phoneNumber.slice(-10);
   twilioAccount.countryCode = incomingPhoneNumber.phoneNumber.slice(
     0,
-    phone.length - 10,
+    incomingPhoneNumber.phoneNumber.length - 10,
   );
   twilioAccount.phoneNumberSid = incomingPhoneNumber.sid;
   twilioAccount.tollfreeVerificationSid = tollfreeVerification.sid;
