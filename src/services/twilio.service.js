@@ -88,7 +88,11 @@ const buyPhoneNumber = async (propertyId, phoneNumber, user) => {
       useCaseCategories: ["CUSTOMER_CARE"],
       useCaseSummary: "Communication with guest for hotel front desk",
     });
-  twilioAccount.phoneNumber = incomingPhoneNumber.phoneNumber;
+  twilioAccount.phoneNumber = incomingPhoneNumber.phoneNumber.slice(-10);
+  twilioAccount.countryCode = incomingPhoneNumber.phoneNumber.slice(
+    0,
+    phone.length - 10,
+  );
   twilioAccount.phoneNumberSid = incomingPhoneNumber.sid;
   twilioAccount.tollfreeVerificationSid = tollfreeVerification.sid;
   await twilioAccount.save();
