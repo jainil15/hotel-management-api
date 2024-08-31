@@ -485,14 +485,14 @@ const createAddOnsRequest = async (req, res, next) => {
   session.startTransaction();
   try {
     const { propertyId, guestId } = req.guestSession;
-    const { name } = req.body;
+    const { addOnsId } = req.body;
     const addOnsRequest = await addOnsFlowService.findOneAddOn(
       propertyId,
-      name,
+      addOnsId,
     );
     if (!addOnsRequest) {
-      throw new NotFoundError("Add Ons Request not found", {
-        addOnsRequest: ["Add Ons Request not found"],
+      throw new NotFoundError("Add Ons not found", {
+        addOnsRequest: ["Add Ons Request found"],
       });
     }
     const addOnsRequestResult =

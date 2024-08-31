@@ -11,7 +11,7 @@ const customAddOnsSchema = new Schema(
     enabled: { type: Boolean, default: true },
     default: { type: Boolean, default: true },
   },
-  { _id: false },
+  {},
 );
 const checkInOutAddOnsSchema = new Schema(
   {
