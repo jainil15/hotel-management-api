@@ -44,8 +44,9 @@ const remove = async (propertyId, session) => {
 };
 
 /**
- * @param {string} propertyId
- * @param {object} filter
+ * @param {string} propertyId - Id of the property
+ * @param {addOnsId} addOnsId - Id of the addOns
+ * @returns {Promise<import('../models/addOnsFlow.model').CustomAddOnsType>}
  */
 const findOneAddOn = async (propertyId, addOnsId) => {
   const addOnsFlow = await AddOnsFlow.findOne({
