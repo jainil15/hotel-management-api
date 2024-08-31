@@ -2629,7 +2629,19 @@ paths:
                             type: array
                             items:
                               type: object
-                              properties: {}
+                              properties:
+                                name:
+                                  type: string
+                                description:
+                                  type: string
+                                paid:
+                                  type: boolean
+                                price:
+                                  type: number
+                                enabled:
+                                  type: boolean
+                                default:
+                                  type: boolean
                           checkInOutAddOns:
                             type: array
                             items:
@@ -2700,57 +2712,68 @@ paths:
                           __v:
                             type: integer
                       inHouseFlow:
-                        type: array
-                        items:
-                          type: object
-                          properties:
-                            _id:
+                        type: object
+                        properties:
+                          _id:
+                            type: string
+                          propertyId:
+                            type: string
+                          wifiDetailsEnabled:
+                            type: boolean
+                          wifiDetails:
+                            type: object
+                            properties:
+                              wifiName:
+                                type: string
+                              wifiInstructions:
+                                type: string
+                          clickableLinksOrButtonsEnabled:
+                            type: boolean
+                          clickableLinksOrButtons:
+                            type: array
+                            items:
                               type: string
-                            propertyId:
-                              type: string
-                            frequentlyAskedQuestionsEnabled:
-                              type: boolean
-                            frequentlyAskedQuestions:
-                              type: array
-                              items:
-                                type: object
-                                properties:
-                                  question:
-                                    type: string
-                                  answer:
-                                    type: string
-                            createdAt:
-                              type: string
-                            updatedAt:
-                              type: string
-                            __v:
-                              type: integer
+                          frequentlyAskedQuestionsEnabled:
+                            type: boolean
+                          frequentlyAskedQuestions:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                question:
+                                  type: string
+                                answer:
+                                  type: string
+                          createdAt:
+                            type: string
+                          updatedAt:
+                            type: string
+                          __v:
+                            type: integer
                       checkedOutFlow:
-                        type: array
-                        items:
-                          type: object
-                          properties:
-                            _id:
-                              type: string
-                            propertyId:
-                              type: string
-                            frequentlyAskedQuestionsEnabled:
-                              type: boolean
-                            frequentlyAskedQuestions:
-                              type: array
-                              items:
-                                type: object
-                                properties:
-                                  question:
-                                    type: string
-                                  answer:
-                                    type: string
-                            createdAt:
-                              type: string
-                            updatedAt:
-                              type: string
-                            __v:
-                              type: integer
+                        type: object
+                        properties:
+                          _id:
+                            type: string
+                          propertyId:
+                            type: string
+                          frequentlyAskedQuestionsEnabled:
+                            type: boolean
+                          frequentlyAskedQuestions:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                question:
+                                  type: string
+                                answer:
+                                  type: string
+                          createdAt:
+                            type: string
+                          updatedAt:
+                            type: string
+                          __v:
+                            type: integer
                   status:
                     type: string
                   type:
@@ -2762,12 +2785,12 @@ paths:
                     statusCode: 200
                     result:
                       homeFlow:
-                        _id: 66c7241ca90a206439615a0f
-                        propertyId: 66a2174cf74f8664b0bb207d
-                        frequentlyAskedQuestionsEnabled: true
+                        _id: 66cb2c53b48abb5da44ec528
+                        propertyId: 66a2125d50a317d5ffa691ad
+                        frequentlyAskedQuestionsEnabled: false
                         amenities:
                           - name: Breakfast Included
-                            enabled: true
+                            enabled: false
                           - name: 24/7 Front Desk
                             enabled: true
                           - name: Free WiFi
@@ -2779,23 +2802,29 @@ paths:
                           - name: Parking Available
                             enabled: true
                           - name: Luggage Storage
-                            enabled: true
+                            enabled: false
                         frequentlyAskedQuestions:
                           - question: What time is standard check in?
                             answer: 'Check-out is at 3:00 PM.'
-                        createdAt: '2024-08-22T11:42:20.266Z'
-                        updatedAt: '2024-08-22T11:42:20.266Z'
+                        createdAt: '2024-08-25T13:06:27.273Z'
+                        updatedAt: '2024-08-25T13:20:10.159Z'
                         __v: 0
                       addOnsFlow:
-                        _id: 66c7241ca90a206439615a11
-                        propertyId: 66a2174cf74f8664b0bb207d
-                        customAddOns: []
+                        _id: 66cb2c53b48abb5da44ec52a
+                        propertyId: 66a2125d50a317d5ffa691ad
+                        customAddOns:
+                          - name: Edit
+                            description: Desc of Edit
+                            paid: true
+                            price: 12.5
+                            enabled: true
+                            default: true
                         checkInOutAddOns:
                           - name: Early Check In
                             description: Early Check In
                             defaultTimeEnabled: true
                             defaultTiming: '14:00'
-                            customTiming: '14:00'
+                            customTiming: '15:00'
                             paid: false
                             price: 0
                             enabled: true
@@ -2809,12 +2838,12 @@ paths:
                             price: 0
                             enabled: true
                             default: true
-                        createdAt: '2024-08-22T11:42:20.326Z'
-                        updatedAt: '2024-08-22T11:42:20.326Z'
+                        createdAt: '2024-08-25T13:06:27.302Z'
+                        updatedAt: '2024-08-25T13:20:10.186Z'
                         __v: 0
                       preArrivalFlow:
-                        _id: 66c7241ca90a206439615a13
-                        propertyId: 66a2174cf74f8664b0bb207d
+                        _id: 66cb2c53b48abb5da44ec52c
+                        propertyId: 66a2125d50a317d5ffa691ad
                         phoneNumber: true
                         emailAddress: true
                         arrivalTime: true
@@ -2827,29 +2856,37 @@ paths:
                         primaryPolicy: Primary policy regarding refund and important points displayed here
                         policyLink: Policy link with bottom sheet
                         extraPolicies: []
-                        createdAt: '2024-08-22T11:42:20.369Z'
-                        updatedAt: '2024-08-22T11:42:20.369Z'
+                        createdAt: '2024-08-25T13:06:27.324Z'
+                        updatedAt: '2024-08-25T13:20:10.215Z'
                         __v: 0
                       inHouseFlow:
-                        - _id: 66c7241ca90a206439615a15
-                          propertyId: 66a2174cf74f8664b0bb207d
-                          frequentlyAskedQuestionsEnabled: true
-                          frequentlyAskedQuestions:
-                            - question: What time is standard check out?
-                              answer: 'Check out is at 11:00 AM.'
-                          createdAt: '2024-08-22T11:42:20.405Z'
-                          updatedAt: '2024-08-22T11:42:20.405Z'
-                          __v: 0
+                        _id: 66cb2c53b48abb5da44ec52e
+                        propertyId: 66a2125d50a317d5ffa691ad
+                        wifiDetailsEnabled: true
+                        wifiDetails:
+                          wifiName: HotelWifi
+                          wifiInstructions: This is edited password
+                        clickableLinksOrButtonsEnabled: true
+                        clickableLinksOrButtons:
+                          - 'https://www.onelyk.com'
+                          - 'https://www.edited.com'
+                        frequentlyAskedQuestionsEnabled: true
+                        frequentlyAskedQuestions:
+                          - question: What time is standard check out?
+                            answer: 'This Check out is at 11:00 AM.'
+                        createdAt: '2024-08-25T13:06:27.347Z'
+                        updatedAt: '2024-08-25T13:20:10.235Z'
+                        __v: 0
                       checkedOutFlow:
-                        - _id: 66c7241ca90a206439615a17
-                          propertyId: 66a2174cf74f8664b0bb207d
-                          frequentlyAskedQuestionsEnabled: true
-                          frequentlyAskedQuestions:
-                            - question: What time is standard check out?
-                              answer: 'Check-out is at 11:00 AM.'
-                          createdAt: '2024-08-22T11:42:20.439Z'
-                          updatedAt: '2024-08-22T11:42:20.439Z'
-                          __v: 0
+                        _id: 66cb2c53b48abb5da44ec530
+                        propertyId: 66a2125d50a317d5ffa691ad
+                        frequentlyAskedQuestionsEnabled: true
+                        frequentlyAskedQuestions:
+                          - question: What time is standard check out?
+                            answer: 'The Check-out is at 11:00 AM.'
+                        createdAt: '2024-08-25T13:06:27.370Z'
+                        updatedAt: '2024-08-25T13:20:10.266Z'
+                        __v: 0
                     status: success
                     type: SUCCESS
                     message: Success
@@ -2859,284 +2896,7 @@ paths:
       security:
         - Bearer: []
       requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                statusCode:
-                  type: integer
-                result:
-                  type: object
-                  properties:
-                    homeFlow:
-                      type: object
-                      properties:
-                        _id:
-                          type: string
-                        propertyId:
-                          type: string
-                        frequentlyAskedQuestionsEnabled:
-                          type: boolean
-                        amenities:
-                          type: array
-                          items:
-                            type: object
-                            properties:
-                              name:
-                                type: string
-                              enabled:
-                                type: boolean
-                        frequentlyAskedQuestions:
-                          type: array
-                          items:
-                            type: object
-                            properties:
-                              question:
-                                type: string
-                              answer:
-                                type: string
-                        createdAt:
-                          type: string
-                        updatedAt:
-                          type: string
-                        __v:
-                          type: integer
-                    addOnsFlow:
-                      type: object
-                      properties:
-                        _id:
-                          type: string
-                        propertyId:
-                          type: string
-                        customAddOns:
-                          type: array
-                          items:
-                            type: object
-                            properties: {}
-                        checkInOutAddOns:
-                          type: array
-                          items:
-                            type: object
-                            properties:
-                              name:
-                                type: string
-                              description:
-                                type: string
-                              defaultTimeEnabled:
-                                type: boolean
-                              defaultTiming:
-                                type: string
-                              customTiming:
-                                type: string
-                              paid:
-                                type: boolean
-                              price:
-                                type: integer
-                              enabled:
-                                type: boolean
-                              default:
-                                type: boolean
-                        createdAt:
-                          type: string
-                        updatedAt:
-                          type: string
-                        __v:
-                          type: integer
-                    preArrivalFlow:
-                      type: object
-                      properties:
-                        _id:
-                          type: string
-                        propertyId:
-                          type: string
-                        phoneNumber:
-                          type: boolean
-                        emailAddress:
-                          type: boolean
-                        arrivalTime:
-                          type: boolean
-                        vehicleMakeModelColor:
-                          type: boolean
-                        licensePlateNo:
-                          type: boolean
-                        specialRequests:
-                          type: boolean
-                        guestSignature:
-                          type: boolean
-                        guestIdProof:
-                          type: boolean
-                        policies:
-                          type: boolean
-                        primaryPolicy:
-                          type: string
-                        policyLink:
-                          type: string
-                        extraPolicies:
-                          type: array
-                          items:
-                            type: object
-                            properties: {}
-                        createdAt:
-                          type: string
-                        updatedAt:
-                          type: string
-                        __v:
-                          type: integer
-                    inHouseFlow:
-                      type: array
-                      items:
-                        type: object
-                        properties:
-                          _id:
-                            type: string
-                          propertyId:
-                            type: string
-                          frequentlyAskedQuestionsEnabled:
-                            type: boolean
-                          frequentlyAskedQuestions:
-                            type: array
-                            items:
-                              type: object
-                              properties:
-                                question:
-                                  type: string
-                                answer:
-                                  type: string
-                          createdAt:
-                            type: string
-                          updatedAt:
-                            type: string
-                          __v:
-                            type: integer
-                    checkedOutFlow:
-                      type: array
-                      items:
-                        type: object
-                        properties:
-                          _id:
-                            type: string
-                          propertyId:
-                            type: string
-                          frequentlyAskedQuestionsEnabled:
-                            type: boolean
-                          frequentlyAskedQuestions:
-                            type: array
-                            items:
-                              type: object
-                              properties:
-                                question:
-                                  type: string
-                                answer:
-                                  type: string
-                          createdAt:
-                            type: string
-                          updatedAt:
-                            type: string
-                          __v:
-                            type: integer
-                status:
-                  type: string
-                type:
-                  type: string
-                message:
-                  type: string
-              x-examples:
-                Example 1:
-                  statusCode: 200
-                  result:
-                    homeFlow:
-                      _id: 66c7241ca90a206439615a0f
-                      propertyId: 66a2174cf74f8664b0bb207d
-                      frequentlyAskedQuestionsEnabled: true
-                      amenities:
-                        - name: Breakfast Included
-                          enabled: true
-                        - name: 24/7 Front Desk
-                          enabled: true
-                        - name: Free WiFi
-                          enabled: true
-                        - name: HouseKeeping
-                          enabled: true
-                        - name: Air conditioning
-                          enabled: true
-                        - name: Parking Available
-                          enabled: true
-                        - name: Luggage Storage
-                          enabled: true
-                      frequentlyAskedQuestions:
-                        - question: What time is standard check in?
-                          answer: 'Check-out is at 3:00 PM.'
-                      createdAt: '2024-08-22T11:42:20.266Z'
-                      updatedAt: '2024-08-22T11:42:20.266Z'
-                      __v: 0
-                    addOnsFlow:
-                      _id: 66c7241ca90a206439615a11
-                      propertyId: 66a2174cf74f8664b0bb207d
-                      customAddOns: []
-                      checkInOutAddOns:
-                        - name: Early Check In
-                          description: Early Check In
-                          defaultTimeEnabled: true
-                          defaultTiming: '14:00'
-                          customTiming: '14:00'
-                          paid: false
-                          price: 0
-                          enabled: true
-                          default: true
-                        - name: Late Check Out
-                          description: Late Check Out
-                          defaultTimeEnabled: true
-                          defaultTiming: '12:00'
-                          customTiming: '12:00'
-                          paid: false
-                          price: 0
-                          enabled: true
-                          default: true
-                      createdAt: '2024-08-22T11:42:20.326Z'
-                      updatedAt: '2024-08-22T11:42:20.326Z'
-                      __v: 0
-                    preArrivalFlow:
-                      _id: 66c7241ca90a206439615a13
-                      propertyId: 66a2174cf74f8664b0bb207d
-                      phoneNumber: true
-                      emailAddress: true
-                      arrivalTime: true
-                      vehicleMakeModelColor: true
-                      licensePlateNo: true
-                      specialRequests: true
-                      guestSignature: true
-                      guestIdProof: true
-                      policies: true
-                      primaryPolicy: Primary policy regarding refund and important points displayed here
-                      policyLink: Policy link with bottom sheet
-                      extraPolicies: []
-                      createdAt: '2024-08-22T11:42:20.369Z'
-                      updatedAt: '2024-08-22T11:42:20.369Z'
-                      __v: 0
-                    inHouseFlow:
-                      - _id: 66c7241ca90a206439615a15
-                        propertyId: 66a2174cf74f8664b0bb207d
-                        frequentlyAskedQuestionsEnabled: true
-                        frequentlyAskedQuestions:
-                          - question: What time is standard check out?
-                            answer: 'Check out is at 11:00 AM.'
-                        createdAt: '2024-08-22T11:42:20.405Z'
-                        updatedAt: '2024-08-22T11:42:20.405Z'
-                        __v: 0
-                    checkedOutFlow:
-                      - _id: 66c7241ca90a206439615a17
-                        propertyId: 66a2174cf74f8664b0bb207d
-                        frequentlyAskedQuestionsEnabled: true
-                        frequentlyAskedQuestions:
-                          - question: What time is standard check out?
-                            answer: 'Check-out is at 11:00 AM.'
-                        createdAt: '2024-08-22T11:42:20.439Z'
-                        updatedAt: '2024-08-22T11:42:20.439Z'
-                        __v: 0
-                  status: success
-                  type: SUCCESS
-                  message: Success
+        content: {}
     put:
       summary: Update workflow
       tags:
@@ -3152,7 +2912,226 @@ paths:
           application/json:
             schema:
               type: object
-              properties: {}
+              x-examples:
+                Example 1:
+                  homeFlow:
+                    frequentlyAskedQuestionsEnabled: false
+                    amenities:
+                      - name: Breakfast Included
+                        enabled: false
+                      - name: 24/7 Front Desk
+                        enabled: true
+                      - name: Free WiFi
+                        enabled: true
+                      - name: HouseKeeping
+                        enabled: true
+                      - name: Air conditioning
+                        enabled: true
+                      - name: Parking Available
+                        enabled: true
+                      - name: Luggage Storage
+                        enabled: false
+                    frequentlyAskedQuestions:
+                      - question: What time is standard check in?
+                        answer: 'Check-out is at 3:00 PM.'
+                  addOnsFlow:
+                    customAddOns:
+                      - name: Edit
+                        description: Desc of Edit
+                        paid: true
+                        price: 12.5
+                        enabled: true
+                        default: true
+                    checkInOutAddOns:
+                      - name: Early Check In
+                        description: Early Check In
+                        defaultTimeEnabled: true
+                        defaultTiming: '14:00'
+                        customTiming: '15:00'
+                        paid: false
+                        price: 0
+                        enabled: true
+                        default: true
+                      - name: Late Check Out
+                        description: Late Check Out
+                        defaultTimeEnabled: true
+                        defaultTiming: '12:00'
+                        customTiming: '12:00'
+                        paid: false
+                        price: 0
+                        enabled: true
+                        default: true
+                  preArrivalFlow:
+                    phoneNumber: true
+                    emailAddress: true
+                    arrivalTime: true
+                    vehicleMakeModelColor: true
+                    licensePlateNo: true
+                    specialRequests: true
+                    guestSignature: true
+                    guestIdProof: true
+                    policies: true
+                    primaryPolicy: Primary policy regarding refund and important points displayed here
+                    policyLink: Policy link with bottom sheet
+                    extraPolicies: []
+                  inHouseFlow:
+                    wifiDetailsEnabled: true
+                    wifiDetails:
+                      wifiName: HotelWifi
+                      wifiInstructions: This is edited password
+                    clickableLinksOrButtonsEnabled: true
+                    clickableLinksOrButtons:
+                      - 'https://www.onelyk.com'
+                      - 'https://www.edited.com'
+                    frequentlyAskedQuestionsEnabled: true
+                    frequentlyAskedQuestions:
+                      - question: What time is standard check out?
+                        answer: 'This Check out is at 11:00 AM.'
+                  checkedOutFlow:
+                    frequentlyAskedQuestionsEnabled: true
+                    frequentlyAskedQuestions:
+                      - question: What time is standard check out?
+                        answer: 'The Check-out is at 11:00 AM.'
+              properties:
+                homeFlow:
+                  type: object
+                  properties:
+                    frequentlyAskedQuestionsEnabled:
+                      type: boolean
+                    amenities:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                          enabled:
+                            type: boolean
+                    frequentlyAskedQuestions:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          question:
+                            type: string
+                          answer:
+                            type: string
+                addOnsFlow:
+                  type: object
+                  properties:
+                    customAddOns:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                          description:
+                            type: string
+                          paid:
+                            type: boolean
+                          price:
+                            type: number
+                          enabled:
+                            type: boolean
+                          default:
+                            type: boolean
+                    checkInOutAddOns:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                          description:
+                            type: string
+                          defaultTimeEnabled:
+                            type: boolean
+                          defaultTiming:
+                            type: string
+                          customTiming:
+                            type: string
+                          paid:
+                            type: boolean
+                          price:
+                            type: integer
+                          enabled:
+                            type: boolean
+                          default:
+                            type: boolean
+                preArrivalFlow:
+
+                  type: object
+                  properties:
+                    phoneNumber:
+                      type: boolean
+                    emailAddress:
+                      type: boolean
+                    arrivalTime:
+                      type: boolean
+                    vehicleMakeModelColor:
+                      type: boolean
+                    licensePlateNo:
+                      type: boolean
+                    specialRequests:
+                      type: boolean
+                    guestSignature:
+                      type: boolean
+                    guestIdProof:
+                      type: boolean
+                    policies:
+                      type: boolean
+                    primaryPolicy:
+                      type: string
+                    policyLink:
+                      type: string
+                    extraPolicies:
+                      type: array
+                      items:
+                        type: string
+                inHouseFlow:
+                  type: object
+                  properties:
+                    wifiDetailsEnabled:
+                      type: boolean
+                    wifiDetails:
+                      type: object
+                      properties:
+                        wifiName:
+                          type: string
+                        wifiInstructions:
+                          type: string
+                    clickableLinksOrButtonsEnabled:
+                      type: boolean
+                    clickableLinksOrButtons:
+                      type: array
+                      items:
+                        type: string
+                    frequentlyAskedQuestionsEnabled:
+                      type: boolean
+                    frequentlyAskedQuestions:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          question:
+                            type: string
+                          answer:
+                            type: string
+                checkedOutFlow:
+                  type: object
+                  properties:
+                    frequentlyAskedQuestionsEnabled:
+                      type: boolean
+                    frequentlyAskedQuestions:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          question:
+                            type: string
+                          answer:
+                            type: string
       security:
         - Bearer: []
   '/twilioAccount/{propertyId}':
@@ -3587,6 +3566,115 @@ paths:
                   type: boolean
                 consentToText:
                   type: boolean
+  '/guestApi/{guestSessionId}/addOnsRequest':
+    parameters:
+
+      - schema:
+          type: string
+        name: guestSessionId
+        in: path
+        required: true
+    post:
+      summary: Create custom addons request
+      tags:
+        - Guest Api
+      responses: {}
+      operationId: post-guestApi-guestSessionId-customAddOnsRequest
+      x-stoplight:
+        id: zn0l4pi0i44k4
+      x-internal: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                addOnsId:
+                  type: string
+                  x-stoplight:
+                    id: lfw7tcurktfly
+  '/guestApi/{guestSessionId}/addOns':
+    get:
+      summary: Get addons
+      tags:
+        - Guest Api
+      responses: {}
+      operationId: get-guestApi-addOns
+      x-stoplight:
+        id: tt7vecsu1a7lf
+      requestBody:
+        content: {}
+    parameters:
+      - schema:
+          type: string
+        name: guestSessionId
+        in: path
+        required: true
+  '/addOnsRequest/{propertyId}/{guestId}/{addOnsRequestId}':
+    parameters:
+      - schema:
+          type: string
+        name: propertyId
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: guestId
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: addOnsRequestId
+        in: path
+        required: true
+    put:
+      summary: Update addons request
+      tags:
+        - Add Ons Request
+      responses: {}
+      operationId: put-addOnsRequest-propertyId-guestId-addOnsRequestId
+      x-stoplight:
+        id: nsp6tqcdebrp7
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                requestStatus:
+                  x-stoplight:
+                    id: 2uyy6sxk4678y
+                  enum:
+                    - Accepted
+                    - Declined
+      security:
+        - Bearer: []
+  '/addOnsRequest/{propertyId}':
+    parameters:
+      - schema:
+          type: string
+        name: propertyId
+        in: path
+        required: true
+    get:
+      summary: Get all request for the property
+      tags:
+        - Add Ons Request
+      responses: {}
+      operationId: get-addOnsRequest-propertyId
+      x-stoplight:
+        id: 0uz2afrg8220u
+      security:
+        - Bearer: []
+      parameters:
+        - schema:
+            type: string
+            enum:
+              - Accepted
+              - Declined
+              - Requested
+          in: query
+          name: requestStatus
 components:
   schemas:
     User:
@@ -5368,17 +5456,23 @@ components:
                 type: string
 x-request-id: null
 tags:
+  - name: Add Ons Request
   - name: Auth
   - name: Broadcast
   - name: Chat List
+  - name: Check In Out Request
   - name: Country
   - name: Guest
   - name: Guest Api
   - name: Guest Status
   - name: Message
   - name: Message Template
+  - name: Pre Arrival
+  - name: Pre Arrival Flow
   - name: Property
+  - name: Setting
   - name: Twilio
+  - name: Twilio Account
   - name: User
   - name: Workflow
 
