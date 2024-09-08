@@ -67,6 +67,7 @@ const getByPropertyId = async (propertyId) => {
   return preArrivals;
 };
 
+// new get by guest id 
 const getByGuestId = (guestId) => {
   const preArrival = PreArrival.findOne({ guestId });
   return preArrival;

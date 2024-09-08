@@ -627,6 +627,11 @@ const getGuestById = async (req, res, next) => {
   }
 };
 
+ 
+// get display data -> preaarival ,addons , getguestbyid
+// new api edit -> patch ->guestedit ->
+// add in routes getguestdisplay, guestedit
+
 module.exports = {
   getAll,
   create,

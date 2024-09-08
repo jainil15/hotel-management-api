@@ -149,21 +149,27 @@ const createSubaccount = async (req, res, next) => {
  * @param {import('express').NextFunction} next - The next function
  * @returns {import('express').Response} - The response
  */
-const getTollFreeVerificationStatus = async (req, res, next) => {
-  try {
-    const propertyId = req.params.propertyId;
+const getTollFreeVerificationStatus = async (twilioClient, twilioAccount) => {
+  const tollfreeVerification = await twilioClient.messaging.v1
+    .tollfreeVerifications(twilioAccount.tollfreeVerificationSid)
+    .fetch();
 
-    const tollFreeVerificationStatus =
-      await twilioService.getTollFreeVerificationStatus(propertyId);
-
-    return responseHandler(res, { tollFreeVerificationStatus });
-  } catch (e) {
-    if (e instanceof APIError) {
-      return next(e);
-    }
-    return next(new InternalServerError());
+  if (!tollfreeVerification.status) {
+    throw new NotFoundError("Toll Free Verification not found", {
+      propertyId: [
+        "Toll Free Verification not found for the given property id",
+      ],
+    });
   }
+
+  const verificationDetails = {
+    status: tollfreeVerification.status,
+    errorCode: tollfreeVerification.errorCode || "No error code",
+  };
+
+  return verificationDetails;
 };
+
 
 /**
  * Send message to guest from property - Maybe not used

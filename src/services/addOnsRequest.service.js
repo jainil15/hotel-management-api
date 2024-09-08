@@ -58,6 +58,9 @@ const getById = async (propertyId, guestId, addOnsRequestId) => {
   return addOnsRequest;
 };
 
+// getByGuestId by findall
+
+
 /**
  * Get all Add Ons Request by Property Id
  * @param {string} propertyId - The property id

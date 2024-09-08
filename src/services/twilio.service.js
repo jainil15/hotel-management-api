@@ -83,7 +83,7 @@ const buyPhoneNumber = async (propertyId, phoneNumber, user) => {
       optInType: "VERBAL",
       optInImageUrls: ["https://onelyk-docs.s3.amazonaws.com/verbal_optin.txt"],
       productionMessageSample:
-        "Hello, You're early checkin is approved. Use the link provided to see next steps.",
+        "Hi [Guest Name], your stay at [Hotel Name] is confirmed from [Check-In Date] to [Check-Out Date]. Please reply if you have any questions.""Hi [Guest Name], your stay at [Hotel Name] is confirmed from [Check-In Date] to [Check-Out Date]. Please reply if you have any questions.",
       tollfreePhoneNumberSid: incomingPhoneNumber.sid,
       useCaseCategories: ["CUSTOMER_CARE"],
       useCaseSummary: "Communication with guest for hotel front desk",
