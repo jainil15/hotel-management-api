@@ -97,7 +97,6 @@ const buyPhoneNumber = async (propertyId, phoneNumber, user) => {
   await twilioAccount.save();
   return incomingPhoneNumber;
 };
-
 const createSubaccount = async (propertyId) => {
   // Check if property exists
   const property = await Property.findById(propertyId);
