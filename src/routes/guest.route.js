@@ -7,6 +7,8 @@ const {
   remove,
   getAllGuestsWithStatus,
   getGuestById,
+  getGuestData, // Newly added
+  guestedit,    // Newly added
 } = require("../controllers/guest.controller");
 
 const { authenticateToken } = require("../middlewares/jwt.middleware");
@@ -16,9 +18,13 @@ const {
 } = require("../middlewares/propertyaccess.middleware");
 const { ROLE } = require("../constants/role.constant");
 const { checkGuestAccess } = require("../middlewares/guestAccess.middleware");
+
 const router = Router();
 
+// Get guest information by guestId
 router.get("/getByGuestId/:guestId", getGuestById);
+
+// Create a new guest (for admins and front desk roles)
 router.post(
   "/:propertyId",
   authenticateToken,
@@ -26,6 +32,8 @@ router.post(
   checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
   create,
 );
+
+// Get all guests with their status (for admins and front desk roles)
 router.get(
   "/:propertyId",
   authenticateToken,
@@ -34,6 +42,7 @@ router.get(
   getAllGuestsWithStatus,
 );
 
+// Get a guest by their ID (for admins, front desk, and guest roles)
 router.get(
   "/:propertyId/:guestId",
   authenticateToken,
@@ -42,6 +51,8 @@ router.get(
   checkGuestAccess,
   getById,
 );
+
+// Update guest data by their ID (for admins and front desk roles)
 router.put(
   "/:propertyId/:guestId",
   authenticateToken,
@@ -49,12 +60,33 @@ router.put(
   checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
   update,
 );
+
+// Remove a guest by their ID (for admins and front desk roles)
 router.delete(
   "/:propertyId/:guestId",
   authenticateToken,
   checkPropertyAccess,
   checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
   remove,
+);
+
+// Add new routes for guest data and editing guest data
+
+// Get combined guest data (guest info, pre-arrival, add-ons, and guest status)
+router.get(
+  "/getGuestData/:propertyId/:guestId",
+  authenticateToken,
+  checkPropertyAccess,
+  getGuestData
+);
+
+// Edit guest data (fields like name, email, check-in, check-out, etc.)
+router.patch(
+  "/guestedit/:propertyId/:guestId",
+  authenticateToken,
+  checkPropertyAccess,
+  checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
+  guestedit
 );
 
 module.exports = router;

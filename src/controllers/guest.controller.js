@@ -19,6 +19,12 @@ const twilioAccountService = require("../services/twilioAccount.service");
 const chatListService = require("../services/chatList.service");
 const propertyService = require("../services/property.service");
 const checkInOutRequestService = require("../services/checkInOutRequest.service");
+
+//new 
+
+const preArrivalService = require('../services/preArrival.service'); // Pre-arrival service
+const addOnsServices  = require('../services/addOnsRequest.service'); // Add-ons service
+
 const {
   CreateGuestStatusValidationSchema,
   UpdateGuestStatusValidationSchema,
@@ -632,6 +638,94 @@ const getGuestById = async (req, res, next) => {
 // new api edit -> patch ->guestedit ->
 // add in routes getguestdisplay, guestedit
 
+// Get combined guest data from PreArrival, AddOns, and Guest by ID
+
+/**
+ * Get combined guest data from PreArrival, AddOns, and Guest by ID
+ * @param {Object} req
+ * @param {Object} res
+ * @param {Function} next
+ */
+
+const getGuestData = async (req, res, next) => {
+  try {
+    const guestId = req.params.guestId;
+    const propertyId = req.params.propertyId;
+
+    // Fetch data from all services
+    const guestData = await guestService.getByGuestId(guestId); // Fetch Guest Information
+    const preArrivalData = await preArrivalService.getByGuestId(guestId); // Fetch Pre-arrival data
+    const addOnsData = await addOnsServices.findAllByGuestId(propertyId, guestId); // Fetch Add-ons data
+    const guestStatus = await guestStatusService.getByGuestId(guestId); // Fetch Guest Status
+    const checkInOutRequest = await checkInOutRequestService.getByPropertyIdAndGuestId(propertyId,guestId);
+
+
+    // Combine all data into a single response
+    const combinedData = {
+      guest: guestData,
+      status: guestStatus,
+      preArrival: preArrivalData,
+      addOns: addOnsData,
+      checkInOutRequest: checkInOutRequest,
+    };
+
+    return responseHandler(res, combinedData);
+  } catch (e) {
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError());
+  }
+};
+
+/**
+ * Update guest data: Allows editing of guest fields like firstName, lastName, countryCode, phoneNumber, email, checkIn, checkOut, confirmationNumber
+ * @param {Object} req
+ * @param {Object} res
+ * @param {Function} next
+ */
+const guestedit = async (req, res, next) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const { guestId, propertyId } = req.params; // Extract guestId and propertyId from request params
+    const guest = req.body;
+    const guestResult = await UpdateGuestValidationSchema.safeParseAsync(guest);
+     // Editable fields
+
+    // Validate the guest data using Joi or similar validation schema
+   
+   if(!guestResult.success){
+    throw new ValidationError("Invalid data", guestResult.error.flatten().fieldErrors);
+   }
+
+    // Proceed with updating guest data in transaction
+    const updatedGuest = await guestService.update(
+      guest,
+      propertyId,
+      guestId,
+      session
+    );
+
+    await session.commitTransaction();
+    session.endSession();
+
+    return responseHandler(res, { updatedGuest: updatedGuest });
+  } catch (e) {
+
+    await session.abortTransaction();
+    session.endSession();
+
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError());
+  }
+
+}
+
+
+
 module.exports = {
   getAll,
   create,
@@ -640,4 +734,6 @@ module.exports = {
   remove,
   getAllGuestsWithStatus,
   getGuestById,
+  getGuestData,
+  guestedit,
 };

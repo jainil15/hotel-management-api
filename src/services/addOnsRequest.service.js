@@ -1,5 +1,6 @@
 const { default: mongoose } = require("mongoose");
-const { AddOnsRequest } = require("../models/addOnsRequest.model");
+const { AddOnsRequest, CreateAddOnsRequestValidationSchema } = require("../models/addOnsRequest.model");
+
 
 /**
  * Create Add Ons Request
@@ -58,8 +59,28 @@ const getById = async (propertyId, guestId, addOnsRequestId) => {
   return addOnsRequest;
 };
 
-// getByGuestId by findall
+/**
+ * Get all Add Ons Requests by Guest Id
+ * @param {string} propertyId
+ * @param {string} guestId
+ * @returns {Promise<Object>}
+ */
 
+
+// new ś
+const findAllByGuestId = async (propertyId, guestId) => {
+  const addOnsRequests = await AddOnsRequest.find({
+    propertyId,
+    guestId,
+  });
+
+  const statusCounts = addOnsRequests.reduce((acc, request) => {
+    acc[request.requestStatus] = (acc[request.requestStatus] || 0) + 1;
+    return acc;
+  }, {});
+
+  return {statusCounts,addOnsRequests};
+};
 
 /**
  * Get all Add Ons Request by Property Id
@@ -91,4 +112,4 @@ const getAllByPropertyId = async (propertyId, requestStatus) => {
   return addOnsRequests;
 };
 
-module.exports = { create, update, getById, getAllByPropertyId };
+module.exports = { create, update, getById, findAllByGuestId, getAllByPropertyId };

@@ -1,6 +1,6 @@
 openapi: 3.1.0
 x-stoplight:
-  id: qwywpxxlzuzxl
+  id: qp3yq2uc491rn
 info:
   title: Onelyk Swagger UI
   version: '1.0'
@@ -31,7 +31,7 @@ paths:
         $ref: '#/components/requestBodies/Register'
       description: Register new user
       x-stoplight:
-        id: 7xhk6wcrsm2m3
+        id: nt9l3ywgwri9r
       parameters: []
       x-internal: false
       tags:
@@ -49,7 +49,7 @@ paths:
           $ref: '#/components/responses/Error'
       operationId: login-user
       x-stoplight:
-        id: 8m90dlv0xc09x
+        id: du0m8wj6y1tl3
       requestBody:
         $ref: '#/components/requestBodies/Login'
   /auth/accessToken:
@@ -58,7 +58,7 @@ paths:
       responses: {}
       operationId: get-auth-accesstoken
       x-stoplight:
-        id: 91ttdhzlaulzl
+        id: 86c1gpof4rc40
       parameters:
         - schema:
             type: string
@@ -84,7 +84,7 @@ paths:
           $ref: '#/components/responses/Error'
       operationId: post-auth-verifyOtp
       x-stoplight:
-        id: 2mys6pc0tw9tn
+        id: q2ux63jc71h5i
       requestBody:
         content:
           application/json:
@@ -115,7 +115,7 @@ paths:
           content: {}
       operationId: post-user-logout
       x-stoplight:
-        id: rl0dfsy0rxz57
+        id: 5rxkdhvuy0g9y
       security:
         - Bearer: []
   /user:
@@ -191,7 +191,7 @@ paths:
                     message: User Found
       operationId: get-user
       x-stoplight:
-        id: ztlhlwiajutbr
+        id: wcnoy9rjdz7pi
       security:
         - Bearer: []
   '/user/{propertyId}':
@@ -208,7 +208,7 @@ paths:
           $ref: '#/components/responses/User'
       operationId: post-user-propertyId
       x-stoplight:
-        id: jrjx090obmx3q
+        id: a3z647hyts4nn
       requestBody:
         $ref: '#/components/requestBodies/User'
       security:
@@ -229,7 +229,7 @@ paths:
           $ref: '#/components/responses/Error'
       operationId: Create-Property
       x-stoplight:
-        id: ryjalcd5tmwuq
+        id: m4duh5kmls89i
       security:
         - Bearer: []
       requestBody:
@@ -241,7 +241,7 @@ paths:
       responses: {}
       operationId: get-all-property-of-user
       x-stoplight:
-        id: u96bywly9mqg4
+        id: a600rohg2ka4b
       security:
         - Bearer: []
   /twilio/phoneNumbers:
@@ -250,7 +250,7 @@ paths:
       responses: {}
       operationId: get-twilio-phoneNumbers
       x-stoplight:
-        id: kbqsty6fg7exx
+        id: 3bz5mfejrmp8q
       security:
         - Bearer: []
       parameters:
@@ -294,7 +294,7 @@ paths:
                           id: m328ktmkl6mxn
       operationId: post-twilio-propertyId-buyPhoneNumber
       x-stoplight:
-        id: r0xyiornttr0a
+        id: 575i2lq90qtvd
       description: ''
       requestBody:
         content:
@@ -344,7 +344,7 @@ paths:
                           id: 3sm8azvocsfrg
       operationId: post-twilio-propertyId-createSubaccount
       x-stoplight:
-        id: 49qo0ggfuutup
+        id: xcaqbx7am5uel
       security:
         - Bearer: []
   /auth/resendOtp:
@@ -369,7 +369,7 @@ paths:
                       id: bufkcslp1clep
       operationId: post-auth-resendOtp
       x-stoplight:
-        id: vnabujuuggkfj
+        id: 2iffkjztjlkex
       requestBody:
         content:
           application/json:
@@ -398,7 +398,7 @@ paths:
           $ref: '#/components/responses/PropertyResponse'
       operationId: get-property-propertyId
       x-stoplight:
-        id: jqjeu1hs5q8ry
+        id: w8mmya8goamfv
       security:
         - Bearer: []
     put:
@@ -408,7 +408,7 @@ paths:
       responses: {}
       operationId: put-property-propertyId
       x-stoplight:
-        id: 1ng4lp3kroxlz
+        id: rcmtbej220q41
       requestBody:
         description: Shared Request
         content:
@@ -520,7 +520,7 @@ paths:
                               type: string
       operationId: get-country
       x-stoplight:
-        id: eahvalgj8q15t
+        id: qi4usgtc9pbcd
   '/country/{country}/states':
     parameters:
       - schema:
@@ -555,7 +555,7 @@ paths:
                               type: string
       operationId: get-country-countryId-states
       x-stoplight:
-        id: yewamkjrance5
+        id: vfz6hx9z31i50
   '/country/{country}/timezones':
     parameters:
       - schema:
@@ -596,7 +596,7 @@ paths:
                               type: string
       operationId: get-country-countryId-timezone
       x-stoplight:
-        id: cr2z17dg4genl
+        id: ycp51kqxw7che
   '/country/{country}/{zipcode}':
     parameters:
       - schema:
@@ -668,7 +668,7 @@ paths:
                         longitude: '-113.676'
       operationId: get-country-countrycode-zipcode
       x-stoplight:
-        id: rt0gmfe39ejzk
+        id: z2sxy6js5chbk
   '/country/{country}/{state}/cities':
     parameters:
       - schema:
@@ -714,7 +714,7 @@ paths:
               examples: {}
       operationId: get-country-country-state-cities
       x-stoplight:
-        id: z3giqx0o6pq65
+        id: nr8yz56h36va8
   '/twilio/{propertyId}/tollFreeVerificationStatus':
     parameters:
       - schema:
@@ -743,9 +743,13 @@ paths:
                         type: string
                         x-stoplight:
                           id: 4aqy1y8chykq8
+                      errorCode:
+                        type: string
+                        x-stoplight:
+                          id: qfzpkuyy3npos
       operationId: get-twilio-propertyId-tollfreeVerificationStatus
       x-stoplight:
-        id: es0glpjzixbxx
+        id: u5b0btubz5ecw
       security:
         - Bearer: []
   '/guest/{propertyId}':
@@ -758,7 +762,7 @@ paths:
           $ref: '#/components/responses/CreateGuest'
       operationId: post-guest-propertyId
       x-stoplight:
-        id: vyo5rxdr47cse
+        id: mkyfkrm41550l
       security:
         - Bearer: []
       requestBody:
@@ -776,7 +780,7 @@ paths:
       responses: {}
       operationId: get-guest-propertyId
       x-stoplight:
-        id: scgy2wj2rtgn9
+        id: buheh7q1s618b
       parameters:
         - schema:
             type: string
@@ -828,7 +832,7 @@ paths:
           $ref: '#/components/responses/CreateGuest'
       operationId: put-guest-propertyId-guestId
       x-stoplight:
-        id: 8qsp31nk6963h
+        id: z0btw9xx5lx8l
       requestBody:
         $ref: '#/components/requestBodies/CreateGuest'
       security:
@@ -842,7 +846,132 @@ paths:
           $ref: '#/components/responses/CreateGuest'
       operationId: get-guest-propertyId-guestId
       x-stoplight:
-        id: wnosjabi6hyhh
+        id: dknbstp8l0hqc
+      security:
+        - Bearer: []
+    patch:
+      summary: guestedit
+      tags:
+        - Guest
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                  result:
+                    type: object
+                    properties:
+                      updatedGuest:
+                        type: object
+                        properties:
+                          _id:
+                            type: string
+                          propertyId:
+                            type: string
+                          countryCode:
+                            type: string
+                          phoneNumber:
+                            type: string
+                          source:
+                            type: string
+                          checkIn:
+                            type: string
+                          checkOut:
+                            type: string
+                          confirmationNumber:
+                            type: string
+                          roomNumber:
+                            type: string
+                          firstName:
+                            type: string
+                          lastName:
+                            type: string
+                          email:
+                            type: string
+                          active:
+                            type: boolean
+                          createdAt:
+                            type: string
+                          updatedAt:
+                            type: string
+                          __v:
+                            type: integer
+                  status:
+                    type: string
+                  type:
+                    type: string
+                  message:
+                    type: string
+                x-examples:
+                  Example 1:
+                    statusCode: 200
+                    result:
+                      updatedGuest:
+                        _id: 66c72f7c8610d881b822af99
+                        propertyId: 66a2125d50a317d5ffa691ad
+                        countryCode: '+1'
+                        phoneNumber: '1234573890'
+                        source: Booking.com
+                        checkIn: '2019-08-24T14:15:00.000Z'
+                        checkOut: '2019-08-25T14:15:00.000Z'
+                        confirmationNumber: '123456789012'
+                        roomNumber: C-102
+                        firstName: First
+                        lastName: Last
+                        email: firstlast@guest.com
+                        active: true
+                        createdAt: '2024-08-22T12:30:52.693Z'
+                        updatedAt: '2024-09-10T12:01:06.814Z'
+                        __v: 0
+                    status: success
+                    type: SUCCESS
+                    message: Success
+      operationId: patch-guest-propertyId-guestId
+      x-stoplight:
+        id: j089jog068q1i
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                  x-stoplight:
+                    id: q6t6d8y5u7bim
+                lastName:
+                  type: string
+                  x-stoplight:
+                    id: quf09e2mgi2fi
+                countryCode:
+                  type: string
+                  x-stoplight:
+                    id: k92oz50cnwbsa
+                phoneNumber:
+                  type: string
+                  x-stoplight:
+                    id: zo070cbxzmems
+                email:
+                  type: string
+                  x-stoplight:
+                    id: ag6pkzry9u3dg
+                checkIn:
+                  type: string
+                  x-stoplight:
+                    id: c5ov0jetdaeex
+                checkOut:
+                  type: string
+                  x-stoplight:
+                    id: l8p8xjre2xx35
+                confirmationNumber:
+                  type: string
+                  x-stoplight:
+                    id: 0hfsqc7a8bjbn
       security:
         - Bearer: []
   '/messageTemplate/{propertyId}':
@@ -857,7 +986,7 @@ paths:
       responses: {}
       operationId: get-messageTemplate-propertyId
       x-stoplight:
-        id: e0b6uci3sccc4
+        id: m216yha6p9ifj
       security:
         - Bearer: []
       tags:
@@ -869,7 +998,7 @@ paths:
           $ref: '#/components/responses/CreateMessageTemplate'
       operationId: post-messageTemplate-propertyId
       x-stoplight:
-        id: g3ds5i6zexgku
+        id: qsf5jsd005kmm
       security:
         - Bearer: []
       requestBody:
@@ -881,7 +1010,7 @@ paths:
       responses: {}
       operationId: put-messageTemplate-propertyId
       x-stoplight:
-        id: tqxogfouffgio
+        id: eych2wzbib205
       security:
         - Bearer: []
       requestBody:
@@ -1015,7 +1144,7 @@ paths:
       responses: {}
       operationId: get-messageTemplate-propertyId-messageTemplateId
       x-stoplight:
-        id: oeymus6t9tc1d
+        id: nfkkp8lo0dpf4
       security:
         - Bearer: []
       tags:
@@ -1027,7 +1156,7 @@ paths:
           $ref: '#/components/responses/CreateMessageTemplate'
       operationId: put-messageTemplate-propertyId-messageTemplateId
       x-stoplight:
-        id: fg4p64kkk534l
+        id: z061kbjyarp75
       security:
         - Bearer: []
       requestBody:
@@ -1041,7 +1170,7 @@ paths:
           description: OK
       operationId: delete-messageTemplate-propertyId-messageTemplateId
       x-stoplight:
-        id: uqjzynq8v29vm
+        id: aesauihj9tchb
       security:
         - Bearer: []
       tags:
@@ -1067,7 +1196,7 @@ paths:
           $ref: '#/components/responses/GuestStatus'
       operationId: get-guestStatus-propertyId-guestId
       x-stoplight:
-        id: 01sisp96036vu
+        id: vh5vkaq2bet35
       security:
         - Bearer: []
     put:
@@ -1079,7 +1208,7 @@ paths:
           $ref: '#/components/responses/GuestStatus'
       operationId: put-guestStatus-propertyId-guestId
       x-stoplight:
-        id: wdogp9jz9ub4g
+        id: e5bt08361wdsq
       requestBody:
         $ref: '#/components/requestBodies/UpdateGuestStatus'
       security:
@@ -1100,7 +1229,7 @@ paths:
           description: Success
       operationId: get-auth-guestAccessToken-guestId
       x-stoplight:
-        id: ikrvbejxoka8j
+        id: nrh9mgme2mki2
   '/auth/guestLogin/{token}':
     parameters:
       - schema:
@@ -1115,7 +1244,7 @@ paths:
       responses: {}
       operationId: post-auth-guestLogin-token
       x-stoplight:
-        id: rotvyvzh8vujs
+        id: qjqxcad9rcuc2
   '/chatList/{propertyId}':
     parameters:
       - schema:
@@ -1132,7 +1261,7 @@ paths:
           $ref: '#/components/responses/ChatLists'
       operationId: get-chatList-propertyId
       x-stoplight:
-        id: c1jevyn62i63u
+        id: yr6beds130946
       security:
         - Bearer: []
       x-request-id: null
@@ -1164,7 +1293,7 @@ paths:
                 properties: {}
       operationId: post-chatList-propertyId-guestId
       x-stoplight:
-        id: uu85k2cggf65h
+        id: 2v31mp7d2crhe
       security:
         - Bearer: []
     put:
@@ -1174,7 +1303,7 @@ paths:
       responses: {}
       operationId: put-chatList-propertyId-guestId
       x-stoplight:
-        id: gbye5fx087kcv
+        id: r12pb5yi4j7vw
       security:
         - Bearer: []
       requestBody:
@@ -1201,7 +1330,7 @@ paths:
           description: OK
       operationId: delete-chatList-propertyId-guestId
       x-stoplight:
-        id: pkregn22omv90
+        id: pu1bbf0rav79j
       security:
         - Bearer: []
   '/sms/send/{propertyId}/{guestId}':
@@ -1230,7 +1359,7 @@ paths:
                 properties: {}
       operationId: post-sms-send-propertyId-guestId
       x-stoplight:
-        id: 3dvs5ezcalz4w
+        id: hwsbc461v2koo
       description: 'This endpoint will send sms to the guest and store the message in db and will emit socket event message:newMessage'
       security:
         - Bearer: []
@@ -1350,7 +1479,7 @@ paths:
                     message: Success
       operationId: get-message-propertyId
       x-stoplight:
-        id: 1zr2m3hgcvsss
+        id: 2u6hxxy0eu8hp
       security:
         - Bearer: []
   /sms/receive:
@@ -1361,7 +1490,7 @@ paths:
       responses: {}
       operationId: post-sms-receive
       x-stoplight:
-        id: jwesxn6m492m6
+        id: vfo1kvym3y0to
       requestBody:
         content:
           application/json:
@@ -1519,7 +1648,7 @@ paths:
                     message: Success
       operationId: get-messageTemplate-propertyId-createStatus
       x-stoplight:
-        id: ccsnv1xosmm80
+        id: 8sqwvtlowtfyk
       requestBody:
         $ref: '#/components/requestBodies/UpdateGuestStatus'
       security:
@@ -1597,7 +1726,7 @@ paths:
                     message: Success
       operationId: get-messageTemplate-propertyId-updateStatus
       x-stoplight:
-        id: fvyjhh9dflh0r
+        id: s0q5u3luc5ogh
       security:
         - Bearer: []
       requestBody:
@@ -1625,7 +1754,7 @@ paths:
           description: OK
       operationId: get-checkInOutRequest-propertyId-guestId
       x-stoplight:
-        id: ilnlvsfismz5i
+        id: gpa3m1gm3hbla
       requestBody:
         content:
           application/json:
@@ -1657,7 +1786,7 @@ paths:
       responses: {}
       operationId: get-all-checkInOutRequest-propertyId-guestId
       x-stoplight:
-        id: z7xnq43j0eq7y
+        id: s8f2w8yk52ecx
       security:
         - Bearer: []
   '/broadcast/{propertyid}':
@@ -1676,7 +1805,7 @@ paths:
           description: OK
       operationId: get-broadcast-propertyid
       x-stoplight:
-        id: c6lgighj3k0ty
+        id: awg8wte1qt6tf
       security:
         - Bearer: []
       requestBody:
@@ -1958,7 +2087,7 @@ paths:
                     message: Success
       operationId: get-broadcastid-propertyid
       x-stoplight:
-        id: km7267q0muup8
+        id: qmpsiokmkalw1
       security:
         - Bearer: []
   '/broadcast/{propertyId}/{broadcastId}/send':
@@ -1982,7 +2111,7 @@ paths:
           description: OK
       operationId: get-broadcast-propertyId-broadcastId
       x-stoplight:
-        id: mmhwelk4osmn9
+        id: qob0cbxgtyn0m
       security:
         - Bearer: []
       requestBody:
@@ -2139,7 +2268,7 @@ paths:
                     message: Success
       operationId: get-broadcast-by-propertyId-broadcastId
       x-stoplight:
-        id: dk7igvwzvombn
+        id: qj36gbum2h1md
       tags:
         - Broadcast
       security:
@@ -2154,7 +2283,7 @@ paths:
           description: OK
       operationId: patch-checkInOutRequest-propertyId-guestId-checkInOutRequestId
       x-stoplight:
-        id: q5j6a63z1nl9g
+        id: i01ekai6mi48d
       requestBody:
         content:
           application/json:
@@ -2193,7 +2322,7 @@ paths:
       responses: {}
       operationId: get-checkInOutRequest-propertyId-guestId-checkInOutRequestId
       x-stoplight:
-        id: 6835ch78otf6v
+        id: e7bn8uf8vysxd
       security:
         - Bearer: []
   '/checkInOutRequest/{propertyId}/{guestId}/requestType':
@@ -2215,7 +2344,7 @@ paths:
       responses: {}
       operationId: get-checkInOutRequest-propertyId-guestId-requestType
       x-stoplight:
-        id: nj7f4n6nn7rbt
+        id: 9whuxmsx77xhp
       security:
         - Bearer: []
       parameters:
@@ -2247,7 +2376,7 @@ paths:
                     additionalProperties: {}
       operationId: post-broadcast-propertyId-badapi
       x-stoplight:
-        id: 6gubnnstr8r1j
+        id: f2lqpag9w6ybw
       security:
         - Bearer: []
       requestBody:
@@ -2342,7 +2471,7 @@ paths:
                     message: Success
       operationId: get-setting-propertyId
       x-stoplight:
-        id: hxv8j5nnlnie0
+        id: 0badis7932dnn
       security:
         - Bearer: []
   '/preArrival/{propertyId}/{guestId}':
@@ -2364,7 +2493,7 @@ paths:
       responses: {}
       operationId: post-preArrival-propertyId-guestId
       x-stoplight:
-        id: g4tsqk9vtb6fu
+        id: f0v57flm5m04f
       requestBody:
         $ref: '#/components/requestBodies/CreatePreArrival'
       security:
@@ -2449,7 +2578,7 @@ paths:
                     message: Success
       operationId: get-preArrivalFlow-propertyId
       x-stoplight:
-        id: 0br0cy02qmfkk
+        id: bo6lrqjbutfeo
       tags:
         - Pre Arrival Flow
       security:
@@ -2527,7 +2656,7 @@ paths:
                     message: Success
       operationId: post-preArrivalFlow-propertyId
       x-stoplight:
-        id: fkmih2fs9r8qx
+        id: kffr70bj9hvm5
       deprecated: true
       tags:
         - Pre Arrival Flow
@@ -2547,7 +2676,7 @@ paths:
           description: OK
       operationId: post-workflow-propertyId
       x-stoplight:
-        id: bkqbgdymvgxja
+        id: 7zvpmhre9ug2r
       deprecated: true
       tags:
         - Workflow
@@ -2563,7 +2692,7 @@ paths:
           description: No Content
       operationId: delete-workflow-propertyId
       x-stoplight:
-        id: i17592xpbbm1t
+        id: 90w96x0wc3j1x
       x-internal: true
       deprecated: true
       security:
@@ -2892,7 +3021,7 @@ paths:
                     message: Success
       operationId: get-workflow-propertyId
       x-stoplight:
-        id: 7sl9ahy0izj7t
+        id: 421m7b1j0oeoh
       security:
         - Bearer: []
       requestBody:
@@ -2906,7 +3035,7 @@ paths:
           description: OK
       operationId: put-workflow-propertyId
       x-stoplight:
-        id: xv0hk8xr5bgj4
+        id: w3x2fowflgea1
       requestBody:
         content:
           application/json:
@@ -3060,7 +3189,6 @@ paths:
                           default:
                             type: boolean
                 preArrivalFlow:
-
                   type: object
                   properties:
                     phoneNumber:
@@ -3182,7 +3310,7 @@ paths:
                     message: Success
       operationId: get-twilioAccount-propertyId
       x-stoplight:
-        id: 7tncxvnm4h66e
+        id: 0aog9tpsbm92m
       security:
         - Bearer: []
   '/twilio/{propertyId}/isTwilioSetup':
@@ -3230,7 +3358,7 @@ paths:
                     message: Success
       operationId: get-twilio-propertyId-isTwilioSetup
       x-stoplight:
-        id: i46y0rjgoo3qu
+        id: vij3gd4cunmkc
       security:
         - Bearer: []
       requestBody:
@@ -3277,7 +3405,7 @@ paths:
                     message: Success
       operationId: get-twilio-propertyId-billing
       x-stoplight:
-        id: 1zuo5ig7rd8t9
+        id: kq6cu7ao7epty
       security:
         - Bearer: []
   '/guestApi/{guestSessionId}/guest':
@@ -3296,7 +3424,7 @@ paths:
           $ref: '#/components/responses/CreateGuest'
       operationId: get-guestApi-guestSessionId-guest
       x-stoplight:
-        id: 942b1ge8svk2c
+        id: aos9mke7yw1hl
   '/guestApi/{guestSessionId}/checkInOutRequest':
     parameters:
       - schema:
@@ -3309,7 +3437,7 @@ paths:
       responses: {}
       operationId: post-guestApi-guestSessionId-checkInOutRequest
       x-stoplight:
-        id: ktbx818kytv7w
+        id: 2x0sme7qx5zks
       tags:
         - Guest Api
       requestBody:
@@ -3391,7 +3519,7 @@ paths:
                     message: Success
       operationId: get-guestApi-guestSessionId-checkInOutRequest
       x-stoplight:
-        id: thernhr5g62f3
+        id: kwky88wojq3bi
   '/guestApi/{guestSessionId}/workflow':
     parameters:
       - schema:
@@ -3408,7 +3536,7 @@ paths:
           $ref: '#/components/responses/Workflow'
       operationId: get-guestApi-guestSessionId-workflow
       x-stoplight:
-        id: 883wn18pw5z5y
+        id: 79u3rzwsssjql
   '/guestApi/{guestSessionId}/property':
     parameters:
       - schema:
@@ -3502,7 +3630,7 @@ paths:
                     message: Success
       operationId: get-guestApi-guestSessionId-property
       x-stoplight:
-        id: rhgquzua65l6s
+        id: owt34pacdocwd
   '/guestApi/{guestSessionId}/preArrival':
     parameters:
       - schema:
@@ -3524,7 +3652,7 @@ paths:
                 properties: {}
       operationId: post-guestApi-guestSessionId-preArrival
       x-stoplight:
-        id: z3p5epp2l0fjy
+        id: ckvmtlm2vr1n9
       x-internal: false
       requestBody:
         content:
@@ -3568,7 +3696,6 @@ paths:
                   type: boolean
   '/guestApi/{guestSessionId}/addOnsRequest':
     parameters:
-
       - schema:
           type: string
         name: guestSessionId
@@ -3581,7 +3708,7 @@ paths:
       responses: {}
       operationId: post-guestApi-guestSessionId-customAddOnsRequest
       x-stoplight:
-        id: zn0l4pi0i44k4
+        id: w7s41g1ehwjas
       x-internal: false
       requestBody:
         content:
@@ -3601,7 +3728,7 @@ paths:
       responses: {}
       operationId: get-guestApi-addOns
       x-stoplight:
-        id: tt7vecsu1a7lf
+        id: wqwgbxi0e03n5
       requestBody:
         content: {}
     parameters:
@@ -3634,7 +3761,7 @@ paths:
       responses: {}
       operationId: put-addOnsRequest-propertyId-guestId-addOnsRequestId
       x-stoplight:
-        id: nsp6tqcdebrp7
+        id: 992r6qdh0hmsw
       requestBody:
         content:
           application/json:
@@ -3663,7 +3790,7 @@ paths:
       responses: {}
       operationId: get-addOnsRequest-propertyId
       x-stoplight:
-        id: 0uz2afrg8220u
+        id: ddfnc64ifepkg
       security:
         - Bearer: []
       parameters:
@@ -3675,13 +3802,507 @@ paths:
               - Requested
           in: query
           name: requestStatus
+  /demo/user:
+    get:
+      summary: Your GET endpoint
+      tags: []
+      responses: {}
+      operationId: get-demo-user
+      x-stoplight:
+        id: zscmj8j8c5n4g
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                '':
+                  type: string
+                  x-stoplight:
+                    id: n7t0nsnhf01mf
+      security:
+        - Bearer: []
+  '/guest/guestedit/{propertyId}/{guestId}':
+    parameters:
+      - schema:
+          type: string
+        name: propertyId
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: guestId
+        in: path
+        required: true
+    patch:
+      summary: Guest Edit path
+      tags:
+        - Guest
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                  result:
+                    type: object
+                    properties:
+                      updatedGuest:
+                        type: object
+                        properties:
+                          _id:
+                            type: string
+                          propertyId:
+                            type: string
+                          countryCode:
+                            type: string
+                          phoneNumber:
+                            type: string
+                          source:
+                            type: string
+                          checkIn:
+                            type: string
+                          checkOut:
+                            type: string
+                          confirmationNumber:
+                            type: string
+                          roomNumber:
+                            type: string
+                          firstName:
+                            type: string
+                          lastName:
+                            type: string
+                          email:
+                            type: string
+                          active:
+                            type: boolean
+                          createdAt:
+                            type: string
+                          updatedAt:
+                            type: string
+                          __v:
+                            type: integer
+                  status:
+                    type: string
+                  type:
+                    type: string
+                  message:
+                    type: string
+                x-examples:
+                  Example 1:
+                    statusCode: 200
+                    result:
+                      updatedGuest:
+                        _id: 66c72f7c8610d881b822af99
+                        propertyId: 66a2125d50a317d5ffa691ad
+                        countryCode: '+1'
+                        phoneNumber: '1234573890'
+                        source: Booking.com
+                        checkIn: '2019-08-24T14:15:00.000Z'
+                        checkOut: '2019-08-25T14:15:00.000Z'
+                        confirmationNumber: '123456789012'
+                        roomNumber: C-102
+                        firstName: First
+                        lastName: Last
+                        email: firstlast@guest.com
+                        active: true
+                        createdAt: '2024-08-22T12:30:52.693Z'
+                        updatedAt: '2024-09-10T12:01:06.814Z'
+                        __v: 0
+                    status: success
+                    type: SUCCESS
+                    message: Success
+        default:
+          description: Default
+      operationId: get-guest-guestedit-propertyId-guestId
+      x-stoplight:
+        id: rejmvit8uspjr
+      security:
+        - Bearer: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                countryCode:
+                  type: string
+                phoneNumber:
+                  type: string
+                checkIn:
+                  type: string
+                checkOut:
+                  type: string
+                confirmationNumber:
+                  type: string
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                email:
+                  type: string
+                active:
+                  type: boolean
+              x-examples:
+                Example 1:
+                  countryCode: '+1'
+                  phoneNumber: '1234573890'
+                  checkIn: '2019-08-24T14:15:00.000Z'
+                  checkOut: '2019-08-25T14:15:00.000Z'
+                  confirmationNumber: '123456789012'
+                  firstName: First
+                  lastName: Last
+                  email: firstlast@guest.com
+                  active: true
+  '/guest/getGuestData/{propertyId}/{guestId}':
+    parameters:
+      - schema:
+          type: string
+        name: propertyId
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: guestId
+        in: path
+        required: true
+    get:
+      summary: Guest Data Display
+      tags:
+        - Guest
+        - Add Ons Request
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                  result:
+                    type: object
+                    properties:
+                      guest:
+                        type: object
+                        properties:
+                          _id:
+                            type: string
+                          propertyId:
+                            type: string
+                          countryCode:
+                            type: string
+                          phoneNumber:
+                            type: string
+                          source:
+                            type: string
+                          checkIn:
+                            type: string
+                          checkOut:
+                            type: string
+                          confirmationNumber:
+                            type: string
+                          roomNumber:
+                            type: string
+                          firstName:
+                            type: string
+                          lastName:
+                            type: string
+                          email:
+                            type: string
+                          active:
+                            type: boolean
+                          createdAt:
+                            type: string
+                          updatedAt:
+                            type: string
+                          __v:
+                            type: integer
+                      status:
+                        type: object
+                        properties:
+                          _id:
+                            type: string
+                          propertyId:
+                            type: string
+                          guestId:
+                            type: string
+                          currentStatus:
+                            type: string
+                          lateCheckOutStatus:
+                            type: string
+                          earlyCheckInStatus:
+                            type: string
+                          reservationStatus:
+                            type: string
+                          preArrivalStatus:
+                            type: string
+                          createdAt:
+                            type: string
+                          updatedAt:
+                            type: string
+                          __v:
+                            type: integer
+                      preArrival:
+                        type: object
+                        properties:
+                          _id:
+                            type: string
+                          guestId:
+                            type: string
+                          propertyId:
+                            type: string
+                          phoneNumber:
+                            type: string
+                          emailAddress:
+                            type: string
+                          arrivalTime:
+                            type: string
+                          vehicleMakeModelColor:
+                            type: string
+                          licensePlateNo:
+                            type: string
+                          specialRequests:
+                            type: string
+                          guestSignatureUrl:
+                            type: string
+                          guestIdProofUrl:
+                            type: string
+                          policyAccepted:
+                            type: boolean
+                          consentToText:
+                            type: boolean
+                          createdAt:
+                            type: string
+                          updatedAt:
+                            type: string
+                          __v:
+                            type: integer
+                      addOns:
+                        type: object
+                        properties:
+                          statusCounts:
+                            type: object
+                            properties:
+                              Requested:
+                                type: integer
+                              Declined:
+                                type: integer
+                              Accepted:
+                                type: integer
+                          addOnsRequests:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                requestStatus:
+                                  type: string
+                                _id:
+                                  type: string
+                                propertyId:
+                                  type: string
+                                guestId:
+                                  type: string
+                                name:
+                                  type: string
+                                description:
+                                  type: string
+                                price:
+                                  type: number
+                                paid:
+                                  type: boolean
+                                __v:
+                                  type: integer
+                      checkInOutRequest:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            _id:
+                              type: string
+                            propertyId:
+                              type: string
+                            guestId:
+                              type: string
+                            requestStatus:
+                              type: string
+                            requestType:
+                              type: string
+                            lateCheckOutDateTime:
+                              type: string
+                            createdAt:
+                              type: string
+                            updatedAt:
+                              type: string
+                            __v:
+                              type: integer
+                            earlyCheckInDateTime:
+                              type: string
+                  status:
+                    type: string
+                  type:
+                    type: string
+                  message:
+                    type: string
+                x-examples:
+                  Example 1:
+                    statusCode: 200
+                    result:
+                      guest:
+                        _id: 66c72f7c8610d881b822af99
+                        propertyId: 66a2125d50a317d5ffa691ad
+                        countryCode: '+1'
+                        phoneNumber: '1234573890'
+                        source: Booking.com
+                        checkIn: '2019-08-24T14:15:00.000Z'
+                        checkOut: '2019-08-25T14:15:00.000Z'
+                        confirmationNumber: '123456789012'
+                        roomNumber: C-102
+                        firstName: First
+                        lastName: Last
+                        email: firstlast123@guest.com
+                        active: true
+                        createdAt: '2024-08-22T12:30:52.693Z'
+                        updatedAt: '2024-08-24T15:38:01.333Z'
+                        __v: 0
+                      status:
+                        _id: 66c72f7c8610d881b822af9b
+                        propertyId: 66a2125d50a317d5ffa691ad
+                        guestId: 66c72f7c8610d881b822af99
+                        currentStatus: Reservation
+                        lateCheckOutStatus: Requested
+                        earlyCheckInStatus: Requested
+                        reservationStatus: Confirmed
+                        preArrivalStatus: Applied
+                        createdAt: '2024-08-22T12:30:52.732Z'
+                        updatedAt: '2024-09-03T17:06:37.713Z'
+                        __v: 0
+                      preArrival:
+                        _id: 66d7421d6c72c9e1bc22b537
+                        guestId: 66c72f7c8610d881b822af99
+                        propertyId: 66a2125d50a317d5ffa691ad
+                        phoneNumber: '11234573890'
+                        emailAddress: firstlast123@guest.com
+                        arrivalTime: '12:35'
+                        vehicleMakeModelColor: BMW
+                        licensePlateNo: '08'
+                        specialRequests: BMW
+                        guestSignatureUrl: 'https://onelyk-images-bucket.s3.amazonaws.com/property/66a2125d50a317d5ffa691ad/guest/66c72f7c8610d881b822af99/signature/signature.png'
+                        guestIdProofUrl: 'https://onelyk-images-bucket.s3.amazonaws.com/property/66a2125d50a317d5ffa691ad/guest/66c72f7c8610d881b822af99/guestIdProof/Notes_er_diagram.png'
+                        policyAccepted: true
+                        consentToText: true
+                        createdAt: '2024-09-03T17:06:37.913Z'
+                        updatedAt: '2024-09-03T17:06:37.913Z'
+                        __v: 0
+                      addOns:
+                        statusCounts:
+                          Requested: 5
+                          Declined: 1
+                          Accepted: 1
+                        addOnsRequests:
+                          - requestStatus: Requested
+                            _id: 66cdf073c04472f6870ecccc
+                            propertyId: 66a2125d50a317d5ffa691ad
+                            guestId: 66c72f7c8610d881b822af99
+                            name: string
+                            description: string
+                            price: 12.5
+                            paid: true
+                            __v: 0
+                          - requestStatus: Requested
+                            _id: 66cdf193c04472f6870eccd2
+                            propertyId: 66a2125d50a317d5ffa691ad
+                            guestId: 66c72f7c8610d881b822af99
+                            name: string
+                            description: string
+                            price: 12.5
+                            paid: true
+                            __v: 0
+                          - requestStatus: Requested
+                            _id: 66cdf49340b649e2f92db881
+                            propertyId: 66a2125d50a317d5ffa691ad
+                            guestId: 66c72f7c8610d881b822af99
+                            name: string
+                            description: string
+                            price: 12.5
+                            paid: true
+                            __v: 0
+                          - requestStatus: Requested
+                            _id: 66cdf80f2ef0a66771520d00
+                            propertyId: 66a2125d50a317d5ffa691ad
+                            guestId: 66c72f7c8610d881b822af99
+                            name: Wine
+                            description: Bottle of wine
+                            price: 12.5
+                            paid: true
+                            __v: 0
+                          - requestStatus: Requested
+                            _id: 66cdfa5fca75745039d4cffd
+                            propertyId: 66a2125d50a317d5ffa691ad
+                            guestId: 66c72f7c8610d881b822af99
+                            name: Wine
+                            description: Bottle of wine
+                            price: 12.5
+                            paid: true
+                            __v: 0
+                          - _id: 66cdfdd5301858bde17482f8
+                            propertyId: 66a2125d50a317d5ffa691ad
+                            guestId: 66c72f7c8610d881b822af99
+                            name: Wine
+                            description: Bottle of wine
+                            price: 12.5
+                            paid: true
+                            requestStatus: Declined
+                            __v: 0
+                          - _id: 66cdfe0467e75a9a2b9a647b
+                            propertyId: 66a2125d50a317d5ffa691ad
+                            guestId: 66c72f7c8610d881b822af99
+                            name: Wine
+                            description: Bottle of wine
+                            price: 12.5
+                            paid: true
+                            requestStatus: Accepted
+                            __v: 0
+                      checkInOutRequest:
+                        - _id: 66c85d75f4b529b50d895d06
+                          propertyId: 66a2125d50a317d5ffa691ad
+                          guestId: 66c72f7c8610d881b822af99
+                          requestStatus: Requested
+                          requestType: lateCheckOut
+                          lateCheckOutDateTime: '2029-12-02T04:50:00.000Z'
+                          createdAt: '2024-08-23T09:59:17.454Z'
+                          updatedAt: '2024-08-23T09:59:17.454Z'
+                          __v: 0
+                        - _id: 66cdfa0fca75745039d4cff4
+                          propertyId: 66a2125d50a317d5ffa691ad
+                          guestId: 66c72f7c8610d881b822af99
+                          requestStatus: Requested
+                          requestType: earlyCheckIn
+                          earlyCheckInDateTime: '2002-09-01T18:30:00.000Z'
+                          createdAt: '2024-08-27T16:08:47.044Z'
+                          updatedAt: '2024-08-27T16:08:47.044Z'
+                          __v: 0
+                    status: success
+                    type: SUCCESS
+                    message: Success
+      operationId: get-guest-getGuestData-propertyId-guestId
+      x-stoplight:
+        id: f0a314hd4xs0x
+      security:
+        - Bearer: []
 components:
   schemas:
     User:
       title: User
       type: object
       x-stoplight:
-        id: 5dg2siga24c7w
+        id: arg8zx8y3oe8a
       x-internal: false
       required:
         - id
@@ -3725,7 +4346,7 @@ components:
     UserWithoutPassword:
       title: UserWithoutPassword
       x-stoplight:
-        id: ei4byjohzee93
+        id: t8lgqrfkgrcga
       type: object
       required:
         - _id
@@ -3842,6 +4463,8 @@ components:
           type: string
           x-stoplight:
             id: odk128ck94ppg
+      x-stoplight:
+        id: 9jxsgyx6bvhuz
     Guest:
       type: object
       x-examples:
@@ -3922,6 +4545,8 @@ components:
           type: string
         __v:
           type: integer
+      x-stoplight:
+        id: 0wdb8asg5ep7q
     GuestStatus:
       type: object
       properties:
@@ -3957,10 +4582,12 @@ components:
           createdAt: '2024-07-22T17:47:59.118Z'
           updatedAt: '2024-07-22T17:47:59.118Z'
           __v: 0
+      x-stoplight:
+        id: 74nmu7xzozb9k
     ChatList:
       title: ChatList
       x-stoplight:
-        id: 67gmi16equeap
+        id: l7f9fn0cxhqts
       type: object
       properties:
         _id:
@@ -5475,4 +6102,3 @@ tags:
   - name: Twilio Account
   - name: User
   - name: Workflow
-
