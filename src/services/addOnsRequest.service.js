@@ -112,4 +112,22 @@ const getAllByPropertyId = async (propertyId, requestStatus) => {
   return addOnsRequests;
 };
 
-module.exports = { create, update, getById, findAllByGuestId, getAllByPropertyId };
+
+/**
+ * Update all Add Ons Requests by Guest Id
+ * @param {string} propertyId
+ * @param {string} guestId
+ * @param {Object} updateData
+ * @param {import('mongoose').ClientSession} session
+ * @returns {Promise<Object>}
+ */
+const updateAllByGuestId = async (propertyId, guestId, updateData, session) => {
+  const result = await AddOnsRequest.updateMany(
+    { propertyId, guestId },
+    { $set: updateData },
+    { session }
+  );
+  return result;
+};
+
+module.exports = { create, update, getById, findAllByGuestId, getAllByPropertyId, updateAllByGuestId };
