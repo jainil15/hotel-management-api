@@ -111,6 +111,30 @@ const getByRequestType = async (propertyId, guestId, requestType) => {
 	return checkInOutRequest;
 };
 
+
+/**
+ * Update a field for all check-in/out requests by propertyId and guestId
+ * @param {string} propertyId - The property id
+ * @param {string} guestId - The guest id
+ * @param {object} updateData - The data to update
+ * @param {object} session - The mongoose session
+ * @returns {Promise<import('../models/checkInOutRequest.model').CheckInOutRequestType[]>} - The updated check-in/out requests
+ */
+const updateFieldByPropertyIdAndGuestId = async (propertyId, guestId, updateData, session) => {
+	const checkInOutRequests = await CheckInOutRequest.find({
+	  propertyId: propertyId,
+	  guestId: guestId,
+	});
+  
+	for (let request of checkInOutRequests) {
+	  Object.assign(request, updateData);
+	  await request.save({ session });
+	}
+  
+	return checkInOutRequests;
+  };
+
+
 module.exports = {
 	create,
 	getByPropertyId,
@@ -118,4 +142,5 @@ module.exports = {
 	findOne,
 	updateRequestStatus,
 	getByRequestType,
+	updateFieldByPropertyIdAndGuestId,
 };

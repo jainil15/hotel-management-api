@@ -348,6 +348,70 @@ const isTwilioSetup = async (req, res, next) => {
     return next(new InternalServerError(e.message));
   }
 };
+
+
+/**
+ * Resubmit Toll-Free Verification for Twilio
+ * @param {import('express').Request } req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {import('express').Response} - The response
+ */
+const resubmitTollFreeVerification = async (req, res, next) => {
+  try {
+    const propertyId = req.params.propertyId;
+    const tollFreeNumber = req.body.tollFreeNumber;
+
+    // Validate toll-free number format
+    const result = z
+      .object({
+        tollFreeNumber: z.string().refine((val) => phoneregex.test(val), {
+          message: "Invalid toll-free number format",
+        }),
+      })
+      .safeParse({ tollFreeNumber });
+
+    if (!result.success) {
+      throw new ValidationError(
+        "Validation Error",
+        result.error.flatten().fieldErrors,
+      );
+    }
+
+    // Find the property
+    const property = await Property.findById(propertyId);
+    if (!property) {
+      throw new NotFoundError("Property not found", {});
+    }
+
+    // Find the Twilio account associated with the property
+    const twilioAccount = await TwilioAccount.findOne({ propertyId: propertyId });
+    if (!twilioAccount) {
+      throw new NotFoundError("Twilio Account not found", {});
+    }
+
+    // Check if the toll-free number is already verified
+    if (twilioAccount.tollFreeVerified) {
+      throw new ConflictError("Toll-free number already verified", {
+        tollFreeNumber: ["Toll-free number is already verified"],
+      });
+    }
+
+    // Resubmit toll-free verification request
+    const resubmittedVerification = await twilioService.resubmitTollFreeVerification(
+      twilioAccount.tollfreeVerificationSid,
+    );
+
+    return responseHandler(res, resubmittedVerification, 201, "Toll-free verification resubmitted successfully");
+  } catch (e) {
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError(e.message));
+  }
+};
+
+
 module.exports = {
   getPhoneNumbers,
   buyPhoneNumber,
@@ -357,4 +421,5 @@ module.exports = {
   incomingMessage,
   isTwilioSetup,
   subaccountBilling,
+  resubmitTollFreeVerification,
 };

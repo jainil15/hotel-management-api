@@ -209,6 +209,59 @@ const getTwilioClient = async (twilioAccount) => {
   return client;
 };
 
+
+/**
+ * Resubmit toll-free phone number verification
+ * @param {string} verificationSid - The SID of the toll-free verification
+ * @returns {Promise<Object>} - The updated verification status
+ */
+ const resubmitTollFreeVerification = async (verificationSid) => {
+  try {
+    // Fetch the existing verification
+    const verification = await twilioClient.messaging.v1.tollfreeVerifications(verificationSid).fetch();
+    
+    // Check if the verification exists
+    if (!verification) {
+      throw new NotFoundError("Verification not found", {
+        verificationSid: ["Sorry, the phone number verification does not exist for the given SID"],
+      });
+    }
+
+    // Resubmit the toll-free verification with updated details
+    const updatedVerification = await twilioClient.messaging.v1.tollfreeVerifications(verificationSid).update({
+      businessCity: verification.businessCity,
+      businessContactEmail: verification.businessContactEmail,
+      businessContactFirstName: verification.businessContactFirstName,
+      businessContactLastName: verification.businessContactLastName,
+      businessContactPhone: verification.businessContactPhone,
+      businessCountry: verification.businessCountry,
+      businessName: verification.businessName,
+      businessPostalCode: verification.businessPostalCode,
+      businessStateProvinceRegion: verification.businessStateProvinceRegion,
+      businessStreetAddress: verification.businessStreetAddress,
+      businessWebsite: verification.businessWebsite,
+      messageVolume: verification.messageVolume,
+      notificationEmail: verification.notificationEmail,
+      optInType: verification.optInType,
+      optInImageUrls: verification.optInImageUrls,
+      productionMessageSample: verification.productionMessageSample,
+      useCaseCategories: verification.useCaseCategories,
+      useCaseSummary: verification.useCaseSummary,
+    });
+
+    return updatedVerification;
+  } catch (error) {
+    // Check if the error is related to verification not being found
+    if (error.code === 20404) {  // Twilio error code for resource not found
+      throw new NotFoundError("Sorry, the verification SID does not exist", {
+        verificationSid: ["The provided SID does not match any verification in the system"],
+      });
+    }
+    throw new Error(`Failed to resubmit toll-free verification: ${error.message}`);
+  }
+}; 
+
+
 module.exports = {
   getPhoneNumbers,
   buyPhoneNumber,
@@ -217,4 +270,5 @@ module.exports = {
   sendAccessLink,
   subaccountBilling,
   getTwilioClient,
+  resubmitTollFreeVerification,
 };

@@ -679,7 +679,7 @@ const getGuestData = async (req, res, next) => {
 };
 
 /**
- * Update guest data: Allows editing of guest fields like firstName, lastName, countryCode, phoneNumber, email, checkIn, checkOut, confirmationNumber
+ *  * Update guest data: Allows editing of guest fields 
  * @param {Object} req
  * @param {Object} res
  * @param {Function} next
@@ -689,30 +689,42 @@ const guestedit = async (req, res, next) => {
   session.startTransaction();
   try {
     const { guestId, propertyId } = req.params; // Extract guestId and propertyId from request params
-    const guest = req.body;
-    const guestResult = await UpdateGuestValidationSchema.safeParseAsync(guest);
-     // Editable fields
+    const { guest, preArrival, addOns, checkInOutRequest } = req.body; // Extract guest, preArrival, addOns, and checkInOutRequest data from request body
 
     // Validate the guest data using Joi or similar validation schema
-   
-   if(!guestResult.success){
-    throw new ValidationError("Invalid data", guestResult.error.flatten().fieldErrors);
-   }
+    const guestResult = await UpdateGuestValidationSchema.safeParseAsync(guest);
+    if (!guestResult.success) {
+      throw new ValidationError("Invalid data", guestResult.error.flatten().fieldErrors);
+    }
 
     // Proceed with updating guest data in transaction
-    const updatedGuest = await guestService.update(
-      guest,
+    const updatedGuest = await guestService.update(guest, propertyId, guestId, session);
+
+    // Update pre-arrival data
+    const updatedPreArrival = await preArrivalService.update(guestId, preArrival, session);
+
+    // Update add-ons data
+    const updatedAddOns = await addOnsServices.updateAllByGuestId(propertyId, guestId, addOns, session);
+
+    // Update check-in/out request data
+    const updatedCheckInOutRequest = await checkInOutRequestService.updateFieldByPropertyIdAndGuestId(
       propertyId,
       guestId,
+      checkInOutRequest,
       session
     );
 
+    // Commit the transaction
     await session.commitTransaction();
     session.endSession();
 
-    return responseHandler(res, { updatedGuest: updatedGuest });
+    return responseHandler(res, {
+      updatedGuest,
+      updatedPreArrival,
+      updatedAddOns,
+      updatedCheckInOutRequest, // Return updated check-in/out request data
+    });
   } catch (e) {
-
     await session.abortTransaction();
     session.endSession();
 
@@ -721,8 +733,8 @@ const guestedit = async (req, res, next) => {
     }
     return next(new InternalServerError());
   }
+};
 
-}
 
 
 
