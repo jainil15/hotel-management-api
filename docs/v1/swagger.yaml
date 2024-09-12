@@ -860,77 +860,324 @@ paths:
             application/json:
               schema:
                 type: object
+                properties: {}
+            application/xml:
+              schema:
+                type: object
                 properties:
-                  statusCode:
-                    type: integer
-                  result:
-                    type: object
-                    properties:
-                      updatedGuest:
-                        type: object
-                        properties:
-                          _id:
-                            type: string
-                          propertyId:
-                            type: string
-                          countryCode:
-                            type: string
-                          phoneNumber:
-                            type: string
-                          source:
-                            type: string
-                          checkIn:
-                            type: string
-                          checkOut:
-                            type: string
-                          confirmationNumber:
-                            type: string
-                          roomNumber:
-                            type: string
-                          firstName:
-                            type: string
-                          lastName:
-                            type: string
-                          email:
-                            type: string
-                          active:
-                            type: boolean
-                          createdAt:
-                            type: string
-                          updatedAt:
-                            type: string
-                          __v:
-                            type: integer
-                  status:
-                    type: string
                   type:
                     type: string
-                  message:
-                    type: string
+                  properties:
+                    type: object
+                    properties:
+                      statusCode:
+                        type: object
+                        properties:
+                          type:
+                            type: string
+                      result:
+                        type: object
+                        properties:
+                          type:
+                            type: string
+                          properties:
+                            type: object
+                            properties:
+                              statusCounts:
+                                type: object
+                                properties:
+                                  type:
+                                    type: string
+                                  properties:
+                                    type: object
+                                    properties:
+                                      Requested:
+                                        type: object
+                                        properties:
+                                          type:
+                                            type: string
+                                      Declined:
+                                        type: object
+                                        properties:
+                                          type:
+                                            type: string
+                                      Accepted:
+                                        type: object
+                                        properties:
+                                          type:
+                                            type: string
+                                  required:
+                                    type: array
+                                    items:
+                                      type: string
+                              addOnsRequests:
+                                type: object
+                                properties:
+                                  type:
+                                    type: string
+                                  items:
+                                    type: object
+                                    properties:
+                                      type:
+                                        type: string
+                                      properties:
+                                        type: object
+                                        properties:
+                                          requestStatus:
+                                            type: object
+                                            properties:
+                                              type:
+                                                type: string
+                                          _id:
+                                            type: object
+                                            properties:
+                                              type:
+                                                type: string
+                                          propertyId:
+                                            type: object
+                                            properties:
+                                              type:
+                                                type: string
+                                          guestId:
+                                            type: object
+                                            properties:
+                                              type:
+                                                type: string
+                                          name:
+                                            type: object
+                                            properties:
+                                              type:
+                                                type: string
+                                          description:
+                                            type: object
+                                            properties:
+                                              type:
+                                                type: string
+                                          price:
+                                            type: object
+                                            properties:
+                                              type:
+                                                type: string
+                                          paid:
+                                            type: object
+                                            properties:
+                                              type:
+                                                type: string
+                                          __v:
+                                            type: object
+                                            properties:
+                                              type:
+                                                type: string
+                                      required:
+                                        type: array
+                                        items:
+                                          type: string
+                              checkInOutRequest:
+                                type: object
+                                properties:
+                                  type:
+                                    type: string
+                                  items:
+                                    type: object
+                                    properties:
+                                      type:
+                                        type: string
+                                      properties:
+                                        type: object
+                                        properties:
+                                          _id:
+                                            type: object
+                                            properties:
+                                              type:
+                                                type: string
+                                          propertyId:
+                                            type: object
+                                            properties:
+                                              type:
+                                                type: string
+                                          guestId:
+                                            type: object
+                                            properties:
+                                              type:
+                                                type: string
+                                          requestStatus:
+                                            type: object
+                                            properties:
+                                              type:
+                                                type: string
+                                          requestType:
+                                            type: object
+                                            properties:
+                                              type:
+                                                type: string
+                                          lateCheckOutDateTime:
+                                            type: object
+                                            properties:
+                                              type:
+                                                type: string
+                                              format:
+                                                type: string
+                                          createdAt:
+                                            type: object
+                                            properties:
+                                              type:
+                                                type: string
+                                              format:
+                                                type: string
+                                          updatedAt:
+                                            type: object
+                                            properties:
+                                              type:
+                                                type: string
+                                              format:
+                                                type: string
+                                          __v:
+                                            type: object
+                                            properties:
+                                              type:
+                                                type: string
+                                          earlyCheckInDateTime:
+                                            type: object
+                                            properties:
+                                              type:
+                                                type: string
+                                              format:
+                                                type: string
+                                      required:
+                                        type: array
+                                        items:
+                                          type: string
+                              status:
+                                type: object
+                                properties:
+                                  type:
+                                    type: string
+                              type:
+                                type: object
+                                properties:
+                                  type:
+                                    type: string
+                              message:
+                                type: object
+                                properties:
+                                  type:
+                                    type: string
+                          required:
+                            type: array
+                            items:
+                              type: string
+                  required:
+                    type: array
+                    items:
+                      type: string
                 x-examples:
                   Example 1:
-                    statusCode: 200
-                    result:
-                      updatedGuest:
-                        _id: 66c72f7c8610d881b822af99
-                        propertyId: 66a2125d50a317d5ffa691ad
-                        countryCode: '+1'
-                        phoneNumber: '1234573890'
-                        source: Booking.com
-                        checkIn: '2019-08-24T14:15:00.000Z'
-                        checkOut: '2019-08-25T14:15:00.000Z'
-                        confirmationNumber: '123456789012'
-                        roomNumber: C-102
-                        firstName: First
-                        lastName: Last
-                        email: firstlast@guest.com
-                        active: true
-                        createdAt: '2024-08-22T12:30:52.693Z'
-                        updatedAt: '2024-09-10T12:01:06.814Z'
-                        __v: 0
-                    status: success
-                    type: SUCCESS
-                    message: Success
+                    type: object
+                    properties:
+                      statusCode:
+                        type: integer
+                      result:
+                        type: object
+                        properties:
+                          statusCounts:
+                            type: object
+                            properties:
+                              Requested:
+                                type: integer
+                              Declined:
+                                type: integer
+                              Accepted:
+                                type: integer
+                            required:
+                              - Requested
+                              - Declined
+                              - Accepted
+                          addOnsRequests:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                requestStatus:
+                                  type: string
+                                _id:
+                                  type: string
+                                propertyId:
+                                  type: string
+                                guestId:
+                                  type: string
+                                name:
+                                  type: string
+                                description:
+                                  type: string
+                                price:
+                                  type: number
+                                paid:
+                                  type: boolean
+                                __v:
+                                  type: integer
+                              required:
+                                - requestStatus
+                                - _id
+                                - propertyId
+                                - guestId
+                                - description
+                                - price
+                                - paid
+                                - __v
+                          checkInOutRequest:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                _id:
+                                  type: string
+                                propertyId:
+                                  type: string
+                                guestId:
+                                  type: string
+                                requestStatus:
+                                  type: string
+                                requestType:
+                                  type: string
+                                lateCheckOutDateTime:
+                                  type: string
+                                  format: date-time
+                                createdAt:
+                                  type: string
+                                  format: date-time
+                                updatedAt:
+                                  type: string
+                                  format: date-time
+                                __v:
+                                  type: integer
+                                earlyCheckInDateTime:
+                                  type: string
+                                  format: date-time
+                              required:
+                                - _id
+                                - propertyId
+                                - guestId
+                                - requestStatus
+                                - requestType
+                                - createdAt
+                                - updatedAt
+                                - __v
+                          status:
+                            type: string
+                          type:
+                            type: string
+                          message:
+                            type: string
+                        required:
+                          - statusCounts
+                          - addOnsRequests
+                          - checkInOutRequest
+                          - status
+                          - type
+                          - message
+                    required:
+                      - statusCode
+                      - result
       operationId: patch-guest-propertyId-guestId
       x-stoplight:
         id: j089jog068q1i
@@ -940,38 +1187,114 @@ paths:
             schema:
               type: object
               properties:
-                firstName:
-                  type: string
-                  x-stoplight:
-                    id: q6t6d8y5u7bim
-                lastName:
-                  type: string
-                  x-stoplight:
-                    id: quf09e2mgi2fi
                 countryCode:
                   type: string
-                  x-stoplight:
-                    id: k92oz50cnwbsa
                 phoneNumber:
                   type: string
-                  x-stoplight:
-                    id: zo070cbxzmems
-                email:
-                  type: string
-                  x-stoplight:
-                    id: ag6pkzry9u3dg
                 checkIn:
                   type: string
-                  x-stoplight:
-                    id: c5ov0jetdaeex
                 checkOut:
                   type: string
-                  x-stoplight:
-                    id: l8p8xjre2xx35
                 confirmationNumber:
                   type: string
-                  x-stoplight:
-                    id: 0hfsqc7a8bjbn
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                email:
+                  type: string
+                active:
+                  type: string
+                arrivalTime:
+                  type: string
+                vehicleMakeModelColor:
+                  type: string
+                licensePlateNo:
+                  type: string
+                specialRequests:
+                  type: string
+                guestSignatureUrl:
+                  type: string
+                guestIdProofUrl:
+                  type: string
+                policyAccepted:
+                  type: string
+                consentToText:
+                  type: string
+                statusCounts:
+                  type: object
+                  properties:
+                    Requested:
+                      type: string
+                    Declined:
+                      type: string
+                    Accepted:
+                      type: string
+                addOnsRequests:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      requestStatus:
+                        type: string
+                      description:
+                        type: string
+                      price:
+                        type: string
+                      paid:
+                        type: string
+                checkInOutRequest:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      requestStatus:
+                        type: string
+                      requestType:
+                        type: string
+                      lateCheckOutDateTime:
+                        type: string
+                      earlyCheckInDateTime:
+                        type: string
+                      createdAt:
+                        type: string
+                      updatedAt:
+                        type: string
+              x-examples:
+                Example 1:
+                  countryCode: string
+                  phoneNumber: string
+                  checkIn: string
+                  checkOut: string
+                  confirmationNumber: string
+                  firstName: string
+                  lastName: string
+                  email: string
+                  active: boolean
+                  arrivalTime: string
+                  vehicleMakeModelColor: string
+                  licensePlateNo: string
+                  specialRequests: string
+                  guestSignatureUrl: string
+                  guestIdProofUrl: string
+                  policyAccepted: boolean
+                  consentToText: boolean
+                  statusCounts:
+                    Requested: number
+                    Declined: number
+                    Accepted: number
+                  addOnsRequests:
+                    - requestStatus: string
+                      description: string
+                      price: number
+                      paid: boolean
+                  checkInOutRequest:
+                    - requestStatus: string
+                      requestType: string
+                      lateCheckOutDateTime: string
+                      earlyCheckInDateTime: string
+                      createdAt: string
+                      updatedAt: string
       security:
         - Bearer: []
   '/messageTemplate/{propertyId}':
@@ -3929,6 +4252,17 @@ paths:
           application/json:
             schema:
               type: object
+              x-examples:
+                Example 1:
+                  countryCode: '+1'
+                  phoneNumber: '1234573890'
+                  checkIn: '2019-08-24T14:15:00.000Z'
+                  checkOut: '2019-08-25T14:15:00.000Z'
+                  confirmationNumber: '123456789012'
+                  firstName: First
+                  lastName: Last
+                  email: firstlast@guest.com
+                  active: true
               properties:
                 countryCode:
                   type: string
@@ -3948,17 +4282,10 @@ paths:
                   type: string
                 active:
                   type: boolean
-              x-examples:
-                Example 1:
-                  countryCode: '+1'
-                  phoneNumber: '1234573890'
-                  checkIn: '2019-08-24T14:15:00.000Z'
-                  checkOut: '2019-08-25T14:15:00.000Z'
-                  confirmationNumber: '123456789012'
-                  firstName: First
-                  lastName: Last
-                  email: firstlast@guest.com
-                  active: true
+                '':
+                  type: string
+                  x-stoplight:
+                    id: kj1hwnf41w5iq
   '/guest/getGuestData/{propertyId}/{guestId}':
     parameters:
       - schema:
