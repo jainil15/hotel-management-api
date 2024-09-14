@@ -215,7 +215,7 @@ const getTwilioClient = async (twilioAccount) => {
  * @param {string} verificationSid - The SID of the toll-free verification
  * @returns {Promise<Object>} - The updated verification status
  */
- const resubmitTollFreeVerification = async (verificationSid) => {
+const resubmitTollFreeVerification = async (verificationSid) => {
   try {
     // Fetch the existing verification
     const verification = await twilioClient.messaging.v1.tollfreeVerifications(verificationSid).fetch();
@@ -227,8 +227,9 @@ const getTwilioClient = async (twilioAccount) => {
       });
     }
 
-    // Resubmit the toll-free verification with updated details
+    // Resubmit the toll-free verification with existing details (assuming some fields need to be re-sent)
     const updatedVerification = await twilioClient.messaging.v1.tollfreeVerifications(verificationSid).update({
+      // Re-submit existing details; if the API requires at least one field to change, ensure that you modify one field.
       businessCity: verification.businessCity,
       businessContactEmail: verification.businessContactEmail,
       businessContactFirstName: verification.businessContactFirstName,
@@ -251,15 +252,15 @@ const getTwilioClient = async (twilioAccount) => {
 
     return updatedVerification;
   } catch (error) {
-    // Check if the error is related to verification not being found
     if (error.code === 20404) {  // Twilio error code for resource not found
       throw new NotFoundError("Sorry, the verification SID does not exist", {
         verificationSid: ["The provided SID does not match any verification in the system"],
       });
     }
-    throw new Error(`Failed to resubmit toll-free verification: ${error.message}`);
+    throw new InternalServerError(`Failed to resubmit toll-free verification: ${error.message}`);
   }
-}; 
+};
+
 
 
 module.exports = {

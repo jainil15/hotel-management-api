@@ -350,8 +350,10 @@ const isTwilioSetup = async (req, res, next) => {
 };
 
 
+
+
 /**
- * Resubmit Toll-Free Verification for Twilio
+ * Resubmit Toll-Free Verification
  * @param {import('express').Request } req - The request
  * @param {import('express').Response} res - The response
  * @param {import('express').NextFunction} next - The next function
@@ -360,16 +362,42 @@ const isTwilioSetup = async (req, res, next) => {
 const resubmitTollFreeVerification = async (req, res, next) => {
   try {
     const propertyId = req.params.propertyId;
-    const tollFreeNumber = req.body.tollFreeNumber;
+    const verificationDetails = req.body.verificationDetails;
 
-    // Validate toll-free number format
+    const property = await Property.findById(propertyId);
+    if (!property) {
+      throw new NotFoundError("Property not found", {});
+    }
+
+    const twilioAccount = await TwilioAccount.findOne({ propertyId });
+    if (!twilioAccount) {
+      throw new NotFoundError("Twilio Account not found", {});
+    }
+
+    if (!twilioAccount.phoneNumber) {
+      throw new ConflictError("Twilio Account does not have a phone number", {
+        phoneNumber: ["Twilio Account does not have a phone number"],
+      });
+    }
+
     const result = z
       .object({
-        tollFreeNumber: z.string().refine((val) => phoneregex.test(val), {
-          message: "Invalid toll-free number format",
+        verificationDetails: z.object({
+          businessName: z.string(),
+          businessAddress: z.string(),
+          contactName: z.string(),
+          contactEmail: z.string().email(),
+          contactPhone: z.string(),
+          businessType: z.string(),
+          businessWebsite: z.string().url(),
+          businessDescription: z.string(),
+          supportingDocuments: z.array(z.object({
+            documentType: z.string(),
+            documentUrl: z.string().url(),
+          })),
         }),
       })
-      .safeParse({ tollFreeNumber });
+      .safeParse({ verificationDetails });
 
     if (!result.success) {
       throw new ValidationError(
@@ -378,39 +406,21 @@ const resubmitTollFreeVerification = async (req, res, next) => {
       );
     }
 
-    // Find the property
-    const property = await Property.findById(propertyId);
-    if (!property) {
-      throw new NotFoundError("Property not found", {});
-    }
-
-    // Find the Twilio account associated with the property
-    const twilioAccount = await TwilioAccount.findOne({ propertyId: propertyId });
-    if (!twilioAccount) {
-      throw new NotFoundError("Twilio Account not found", {});
-    }
-
-    // Check if the toll-free number is already verified
-    if (twilioAccount.tollFreeVerified) {
-      throw new ConflictError("Toll-free number already verified", {
-        tollFreeNumber: ["Toll-free number is already verified"],
-      });
-    }
-
-    // Resubmit toll-free verification request
-    const resubmittedVerification = await twilioService.resubmitTollFreeVerification(
-      twilioAccount.tollfreeVerificationSid,
+    const updatedVerification = await twilioService.resubmitTollFreeVerification(
+      propertyId,
+      twilioAccount.phoneNumber,
+      verificationDetails,
+      req.user,
     );
 
-    return responseHandler(res, resubmittedVerification, 201, "Toll-free verification resubmitted successfully");
+    return responseHandler(res, {}, 200, "Successfully resubmitted toll-free verification");
   } catch (e) {
     if (e instanceof APIError) {
       return next(e);
     }
-    return next(new InternalServerError(e.message));
+    return next(new InternalServerError());
   }
 };
-
 
 module.exports = {
   getPhoneNumbers,

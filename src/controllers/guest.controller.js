@@ -677,7 +677,7 @@ const getGuestData = async (req, res, next) => {
     return next(new InternalServerError());
   }
 };
-
+        
 /**
  *  * Update guest data: Allows editing of guest fields 
  * @param {Object} req
@@ -734,9 +734,6 @@ const guestedit = async (req, res, next) => {
     return next(new InternalServerError());
   }
 };
-
-
-
 
 module.exports = {
   getAll,
