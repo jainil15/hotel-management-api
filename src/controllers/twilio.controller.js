@@ -149,27 +149,21 @@ const createSubaccount = async (req, res, next) => {
  * @param {import('express').NextFunction} next - The next function
  * @returns {import('express').Response} - The response
  */
-const getTollFreeVerificationStatus = async (twilioClient, twilioAccount) => {
-  const tollfreeVerification = await twilioClient.messaging.v1
-    .tollfreeVerifications(twilioAccount.tollfreeVerificationSid)
-    .fetch();
+const getTollFreeVerificationStatus = async (req, res, next) => {
+  try {
+    const propertyId = req.params.propertyId;
 
-  if (!tollfreeVerification.status) {
-    throw new NotFoundError("Toll Free Verification not found", {
-      propertyId: [
-        "Toll Free Verification not found for the given property id",
-      ],
-    });
+    const tollFreeVerificationStatus =
+      await twilioService.getTollFreeVerificationStatus(propertyId);
+
+    return responseHandler(res, { tollFreeVerificationStatus });
+  } catch (e) {
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError());
   }
-
-  const verificationDetails = {
-    status: tollfreeVerification.status,
-    errorCode: tollfreeVerification.errorCode || "No error code",
-  };
-
-  return verificationDetails;
 };
-
 
 /**
  * Send message to guest from property - Maybe not used
@@ -349,9 +343,6 @@ const isTwilioSetup = async (req, res, next) => {
   }
 };
 
-
-
-
 /**
  * Resubmit Toll-Free Verification
  * @param {import('express').Request } req - The request
@@ -391,10 +382,12 @@ const resubmitTollFreeVerification = async (req, res, next) => {
           businessType: z.string(),
           businessWebsite: z.string().url(),
           businessDescription: z.string(),
-          supportingDocuments: z.array(z.object({
-            documentType: z.string(),
-            documentUrl: z.string().url(),
-          })),
+          supportingDocuments: z.array(
+            z.object({
+              documentType: z.string(),
+              documentUrl: z.string().url(),
+            }),
+          ),
         }),
       })
       .safeParse({ verificationDetails });
@@ -406,14 +399,20 @@ const resubmitTollFreeVerification = async (req, res, next) => {
       );
     }
 
-    const updatedVerification = await twilioService.resubmitTollFreeVerification(
-      propertyId,
-      twilioAccount.phoneNumber,
-      verificationDetails,
-      req.user,
-    );
+    const updatedVerification =
+      await twilioService.resubmitTollFreeVerification(
+        propertyId,
+        twilioAccount.phoneNumber,
+        verificationDetails,
+        req.user,
+      );
 
-    return responseHandler(res, {}, 200, "Successfully resubmitted toll-free verification");
+    return responseHandler(
+      res,
+      {},
+      200,
+      "Successfully resubmitted toll-free verification",
+    );
   } catch (e) {
     if (e instanceof APIError) {
       return next(e);
