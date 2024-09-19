@@ -350,21 +350,29 @@ const isTwilioSetup = async (req, res, next) => {
  * @param {import('express').NextFunction} next - The next function
  * @returns {import('express').Response} - The response
  */
+
 const resubmitTollFreeVerification = async (req, res, next) => {
   try {
-    const propertyId = req.params.propertyId;
-    const verificationDetails = req.body.verificationDetails;
+    const { propertyId } = req.params;
 
-    const property = await Property.findById(propertyId);
+    // Check if property exists
+    const property = await twilioService.findPropertyById(propertyId);
     if (!property) {
-      throw new NotFoundError("Property not found", {});
+      throw new NotFoundError("Property not found", {
+        propertyId: ["Property not found for the given id"],
+      });
     }
 
-    const twilioAccount = await TwilioAccount.findOne({ propertyId });
+    // Check if Twilio account exists for the property
+    const twilioAccount =
+      await twilioService.findTwilioAccountByPropertyId(propertyId);
     if (!twilioAccount) {
-      throw new NotFoundError("Twilio Account not found", {});
+      throw new NotFoundError("Twilio Account not found", {
+        propertyId: ["Twilio account not found for the given property id"],
+      });
     }
 
+    // Check if Twilio account has a phone number
     if (!twilioAccount.phoneNumber) {
       throw new ConflictError("Twilio Account does not have a phone number", {
         phoneNumber: ["Twilio Account does not have a phone number"],
@@ -417,7 +425,11 @@ const resubmitTollFreeVerification = async (req, res, next) => {
     if (e instanceof APIError) {
       return next(e);
     }
-    return next(new InternalServerError(e.message));
+    return next(
+      new InternalServerError(
+        "An unexpected error occurred while resubmitting verification",
+      ),
+    );
   }
 };
 

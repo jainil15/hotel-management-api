@@ -7,7 +7,11 @@ const { Property } = require("../models/property.model");
 const twilioClient = twilio(accountSid, authToken);
 const countryFile = require("../data/country.json");
 const { getCountryIso2 } = require("../utils/country.util");
-const { NotFoundError, ConflictError } = require("../lib/CustomErrors");
+const {
+  NotFoundError,
+  ConflictError,
+  InternalServerError,
+} = require("../lib/CustomErrors");
 const { Guest } = require("../models/guest.model");
 const { Message } = require("../models/message.model");
 
@@ -270,6 +274,56 @@ const resubmitTollFreeVerification = async (verificationSid) => {
       `Failed to resubmit toll-free verification: ${error.message}`,
     );
   }
+};
+const resubmitTollFreeVerification = async (propertyId) => {
+  const property = await Property.findById(propertyId);
+  if (!property) {
+    throw new NotFoundError("Property not found", {
+      propertyId: ["Property not found for the given id"],
+    });
+  }
+
+  const twilioAccount = await TwilioAccount.findOne({
+    propertyId: propertyId,
+  });
+  if (!twilioAccount) {
+    throw new NotFoundError("Twilio Account not found", {
+      propertyId: ["Twilio account found for the given property id"],
+    });
+  }
+
+  if (!twilioAccount.phoneNumber) {
+    throw new ConflictError("Twilio Account does not have a phone number", {
+      phoneNumber: ["Twilio Account does not have a phone number"],
+    });
+  }
+
+  const tollfreeVerification =
+    await twilioClient.messaging.v1.tollfreeVerifications.create({
+      businessCity: property.city,
+      businessContactEmail: property.email,
+      businessContactFirstName: property.contactFirstName,
+      businessContactLastName: property.contactLastName,
+      businessContactPhone: property.phoneNumber,
+      businessCountry: getCountryIso2(property.country),
+      businessName: property.name,
+      businessPostalCode: property.zipcode,
+      businessStateProvinceRegion: property.state,
+      businessStreetAddress: property.address,
+      businessWebsite: property.website,
+      messageVolume: "1,000",
+      notificationEmail: property.email,
+      optInType: "VERBAL",
+      optInImageUrls: ["https://onelyk-docs.s3.amazonaws.com/verbal_optin.txt"],
+      productionMessageSample:
+        "Hi [Guest Name], your stay at [Hotel Name] is confirmed from [Check-In Date] to [Check-Out Date]. Please reply if you have any questions.",
+      useCaseCategories: ["CUSTOMER_CARE"],
+      useCaseSummary: "Communication with guest for hotel front desk",
+    });
+
+  twilioAccount.tollfreeVerificationSid = tollfreeVerification.sid;
+  await twilioAccount.save();
+  return tollfreeVerification;
 };
 
 module.exports = {
