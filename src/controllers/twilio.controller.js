@@ -156,7 +156,7 @@ const getTollFreeVerificationStatus = async (req, res, next) => {
     const tollFreeVerificationStatus =
       await twilioService.getTollFreeVerificationStatus(propertyId);
 
-    return responseHandler(res, { tollFreeVerificationStatus });
+    return responseHandler(res, { ...tollFreeVerificationStatus });
   } catch (e) {
     if (e instanceof APIError) {
       return next(e);

@@ -62,7 +62,6 @@ const buyPhoneNumber = async (propertyId, phoneNumber, user) => {
     statusCallbackMethod: "POST",
     statusCallback: process.env.TWILIO_STATUS_CALLBACK,
   });
-
   // Transfer phone number to subaccount
   const response = twilioClient
     .incomingPhoneNumbers(incomingPhoneNumber.sid)
@@ -84,12 +83,13 @@ const buyPhoneNumber = async (propertyId, phoneNumber, user) => {
       businessWebsite: property.website,
       messageVolume: "1,000",
       notificationEmail: property.email,
-      optInType: "VERBAL",
+      optInType: "WEB_FORM",
       optInImageUrls: ["https://onelyk-docs.s3.amazonaws.com/verbal_optin.txt"],
-      productionMessageSample:
-        "Hi [Guest Name], your stay at [Hotel Name] is confirmed from [Check-In Date] to [Check-Out Date]. Please reply if you have any questions.",
+      productionMessageSample: `Hi [Guest_Name], your stay at [Hotel_Name] is confirmed from [Check_In_Date] to [Check_Out_Date]. Reply with any questions or text STOP to opt out of future notifications.`,
+      tollfreePhoneNumberSid: incomingPhoneNumber.sid,
       useCaseCategories: ["CUSTOMER_CARE"],
-      useCaseSummary: "Communication with guest for hotel front desk",
+      useCaseSummary: `Our software enables hotels to communicate with guests via SMS for booking confirmations, check-in reminders, and other stay-related updates. Hotels retrieve guest phone numbers from online booking platforms. Post-checkout, guests receive a message inviting them to opt into future promotional offers by replying "YES." Promotional messages are only sent to guests who explicitly opt in, ensuring compliance with consent regulations.
+`,
     });
   twilioAccount.phoneNumber = incomingPhoneNumber.phoneNumber.slice(-10);
   twilioAccount.countryCode = incomingPhoneNumber.phoneNumber.slice(
@@ -171,7 +171,10 @@ const getTollFreeVerificationStatus = async (propertyId) => {
     });
   }
   console.log("Toll Free Ver", JSON.stringify(tollfreeVerification));
-  return tollfreeVerification;
+  return {
+    status: tollfreeVerification.status,
+    errorCode: tollfreeVerification.errorCode,
+  };
 };
 
 const sendAccessLink = async (propertyId, guestPhoneNumber, body) => {
