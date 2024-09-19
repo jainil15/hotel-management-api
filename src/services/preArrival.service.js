@@ -67,18 +67,21 @@ const getByPropertyId = async (propertyId) => {
   return preArrivals;
 };
 
-// new get by guest id 
+// new get by guest id
 const getByGuestId = (guestId) => {
   const preArrival = PreArrival.findOne({ guestId });
   return preArrival;
 };
 
-const update = async (preArrivalId, preArrival, session) => {
-  const updatedPreArrival = await PreArrival.findByIdAndUpdate(
-    preArrivalId,
+const update = async (guestId, preArrival, session) => {
+  let updatedPreArrival = "";
+  delete preArrival._id;
+  updatedPreArrival = await PreArrival.findOneAndUpdate(
+    { guestId: guestId },
     preArrival,
-    { new: true, session: session },
+    { new: true, upsert: true, session: session },
   );
+
   return updatedPreArrival;
 };
 
