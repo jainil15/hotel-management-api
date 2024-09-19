@@ -214,67 +214,6 @@ const getTwilioClient = async (twilioAccount) => {
   return client;
 };
 
-/**
- * Resubmit toll-free phone number verification
- * @param {string} verificationSid - The SID of the toll-free verification
- * @returns {Promise<Object>} - The updated verification status
- */
-const resubmitTollFreeVerification = async (verificationSid) => {
-  try {
-    // Fetch the existing verification
-    const verification = await twilioClient.messaging.v1
-      .tollfreeVerifications(verificationSid)
-      .fetch();
-
-    // Check if the verification exists
-    if (!verification) {
-      throw new NotFoundError("Verification not found", {
-        verificationSid: [
-          "Sorry, the phone number verification does not exist for the given SID",
-        ],
-      });
-    }
-
-    // Resubmit the toll-free verification with existing details (assuming some fields need to be re-sent)
-    const updatedVerification = await twilioClient.messaging.v1
-      .tollfreeVerifications(verificationSid)
-      .update({
-        // Re-submit existing details; if the API requires at least one field to change, ensure that you modify one field.
-        businessCity: verification.businessCity,
-        businessContactEmail: verification.businessContactEmail,
-        businessContactFirstName: verification.businessContactFirstName,
-        businessContactLastName: verification.businessContactLastName,
-        businessContactPhone: verification.businessContactPhone,
-        businessCountry: verification.businessCountry,
-        businessName: verification.businessName,
-        businessPostalCode: verification.businessPostalCode,
-        businessStateProvinceRegion: verification.businessStateProvinceRegion,
-        businessStreetAddress: verification.businessStreetAddress,
-        businessWebsite: verification.businessWebsite,
-        messageVolume: verification.messageVolume,
-        notificationEmail: verification.notificationEmail,
-        optInType: verification.optInType,
-        optInImageUrls: verification.optInImageUrls,
-        productionMessageSample: verification.productionMessageSample,
-        useCaseCategories: verification.useCaseCategories,
-        useCaseSummary: verification.useCaseSummary,
-      });
-
-    return updatedVerification;
-  } catch (error) {
-    if (error.code === 20404) {
-      // Twilio error code for resource not found
-      throw new NotFoundError("Sorry, the verification SID does not exist", {
-        verificationSid: [
-          "The provided SID does not match any verification in the system",
-        ],
-      });
-    }
-    throw new InternalServerError(
-      `Failed to resubmit toll-free verification: ${error.message}`,
-    );
-  }
-};
 const resubmitTollFreeVerification = async (propertyId) => {
   const property = await Property.findById(propertyId);
   if (!property) {
