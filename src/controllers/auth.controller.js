@@ -13,6 +13,7 @@ const {
   ValidationError,
   UnauthorizedError,
   InternalServerError,
+  ForbiddenError,
   APIError,
 } = require("../lib/CustomErrors");
 const { responseHandler } = require("../middlewares/response.middleware");
@@ -60,8 +61,25 @@ const getAccessToken = async (req, res, next) => {
       return next(new UnauthorizedError("Session is not valid", {}));
     }
     // Decode refresh token
-    const decoded = await authService.decodeRefreshToken(refreshToken);
-    // Check if email matches
+    let decoded;
+    try {
+      decoded = await authService.decodeRefreshToken(
+        refreshToken,
+        req.query.email,
+      );
+    } catch (error) {
+      console.error("Refresh token error:", error.message);
+
+      if (error.statusCode === 403) {
+        if (error.message === "Refresh token has expired") {
+          return next(new ForbiddenError("Refresh token has expired", {}));
+        } else {
+          return next(new ForbiddenError("Invalid refresh token", {}));
+        }
+      } else {
+        return next(new UnauthorizedError("Authentication failed", {}));
+      }
+    }
     if (decoded.email !== req.query.email) {
       return next(new UnauthorizedError("Email does not match", {}));
     }
@@ -74,6 +92,7 @@ const getAccessToken = async (req, res, next) => {
       "1d",
       process.env.ACCESS_TOKEN_SECRET,
     );
+    console.log("Access token generated");
     // Send response
     return responseHandler(res, { accessToken });
   } catch (e) {
@@ -272,6 +291,70 @@ const refreshGuestAccessToken = (req, res, next) => {
   }
 };
 
+const generateNewAccessToken = async (req, res, next) => {
+  try {
+    // Get session
+    const session = await authService.getSession(req.email);
+    // Get refresh token from cookies
+    const refreshToken = req.cookies.refreshToken;
+    // Check if refresh token exists
+    if (!refreshToken) {
+      return next(new UnauthorizedError("Refresh token not found", {}));
+    }
+    // Check if session exists
+    if (!session) {
+      return next(new UnauthorizedError("Session not found", {}));
+    }
+
+    // Check if session is valid
+    if (!session.valid) {
+      return next(new UnauthorizedError("Session is not valid", {}));
+    }
+
+    // Decode refresh token
+    let decoded;
+    try {
+      decoded = await authService.decodeRefreshToken(
+        refreshToken,
+        req.query.email,
+      );
+    } catch (error) {
+      console.error("Refresh token error:", error.message);
+
+      if (error.statusCode === 403) {
+        if (error.message === "Refresh token has expired") {
+          return next(new ForbiddenError("Refresh token has expired", {}));
+        } else {
+          return next(new ForbiddenError("Invalid refresh token", {}));
+        }
+      } else {
+        return next(new UnauthorizedError("Authentication failed", {}));
+      }
+    }
+
+    if (decoded.email !== req.email) {
+      return next(new UnauthorizedError("Email does not match", {}));
+    }
+    // Extract payload
+    const { __exp, sessionId, iat, exp, ...rest } = decoded;
+
+    // Generate access token
+    const accessToken = generateAccessToken(
+      { ...rest },
+      "1d",
+      process.env.ACCESS_TOKEN_SECRET,
+    );
+    console.log("Access token generated");
+    // Send response
+    return accessToken;
+  } catch (e) {
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError());
+  }
+};
+
 module.exports = {
   getAccessToken,
   verifyOtp,
@@ -279,4 +362,5 @@ module.exports = {
   genreateGuestAccessToken,
   guestLoginWithToken,
   isLoggedIn,
+  generateNewAccessToken,
 };

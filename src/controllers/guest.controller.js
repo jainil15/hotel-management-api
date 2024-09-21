@@ -20,10 +20,10 @@ const chatListService = require("../services/chatList.service");
 const propertyService = require("../services/property.service");
 const checkInOutRequestService = require("../services/checkInOutRequest.service");
 
-//new 
+//new
 
-const preArrivalService = require('../services/preArrival.service'); // Pre-arrival service
-const addOnsServices  = require('../services/addOnsRequest.service'); // Add-ons service
+const preArrivalService = require("../services/preArrival.service"); // Pre-arrival service
+const addOnsServices = require("../services/addOnsRequest.service"); // Add-ons service
 
 const {
   CreateGuestStatusValidationSchema,
@@ -633,7 +633,6 @@ const getGuestById = async (req, res, next) => {
   }
 };
 
- 
 // get display data -> preaarival ,addons , getguestbyid
 // new api edit -> patch ->guestedit ->
 // add in routes getguestdisplay, guestedit
@@ -655,10 +654,16 @@ const getGuestData = async (req, res, next) => {
     // Fetch data from all services
     const guestData = await guestService.getByGuestId(guestId); // Fetch Guest Information
     const preArrivalData = await preArrivalService.getByGuestId(guestId); // Fetch Pre-arrival data
-    const addOnsData = await addOnsServices.findAllByGuestId(propertyId, guestId); // Fetch Add-ons data
+    const addOnsData = await addOnsServices.findAllByGuestId(
+      propertyId,
+      guestId,
+    ); // Fetch Add-ons data
     const guestStatus = await guestStatusService.getByGuestId(guestId); // Fetch Guest Status
-    const checkInOutRequest = await checkInOutRequestService.getByPropertyIdAndGuestId(propertyId,guestId);
-
+    const checkInOutRequest =
+      await checkInOutRequestService.getByPropertyIdAndGuestId(
+        propertyId,
+        guestId,
+      );
 
     // Combine all data into a single response
     const combinedData = {
@@ -677,61 +682,198 @@ const getGuestData = async (req, res, next) => {
     return next(new InternalServerError());
   }
 };
-        
+
 /**
- *  * Update guest data: Allows editing of guest fields 
+ *  * Update guest data: Allows editing of guest fields
  * @param {Object} req
  * @param {Object} res
  * @param {Function} next
  */
+// const guestedit = async (req, res, next) => {
+//   const session = await mongoose.startSession();
+//   session.startTransaction();
+//   try {
+//     const { guestId, propertyId } = req.params; // Extract guestId and propertyId from request params
+//     const { guest, preArrival, addOns, checkInOutRequest } = req.body; // Extract guest, preArrival, addOns, and checkInOutRequest data from request body
+//     console.log(
+//       "================================",
+//       guest,
+//       preArrival,
+//       addOns,
+//       checkInOutRequest,
+//     );
+//     // Validate the guest data using Joi or similar validation schema
+//     const guestResult = await UpdateGuestValidationSchema.safeParseAsync(guest);
+//     if (!guestResult.success) {
+//       throw new ValidationError(
+//         "Invalid data",
+//         guestResult.error.flatten().fieldErrors,
+//       );
+//     }
+//     console.log(" Validation", guestResult);
+
+//     // Proceed with updating guest data in transaction
+
+//     const updatedGuest = await guestService.update(
+//       guest,
+//       propertyId,
+//       guestId,
+//       session,
+//     );
+//     console.log(" Validation777777");
+//     // Update pre-arrival data
+//     let updatedPreArrival = "";
+//     if (preArrival._id && guestId) {
+//       updatedPreArrival = await preArrivalService.update(
+//         guestId,
+//         preArrival,
+//         session,
+//       );
+//     }
+
+//     console.log(" 777777");
+//     // Update add-ons data
+//     const updatedAddOns = await addOnsServices.updateAllByGuestId(
+//       propertyId,
+//       guestId,
+//       addOns,
+//       session,
+//     );
+//     console.log(" 777updatedAddOns777", updatedAddOns);
+//     // Update check-in/out request data
+//     const updatedCheckInOutRequest =
+//       await checkInOutRequestService.updateFieldByPropertyIdAndGuestId(
+//         propertyId,
+//         guestId,
+//         checkInOutRequest,
+//         session,
+//       );
+//     console.log(" updatedCheckInOutRequest", updatedCheckInOutRequest);
+//     // Commit the transaction
+//     await session.commitTransaction();
+//     session.endSession();
+
+//     return responseHandler(res, {
+//       updatedGuest,
+//       updatedPreArrival,
+//       updatedAddOns,
+//       updatedCheckInOutRequest, // Return updated check-in/out request data
+//     });
+//   } catch (e) {
+//     await session.abortTransaction();
+//     session.endSession();
+
+//     if (e instanceof APIError) {
+//       return next(e);
+//     }
+//     return next(new InternalServerError());
+//   }
+// };
 const guestedit = async (req, res, next) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    const { guestId, propertyId } = req.params; // Extract guestId and propertyId from request params
-    const { guest, preArrival, addOns, checkInOutRequest } = req.body; // Extract guest, preArrival, addOns, and checkInOutRequest data from request body
+    const { guestId, propertyId } = req.params;
+    const { guest, preArrival, addOns, checkInOutRequest } = req.body;
 
-    // Validate the guest data using Joi or similar validation schema
-    const guestResult = await UpdateGuestValidationSchema.safeParseAsync(guest);
-    if (!guestResult.success) {
-      throw new ValidationError("Invalid data", guestResult.error.flatten().fieldErrors);
+    let updatedGuest = null,
+      updatedPreArrival = null,
+      updatedAddOns = null,
+      updatedCheckInOutRequest = null;
+
+    if (guest) {
+      const guestResult =
+        await UpdateGuestValidationSchema.safeParseAsync(guest);
+      if (!guestResult.success) {
+        console.log(
+          "Guest validation failed",
+          guestResult.error.flatten().fieldErrors,
+        );
+        throw new ValidationError(
+          "Invalid guest data",
+          guestResult.error.flatten().fieldErrors,
+        );
+      }
+
+      updatedGuest = await guestService.update(
+        guest,
+        propertyId,
+        guestId,
+        session,
+      );
+      if (!updatedGuest || updatedGuest.modifiedCount === 0) {
+        throw new Error("Failed to update guest");
+      }
     }
 
-    // Proceed with updating guest data in transaction
-    const updatedGuest = await guestService.update(guest, propertyId, guestId, session);
+    // Conditionally update pre-arrival information if provided
+    if (preArrival) {
+      preArrival.guestId = guestId;
+      preArrival.propertyId = propertyId;
+      updatedPreArrival = await preArrivalService.update(
+        guestId,
+        preArrival,
+        session,
+      );
+      if (!updatedPreArrival || updatedPreArrival.modifiedCount === 0) {
+        throw new Error("Failed to update pre-arrival");
+      }
+    }
 
-    // Update pre-arrival data
-    const updatedPreArrival = await preArrivalService.update(guestId, preArrival, session);
+    //  Conditionally update add-ons if provided
+    if (addOns && addOns.length > 0) {
+      updatedAddOns = await addOnsServices.updateAllByGuestId(
+        propertyId,
+        guestId,
+        addOns,
+        session,
+      );
+      if (!updatedAddOns || updatedAddOns.modifiedCount === 0) {
+        throw new Error("Failed to update add-ons");
+      }
+    }
 
-    // Update add-ons data
-    const updatedAddOns = await addOnsServices.updateAllByGuestId(propertyId, guestId, addOns, session);
+    //  Conditionally update check-in/out request if provided
+    if (checkInOutRequest && Object.keys(checkInOutRequest).length > 0) {
+      updatedCheckInOutRequest =
+        await checkInOutRequestService.updateFieldByPropertyIdAndGuestId(
+          propertyId,
+          guestId,
+          checkInOutRequest,
+          session,
+        );
+      if (
+        !updatedCheckInOutRequest ||
+        updatedCheckInOutRequest.modifiedCount === 0
+      ) {
+        throw new Error("Failed to update check-in/out request");
+      }
+    }
 
-    // Update check-in/out request data
-    const updatedCheckInOutRequest = await checkInOutRequestService.updateFieldByPropertyIdAndGuestId(
-      propertyId,
-      guestId,
-      checkInOutRequest,
-      session
-    );
-
-    // Commit the transaction
+    // Commit the transaction if all updates succeed
     await session.commitTransaction();
     session.endSession();
 
+    // Return response with all updated data, including those that were not updated
     return responseHandler(res, {
       updatedGuest,
       updatedPreArrival,
       updatedAddOns,
-      updatedCheckInOutRequest, // Return updated check-in/out request data
+      updatedCheckInOutRequest,
     });
   } catch (e) {
+    // Rollback the transaction on error
     await session.abortTransaction();
     session.endSession();
 
+    console.log("Error occurred during transaction:", e.message); // Log error details
+
+    // Handle specific API errors if necessary
     if (e instanceof APIError) {
       return next(e);
     }
-    return next(new InternalServerError());
+    // General server error
+    return next(new InternalServerError("Transaction failed"));
   }
 };
 
