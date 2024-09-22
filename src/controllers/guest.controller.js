@@ -775,7 +775,6 @@ const guestedit = async (req, res, next) => {
   try {
     const { guestId, propertyId } = req.params;
     const { guest, preArrival, addOns, checkInOutRequest } = req.body;
-
     let updatedGuest = null,
       updatedPreArrival = null,
       updatedAddOns = null,
@@ -821,11 +820,11 @@ const guestedit = async (req, res, next) => {
     }
 
     //  Conditionally update add-ons if provided
-    if (addOns && addOns.length > 0) {
+    if (addOns && addOns.addOnsRequests.length > 0) {
       updatedAddOns = await addOnsServices.updateAllByGuestId(
         propertyId,
         guestId,
-        addOns,
+        addOns.addOnsRequests,
         session,
       );
       if (!updatedAddOns || updatedAddOns.modifiedCount === 0) {
@@ -853,6 +852,13 @@ const guestedit = async (req, res, next) => {
     // Commit the transaction if all updates succeed
     await session.commitTransaction();
     session.endSession();
+    req.app.io.to(`property:${propertyId}`).emit("guest:guestUpdate", {
+      guest: { ...updatedGuest._doc, status: updatedGuest },
+    });
+    // Emit to chat list updated
+    req.app.io.to(`property:${propertyId}`).emit("chatList:update", {});
+    // Emit to guest messages updated
+    req.app.io.to(`guest:${guestId}`).emit("message:newMessage", {});
 
     // Return response with all updated data, including those that were not updated
     return responseHandler(res, {
