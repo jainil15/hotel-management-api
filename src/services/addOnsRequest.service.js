@@ -1,6 +1,8 @@
 const { default: mongoose } = require("mongoose");
-const { AddOnsRequest, CreateAddOnsRequestValidationSchema } = require("../models/addOnsRequest.model");
-
+const {
+  AddOnsRequest,
+  CreateAddOnsRequestValidationSchema,
+} = require("../models/addOnsRequest.model");
 
 /**
  * Create Add Ons Request
@@ -66,7 +68,6 @@ const getById = async (propertyId, guestId, addOnsRequestId) => {
  * @returns {Promise<Object>}
  */
 
-
 // new ś
 const findAllByGuestId = async (propertyId, guestId) => {
   const addOnsRequests = await AddOnsRequest.find({
@@ -79,7 +80,7 @@ const findAllByGuestId = async (propertyId, guestId) => {
     return acc;
   }, {});
 
-  return {statusCounts,addOnsRequests};
+  return { statusCounts, addOnsRequests };
 };
 
 /**
@@ -112,7 +113,6 @@ const getAllByPropertyId = async (propertyId, requestStatus) => {
   return addOnsRequests;
 };
 
-
 /**
  * Update all Add Ons Requests by Guest Id
  * @param {string} propertyId
@@ -121,13 +121,36 @@ const getAllByPropertyId = async (propertyId, requestStatus) => {
  * @param {import('mongoose').ClientSession} session
  * @returns {Promise<Object>}
  */
+// const updateAllByGuestId = async (propertyId, guestId, updateData, session) => {
+//   console.log("updateAllByGuestId", propertyId, guestId, updateData);
+//   const result = await AddOnsRequest.updateMany(
+//     { propertyId, guestId },
+//     { $set: updateData },
+//     { session },
+//   );
+//   return result;
+// };
 const updateAllByGuestId = async (propertyId, guestId, updateData, session) => {
-  const result = await AddOnsRequest.updateMany(
-    { propertyId, guestId },
-    { $set: updateData },
-    { session }
+  console.log("updateAllByGuestId", propertyId, guestId, updateData); // Loop through each item in updateData and update each document individually
+  const results = await Promise.all(
+    updateData.map((item) => {
+      const { _id, ...updateFields } = item; // Extract the _id and other fields to update
+      return AddOnsRequest.updateOne(
+        { propertyId, guestId, _id }, // Find document by propertyId, guestId, and _id
+        { $set: updateFields }, // Update the document with remaining fields
+        { session },
+      );
+    }),
   );
-  return result;
+
+  return results;
 };
 
-module.exports = { create, update, getById, findAllByGuestId, getAllByPropertyId, updateAllByGuestId };
+module.exports = {
+  create,
+  update,
+  getById,
+  findAllByGuestId,
+  getAllByPropertyId,
+  updateAllByGuestId,
+};
