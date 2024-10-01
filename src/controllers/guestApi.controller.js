@@ -336,16 +336,19 @@ const createPreArrival = async (req, res, next) => {
     preArrival.policyAccepted = preArrival.policyAccepted === "true";
     preArrival.guestSignature = req?.files?.guestSignature;
     preArrival.guestIdProof = req?.files?.guestIdProof;
+
     if (preArrival.consentToText === false) {
       throw new ValidationError("Input Validation Error", {
         consentToText: ["Consent to text is required"],
       });
     }
+
     if (preArrival.policyAccepted === false) {
       throw new ValidationError("Input Validation Error", {
         policyAccepted: ["Policy accepted is required"],
       });
     }
+
     const preArrivalResult =
       CreatePreArrivalValidationSchema.safeParse(preArrival);
 
@@ -354,12 +357,14 @@ const createPreArrival = async (req, res, next) => {
         ...preArrivalResult.error.flatten().fieldErrors,
       });
     }
+
     const preArrivalFlow =
       await preArrivalFlowService.getByPropertyId(propertyId);
     const validationResult = zodValidatePreArrivalFlow(
       preArrivalFlow._doc,
       preArrival,
     );
+
     if (!validationResult.success) {
       throw new ValidationError("Validation Error", {
         ...validationResult.error.flatten().fieldErrors,
@@ -394,6 +399,7 @@ const createPreArrival = async (req, res, next) => {
     req.app.io.to(`property:${propertyId}`).emit("guestStatus:update", {
       guestStatus: updatedGuestStatus,
     });
+
     return responseHandler(res, { preArrival: newPreArrival });
   } catch (e) {
     await session.abortTransaction();

@@ -4,6 +4,11 @@ const logger = require("../configs/winston.config");
 
 const Schema = mongoose.Schema;
 
+const policySchema = new Schema({
+  name: { type: String },
+  description: { type: String },
+});
+
 const preArrivalFlowSchema = new Schema(
   {
     propertyId: {
@@ -27,6 +32,7 @@ const preArrivalFlowSchema = new Schema(
     },
     policyLink: { type: String, default: "Policy link with bottom sheet" },
     extraPolicies: { type: [String], default: [] },
+    propertyPolicies: [policySchema],
   },
   { timestamps: true },
 );
@@ -51,6 +57,14 @@ const UpdatePreArrivalValidationSchema = z.object({
   primaryPolicy: z.string().optional(),
   policyLink: z.string().optional(),
   extraPolicies: z.array(z.string()).optional(),
+  propertyPolicies: z
+    .array(
+      z.object({
+        name: z.string().optional(),
+        description: z.string().optional(),
+      }),
+    )
+    .optional(),
 });
 
 PreArrivalFlow.init().then(() => {

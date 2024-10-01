@@ -4,6 +4,7 @@ const preArrivalFlowService = require("../services/preArrivalFlow.service");
 const workflowService = require("../services/workflow.service");
 const inHouseFlowService = require("../services/inHouseFlow.service");
 const checkedOutFlowService = require("../services/checkedOutFlow.service");
+const settingService = require("../services/setting.service");
 const {
   APIError,
   InternalServerError,
@@ -101,12 +102,14 @@ const getByPropertyId = async (req, res, next) => {
     const inHouseFlow = await inHouseFlowService.getByPropertyId(propertyId);
     const checkedOutFlow =
       await checkedOutFlowService.getByPropertyId(propertyId);
+    const settingFlow = await settingService.getByPropertyId(propertyId);
     return responseHandler(res, {
       homeFlow,
       addOnsFlow,
       preArrivalFlow,
       inHouseFlow,
       checkedOutFlow,
+      settingFlow,
     });
   } catch (e) {
     if (e instanceof APIError) {
@@ -128,7 +131,6 @@ const update = async (req, res, next) => {
       inHouseFlow,
       checkedOutFlow,
     } = req.body;
-
     const homeFlowResult = UpdateHomeFlowValidationSchema.safeParse(homeFlow);
     const addOnsFlowResult =
       UpdateAddOnsFlowValidationSchema.safeParse(addOnsFlow);

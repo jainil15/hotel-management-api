@@ -12,6 +12,7 @@ const ignoreKeys = [
   "policyLink",
   "extraPolicies",
   "primaryPolicy",
+  "propertyPolicies",
 ];
 
 const ignoreOptionalKeys = ["specialRequests"];

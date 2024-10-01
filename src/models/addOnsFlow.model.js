@@ -4,6 +4,7 @@ const logger = require("../configs/winston.config");
 const Schema = mongoose.Schema;
 const customAddOnsSchema = new Schema(
   {
+    addOnType: { type: String, default: "CustomAddon" },
     name: { type: String, required: true },
     description: { type: String, required: true },
     paid: { type: Boolean, default: true },
@@ -25,7 +26,7 @@ const checkInOutAddOnsSchema = new Schema(
     enabled: { type: Boolean, default: true },
     default: { type: Boolean, default: true },
   },
-  { _id: false },
+  {},
 );
 
 const addOnsFlowSchema = new Schema(
@@ -41,8 +42,9 @@ const addOnsFlowSchema = new Schema(
       default: [
         {
           name: "Early Check In",
-          description: "Early Check In",
-          defaultTimeEnabled: true,
+          description:
+            "Early check-in lets guests access their accommodations before the standard check-in time for added convenience.",
+          defaultTimeEnabled: false,
           defaultTiming: "14:00",
           customTiming: "14:00",
           paid: false,
@@ -52,8 +54,9 @@ const addOnsFlowSchema = new Schema(
         },
         {
           name: "Late Check Out",
-          description: "Late Check Out",
-          defaultTimeEnabled: true,
+          description:
+            "Late check-out allows guests to extend their stay beyond the standard check-out time, providing extra time to relax or prepare for departure.",
+          defaultTimeEnabled: false,
           defaultTiming: "12:00",
           customTiming: "12:00",
           paid: false,
@@ -84,6 +87,7 @@ const CreateAddOnsFlowValidationSchema = z.object({
       price: z.number().optional(),
       enabled: z.boolean(),
       default: z.boolean(),
+      addOnType: z.string().optional(),
     }),
   ),
   checkInOutAddOns: z.array(
@@ -111,6 +115,7 @@ const UpdateAddOnsFlowValidationSchema = z.object({
         price: z.number().optional(),
         enabled: z.boolean().optional(),
         default: z.boolean().optional(),
+        addOnType: z.string().optional(),
       }),
     )
     .optional(),

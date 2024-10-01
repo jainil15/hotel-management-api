@@ -3,6 +3,7 @@ const addOnsFlowService = require("./addOnsFlow.service");
 const preArrivalFlowService = require("./preArrivalFlow.service");
 const inHouseFlowService = require("./inHouseFlow.service");
 const checkedOutFlowService = require("./checkedOutFlow.service");
+const settingService = require("./setting.service");
 /**
  * Create default workflows for a property
  * @param {string} propertyId
@@ -53,7 +54,15 @@ const getByPropertyId = async (propertyId) => {
   const inHouseFlow = await inHouseFlowService.getByPropertyId(propertyId);
   const checkedOutFlow =
     await checkedOutFlowService.getByPropertyId(propertyId);
-  return { homeFlow, addOnsFlow, preArrivalFlow, inHouseFlow, checkedOutFlow };
+  const settingFlow = await settingService.getByPropertyId(propertyId);
+  return {
+    homeFlow,
+    addOnsFlow,
+    preArrivalFlow,
+    inHouseFlow,
+    checkedOutFlow,
+    settingFlow,
+  };
 };
 
 const update = async (propertyId, workflow, session) => {

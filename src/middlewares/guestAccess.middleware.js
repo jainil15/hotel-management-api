@@ -21,13 +21,16 @@ const checkGuestAccess = async (req, res, next) => {
 const authenticateGuestSession = async (req, res, next) => {
   try {
     const { guestSessionId } = req.params;
+
     if (!guestSessionId) {
+      console.log("Guest Session");
       return next(new UnauthorizedError("Unauthorized", {}));
     }
     const guestSession = await guestSessionService.getById(guestSessionId);
     if (!guestSession) {
       return next(new UnauthorizedError("Unauthorized", {}));
     }
+
     req.guestSession = guestSession;
     next();
   } catch (e) {
