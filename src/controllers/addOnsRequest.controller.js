@@ -10,6 +10,17 @@ const guestService = require("../services/guest.service");
 const twilioAccountService = require("../services/twilioAccount.service");
 const twilioService = require("../services/twilio.service");
 const { REQUEST_STATUS } = require("../constants/guestStatus.contant");
+const {
+  guestStatusToTemplate,
+  guestStatusToTemplateOnUpdate,
+} = require("../utils/guestStatustToTemplate");
+const messageTemplateService = require("../services/messageTemplate.service");
+const smsService = require("../services/sms.service");
+const {
+  messageTriggerType,
+  requestType,
+  messageType,
+} = require("../constants/message.constant");
 
 const { z } = require("zod");
 const { responseHandler } = require("../middlewares/response.middleware");
@@ -53,6 +64,7 @@ const update = async (req, res, next) => {
     if (!existingAddOnsRequest) {
       throw new APIError("Add Ons Request not found", {});
     }
+    console.log("Add Ons Request", existingAddOnsRequest);
     const updatedAddOnsRequest = await addOnsRequestService.update(
       propertyId,
       guestId,
@@ -60,10 +72,71 @@ const update = async (req, res, next) => {
       { requestStatus },
       session,
     );
+    // const messageTemplateName = guestStatusToTemplateOnUpdate(
+    //   oldGuestStatus,
+    //   updatedGuestStatus,
+    // );
+    const oldGuest = await guestService.getById(guestId, propertyId);
+    // const messageTemplate = await messageTemplateService.getByNameAndPropertyId(
+    //   propertyId,
+    //   messageTemplateName,
+    // );
+    // if (!messageTemplate) {
+    //   await session.commitTransaction();
+    //   session.endSession();
+    //   req.app.io.to(`property:${propertyId}`).emit("guest:guestStatusUpdate", {
+    //     guestStatus: updatedGuestStatus,
+    //   });
+    //   return responseHandler(res, {
+    //     checkInOutRequest: updatedCheckInOutRequest,
+    //   });
+    // }
+    const twilioAccount =
+      await twilioAccountService.getByPropertyId(propertyId);
+    const twilioSubClient = await twilioService.getTwilioClient(twilioAccount);
+    const sentSms = await smsService.send(
+      twilioSubClient,
+      `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
+      `${oldGuest.countryCode}${oldGuest.phoneNumber}`,
+      `Your request for addon is ${requestStatus.toLowercase()}`,
+    );
+    const newMessage = await messageService.create(
+      {
+        propertyId: propertyId,
+        guestId: guestId,
+        senderId: propertyId,
+        receiverId: guestId,
+        content: `Your request for addon is ${requestStatus.toLowercase()}`,
+        messageTriggerType: messageTriggerType.AUTOMATIC,
+        messageType: messageType.SMS,
+        messageSid: sentSms.sid,
+      },
+      session,
+    );
+
+    const chatList = await chatListService.update(
+      propertyId,
+      guestId,
+      {
+        latestMessage: newMessage._id,
+      },
+      session,
+    );
 
     // TODO: Send message to the guest
     await session.commitTransaction();
     session.endSession();
+    req.app.io.to(`guest:${guestId}`).emit("message:newMessage", {
+      message: newMessage,
+    });
+
+    req.app.io.to(`property:${propertyId}`).emit("guest:guestStatusUpdate", {
+      guestStatus: updatedAddOnsRequest,
+    });
+
+    req.app.io.to(`property:${propertyId}`).emit("chatList:update", {
+      chatList: chatList,
+    });
     return responseHandler(res, { addOnsRequest: updatedAddOnsRequest });
   } catch (e) {
     await session.abortTransaction();
