@@ -106,7 +106,7 @@ const update = async (req, res, next) => {
         guestId: guestId,
         senderId: propertyId,
         receiverId: guestId,
-        content: `Your request for addon is ${requestStatus.toLowercase()}`,
+        content: `Your request for addon is ${requestStatus.toLowerCase()}`,
         messageTriggerType: messageTriggerType.AUTOMATIC,
         messageType: messageType.SMS,
         messageSid: sentSms.sid,
