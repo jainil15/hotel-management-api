@@ -4,6 +4,7 @@ const preArrivalFlowService = require("./preArrivalFlow.service");
 const inHouseFlowService = require("./inHouseFlow.service");
 const checkedOutFlowService = require("./checkedOutFlow.service");
 const settingService = require("./setting.service");
+const reviewsFlowService = require("./reviewsFlow.service");
 /**
  * Create default workflows for a property
  * @param {string} propertyId
@@ -30,7 +31,15 @@ const createDefaults = async (propertyId, session) => {
     {},
     session,
   );
-  return { homeFlow, addOnsFlow, preArrivalFlow, inHouseFlow, checkedOutFlow };
+  const reviewFlow = await reviewsFlowService.create(propertyId, {}, session);
+  return {
+    homeFlow,
+    addOnsFlow,
+    preArrivalFlow,
+    inHouseFlow,
+    checkedOutFlow,
+    reviewFlow,
+  };
 };
 
 const removeDefaults = async (propertyId, session) => {
@@ -39,6 +48,7 @@ const removeDefaults = async (propertyId, session) => {
   await preArrivalFlowService.remove(propertyId, session);
   await inHouseFlowService.remove(propertyId, session);
   await checkedOutFlowService.remove(propertyId, session);
+  await reviewsFlowService.remove(propertyId, session);
 };
 
 /**
@@ -55,6 +65,7 @@ const getByPropertyId = async (propertyId) => {
   const checkedOutFlow =
     await checkedOutFlowService.getByPropertyId(propertyId);
   const settingFlow = await settingService.getByPropertyId(propertyId);
+  const reviewFlow = await reviewsFlowService.getByPropertyId(propertyId);
   return {
     homeFlow,
     addOnsFlow,
@@ -62,6 +73,7 @@ const getByPropertyId = async (propertyId) => {
     inHouseFlow,
     checkedOutFlow,
     settingFlow,
+    reviewFlow,
   };
 };
 
@@ -91,7 +103,19 @@ const update = async (propertyId, workflow, session) => {
     workflow.checkedOutFlow,
     session,
   );
-  return { homeFlow, addOnsFlow, preArrivalFlow, inHouseFlow, checkedOutFlow };
+  const reviewFlow = await reviewsFlowService.update(
+    propertyId,
+    workflow.reviewFlow,
+    session,
+  );
+  return {
+    homeFlow,
+    addOnsFlow,
+    preArrivalFlow,
+    inHouseFlow,
+    checkedOutFlow,
+    reviewFlow,
+  };
 };
 
 module.exports = {

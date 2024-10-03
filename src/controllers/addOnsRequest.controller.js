@@ -98,7 +98,7 @@ const update = async (req, res, next) => {
       twilioSubClient,
       `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
       `${oldGuest.countryCode}${oldGuest.phoneNumber}`,
-      `Your request for addon is ${requestStatus.toLowerCase()}`,
+      `Your request for ${existingAddOnsRequest.name} addon  is ${requestStatus.toLowerCase()}`,
     );
     const newMessage = await messageService.create(
       {
@@ -106,7 +106,7 @@ const update = async (req, res, next) => {
         guestId: guestId,
         senderId: propertyId,
         receiverId: guestId,
-        content: `Your request for addon is ${requestStatus.toLowerCase()}`,
+        content: `Your request for ${existingAddOnsRequest.name} addon is ${requestStatus.toLowerCase()}`,
         messageTriggerType: messageTriggerType.AUTOMATIC,
         messageType: messageType.SMS,
         messageSid: sentSms.sid,

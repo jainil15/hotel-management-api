@@ -219,7 +219,7 @@ const create = async (req, res, next) => {
           twilioSubClient,
           `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
           `${newGuest.countryCode}${newGuest.phoneNumber}`,
-          messageTemplate.message,
+          `${messageTemplate.message}.Your guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
         );
         const newMessage = await messageService.create(
           {
@@ -448,9 +448,12 @@ const update = async (req, res, next) => {
     }
 
     // Send message to the guest according to the status
-
     if (sendMessage === true) {
       // Get Message Template
+      const guestSession = await guestSessionService.getGuestSession(
+        propertyId,
+        guestId,
+      );
       const messageTemplate =
         await messageTemplateService.getByNameAndPropertyId(
           propertyId,
@@ -474,7 +477,7 @@ const update = async (req, res, next) => {
           twilioSubClient,
           `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
           `${updatedGuest.countryCode}${updatedGuest.phoneNumber}`,
-          messageTemplate.message,
+          `${messageTemplate.message}.Your guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
         );
 
         const newMessage = await messageService.create(
@@ -779,7 +782,6 @@ const guestedit = async (req, res, next) => {
       updatedPreArrival = null,
       updatedAddOns = null,
       updatedCheckInOutRequest = null;
-
     if (guest) {
       const guestResult =
         await UpdateGuestValidationSchema.safeParseAsync(guest);
@@ -858,7 +860,7 @@ const guestedit = async (req, res, next) => {
     // Emit to chat list updated
     req.app.io.to(`property:${propertyId}`).emit("chatList:update", {});
     // Emit to guest messages updated
-    req.app.io.to(`guest:${guestId}`).emit("message:newMessage", {});
+    //req.app.io.to(`guest:${guestId}`).emit("message:newMessage", {});
 
     // Return response with all updated data, including those that were not updated
     return responseHandler(res, {

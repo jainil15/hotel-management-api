@@ -50,4 +50,9 @@ const findOne = async (filter) => {
   return guestSession;
 };
 
-module.exports = { create, getById, update, findOne };
+const getGuestSession = async (propertyId, guestId) => {
+  const guestSession = await findOne({ propertyId, guestId });
+  return guestSession;
+};
+
+module.exports = { create, getById, update, findOne, getGuestSession };

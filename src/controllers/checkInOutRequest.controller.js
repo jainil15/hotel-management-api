@@ -20,6 +20,7 @@ const twilioService = require("../services/twilio.service");
 const chatListService = require("../services/chatList.service");
 const { REQUEST_STATUS } = require("../constants/guestStatus.contant");
 const smsService = require("../services/sms.service");
+const guestSessionService = require("../services/guestSession.service");
 const {
   messageTriggerType,
   requestType,
@@ -269,6 +270,10 @@ const updateRequestStatus = async (req, res, next) => {
         checkInOutRequest: updatedCheckInOutRequest,
       });
     }
+    const guestSession = await guestSessionService.getGuestSession(
+      propertyId,
+      guestId,
+    );
     const twilioAccount =
       await twilioAccountService.getByPropertyId(propertyId);
     const twilioSubClient = await twilioService.getTwilioClient(twilioAccount);
@@ -276,7 +281,7 @@ const updateRequestStatus = async (req, res, next) => {
       twilioSubClient,
       `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
       `${oldGuest.countryCode}${oldGuest.phoneNumber}`,
-      messageTemplate.message,
+      `${messageTemplate.message}.Your guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
     );
     const newMessage = await messageService.create(
       {

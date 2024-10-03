@@ -5,6 +5,7 @@ const workflowService = require("../services/workflow.service");
 const inHouseFlowService = require("../services/inHouseFlow.service");
 const checkedOutFlowService = require("../services/checkedOutFlow.service");
 const settingService = require("../services/setting.service");
+const reviewFlowService = require("../services/reviewsFlow.service");
 const {
   APIError,
   InternalServerError,
@@ -25,6 +26,9 @@ const {
 const {
   UpdateInHouseFlowValidationSchema,
 } = require("../models/inHouseFlow.model");
+const {
+  UpdateReviewsFlowValidationSchema,
+} = require("../models/reviewsFlow.model");
 
 /**
  * @deprecated
@@ -103,6 +107,7 @@ const getByPropertyId = async (req, res, next) => {
     const checkedOutFlow =
       await checkedOutFlowService.getByPropertyId(propertyId);
     const settingFlow = await settingService.getByPropertyId(propertyId);
+    const reviewFlow = await reviewFlowService.getByPropertyId(propertyId);
     return responseHandler(res, {
       homeFlow,
       addOnsFlow,
@@ -110,6 +115,7 @@ const getByPropertyId = async (req, res, next) => {
       inHouseFlow,
       checkedOutFlow,
       settingFlow,
+      reviewFlow,
     });
   } catch (e) {
     if (e instanceof APIError) {
@@ -130,6 +136,7 @@ const update = async (req, res, next) => {
       preArrivalFlow,
       inHouseFlow,
       checkedOutFlow,
+      reviewFlow,
     } = req.body;
     const homeFlowResult = UpdateHomeFlowValidationSchema.safeParse(homeFlow);
     const addOnsFlowResult =
@@ -140,13 +147,16 @@ const update = async (req, res, next) => {
       UpdateInHouseFlowValidationSchema.safeParse(inHouseFlow);
     const checkedOutFlowResult =
       UpdateCheckedOutFlowValidationSchema.safeParse(checkedOutFlow);
+    const reviewFlowResult =
+      UpdateReviewsFlowValidationSchema.safeParse(reviewFlow);
 
     if (
       !homeFlowResult.success ||
       !addOnsFlowResult.success ||
       !preArrivalFlowResult.success ||
       !inHouseFlowResult.success ||
-      !checkedOutFlowResult.success
+      !checkedOutFlowResult.success ||
+      !reviewFlowResult.success
     ) {
       throw new ValidationError("Validation Error", {
         ...homeFlowResult?.error?.flatten().fieldErrors,
@@ -154,6 +164,7 @@ const update = async (req, res, next) => {
         ...preArrivalFlowResult?.error?.flatten().fieldErrors,
         ...inHouseFlowResult?.error?.flatten().fieldErrors,
         ...checkedOutFlowResult?.error?.flatten().fieldErrors,
+        ...reviewFlowResult?.error?.flatten().fieldErrors,
       });
     }
 
@@ -182,6 +193,11 @@ const update = async (req, res, next) => {
       checkedOutFlowResult.data,
       session,
     );
+    const updatedReviewFlow = await reviewFlowService.update(
+      propertyId,
+      checkedOutFlowResult.data,
+      session,
+    );
 
     await session.commitTransaction();
     session.endSession();
@@ -191,6 +207,7 @@ const update = async (req, res, next) => {
       preArrivalFlow: updatedPreArrivalFlow,
       inHouseFlow: updatedInHouseFlow,
       checkedOutFlow: updatedCheckedOutFlow,
+      reviewsFlow: updatedReviewFlow,
     });
   } catch (e) {
     await session.abortTransaction();

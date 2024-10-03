@@ -331,7 +331,6 @@ const createPreArrival = async (req, res, next) => {
   try {
     const { propertyId, guestId } = req.guestSession;
     const preArrival = req.body;
-
     preArrival.consentToText = preArrival.consentToText === "true";
     preArrival.policyAccepted = preArrival.policyAccepted === "true";
     preArrival.guestSignature = req?.files?.guestSignature;
@@ -357,14 +356,12 @@ const createPreArrival = async (req, res, next) => {
         ...preArrivalResult.error.flatten().fieldErrors,
       });
     }
-
     const preArrivalFlow =
       await preArrivalFlowService.getByPropertyId(propertyId);
     const validationResult = zodValidatePreArrivalFlow(
       preArrivalFlow._doc,
       preArrival,
     );
-
     if (!validationResult.success) {
       throw new ValidationError("Validation Error", {
         ...validationResult.error.flatten().fieldErrors,
