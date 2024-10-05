@@ -100,11 +100,12 @@ const create = async (req, res, next) => {
           date: ["Late check out date should be after the check out date"],
         });
       }
-    } else {
-      throw new ValidationError("Invalid request type", {
-        requestType: ["Invalid request type"],
-      });
     }
+    //  else {
+    //   throw new ValidationError("Invalid request type", {
+    //     requestType: ["Invalid request type"],
+    //   });
+    // }
     const oldGuestStatus = await guestStatusService.getByGuestId(guestId);
 
     const updatedGuestStatus = await guestStatusService.update(
@@ -184,7 +185,6 @@ const updateRequestStatus = async (req, res, next) => {
   try {
     const { propertyId, guestId, checkInOutRequestId } = req.params;
     const checkInOutRequest = req.body;
-
     const checkInOutRequestResult =
       UpdateRequestStatusValidationSchema.safeParse(checkInOutRequest);
     if (!checkInOutRequestResult.success) {
@@ -220,6 +220,7 @@ const updateRequestStatus = async (req, res, next) => {
         session,
       );
     const oldGuestStatus = await guestStatusService.getByGuestId(guestId);
+    // console.log("ooooooooooooooo", oldGuestStatus);
     const updatedGuestStatus = await guestStatusService.update(
       guestId,
       {
@@ -228,24 +229,58 @@ const updateRequestStatus = async (req, res, next) => {
       },
       session,
     );
+    //console.log("qacccccccc", updatedGuestStatus);
     if (!validateUpdatev3(oldGuestStatus._doc, updatedGuestStatus._doc)) {
       throw new ValidationError("Invalid Status", {
         currentStatus: ["Invalid Status"],
       });
     }
 
+    // if (updatedCheckInOutRequest.requestStatus === REQUEST_STATUS.ACCEPTED) {
+    //   console.log("ppppppppppppppppppppp", [
+    //     `${updatedCheckInOutRequest.requestType
+    //       .match(/[A-Z][a-z]+/g)
+    //       .join("")
+    //       .replace("C", "c")}`,
+    //   ]);
+    //   const updatedGuest = await guestService.update(
+    //     {
+    //       [`${updatedCheckInOutRequest.requestType
+    //         .match(/[A-Z][a-z]+/g)
+    //         .join("")
+    //         .replace("C", "c")}`]:
+    //         updatedCheckInOutRequest[
+    //           `${updatedCheckInOutRequest.requestType}DateTime`
+    //         ],
+    //     },
+    //     propertyId,
+    //     guestId,
+    //     session,
+    //   );
+    //   console.log("updateddddddddddGuest", updatedGuest);
+    // }
     if (updatedCheckInOutRequest.requestStatus === REQUEST_STATUS.ACCEPTED) {
-      console.log(updatedCheckInOutRequest);
+      // Get the field name to update based on requestType
+      const fieldNameToUpdate = updatedCheckInOutRequest.requestType
+        .match(/[A-Z][a-z]+/g)
+        .join("")
+        .replace("C", "c");
+
+      // If the field is 'Stay', we want to update 'checkOut' instead
+      const finalFieldName =
+        fieldNameToUpdate === "Stay" ? "checkOut" : fieldNameToUpdate;
+
+      console.log("Field being updated:", finalFieldName);
+
+      const updateData = {
+        [finalFieldName]:
+          updatedCheckInOutRequest[
+            `${updatedCheckInOutRequest.requestType}DateTime`
+          ],
+      };
+
       const updatedGuest = await guestService.update(
-        {
-          [`${updatedCheckInOutRequest.requestType
-            .match(/[A-Z][a-z]+/g)
-            .join("")
-            .replace("C", "c")}`]:
-            updatedCheckInOutRequest[
-              `${updatedCheckInOutRequest.requestType}DateTime`
-            ],
-        },
+        updateData,
         propertyId,
         guestId,
         session,

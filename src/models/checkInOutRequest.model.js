@@ -38,6 +38,9 @@ const checkInOutRequest = new Schema(
     lateCheckOutDateTime: {
       type: Date,
     },
+    extendStayDateTime: {
+      type: Date,
+    },
   },
   { timestamps: true },
 );
@@ -62,6 +65,15 @@ const CreateCheckInOutRequestValidationSchema = z
       ])
       .optional(),
     lateCheckOutDateTime: z
+      .string()
+      .refine(
+        (val) => datetimeregex.test(val) && !Number.isNaN(Date.parse(val)),
+        {
+          message: "Invalid date format",
+        },
+      )
+      .optional(),
+    extendStayDateTime: z
       .string()
       .refine(
         (val) => datetimeregex.test(val) && !Number.isNaN(Date.parse(val)),
@@ -98,6 +110,20 @@ const CreateCheckInOutRequestValidationSchema = z
         path: ["lateCheckOutDateTime"],
         fatal: true,
         message: "Cannot request both early check in and late check out",
+      });
+    }
+    if (arg.lateCheckOutDateTime && arg.extendStayDateTime) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.invalid_date,
+        path: ["lateCheckOutDateTime"],
+        fatal: true,
+        message: "Cannot request both late check out and extend stay",
+      });
+      ctx.addIssue({
+        code: z.ZodIssueCode.invalid_date,
+        path: ["extendStayDateTime"],
+        fatal: true,
+        message: "Cannot request both late check out and extend stay",
       });
     }
   });
@@ -137,6 +163,15 @@ const UpdateCheckInOutRequestValidationSchema = z
         },
       )
       .optional(),
+    extendStayDateTime: z
+      .string()
+      .refine(
+        (val) => datetimeregex.test(val) && !Number.isNaN(Date.parse(val)),
+        {
+          message: "Invalid date format",
+        },
+      )
+      .optional(),
   })
   .superRefine((arg, ctx) => {
     if (arg.requestType === "earlyCheckIn" && !arg.earlyCheckInDateTime) {
@@ -165,6 +200,20 @@ const UpdateCheckInOutRequestValidationSchema = z
         path: ["lateCheckOutDateTime"],
         fatal: true,
         message: "Cannot request both early check in and late check out",
+      });
+    }
+    if (arg.lateCheckOutDateTime && arg.extendStayDateTime) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.invalid_date,
+        path: ["lateCheckOutDateTime"],
+        fatal: true,
+        message: "Cannot request both late check out and extend stay",
+      });
+      ctx.addIssue({
+        code: z.ZodIssueCode.invalid_date,
+        path: ["extendStayDateTime"],
+        fatal: true,
+        message: "Cannot request both late check out and extend stay",
       });
     }
   });

@@ -17,6 +17,12 @@ const LATE_CHECK_OUT_STATUS = {
   DECLINED: "Declined",
   ACCEPTED: "Accepted",
 };
+const EXTEND_STAY_STATUS = {
+  NOT_REQUESTED: "Not Requested",
+  REQUESTED: "Requested",
+  DECLINED: "Declined",
+  ACCEPTED: "Accepted",
+};
 
 const RESERVATION_STATUS = {
   CONFIRMED: "Confirmed",
@@ -51,4 +57,5 @@ module.exports = {
   PRE_ARRIVAL_STATUS,
   REQUEST_STATUS,
   GUEST_REQUEST,
+  EXTEND_STAY_STATUS,
 };

@@ -193,11 +193,12 @@ const createCheckInOutRequest = async (req, res, next) => {
           date: ["Late check out date should be after the check out date"],
         });
       }
-    } else {
-      throw new ValidationError("Invalid request type", {
-        requestType: ["Invalid request type"],
-      });
     }
+    // else {
+    //   throw new ValidationError("Invalid request type", {
+    //     requestType: ["Invalid request type"],
+    //   });
+    // }
     const oldGuestStatus = await guestStatusService.getByGuestId(guestId);
 
     const updatedGuestStatus = await guestStatusService.update(

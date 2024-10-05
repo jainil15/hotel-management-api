@@ -14,6 +14,7 @@ const requestType = {
   earlyCheckIn: "Early Check In",
   lateCheckOut: "Late Check Out",
   customAddons: "Custom Addons",
+  extendStay: "Extend Stay",
 };
 
 module.exports = { messageType, messageTriggerType, requestType };
