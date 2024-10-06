@@ -12,10 +12,17 @@ const {
  * @param {import('mongoose').ClientSession} session
  * @returns {Promise<import('../models/addOnsRequest.model').AddOnsRequestType>}
  */
-const create = async (propertyId, guestId, addOnsRequest, session) => {
+const create = async (
+  propertyId,
+  guestId,
+  addOnsRequest,
+  session,
+  addOnsId,
+) => {
   const newAddOnsRequest = new AddOnsRequest({
     propertyId,
     guestId,
+    addOnsId,
     ...addOnsRequest,
   });
   const savedAddOnsRequest = await newAddOnsRequest.save({ session });
@@ -146,6 +153,14 @@ const updateAllByGuestId = async (propertyId, guestId, updateData, session) => {
   return results;
 };
 
+const getByPropertyIdAndGuestId = async (propertyId, guestId) => {
+  const addOnRequest = await AddOnsRequest.find({
+    propertyId: propertyId,
+    guestId: guestId,
+  });
+  return addOnRequest;
+};
+
 module.exports = {
   create,
   update,
@@ -153,4 +168,5 @@ module.exports = {
   findAllByGuestId,
   getAllByPropertyId,
   updateAllByGuestId,
+  getByPropertyIdAndGuestId,
 };

@@ -18,6 +18,7 @@ const checkInOutRequest = new Schema(
       required: true,
     },
     guestId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    checkInOutRequestId: { type: Schema.Types.ObjectId },
     requestStatus: {
       type: String,
       enum: [

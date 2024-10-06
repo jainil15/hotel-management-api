@@ -101,7 +101,7 @@ const CreatePreArrivalValidationSchema = z.object({
     )
     .length(1)
     .optional(),
-  policyAccepted: z.boolean(),
+  policyAccepted: z.boolean().optional(),
   consentToText: z.boolean(),
 });
 

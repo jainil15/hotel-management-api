@@ -6,6 +6,7 @@ const Schema = mongoose.Schema;
 const addOnsRequestSchema = new Schema({
   propertyId: { type: Schema.Types.ObjectId, ref: "Property" },
   guestId: { type: Schema.Types.ObjectId, ref: "Guest" },
+  addOnsId: { type: Schema.Types.ObjectId, required: true },
   name: { type: String, required: true },
   description: { type: String, required: true },
   price: { type: Number, required: true },

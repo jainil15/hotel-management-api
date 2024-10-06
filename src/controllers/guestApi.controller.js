@@ -17,6 +17,10 @@ const setttingService = require("../services/setting.service");
 const addOnsFlowService = require("../services/addOnsFlow.service");
 const checkInOutRequestService = require("../services/checkInOutRequest.service");
 const guestStatusService = require("../services/guestStatus.service");
+const twilioAccountService = require("../services/twilioAccount.service");
+const smsService = require("../services/sms.service");
+const guestSessionService = require("../services/guestSession.service");
+const twilioService = require("../services/twilio.service");
 const messageService = require("../services/message.service");
 const chatListService = require("../services/chatList.service");
 const preArrivalService = require("../services/preArrival.service");
@@ -141,6 +145,7 @@ const createCheckInOutRequest = async (req, res, next) => {
   try {
     const { propertyId, guestId } = req.guestSession;
     const checkInOutRequest = req.body;
+
     const checkInOutRequestResult =
       CreateCheckInOutRequestValidationSchema.safeParse(checkInOutRequest);
     if (!checkInOutRequestResult.success) {
@@ -214,11 +219,12 @@ const createCheckInOutRequest = async (req, res, next) => {
         currentStatus: ["Invalid Status"],
       });
     }
-
+    const checkInOutRequestId = checkInOutRequest.checkInOutRequestId;
     const newCheckInOutRequest = await checkInOutRequestService.create(
       propertyId,
       guestId,
       checkInOutRequest,
+      checkInOutRequestId,
       session,
     );
 
@@ -343,11 +349,11 @@ const createPreArrival = async (req, res, next) => {
       });
     }
 
-    if (preArrival.policyAccepted === false) {
-      throw new ValidationError("Input Validation Error", {
-        policyAccepted: ["Policy accepted is required"],
-      });
-    }
+    // if (preArrival.policyAccepted === false) {
+    //   throw new ValidationError("Input Validation Error", {
+    //     policyAccepted: ["Policy accepted is required"],
+    //   });
+    // }
 
     const preArrivalResult =
       CreatePreArrivalValidationSchema.safeParse(preArrival);
@@ -390,12 +396,56 @@ const createPreArrival = async (req, res, next) => {
       preArrivalResult.data,
       session,
     );
+    const guestSession = await guestSessionService.getGuestSession(
+      propertyId,
+      guestId,
+    );
+    const oldGuest = await guestService.getById(guestId, propertyId);
+    const twilioAccount =
+      await twilioAccountService.getByPropertyId(propertyId);
+    const twilioSubClient = await twilioService.getTwilioClient(twilioAccount);
+    const sentSms = await smsService.send(
+      twilioSubClient,
+      `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
+      `${oldGuest.countryCode}${oldGuest.phoneNumber}`,
+      `Your online checkin is completed.Your guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
+    );
+    const newMessage = await messageService.create(
+      {
+        propertyId: propertyId,
+        guestId: guestId,
+        senderId: propertyId,
+        receiverId: guestId,
+        content: `Your online checkin is completed.Your guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
+        messageTriggerType: messageTriggerType.AUTOMATIC,
+        messageType: messageType.SMS,
+        messageSid: sentSms.sid,
+      },
+      session,
+    );
+
+    const chatList = await chatListService.update(
+      propertyId,
+      guestId,
+      {
+        latestMessage: newMessage._id,
+      },
+      session,
+    );
 
     await session.commitTransaction();
-    session.endSession();
+    await session.endSession();
 
-    req.app.io.to(`property:${propertyId}`).emit("guestStatus:update", {
+    req.app.io.to(`guest:${guestId}`).emit("message:newMessage", {
+      message: newMessage,
+    });
+
+    req.app.io.to(`property:${propertyId}`).emit("guest:guestStatusUpdate", {
       guestStatus: updatedGuestStatus,
+    });
+
+    req.app.io.to(`property:${propertyId}`).emit("chatList:update", {
+      chatList: chatList,
     });
 
     return responseHandler(res, { preArrival: newPreArrival });
@@ -424,6 +474,20 @@ const getCheckInOutRequest = async (req, res, next) => {
         propertyId,
         guestId,
       );
+    return responseHandler(res, checkInOutRequest);
+  } catch (e) {
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError(e.message));
+  }
+};
+
+const getAddOnRequest = async (req, res, next) => {
+  try {
+    const { propertyId, guestId } = req.guestSession;
+    const checkInOutRequest =
+      await addOnsRequestService.getByPropertyIdAndGuestId(propertyId, guestId);
     return responseHandler(res, checkInOutRequest);
   } catch (e) {
     if (e instanceof APIError) {
@@ -512,6 +576,7 @@ const createAddOnsRequest = async (req, res, next) => {
       guestId,
       addOnsRequestResult.data,
       session,
+      addOnsId,
     );
     const newMessage = await messageService.create(
       {
@@ -590,4 +655,5 @@ module.exports = {
   getCheckInOutRequest,
   createReview,
   createAddOnsRequest,
+  getAddOnRequest,
 };

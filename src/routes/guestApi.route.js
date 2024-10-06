@@ -14,7 +14,7 @@ router.get("/property", guestApiController.getProperty);
 router.get("/settings", guestApiController.getSettings);
 router.get("/guest/status", guestApiController.getGuestStatus);
 router.get("/checkInOutRequest", guestApiController.getCheckInOutRequest);
-router.get("/addOns", guestApiController.getAddOns);
+router.get("/addOns", guestApiController.getAddOnRequest);
 
 router.post("/checkInOutRequest", guestApiController.createCheckInOutRequest);
 router.post(

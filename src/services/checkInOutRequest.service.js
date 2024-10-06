@@ -1,5 +1,5 @@
 const { CheckInOutRequest } = require("../models/checkInOutRequest.model");
-
+const { REQUEST_STATUS } = require("../constants/guestStatus.contant");
 /**
  * Create a new check in/out request
  * @param {string} propertyId - The property id
@@ -8,15 +8,22 @@ const { CheckInOutRequest } = require("../models/checkInOutRequest.model");
  * @param {object} session - The mongoose session
  * @returns {Promise<import('../models/checkInOutRequest.model').CheckInOutRequestType>} - The saved check in/out request
  */
-const create = async (propertyId, guestId, checkInOutRequest, session) => {
-	const newCheckInOutRequest = new CheckInOutRequest({
-		propertyId: propertyId,
-		guestId: guestId,
-		...checkInOutRequest,
-	});
+const create = async (
+  propertyId,
+  guestId,
+  checkInOutRequest,
+  checkInOutRequestId,
+  session,
+) => {
+  const newCheckInOutRequest = new CheckInOutRequest({
+    propertyId: propertyId,
+    guestId: guestId,
+    checkInOutRequestId,
+    ...checkInOutRequest,
+  });
 
-	const savedCheckInOutRequest = await newCheckInOutRequest.save({ session });
-	return savedCheckInOutRequest;
+  const savedCheckInOutRequest = await newCheckInOutRequest.save({ session });
+  return savedCheckInOutRequest;
 };
 
 /**
@@ -27,12 +34,12 @@ const create = async (propertyId, guestId, checkInOutRequest, session) => {
  * @returns {Promise<import('../models/checkInOutRequest.model').CheckInOutRequestType>} - The check in/out request
  */
 const getByPropertyId = async (propertyId, guestId, requestId) => {
-	const checkInOutRequest = await CheckInOutRequest.findOne({
-		propertyId: propertyId,
-		guestId: guestId,
-		_id: requestId,
-	});
-	return checkInOutRequest;
+  const checkInOutRequest = await CheckInOutRequest.findOne({
+    propertyId: propertyId,
+    guestId: guestId,
+    _id: requestId,
+  });
+  return checkInOutRequest;
 };
 
 /**
@@ -42,11 +49,11 @@ const getByPropertyId = async (propertyId, guestId, requestId) => {
  * @returns {Promise<import('../models/checkInOutRequest.model').CheckInOutRequestType[]>} - The check in/out request
  */
 const getByPropertyIdAndGuestId = async (propertyId, guestId) => {
-	const checkInOutRequest = await CheckInOutRequest.find({
-		propertyId: propertyId,
-		guestId: guestId,
-	});
-	return checkInOutRequest;
+  const checkInOutRequest = await CheckInOutRequest.find({
+    propertyId: propertyId,
+    guestId: guestId,
+  });
+  return checkInOutRequest;
 };
 
 /**
@@ -57,12 +64,13 @@ const getByPropertyIdAndGuestId = async (propertyId, guestId) => {
  * @returns {Promise<import('../models/checkInOutRequest.model').CheckInOutRequestType>} - The check in/out request
  */
 const findOne = async (propertyId, guestId, filter) => {
-	const checkInOutRequest = await CheckInOutRequest.findOne({
-		propertyId: propertyId,
-		guestId: guestId,
-		...filter,
-	});
-	return checkInOutRequest;
+  const checkInOutRequest = await CheckInOutRequest.findOne({
+    propertyId: propertyId,
+    guestId: guestId,
+    requestStatus: { $in: [REQUEST_STATUS.REQUESTED, REQUEST_STATUS.ACCEPTED] },
+    ...filter,
+  });
+  return checkInOutRequest;
 };
 
 /**
@@ -74,25 +82,25 @@ const findOne = async (propertyId, guestId, filter) => {
  *  @returns {Promise<import('../models/checkInOutRequest.model').CheckInOutRequestType>} - The updated check in/out request
  */
 const updateRequestStatus = async (
-	propertyId,
-	checkInOutRequestId,
-	checkInOutRequestStatus,
-	session,
+  propertyId,
+  checkInOutRequestId,
+  checkInOutRequestStatus,
+  session,
 ) => {
-	const updatedCheckInOutRequest = await CheckInOutRequest.findOneAndUpdate(
-		{
-			propertyId: propertyId,
-			_id: checkInOutRequestId,
-		},
+  const updatedCheckInOutRequest = await CheckInOutRequest.findOneAndUpdate(
+    {
+      propertyId: propertyId,
+      _id: checkInOutRequestId,
+    },
 
-		checkInOutRequestStatus,
+    checkInOutRequestStatus,
 
-		{
-			new: true,
-			session: session,
-		},
-	);
-	return updatedCheckInOutRequest;
+    {
+      new: true,
+      session: session,
+    },
+  );
+  return updatedCheckInOutRequest;
 };
 
 /**
@@ -103,14 +111,13 @@ const updateRequestStatus = async (
  * @returns {Promise<import('../models/checkInOutRequest.model').CheckInOutRequestType>} - The check in/out request
  */
 const getByRequestType = async (propertyId, guestId, requestType) => {
-	const checkInOutRequest = await CheckInOutRequest.findOne({
-		propertyId: propertyId,
-		guestId: guestId,
-		requestType: requestType,
-	});
-	return checkInOutRequest;
+  const checkInOutRequest = await CheckInOutRequest.findOne({
+    propertyId: propertyId,
+    guestId: guestId,
+    requestType: requestType,
+  });
+  return checkInOutRequest;
 };
-
 
 /**
  * Update a field for all check-in/out requests by propertyId and guestId
@@ -120,27 +127,31 @@ const getByRequestType = async (propertyId, guestId, requestType) => {
  * @param {object} session - The mongoose session
  * @returns {Promise<import('../models/checkInOutRequest.model').CheckInOutRequestType[]>} - The updated check-in/out requests
  */
-const updateFieldByPropertyIdAndGuestId = async (propertyId, guestId, updateData, session) => {
-	const checkInOutRequests = await CheckInOutRequest.find({
-	  propertyId: propertyId,
-	  guestId: guestId,
-	});
-  
-	for (let request of checkInOutRequests) {
-	  Object.assign(request, updateData);
-	  await request.save({ session });
-	}
-  
-	return checkInOutRequests;
-  };
+const updateFieldByPropertyIdAndGuestId = async (
+  propertyId,
+  guestId,
+  updateData,
+  session,
+) => {
+  const checkInOutRequests = await CheckInOutRequest.find({
+    propertyId: propertyId,
+    guestId: guestId,
+  });
 
+  for (let request of checkInOutRequests) {
+    Object.assign(request, updateData);
+    await request.save({ session });
+  }
+
+  return checkInOutRequests;
+};
 
 module.exports = {
-	create,
-	getByPropertyId,
-	getByPropertyIdAndGuestId,
-	findOne,
-	updateRequestStatus,
-	getByRequestType,
-	updateFieldByPropertyIdAndGuestId,
+  create,
+  getByPropertyId,
+  getByPropertyIdAndGuestId,
+  findOne,
+  updateRequestStatus,
+  getByRequestType,
+  updateFieldByPropertyIdAndGuestId,
 };
