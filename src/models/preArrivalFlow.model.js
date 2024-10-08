@@ -7,6 +7,7 @@ const Schema = mongoose.Schema;
 const policySchema = new Schema({
   name: { type: String },
   description: { type: String },
+  isMandatory: { type: Boolean, default: true },
 });
 
 const preArrivalFlowSchema = new Schema(
@@ -62,6 +63,7 @@ const UpdatePreArrivalValidationSchema = z.object({
       z.object({
         name: z.string().optional(),
         description: z.string().optional(),
+        isMandatory: z.boolean().optional(),
       }),
     )
     .optional(),

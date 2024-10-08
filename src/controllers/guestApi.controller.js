@@ -44,7 +44,7 @@ const {
   messageTriggerType,
 } = require("../constants/message.constant");
 const {
-  CreatePreArrivalValidationSchema,
+  CreatePreArrivsmsValidationSchema,
 } = require("../models/preArrival.model");
 const { CreateReviewValidationSchema } = require("../models/review.model");
 const {
@@ -62,8 +62,11 @@ const getGuest = async (req, res, next) => {
   try {
     const guestId = req.guestSession.guestId;
     const propertyId = req.guestSession.propertyId;
-    const guest = await guestService.getById(guestId, propertyId);
-    return responseHandler(res, guest);
+    const { guest, guestPropertyMobile } = await guestService.getById(
+      guestId,
+      propertyId,
+    );
+    return responseHandler(res, guest, guestPropertyMobile);
   } catch (e) {
     if (e instanceof APIError) {
       return next(e);
@@ -102,8 +105,9 @@ const getWorkflow = async (req, res, next) => {
 const getProperty = async (req, res, next) => {
   try {
     const propertyId = req.guestSession.propertyId;
-    const property = await propertyService.getById(propertyId);
-    return responseHandler(res, property);
+    const { property, guestPropertyMobile } =
+      await propertyService.getById(propertyId);
+    return responseHandler(res, { property, guestPropertyMobile });
   } catch (e) {
     if (e instanceof APIError) {
       return next(e);

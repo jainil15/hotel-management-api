@@ -9,6 +9,7 @@ const { TwilioAccount } = require("../models/twilioAccount.model");
 const twilio = require("twilio");
 const { Setting } = require("../models/setting.model");
 const { NotFoundError, InternalServerError } = require("../lib/CustomErrors");
+const twilioService = require("./twilioAccount.service");
 require("dotenv").config();
 
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
@@ -165,12 +166,13 @@ const remove = async (propertyId) => {
  */
 const getById = async (propertyId) => {
   const property = await Property.findById(propertyId);
+  const guestPropertyMobile = await twilioService.getByPropertyId(propertyId);
   if (!property) {
     throw new NotFoundError("Property not found", {
       propertyId: ["Property not found for the given id"],
     });
   }
-  return property;
+  return { property, guestPropertyMobile };
 };
 
 /**
