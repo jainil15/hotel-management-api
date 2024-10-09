@@ -35,6 +35,10 @@ const {
 const {
   CreateCheckInOutRequestValidationSchema,
 } = require("../models/checkInOutRequest.model");
+
+const {
+  CreatePreArrivalValidationSchema,
+} = require("../models/preArrival.model");
 const { compareDateGt } = require("../utils/dateCompare");
 const { REQUEST_STATUS } = require("../constants/guestStatus.contant");
 const { validateUpdatev3 } = require("../utils/guestStatus.util");
@@ -347,11 +351,11 @@ const createPreArrival = async (req, res, next) => {
     preArrival.guestSignature = req?.files?.guestSignature;
     preArrival.guestIdProof = req?.files?.guestIdProof;
 
-    if (preArrival.consentToText === false) {
-      throw new ValidationError("Input Validation Error", {
-        consentToText: ["Consent to text is required"],
-      });
-    }
+    // if (preArrival.consentToText === false) {
+    //   throw new ValidationError("Input Validation Error", {
+    //     consentToText: ["Consent to text is required"],
+    //   });
+    // }
 
     // if (preArrival.policyAccepted === false) {
     //   throw new ValidationError("Input Validation Error", {
