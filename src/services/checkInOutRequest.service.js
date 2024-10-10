@@ -8,6 +8,23 @@ const { REQUEST_STATUS } = require("../constants/guestStatus.contant");
  * @param {object} session - The mongoose session
  * @returns {Promise<import('../models/checkInOutRequest.model').CheckInOutRequestType>} - The saved check in/out request
  */
+// const create = async (
+//   propertyId,
+//   guestId,
+//   checkInOutRequest,
+//   checkInOutRequestId,
+//   session,
+// ) => {
+//   const newCheckInOutRequest = new CheckInOutRequest({
+//     propertyId: propertyId,
+//     guestId: guestId,
+//     checkInOutRequestId,
+//     ...checkInOutRequest,
+//   });
+
+//   const savedCheckInOutRequest = await newCheckInOutRequest.save({ session });
+//   return savedCheckInOutRequest;
+// };
 const create = async (
   propertyId,
   guestId,
@@ -15,15 +32,30 @@ const create = async (
   checkInOutRequestId,
   session,
 ) => {
-  const newCheckInOutRequest = new CheckInOutRequest({
-    propertyId: propertyId,
-    guestId: guestId,
+  // Check if a check-in/out request already exists with the same propertyId, guestId, and checkInOutRequestId
+  const existingRequest = await CheckInOutRequest.findOne({
+    propertyId,
+    guestId,
     checkInOutRequestId,
-    ...checkInOutRequest,
-  });
+  }).session(session);
 
-  const savedCheckInOutRequest = await newCheckInOutRequest.save({ session });
-  return savedCheckInOutRequest;
+  if (existingRequest) {
+    // If it exists, update the existing request
+    checkInOutRequest.requestStatus = "Requested";
+    Object.assign(existingRequest, checkInOutRequest); // Merge new data into the existing request
+    const updatedCheckInOutRequest = await existingRequest.save({ session });
+    return updatedCheckInOutRequest; // Return the updated request
+  } else {
+    // If it doesn't exist, create a new request
+    const newCheckInOutRequest = new CheckInOutRequest({
+      propertyId,
+      guestId,
+      checkInOutRequestId,
+      ...checkInOutRequest,
+    });
+    const savedCheckInOutRequest = await newCheckInOutRequest.save({ session });
+    return savedCheckInOutRequest; // Return the newly created request
+  }
 };
 
 /**

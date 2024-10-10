@@ -19,14 +19,31 @@ const create = async (
   session,
   addOnsId,
 ) => {
-  const newAddOnsRequest = new AddOnsRequest({
+  // Check if an add-on request already exists with the same propertyId, guestId, and addOnsId
+  const existingRequest = await AddOnsRequest.findOne({
     propertyId,
     guestId,
     addOnsId,
-    ...addOnsRequest,
-  });
-  const savedAddOnsRequest = await newAddOnsRequest.save({ session });
-  return savedAddOnsRequest;
+  }).session(session);
+
+  if (existingRequest) {
+    addOnsRequest.requestStatus = "Requested";
+    // If it exists, update the existing request
+    Object.assign(existingRequest, addOnsRequest); // Merge the new data into the existing request
+    const updatedAddOnsRequest = await existingRequest.save({ session });
+    return updatedAddOnsRequest; // Return the updated request
+  } else {
+    // If it doesn't exist, create a new request
+    const newAddOnsRequest = new AddOnsRequest({
+      propertyId,
+      guestId,
+      addOnsId,
+      ...addOnsRequest,
+    });
+    const savedAddOnsRequest = await newAddOnsRequest.save({ session });
+    console.log("savedAddOnsRequest", savedAddOnsRequest);
+    return savedAddOnsRequest; // Return the newly created request
+  }
 };
 
 /**
