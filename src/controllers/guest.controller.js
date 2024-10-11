@@ -46,6 +46,7 @@ const { z } = require("zod");
 const {
   guestStatusToTemplateOnCreate,
   guestStatusToTemplateOnUpdate,
+  guestTimingUpdate,
 } = require("../utils/guestStatustToTemplate");
 const {
   GUEST_REQUEST,
@@ -314,8 +315,10 @@ const update = async (req, res, next) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
+    console.log("ppppppppppppp", req.body);
     // TODO: add messageGuest
     const { sendMessage, status, ...guest } = req.body;
+    console.log("311111999999", sendMessage, status);
     const propertyId = req.params.propertyId;
     const guestId = req.params.guestId;
     const guestResult = await UpdateGuestValidationSchema.safeParseAsync(guest);
@@ -348,19 +351,39 @@ const update = async (req, res, next) => {
         ...roomNumberResult?.error?.flatten().fieldErrors,
       });
     }
-
+    let checkCheckInUpdated = false;
+    let checkCheckOutUpdated = false;
+    const guestInfo = await guestService.getById(guestId, propertyId);
     const updatedGuest = await guestService.update(
       guest,
       propertyId,
       guestId,
       session,
     );
+    console.log("Updated guest", updatedGuest, "kkkkkk", guestInfo);
+    if (
+      new Date(guestInfo.checkIn).getTime() !==
+      new Date(updatedGuest.checkIn).getTime()
+    ) {
+      checkCheckInUpdated = true;
+    }
+
+    if (
+      new Date(guestInfo.checkOut).getTime() !==
+      new Date(updatedGuest.checkOut).getTime()
+    ) {
+      checkCheckOutUpdated = true;
+    }
+    console.log("ppppppppppppp", checkCheckOutUpdated, checkCheckInUpdated);
+
     const oldGuestStatus = await guestStatusService.getByGuestId(guestId);
+    console.log("oldddddd", oldGuestStatus);
     const updatedGuestStatus = await guestStatusService.update(
       guestId,
       status,
       session,
     );
+    console.log("newwwwwwwwwwww", updatedGuestStatus);
 
     // Check for early check in or late check out
     const existingCheckInOutRequests =
@@ -368,6 +391,7 @@ const update = async (req, res, next) => {
         propertyId,
         guestId,
       );
+    //  console.log("33333777772222222", existingCheckInOutRequests);
     for (const existingCheckInOutRequest of existingCheckInOutRequests) {
       if (
         updatedGuestStatus[`${existingCheckInOutRequest.requestType}Status`] !==
@@ -449,6 +473,58 @@ const update = async (req, res, next) => {
 
     // Send message to the guest according to the status
     if (sendMessage === true) {
+      if (checkCheckInUpdated || checkCheckOutUpdated) {
+        const guestSession = await guestSessionService.getGuestSession(
+          propertyId,
+          guestId,
+        );
+        const messageTemplate =
+          await messageTemplateService.getByNameAndPropertyId(
+            propertyId,
+            guestTimingUpdate(guestInfo, updatedGuest),
+          );
+        const twilioAccount =
+          await twilioAccountService.getByPropertyId(propertyId);
+        if (!twilioAccount) {
+          throw new NotFoundError("Twilio account not found", {
+            propertyId: ["Twilio account not found for this property"],
+          });
+        }
+
+        const twilioSubClient =
+          await twilioService.getTwilioClient(twilioAccount);
+
+        const sentMessage = await smsService.send(
+          twilioSubClient,
+          `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
+          `${updatedGuest.countryCode}${updatedGuest.phoneNumber}`,
+          `${messageTemplate.message}.${checkCheckInUpdated ? `Your new check in time is ${updatedGuest.checkIn}` : `Your new check in time is ${updatedGuest.checkOut}`}.Your guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
+        );
+
+        const newMessage = await messageService.create(
+          {
+            propertyId: propertyId,
+            guestId: updatedGuest._id,
+            senderId: propertyId,
+            receiverId: updatedGuest._id,
+            content: sentMessage.body,
+            messageSid: sentMessage.sid,
+            messageType: messageType.SMS,
+            messageTriggerType: messageTriggerType.AUTOMATIC,
+            status: sentMessage.status,
+          },
+          session,
+        );
+
+        await chatListService.updateAndIncUnreadMessages(
+          propertyId,
+          updatedGuest._id,
+          {
+            latestMessage: newMessage._id,
+          },
+          session,
+        );
+      }
       // Get Message Template
       const guestSession = await guestSessionService.getGuestSession(
         propertyId,

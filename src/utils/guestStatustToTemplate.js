@@ -113,10 +113,10 @@ const guestStatusToTemplateOnUpdate = (oldStatus, newStatus) => {
       }
       if (oldStatus.extendStayStatus !== newStatus.extendStayStatus) {
         if (newStatus.extendStayStatus === EXTEND_STAY_STATUS.ACCEPTED) {
-          return "Extended stay Accepted";
+          return "Extend Stay Accepted";
         }
         if (newStatus.extendStayStatus === EXTEND_STAY_STATUS.DECLINED) {
-          return "Extended stay Declined";
+          return "Extend Stay Declined";
         }
       }
       return "Checked In";
@@ -166,6 +166,17 @@ const guestStatusToTemplateOnUpdate = (oldStatus, newStatus) => {
       return "Extend Stay Declined";
     }
   }
+
+  return "";
+};
+
+const guestTimingUpdate = (oldGuestInfo, updatedGuestInfo) => {
+  if (oldGuestInfo.checkIn !== updatedGuestInfo.checkIn) {
+    return "Check In Time Update";
+  }
+  if (oldGuestInfo.checkOut !== updatedGuestInfo.checkOut) {
+    return "Check Out Time Update";
+  }
   return "";
 };
 
@@ -173,4 +184,5 @@ module.exports = {
   guestStatusToTemplate,
   guestStatusToTemplateOnCreate,
   guestStatusToTemplateOnUpdate,
+  guestTimingUpdate,
 };

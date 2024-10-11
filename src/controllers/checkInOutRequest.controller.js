@@ -15,6 +15,7 @@ const messageService = require("../services/message.service");
 const guestStatusService = require("../services/guestStatus.service");
 const checkInOutRequestService = require("../services/checkInOutRequest.service");
 const guestService = require("../services/guest.service");
+const propertyService = require("../services/property.service");
 const twilioAccountService = require("../services/twilioAccount.service");
 const twilioService = require("../services/twilio.service");
 const chatListService = require("../services/chatList.service");
@@ -26,6 +27,7 @@ const {
   requestType,
   messageType,
 } = require("../constants/message.constant");
+const { modifyMessageTemplateBody } = require("../utils/messageTemplateUpdate");
 const { responseHandler } = require("../middlewares/response.middleware");
 const { compareDateGt } = require("../utils/dateCompare");
 const { z } = require("zod");
@@ -236,49 +238,42 @@ const updateRequestStatus = async (req, res, next) => {
       });
     }
 
-    // if (updatedCheckInOutRequest.requestStatus === REQUEST_STATUS.ACCEPTED) {
-    //   console.log("ppppppppppppppppppppp", [
-    //     `${updatedCheckInOutRequest.requestType
-    //       .match(/[A-Z][a-z]+/g)
-    //       .join("")
-    //       .replace("C", "c")}`,
-    //   ]);
-    //   const updatedGuest = await guestService.update(
-    //     {
-    //       [`${updatedCheckInOutRequest.requestType
-    //         .match(/[A-Z][a-z]+/g)
-    //         .join("")
-    //         .replace("C", "c")}`]:
-    //         updatedCheckInOutRequest[
-    //           `${updatedCheckInOutRequest.requestType}DateTime`
-    //         ],
-    //     },
-    //     propertyId,
-    //     guestId,
-    //     session,
-    //   );
-    //   console.log("updateddddddddddGuest", updatedGuest);
-    // }
     if (updatedCheckInOutRequest.requestStatus === REQUEST_STATUS.ACCEPTED) {
-      // Get the field name to update based on requestType
-      const fieldNameToUpdate = updatedCheckInOutRequest.requestType
-        .match(/[A-Z][a-z]+/g)
-        .join("")
-        .replace("C", "c");
+      // Map request types to their corresponding field names.
+      const requestTypeToFieldMap = {
+        earlyCheckIn: "earlyCheckIn",
+        lateCheckOut: "checkOut",
+        extendStay: "extendStay",
+      };
 
-      // If the field is 'Stay', we want to update 'checkOut' instead
-      const finalFieldName =
-        fieldNameToUpdate === "Stay" ? "checkOut" : fieldNameToUpdate;
+      // Get the field name to update based on requestType using the mapping.
+      const fieldNameToUpdate =
+        requestTypeToFieldMap[updatedCheckInOutRequest.requestType] || null;
 
-      console.log("Field being updated:", finalFieldName);
+      if (!fieldNameToUpdate) {
+        console.error(
+          `Unknown requestType: ${updatedCheckInOutRequest.requestType}`,
+        );
+        return;
+      }
 
+      console.log(
+        "Processing request",
+        updatedCheckInOutRequest,
+        fieldNameToUpdate,
+      );
+
+      // Construct the update data.
       const updateData = {
-        [finalFieldName]:
+        [fieldNameToUpdate]:
           updatedCheckInOutRequest[
             `${updatedCheckInOutRequest.requestType}DateTime`
           ],
       };
 
+      console.log("Field being updated:", updateData);
+
+      // Update the guest record using the service.
       const updatedGuest = await guestService.update(
         updateData,
         propertyId,
@@ -286,15 +281,19 @@ const updateRequestStatus = async (req, res, next) => {
         session,
       );
     }
+
     const messageTemplateName = guestStatusToTemplateOnUpdate(
       oldGuestStatus,
       updatedGuestStatus,
     );
+    console.log("MessageTemplate", messageTemplateName);
     const oldGuest = await guestService.getById(guestId, propertyId);
+    const { property } = await propertyService.getById(propertyId);
     const messageTemplate = await messageTemplateService.getByNameAndPropertyId(
       propertyId,
       messageTemplateName,
     );
+    console.log("Message template", messageTemplate);
     if (!messageTemplate) {
       await session.commitTransaction();
       session.endSession();
@@ -305,6 +304,13 @@ const updateRequestStatus = async (req, res, next) => {
         checkInOutRequest: updatedCheckInOutRequest,
       });
     }
+    console.log("ookokokok", messageTemplate);
+    const updatedMessageBody = modifyMessageTemplateBody(
+      messageTemplate,
+      oldGuest,
+      property,
+    );
+    console.log("qqqqqqqqqqqqqqqqq", updatedMessageBody);
     const guestSession = await guestSessionService.getGuestSession(
       propertyId,
       guestId,
@@ -316,7 +322,7 @@ const updateRequestStatus = async (req, res, next) => {
       twilioSubClient,
       `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
       `${oldGuest.countryCode}${oldGuest.phoneNumber}`,
-      `${messageTemplate.message}.Your guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
+      `${updatedMessageBody.message}.Your guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
     );
     const newMessage = await messageService.create(
       {
@@ -324,7 +330,7 @@ const updateRequestStatus = async (req, res, next) => {
         guestId: guestId,
         senderId: propertyId,
         receiverId: guestId,
-        content: messageTemplate.message,
+        content: updatedMessageBody.message,
         messageTriggerType: messageTriggerType.AUTOMATIC,
         messageType: messageType.SMS,
         messageSid: sentSms.sid,
