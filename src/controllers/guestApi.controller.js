@@ -19,6 +19,8 @@ const checkInOutRequestService = require("../services/checkInOutRequest.service"
 const guestStatusService = require("../services/guestStatus.service");
 const twilioAccountService = require("../services/twilioAccount.service");
 const smsService = require("../services/sms.service");
+const { modifyMessageTemplateBody } = require("../utils/messageTemplateUpdate");
+const messageTemplateService = require("../services/messageTemplate.service");
 const guestSessionService = require("../services/guestSession.service");
 const twilioService = require("../services/twilio.service");
 const messageService = require("../services/message.service");
@@ -412,11 +414,22 @@ const createPreArrival = async (req, res, next) => {
     const twilioAccount =
       await twilioAccountService.getByPropertyId(propertyId);
     const twilioSubClient = await twilioService.getTwilioClient(twilioAccount);
+    const messageTemplateName =
+      messageTemplateService.getMessageTemplateByStatus(
+        propertyId,
+        "Pre Arrival Complete",
+      );
+    const { property } = await propertyService.getById(propertyId);
+    const updatedMessageBody = modifyMessageTemplateBody(
+      messageTemplateName,
+      oldGuest,
+      property,
+    );
     const sentSms = await smsService.send(
       twilioSubClient,
       `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
       `${oldGuest.countryCode}${oldGuest.phoneNumber}`,
-      `Your online checkin is completed.Your guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
+      `${updatedMessageBody.message}. Your online checkin is completed.Your guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
     );
     const newMessage = await messageService.create(
       {
@@ -424,7 +437,7 @@ const createPreArrival = async (req, res, next) => {
         guestId: guestId,
         senderId: propertyId,
         receiverId: guestId,
-        content: `Your online checkin is completed.Your guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
+        content: `${updatedMessageBody.message}. Your online checkin is completed.Your guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
         messageTriggerType: messageTriggerType.AUTOMATIC,
         messageType: messageType.SMS,
         messageSid: sentSms.sid,

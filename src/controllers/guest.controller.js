@@ -19,7 +19,7 @@ const twilioAccountService = require("../services/twilioAccount.service");
 const chatListService = require("../services/chatList.service");
 const propertyService = require("../services/property.service");
 const checkInOutRequestService = require("../services/checkInOutRequest.service");
-
+const { modifyMessageTemplateBody } = require("../utils/messageTemplateUpdate");
 //new
 
 const preArrivalService = require("../services/preArrival.service"); // Pre-arrival service
@@ -191,8 +191,8 @@ const create = async (req, res, next) => {
 
     // todo: move to sms.service
     // Send message to the guest
-    const guestProeperty = await propertyService.getById(propertyId);
-    const message = `Welcome to ${guestProeperty.name}, Your guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`;
+    const { property } = await propertyService.getById(propertyId);
+    const message = `Welcome to ${property.name}, Your guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`;
     await twilioService.sendAccessLink(
       propertyId,
       `${newGuest.countryCode + newGuest.phoneNumber}`,
@@ -216,11 +216,16 @@ const create = async (req, res, next) => {
           await twilioAccountService.getByPropertyId(propertyId);
         const twilioSubClient =
           await twilioService.getTwilioClient(twilioAccount);
+        const updatedMessageBody = modifyMessageTemplateBody(
+          messageTemplate,
+          newGuest,
+          property,
+        );
         const sentMessage = await smsService.send(
           twilioSubClient,
           `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
           `${newGuest.countryCode}${newGuest.phoneNumber}`,
-          `${messageTemplate.message}.Your guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
+          `${updatedMessageBody.message}.Your guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
         );
         const newMessage = await messageService.create(
           {
@@ -473,6 +478,7 @@ const update = async (req, res, next) => {
 
     // Send message to the guest according to the status
     if (sendMessage === true) {
+      const { property } = await propertyService.getById(propertyId);
       if (checkCheckInUpdated || checkCheckOutUpdated) {
         const guestSession = await guestSessionService.getGuestSession(
           propertyId,
@@ -483,6 +489,7 @@ const update = async (req, res, next) => {
             propertyId,
             guestTimingUpdate(guestInfo, updatedGuest),
           );
+
         const twilioAccount =
           await twilioAccountService.getByPropertyId(propertyId);
         if (!twilioAccount) {
@@ -493,12 +500,20 @@ const update = async (req, res, next) => {
 
         const twilioSubClient =
           await twilioService.getTwilioClient(twilioAccount);
-
+        const updatedMessageBody = modifyMessageTemplateBody(
+          messageTemplate,
+          updatedGuest,
+          property,
+        );
+        console.log(
+          "Updatedxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          updatedMessageBody,
+        );
         const sentMessage = await smsService.send(
           twilioSubClient,
           `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
           `${updatedGuest.countryCode}${updatedGuest.phoneNumber}`,
-          `${messageTemplate.message}.${checkCheckInUpdated ? `Your new check in time is ${updatedGuest.checkIn}` : `Your new check in time is ${updatedGuest.checkOut}`}.Your guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
+          `${updatedMessageBody.message}.Your guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
         );
 
         const newMessage = await messageService.create(
@@ -548,12 +563,16 @@ const update = async (req, res, next) => {
 
         const twilioSubClient =
           await twilioService.getTwilioClient(twilioAccount);
-
+        const updatedMessageBody = modifyMessageTemplateBody(
+          messageTemplate,
+          updatedGuest,
+          property,
+        );
         const sentMessage = await smsService.send(
           twilioSubClient,
           `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
           `${updatedGuest.countryCode}${updatedGuest.phoneNumber}`,
-          `${messageTemplate.message}.Your guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
+          `${updatedMessageBody.message}.Your guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
         );
 
         const newMessage = await messageService.create(

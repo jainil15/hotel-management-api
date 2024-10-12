@@ -149,11 +149,7 @@ const updateAll = async (propertyId, messageTemplates, session) => {
  * @param {string} messageTemplateName - The message template name
  * @returns {Promise<import('../models/messageTemplates.model').MessageTemplateType>} - The message template
  */
-const getMessageTemplateByStatus = async (
-  propertyId,
-  status,
-  messageTemplateName,
-) => {
+const getMessageTemplateByStatus = async (propertyId, messageTemplateName) => {
   const messageTemplate = await MessageTemplate.findOne({
     propertyId: propertyId,
     name: messageTemplateName,

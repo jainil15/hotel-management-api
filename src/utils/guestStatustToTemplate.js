@@ -171,10 +171,16 @@ const guestStatusToTemplateOnUpdate = (oldStatus, newStatus) => {
 };
 
 const guestTimingUpdate = (oldGuestInfo, updatedGuestInfo) => {
-  if (oldGuestInfo.checkIn !== updatedGuestInfo.checkIn) {
+  if (
+    new Date(oldGuestInfo.checkIn).getTime() !==
+    new Date(updatedGuestInfo.checkIn).getTime()
+  ) {
     return "Check In Time Update";
   }
-  if (oldGuestInfo.checkOut !== updatedGuestInfo.checkOut) {
+  if (
+    new Date(oldGuestInfo.checkOut).getTime() !==
+    new Date(updatedGuestInfo.checkOut).getTime()
+  ) {
     return "Check Out Time Update";
   }
   return "";

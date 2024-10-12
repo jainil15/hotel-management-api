@@ -13,6 +13,7 @@ const reviewsFlowSchema = new Schema(
     },
 
     reviewsEnabled: { type: Boolean, default: true },
+    startLimitForReviewLink: { type: Number, default: 3 },
     reviewsLink: {
       type: String,
       default: "https://www.onelyk.com",
