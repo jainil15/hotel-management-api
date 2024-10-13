@@ -44,7 +44,7 @@ const update = async (propertyId, guestId, review, session) => {
   const updatedReview = await Review.findOneAndUpdate(
     { propertyId, guestId },
     { ...review },
-    { session: session },
+    { session: session, upsert: true, new: true },
   );
   return updatedReview;
 };

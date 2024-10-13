@@ -77,6 +77,10 @@ const update = async (guest, propertyId, guestId, session) => {
   if (guest.checkOut) {
     guest.checkOut = new Date(guest.checkOut);
   }
+  if (guest.extendStay) {
+    guest.checkOut = new Date(guest.extendStay);
+  }
+
   const updatedGuest = await Guest.findOneAndUpdate(
     { _id: guestId, propertyId: propertyId },
     {

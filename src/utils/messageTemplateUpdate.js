@@ -11,6 +11,7 @@ const names = [
   "Late Check Out Declined",
   "Early Check In Accepted",
   "Early Check In Declined",
+  "Pre Arrival Complete",
 ];
 
 // function modifyMessageTemplateBody(messageTemplate, guestInfo, propertyInfo) {
@@ -128,7 +129,8 @@ function modifyMessageTemplateBody(messageTemplate, guestInfo, propertyInfo) {
   } else if (
     messageTemplate.name === "Checked In" ||
     messageTemplate.name === "Checked Out" ||
-    messageTemplate.name === "Reservation Cancelled"
+    messageTemplate.name === "Reservation Cancelled" ||
+    messageTemplate.name === "Pre Arrival Complete"
   ) {
     messageTemplate.message = messageTemplate.message.replace(
       "[Hotel Name]",

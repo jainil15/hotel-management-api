@@ -29,13 +29,42 @@ const createDefaults = async (propertyId, session) => {
       messageTemplates.push(await newMessageTemplate.save({ session }));
     }
   }
-  const newMessageTemplate = new MessageTemplate({
+
+  const preArrivalTemplate = new MessageTemplate({
+    propertyId,
+    type: MESSAGE_TEMPLATE_TYPES.DEFAULT,
+    name: "Pre Arrival Complete",
+    message:
+      "Your online check-in for [Hotel Name] is completed. Reply here for questions.",
+  });
+  messageTemplates.push(await preArrivalTemplate.save({ session }));
+
+  const checkInUpdateTemplate = new MessageTemplate({
+    propertyId,
+    type: MESSAGE_TEMPLATE_TYPES.DEFAULT,
+    name: "Check In Time Update",
+    message:
+      "Your Check In at [Hotel Name] has been updated. Check-in available at [Time]. Reply here for questions.",
+  });
+  messageTemplates.push(await checkInUpdateTemplate.save({ session }));
+
+  const checkOutUpdateTemplate = new MessageTemplate({
+    propertyId,
+    type: MESSAGE_TEMPLATE_TYPES.DEFAULT,
+    name: "Check Out Time Update",
+    message:
+      "Your check out at [Hotel Name] has been updated. Check-out available at [Time]. Reply here for questions.",
+  });
+  messageTemplates.push(await checkOutUpdateTemplate.save({ session }));
+
+  const earlyLateCheckTemplate = new MessageTemplate({
     propertyId,
     type: MESSAGE_TEMPLATE_TYPES.DEFAULT,
     name: "Early Check In Accepted and Late Check Out Accepted",
-    message: "Your early check in and late check out request is accepted",
+    message: "Your early check-in and late check-out request is accepted",
   });
-  messageTemplates.push(await newMessageTemplate.save({ session }));
+  messageTemplates.push(await earlyLateCheckTemplate.save({ session }));
+
   return messageTemplates;
 };
 

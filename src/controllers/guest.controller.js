@@ -95,7 +95,6 @@ const create = async (req, res, next) => {
     const guestResult = CreateGuestValidationSchema.safeParse(guest);
     const statusResult = CreateGuestStatusValidationSchema.safeParse(status);
     const sendMessageResult = z.boolean().optional().safeParse(sendMessage);
-    console.log(guest.roomNumber);
     const roomNumberResult =
       status.currentStatus === GUEST_CURRENT_STATUS.RESERVED
         ? z.string().optional().safeParse(status.roomNumber)
@@ -192,7 +191,7 @@ const create = async (req, res, next) => {
     // todo: move to sms.service
     // Send message to the guest
     const { property } = await propertyService.getById(propertyId);
-    const message = `Welcome to ${property.name}, Your guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`;
+    const message = `Welcome to ${property.name}.\nYour guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`;
     await twilioService.sendAccessLink(
       propertyId,
       `${newGuest.countryCode + newGuest.phoneNumber}`,
@@ -225,7 +224,7 @@ const create = async (req, res, next) => {
           twilioSubClient,
           `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
           `${newGuest.countryCode}${newGuest.phoneNumber}`,
-          `${updatedMessageBody.message}.Your guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
+          `${updatedMessageBody.message}.\nYour guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
         );
         const newMessage = await messageService.create(
           {
@@ -320,10 +319,8 @@ const update = async (req, res, next) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    console.log("ppppppppppppp", req.body);
     // TODO: add messageGuest
     const { sendMessage, status, ...guest } = req.body;
-    console.log("311111999999", sendMessage, status);
     const propertyId = req.params.propertyId;
     const guestId = req.params.guestId;
     const guestResult = await UpdateGuestValidationSchema.safeParseAsync(guest);
@@ -365,7 +362,6 @@ const update = async (req, res, next) => {
       guestId,
       session,
     );
-    console.log("Updated guest", updatedGuest, "kkkkkk", guestInfo);
     if (
       new Date(guestInfo.checkIn).getTime() !==
       new Date(updatedGuest.checkIn).getTime()
@@ -379,16 +375,13 @@ const update = async (req, res, next) => {
     ) {
       checkCheckOutUpdated = true;
     }
-    console.log("ppppppppppppp", checkCheckOutUpdated, checkCheckInUpdated);
 
     const oldGuestStatus = await guestStatusService.getByGuestId(guestId);
-    console.log("oldddddd", oldGuestStatus);
     const updatedGuestStatus = await guestStatusService.update(
       guestId,
       status,
       session,
     );
-    console.log("newwwwwwwwwwww", updatedGuestStatus);
 
     // Check for early check in or late check out
     const existingCheckInOutRequests =
@@ -396,7 +389,6 @@ const update = async (req, res, next) => {
         propertyId,
         guestId,
       );
-    //  console.log("33333777772222222", existingCheckInOutRequests);
     for (const existingCheckInOutRequest of existingCheckInOutRequests) {
       if (
         updatedGuestStatus[`${existingCheckInOutRequest.requestType}Status`] !==
@@ -505,15 +497,11 @@ const update = async (req, res, next) => {
           updatedGuest,
           property,
         );
-        console.log(
-          "Updatedxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-          updatedMessageBody,
-        );
         const sentMessage = await smsService.send(
           twilioSubClient,
           `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
           `${updatedGuest.countryCode}${updatedGuest.phoneNumber}`,
-          `${updatedMessageBody.message}.Your guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
+          `${updatedMessageBody.message}.\nYour guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
         );
 
         const newMessage = await messageService.create(
@@ -572,7 +560,7 @@ const update = async (req, res, next) => {
           twilioSubClient,
           `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
           `${updatedGuest.countryCode}${updatedGuest.phoneNumber}`,
-          `${updatedMessageBody.message}.Your guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
+          `${updatedMessageBody.message}.\nYour guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
         );
 
         const newMessage = await messageService.create(
@@ -881,10 +869,6 @@ const guestedit = async (req, res, next) => {
       const guestResult =
         await UpdateGuestValidationSchema.safeParseAsync(guest);
       if (!guestResult.success) {
-        console.log(
-          "Guest validation failed",
-          guestResult.error.flatten().fieldErrors,
-        );
         throw new ValidationError(
           "Invalid guest data",
           guestResult.error.flatten().fieldErrors,

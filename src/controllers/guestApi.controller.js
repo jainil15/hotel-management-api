@@ -415,10 +415,11 @@ const createPreArrival = async (req, res, next) => {
       await twilioAccountService.getByPropertyId(propertyId);
     const twilioSubClient = await twilioService.getTwilioClient(twilioAccount);
     const messageTemplateName =
-      messageTemplateService.getMessageTemplateByStatus(
+      await messageTemplateService.getMessageTemplateByStatus(
         propertyId,
         "Pre Arrival Complete",
       );
+    console.log("messageTemplateName", messageTemplateName);
     const { property } = await propertyService.getById(propertyId);
     const updatedMessageBody = modifyMessageTemplateBody(
       messageTemplateName,
@@ -429,7 +430,7 @@ const createPreArrival = async (req, res, next) => {
       twilioSubClient,
       `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
       `${oldGuest.countryCode}${oldGuest.phoneNumber}`,
-      `${updatedMessageBody.message}. Your online checkin is completed.Your guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
+      `${updatedMessageBody.message}.\nYour guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
     );
     const newMessage = await messageService.create(
       {
@@ -437,7 +438,7 @@ const createPreArrival = async (req, res, next) => {
         guestId: guestId,
         senderId: propertyId,
         receiverId: guestId,
-        content: `${updatedMessageBody.message}. Your online checkin is completed.Your guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
+        content: `${updatedMessageBody.message}. Your online checkin is completed.\nYour guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
         messageTriggerType: messageTriggerType.AUTOMATIC,
         messageType: messageType.SMS,
         messageSid: sentSms.sid,
@@ -562,6 +563,54 @@ const createReview = async (req, res, next) => {
   }
 };
 
+const updateReview = async (req, res, next) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const { propertyId, guestId } = req.guestSession;
+    const { review } = req.body;
+    console.log("rrrrrrrrrrrrrrrrrr", req.body);
+    const createdReview = await reviewService.update(
+      propertyId,
+      guestId,
+      review,
+      session,
+    );
+    await session.commitTransaction();
+    session.endSession();
+    return responseHandler(
+      res,
+      { review: createdReview },
+      200,
+      "Review updated successfully",
+    );
+  } catch (e) {
+    await session.abortTransaction();
+    session.endSession();
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError(e.message));
+  }
+};
+const getReview = async (req, res, next) => {
+  try {
+    const { propertyId, guestId } = req.guestSession;
+    const review = await reviewService.getByGuestId(propertyId, guestId);
+    return responseHandler(
+      res,
+      { review },
+      200,
+      "Guest review retrieved successfully",
+    );
+  } catch (e) {
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError(e.message));
+  }
+};
+
 /**
  * Create add ons request
  * @param {import('express').Request} req - Request object
@@ -675,6 +724,8 @@ module.exports = {
   createPreArrival,
   getCheckInOutRequest,
   createReview,
+  getReview,
+  updateReview,
   createAddOnsRequest,
   getAddOnRequest,
 };

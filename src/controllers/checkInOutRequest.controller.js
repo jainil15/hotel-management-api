@@ -222,7 +222,6 @@ const updateRequestStatus = async (req, res, next) => {
         session,
       );
     const oldGuestStatus = await guestStatusService.getByGuestId(guestId);
-    // console.log("ooooooooooooooo", oldGuestStatus);
     const updatedGuestStatus = await guestStatusService.update(
       guestId,
       {
@@ -231,7 +230,6 @@ const updateRequestStatus = async (req, res, next) => {
       },
       session,
     );
-    //console.log("qacccccccc", updatedGuestStatus);
     if (!validateUpdatev3(oldGuestStatus._doc, updatedGuestStatus._doc)) {
       throw new ValidationError("Invalid Status", {
         currentStatus: ["Invalid Status"],
@@ -257,12 +255,6 @@ const updateRequestStatus = async (req, res, next) => {
         return;
       }
 
-      console.log(
-        "Processing request",
-        updatedCheckInOutRequest,
-        fieldNameToUpdate,
-      );
-
       // Construct the update data.
       const updateData = {
         [fieldNameToUpdate]:
@@ -270,9 +262,6 @@ const updateRequestStatus = async (req, res, next) => {
             `${updatedCheckInOutRequest.requestType}DateTime`
           ],
       };
-
-      console.log("Field being updated:", updateData);
-
       // Update the guest record using the service.
       const updatedGuest = await guestService.update(
         updateData,
@@ -286,14 +275,13 @@ const updateRequestStatus = async (req, res, next) => {
       oldGuestStatus,
       updatedGuestStatus,
     );
-    console.log("MessageTemplate", messageTemplateName);
     const oldGuest = await guestService.getById(guestId, propertyId);
     const { property } = await propertyService.getById(propertyId);
     const messageTemplate = await messageTemplateService.getByNameAndPropertyId(
       propertyId,
       messageTemplateName,
     );
-    console.log("Message template", messageTemplate);
+
     if (!messageTemplate) {
       await session.commitTransaction();
       session.endSession();
@@ -304,13 +292,11 @@ const updateRequestStatus = async (req, res, next) => {
         checkInOutRequest: updatedCheckInOutRequest,
       });
     }
-    console.log("ookokokok", messageTemplate);
     const updatedMessageBody = modifyMessageTemplateBody(
       messageTemplate,
       oldGuest,
       property,
     );
-    console.log("qqqqqqqqqqqqqqqqq", updatedMessageBody);
     const guestSession = await guestSessionService.getGuestSession(
       propertyId,
       guestId,
@@ -322,8 +308,9 @@ const updateRequestStatus = async (req, res, next) => {
       twilioSubClient,
       `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
       `${oldGuest.countryCode}${oldGuest.phoneNumber}`,
-      `${updatedMessageBody.message}.Your guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
+      `${updatedMessageBody.message}.\nYour guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
     );
+
     const newMessage = await messageService.create(
       {
         propertyId: propertyId,
@@ -395,7 +382,6 @@ const getAll = async (req, res, next) => {
 const getById = async (req, res, next) => {
   try {
     const { propertyId, guestId, checkInOutRequestId } = req.params;
-    console.log(propertyId, guestId, checkInOutRequestId);
     const checkInOutRequest = await checkInOutRequestService.findOne(
       propertyId,
       guestId,

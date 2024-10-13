@@ -46,6 +46,25 @@ const create = async (
   }
 };
 
+// const create = async (
+//   propertyId,
+//   guestId,
+//   addOnsRequest,
+//   session,
+//   addOnsId,
+// ) => {
+//   // If it doesn't exist, create a new request
+//   const newAddOnsRequest = new AddOnsRequest({
+//     propertyId,
+//     guestId,
+//     addOnsId,
+//     ...addOnsRequest,
+//   });
+//   const savedAddOnsRequest = await newAddOnsRequest.save({ session });
+//   console.log("savedAddOnsRequest", savedAddOnsRequest);
+//   return savedAddOnsRequest; // Return the newly created request
+// };
+
 /**
  * Update Add Ons Request
  * @param {string} propertyId
