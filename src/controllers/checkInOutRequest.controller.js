@@ -18,6 +18,7 @@ const guestService = require("../services/guest.service");
 const propertyService = require("../services/property.service");
 const twilioAccountService = require("../services/twilioAccount.service");
 const twilioService = require("../services/twilio.service");
+const settingService = require("../services/setting.service");
 const chatListService = require("../services/chatList.service");
 const { REQUEST_STATUS } = require("../constants/guestStatus.contant");
 const smsService = require("../services/sms.service");
@@ -221,7 +222,9 @@ const updateRequestStatus = async (req, res, next) => {
         checkInOutRequestResult.data,
         session,
       );
+    console.log("updatedCheckInOutRequest", updatedCheckInOutRequest);
     const oldGuestStatus = await guestStatusService.getByGuestId(guestId);
+    console.log("oldGuestStatus", oldGuestStatus);
     const updatedGuestStatus = await guestStatusService.update(
       guestId,
       {
@@ -230,16 +233,18 @@ const updateRequestStatus = async (req, res, next) => {
       },
       session,
     );
+    console.log("updatedGuestStatus", updatedGuestStatus);
+
     if (!validateUpdatev3(oldGuestStatus._doc, updatedGuestStatus._doc)) {
       throw new ValidationError("Invalid Status", {
         currentStatus: ["Invalid Status"],
       });
     }
-
+    let updatedGuest = "";
     if (updatedCheckInOutRequest.requestStatus === REQUEST_STATUS.ACCEPTED) {
       // Map request types to their corresponding field names.
       const requestTypeToFieldMap = {
-        earlyCheckIn: "earlyCheckIn",
+        earlyCheckIn: "checkIn",
         lateCheckOut: "checkOut",
         extendStay: "extendStay",
       };
@@ -247,7 +252,7 @@ const updateRequestStatus = async (req, res, next) => {
       // Get the field name to update based on requestType using the mapping.
       const fieldNameToUpdate =
         requestTypeToFieldMap[updatedCheckInOutRequest.requestType] || null;
-
+      console.log("Field name to update", fieldNameToUpdate);
       if (!fieldNameToUpdate) {
         console.error(
           `Unknown requestType: ${updatedCheckInOutRequest.requestType}`,
@@ -262,13 +267,15 @@ const updateRequestStatus = async (req, res, next) => {
             `${updatedCheckInOutRequest.requestType}DateTime`
           ],
       };
+      console.log("Update data", updateData);
       // Update the guest record using the service.
-      const updatedGuest = await guestService.update(
+      updatedGuest = await guestService.update(
         updateData,
         propertyId,
         guestId,
         session,
       );
+      console.log("Updated guest", updatedGuest);
     }
 
     const messageTemplateName = guestStatusToTemplateOnUpdate(
@@ -292,10 +299,12 @@ const updateRequestStatus = async (req, res, next) => {
         checkInOutRequest: updatedCheckInOutRequest,
       });
     }
+    const propertySetting = await settingService.getByPropertyId(property._id);
     const updatedMessageBody = modifyMessageTemplateBody(
       messageTemplate,
-      oldGuest,
+      updatedGuest,
       property,
+      propertySetting,
     );
     const guestSession = await guestSessionService.getGuestSession(
       propertyId,

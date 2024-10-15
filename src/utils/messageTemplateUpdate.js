@@ -1,3 +1,4 @@
+const moment = require("moment-timezone");
 const names = [
   "Extend Stay Declined",
   "Check Out Time Update",
@@ -13,82 +14,47 @@ const names = [
   "Early Check In Declined",
   "Pre Arrival Complete",
 ];
+const timeZoneMapping = {
+  "Hawaii–Aleutian Standard Time (UTC-10:00)": "Pacific/Honolulu",
+  "Alaska Standard Time (UTC-09:00)": "America/Anchorage",
+  "Pacific Standard Time (North America) (UTC-08:00)": "America/Los_Angeles",
+  "Mountain Standard Time (North America) (UTC-07:00)": "America/Denver",
+  "Central Standard Time (North America) (UTC-06:00)": "America/Chicago",
+  "Eastern Standard Time (North America) (UTC-05:00)": "America/New_York",
+};
 
-// function modifyMessageTemplateBody(messageTemplate, guestInfo, propertyInfo) {
-//   // Destructure property name for easier access
-//   const { name: hotelName } = propertyInfo;
-
-//   if (
-//     messageTemplate.name === "Late Check Out Accepted" ||
-//     messageTemplate.name === "Early Check In Accepted" ||
-//     messageTemplate.name === "Late Check Out Declined" ||
-//     messageTemplate.name === "Early Check In Declined"
-//   ) {
-//     // Determine whether to use check-in or check-out time based on the message template name
-//     const time = messageTemplate.name.includes("Early")
-//       ? guestInfo.checkIn
-//       : guestInfo.checkOut;
-
-//     // Format time as needed (for example, to HH:mm or another format)
-//     const formattedTime = new Date(time).getTime();
-
-//     // Replace placeholders with dynamic values
-//     messageTemplate.message = messageTemplate.message
-//       .replace("[Time]", time)
-//       .replace("[Hotel Name]", hotelName);
-//   } else if (messageTemplate.name === "Extend Stay Accepted") {
-//     // Use the check-out date for these message templates
-//     const formattedDate = new Date(guestInfo.checkOut).toLocaleDateString();
-
-//     // Replace placeholders with dynamic values
-//     messageTemplate.message = messageTemplate.message
-//       .replace("[New Checkout Date]", guestInfo.checkOut)
-//       .replace("[Hotel Name]", hotelName);
-//   } else if (messageTemplate.name === "Extend Stay Declined") {
-//     // Use the check-out date for these message templates
-//     const formattedDate = new Date(guestInfo.checkOut).toLocaleDateString();
-
-//     // Replace placeholders with dynamic values
-//     messageTemplate.message = messageTemplate.message
-//       .replace("[Original Checkout Date]", guestInfo.checkOut)
-//       .replace("[Hotel Name]", hotelName);
-//   } else if (messageTemplate.name === "Reservation Confirmed") {
-//     // Use the check-out date for these message templates
-//     const formattedDate = new Date(guestInfo.checkOut).toLocaleDateString();
-
-//     // Replace placeholders with dynamic values
-//     messageTemplate.message = messageTemplate.message
-//       .replace("[Date]", guestInfo.checkOut)
-//       .replace("[Hotel Name]", hotelName);
-//   } else if (
-//     messageTemplate.name === "Checked In" ||
-//     messageTemplate.name === "Checked Out" ||
-//     messageTemplate.name === "Reservation Cancelled"
-//   ) {
-//     // Replace only the [Hotel Name] placeholder
-//     messageTemplate.message = messageTemplate.message.replace(
-//       "[Hotel Name]",
-//       hotelName,
-//     );
-//   } else if (messageTemplate.name === "Check Out Time Update") {
-//     messageTemplate.message = messageTemplate.message
-//       .replace("[Time]", guestInfo.checkOut)
-//       .replace("[Hotel Name]", hotelName);
-//   } else if (messageTemplate.name === "Check In Time Update") {
-//     messageTemplate.message = messageTemplate.message
-//       .replace("[Time]", guestInfo.checkIn)
-//       .replace("[Hotel Name]", hotelName);
-//   }
-
-//   return messageTemplate;
-// }
 function formatDateToUTC(date) {
   const utcDate = new Date(date);
-  return utcDate.toUTCString(); // Returns date in UTC format
+
+  // Extracting individual components in UTC time
+  const hours = utcDate.getUTCHours();
+  const minutes = utcDate.getUTCMinutes();
+  const ampm = hours >= 12 ? "PM" : "AM";
+
+  // Converting to 12-hour format
+  const formattedHours = hours % 12 || 12; // Convert '0' hours to '12'
+  const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+
+  // Building the formatted date string
+  const day = utcDate.getUTCDate();
+  const month = utcDate.getUTCMonth() + 1; // Months are zero-indexed
+  const year = utcDate.getUTCFullYear();
+
+  return `${formattedHours}:${formattedMinutes} ${ampm}, ${month}/${day}/${year} UTC`;
+}
+
+function formatDateWithLocalTimezone(utcDateString, timeZone) {
+  const localMoment = moment.tz(utcDateString, timeZone);
+  return localMoment.format("MM/DD, hh:mm A");
 }
 
 // Update the modifyMessageTemplateBody function
-function modifyMessageTemplateBody(messageTemplate, guestInfo, propertyInfo) {
+function modifyMessageTemplateBody(
+  messageTemplate,
+  guestInfo,
+  propertyInfo,
+  propertySetting,
+) {
   const { name: hotelName } = propertyInfo;
 
   if (
@@ -102,29 +68,108 @@ function modifyMessageTemplateBody(messageTemplate, guestInfo, propertyInfo) {
       : guestInfo.checkOut;
 
     // Format time as UTC
-    const formattedTime = formatDateToUTC(time);
-
+    const formattedTime = new Date(time).toLocaleString("en", {
+      day: "2-digit",
+      month: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    });
+    const options = {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      timeZoneName: "short",
+    };
+    const localDate = new Intl.DateTimeFormat("en-US", options).format(
+      new Date(time),
+    );
+    console.log("Setting", formattedTime);
+    console.log("Settinaag", localDate);
+    console.log(
+      "Settinggggggg",
+      formatDateWithLocalTimezone(time, "Asia/Kolkata"),
+    );
+    console.log(
+      "Settinggggggggggggg",
+      formatDateWithLocalTimezone(formatDateToUTC(time)),
+    );
     // Replace placeholders with dynamic values
     messageTemplate.message = messageTemplate.message
-      .replace("[Time]", formattedTime)
+      .replace("[Time]", formattedTime + ` ${propertySetting.timezone}`)
       .replace("[Hotel Name]", hotelName);
   } else if (messageTemplate.name === "Extend Stay Accepted") {
+    const formattedTime = new Date(guestInfo.checkOut).toLocaleString("en", {
+      year: "numeric",
+      day: "2-digit",
+      month: "2-digit",
+      // hour: "2-digit",
+      // minute: "2-digit",
+      // hour12: true,
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    });
+    const options = {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      // hour: "2-digit",
+      // minute: "2-digit",
+      // second: "2-digit",
+      timeZoneName: "short",
+    };
+    const localDate = new Intl.DateTimeFormat("en-US", options).format(
+      new Date(guestInfo.checkOut),
+    );
+    console.log("Setting", formattedTime);
+    console.log("Settinaag", localDate);
     const formattedDate = formatDateToUTC(guestInfo.checkOut);
 
     messageTemplate.message = messageTemplate.message
-      .replace("[New Checkout Date]", formattedDate)
+      .replace(
+        "[New Checkout Date]",
+        formattedTime + ` ${propertySetting.timezone}`,
+      )
       .replace("[Hotel Name]", hotelName);
   } else if (messageTemplate.name === "Extend Stay Declined") {
+    const formattedTime = new Date(guestInfo.checkOut).toLocaleString("en", {
+      day: "2-digit",
+      month: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    });
+    const options = {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      // hour: "2-digit",
+      // minute: "2-digit",
+      // second: "2-digit",
+      timeZoneName: "short",
+    };
+    const localDate = new Intl.DateTimeFormat("en-US", options).format(
+      new Date(guestInfo.checkOut),
+    );
+    console.log("Setting", formattedTime);
+    console.log("Settinaag", localDate);
     const formattedDate = formatDateToUTC(guestInfo.checkOut);
 
     messageTemplate.message = messageTemplate.message
-      .replace("[Original Checkout Date]", formattedDate)
+      .replace(
+        "[Original Checkout Date]",
+        formattedTime + ` ${propertySetting.timezone}`,
+      )
       .replace("[Hotel Name]", hotelName);
   } else if (messageTemplate.name === "Reservation Confirmed") {
-    const formattedDate = formatDateToUTC(guestInfo.checkOut);
+    const formattedDate = formatDateToUTC(guestInfo.checkIn);
 
     messageTemplate.message = messageTemplate.message
-      .replace("[Date]", formattedDate)
+      .replace("[Date]", formattedDate + ` ${propertySetting.timezone}`)
       .replace("[Hotel Name]", hotelName);
   } else if (
     messageTemplate.name === "Checked In" ||
@@ -137,25 +182,63 @@ function modifyMessageTemplateBody(messageTemplate, guestInfo, propertyInfo) {
       hotelName,
     );
   } else if (messageTemplate.name === "Check Out Time Update") {
-    const formattedTime = formatDateToUTC(guestInfo.checkOut);
+    const formattedTime = new Date(guestInfo.checkOut).toLocaleString("en", {
+      day: "2-digit",
+      month: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    });
+    const options = {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      // hour: "2-digit",
+      // minute: "2-digit",
+      // second: "2-digit",
+      timeZoneName: "short",
+    };
+    const localDate = new Intl.DateTimeFormat("en-US", options).format(
+      new Date(guestInfo.checkOut),
+    );
+    console.log("Setting", formattedTime);
+    console.log("Settinaag", localDate);
 
     messageTemplate.message = messageTemplate.message
-      .replace("[Time]", formattedTime)
+      .replace("[Time]", formattedTime + ` ${propertySetting.timezone}`)
       .replace("[Hotel Name]", hotelName);
   } else if (messageTemplate.name === "Check In Time Update") {
-    const formattedTime = formatDateToUTC(guestInfo.checkIn);
+    const formattedTime = new Date(guestInfo.checkIn).toLocaleString("en", {
+      day: "2-digit",
+      month: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    });
+    const options = {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      // hour: "2-digit",
+      // minute: "2-digit",
+      // second: "2-digit",
+      timeZoneName: "short",
+    };
+    const localDate = new Intl.DateTimeFormat("en-US", options).format(
+      new Date(guestInfo.checkIn),
+    );
+    console.log("Setting", formattedTime);
+    console.log("Settinaag", localDate);
 
     messageTemplate.message = messageTemplate.message
-      .replace("[Time]", formattedTime)
+      .replace("[Time]", formattedTime + ` ${propertySetting.timezone}`)
       .replace("[Hotel Name]", hotelName);
   }
 
   return messageTemplate;
 }
-
-module.exports = {
-  modifyMessageTemplateBody,
-};
 
 module.exports = {
   modifyMessageTemplateBody,

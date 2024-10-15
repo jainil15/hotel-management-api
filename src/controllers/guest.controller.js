@@ -14,6 +14,7 @@ const guestService = require("../services/guest.service");
 const guestStatusService = require("../services/guestStatus.service");
 const guestTokenService = require("../services/guestToken.service");
 const guestSessionService = require("../services/guestSession.service");
+const settingService = require("../services/setting.service");
 const twilioService = require("../services/twilio.service");
 const twilioAccountService = require("../services/twilioAccount.service");
 const chatListService = require("../services/chatList.service");
@@ -191,12 +192,12 @@ const create = async (req, res, next) => {
     // todo: move to sms.service
     // Send message to the guest
     const { property } = await propertyService.getById(propertyId);
-    const message = `Welcome to ${property.name}.\nYour guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`;
-    await twilioService.sendAccessLink(
-      propertyId,
-      `${newGuest.countryCode + newGuest.phoneNumber}`,
-      message,
-    );
+    // const message = `Welcome to ${property.name}.\nYour guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`;
+    // await twilioService.sendAccessLink(
+    //   propertyId,
+    //   `${newGuest.countryCode + newGuest.phoneNumber}`,
+    //   message,
+    // );
     // TODO: Workflow message trigger
     // if (sendMessage === true) {
     // }
@@ -215,10 +216,14 @@ const create = async (req, res, next) => {
           await twilioAccountService.getByPropertyId(propertyId);
         const twilioSubClient =
           await twilioService.getTwilioClient(twilioAccount);
+        const propertySetting = await settingService.getByPropertyId(
+          property._id,
+        );
         const updatedMessageBody = modifyMessageTemplateBody(
           messageTemplate,
           newGuest,
           property,
+          propertySetting,
         );
         const sentMessage = await smsService.send(
           twilioSubClient,
@@ -320,7 +325,9 @@ const update = async (req, res, next) => {
   session.startTransaction();
   try {
     // TODO: add messageGuest
+    console.log("111111");
     const { sendMessage, status, ...guest } = req.body;
+    console.log("11111bbbbbb1");
     const propertyId = req.params.propertyId;
     const guestId = req.params.guestId;
     const guestResult = await UpdateGuestValidationSchema.safeParseAsync(guest);
@@ -353,6 +360,7 @@ const update = async (req, res, next) => {
         ...roomNumberResult?.error?.flatten().fieldErrors,
       });
     }
+    console.log("111112222222221");
     let checkCheckInUpdated = false;
     let checkCheckOutUpdated = false;
     const guestInfo = await guestService.getById(guestId, propertyId);
@@ -375,13 +383,14 @@ const update = async (req, res, next) => {
     ) {
       checkCheckOutUpdated = true;
     }
-
+    console.log("111111xxxxxxxxxx");
     const oldGuestStatus = await guestStatusService.getByGuestId(guestId);
     const updatedGuestStatus = await guestStatusService.update(
       guestId,
       status,
       session,
     );
+    console.log("zzzzzzzzzzzzzzzz111111");
 
     // Check for early check in or late check out
     const existingCheckInOutRequests =
@@ -389,6 +398,7 @@ const update = async (req, res, next) => {
         propertyId,
         guestId,
       );
+    console.log("nnnnnnnnnnnnnnnn111111");
     for (const existingCheckInOutRequest of existingCheckInOutRequests) {
       if (
         updatedGuestStatus[`${existingCheckInOutRequest.requestType}Status`] !==
@@ -467,7 +477,7 @@ const update = async (req, res, next) => {
         }
       }
     }
-
+    console.log("11cccccccc1111");
     // Send message to the guest according to the status
     if (sendMessage === true) {
       const { property } = await propertyService.getById(propertyId);
@@ -492,10 +502,14 @@ const update = async (req, res, next) => {
 
         const twilioSubClient =
           await twilioService.getTwilioClient(twilioAccount);
+        const propertySetting = await settingService.getByPropertyId(
+          property._id,
+        );
         const updatedMessageBody = modifyMessageTemplateBody(
           messageTemplate,
           updatedGuest,
           property,
+          propertySetting,
         );
         const sentMessage = await smsService.send(
           twilioSubClient,
@@ -548,13 +562,16 @@ const update = async (req, res, next) => {
             propertyId: ["Twilio account not found for this property"],
           });
         }
-
+        const propertySetting = await settingService.getByPropertyId(
+          property._id,
+        );
         const twilioSubClient =
           await twilioService.getTwilioClient(twilioAccount);
         const updatedMessageBody = modifyMessageTemplateBody(
           messageTemplate,
           updatedGuest,
           property,
+          propertySetting,
         );
         const sentMessage = await smsService.send(
           twilioSubClient,
@@ -588,7 +605,7 @@ const update = async (req, res, next) => {
         );
       }
     }
-
+    console.log("1111mmmmmmmmmmmmm11");
     await session.commitTransaction();
     session.endSession();
 
@@ -601,6 +618,7 @@ const update = async (req, res, next) => {
     req.app.io.to(`property:${propertyId}`).emit("chatList:update", {});
     // Emit to guest messages updated
     req.app.io.to(`guest:${guestId}`).emit("message:newMessage", {});
+    console.log("111111999999999999");
     return responseHandler(
       res,
       {
@@ -610,6 +628,7 @@ const update = async (req, res, next) => {
       "Guest Updated",
     );
   } catch (e) {
+    console.log("eeeeeeeeeee", e);
     await session.abortTransaction();
     session.endSession();
     if (e instanceof APIError) {

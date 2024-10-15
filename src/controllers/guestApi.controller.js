@@ -19,6 +19,7 @@ const checkInOutRequestService = require("../services/checkInOutRequest.service"
 const guestStatusService = require("../services/guestStatus.service");
 const twilioAccountService = require("../services/twilioAccount.service");
 const smsService = require("../services/sms.service");
+const settingService = require("../services/setting.service");
 const { modifyMessageTemplateBody } = require("../utils/messageTemplateUpdate");
 const messageTemplateService = require("../services/messageTemplate.service");
 const guestSessionService = require("../services/guestSession.service");
@@ -421,10 +422,12 @@ const createPreArrival = async (req, res, next) => {
       );
     console.log("messageTemplateName", messageTemplateName);
     const { property } = await propertyService.getById(propertyId);
+    const propertySetting = await settingService.getByPropertyId(property._id);
     const updatedMessageBody = modifyMessageTemplateBody(
       messageTemplateName,
       oldGuest,
       property,
+      propertySetting,
     );
     const sentSms = await smsService.send(
       twilioSubClient,
