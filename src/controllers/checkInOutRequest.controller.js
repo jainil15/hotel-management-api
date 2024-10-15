@@ -188,15 +188,20 @@ const updateRequestStatus = async (req, res, next) => {
   try {
     const { propertyId, guestId, checkInOutRequestId } = req.params;
     const checkInOutRequest = req.body;
+    console.log("qqqqqqqqqqqqqqqqqqq", checkInOutRequest);
     const checkInOutRequestResult =
       UpdateRequestStatusValidationSchema.safeParse(checkInOutRequest);
     if (!checkInOutRequestResult.success) {
+      console.log(
+        "Validation Error",
+        checkInOutRequestResult.error.flatten().fieldErrors,
+      );
       throw new ValidationError(
         "Validation Error",
         checkInOutRequestResult.error.flatten().fieldErrors,
       );
     }
-
+    console.log("Validation Error");
     const existingCheckInOutRequest = await checkInOutRequestService.findOne(
       propertyId,
       guestId,
@@ -240,6 +245,7 @@ const updateRequestStatus = async (req, res, next) => {
         currentStatus: ["Invalid Status"],
       });
     }
+    console.log("updatedGuestStatusssss");
     let updatedGuest = "";
     if (updatedCheckInOutRequest.requestStatus === REQUEST_STATUS.ACCEPTED) {
       // Map request types to their corresponding field names.
@@ -277,7 +283,7 @@ const updateRequestStatus = async (req, res, next) => {
       );
       console.log("Updated guest", updatedGuest);
     }
-
+    console.log("updatedGuestStatusssssxxxxx");
     const messageTemplateName = guestStatusToTemplateOnUpdate(
       oldGuestStatus,
       updatedGuestStatus,
@@ -290,6 +296,7 @@ const updateRequestStatus = async (req, res, next) => {
     );
 
     if (!messageTemplate) {
+      console.log("updatedGuestStatussssszzzzzzzz");
       await session.commitTransaction();
       session.endSession();
       req.app.io.to(`property:${propertyId}`).emit("guest:guestStatusUpdate", {
@@ -300,6 +307,10 @@ const updateRequestStatus = async (req, res, next) => {
       });
     }
     const propertySetting = await settingService.getByPropertyId(property._id);
+    console.log("updatedGuestStatusssssxxxxxxxxxx");
+    if (!updatedGuest) {
+      updatedGuest = oldGuest;
+    }
     const updatedMessageBody = modifyMessageTemplateBody(
       messageTemplate,
       updatedGuest,
