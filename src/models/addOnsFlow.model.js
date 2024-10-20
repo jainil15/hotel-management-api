@@ -11,6 +11,9 @@ const customAddOnsSchema = new Schema(
     price: { type: Number },
     enabled: { type: Boolean, default: true },
     default: { type: Boolean, default: true },
+    image: {
+      type: String,
+    },
   },
   {},
 );
@@ -25,6 +28,9 @@ const checkInOutAddOnsSchema = new Schema(
     price: { type: Number, required: true },
     enabled: { type: Boolean, default: true },
     default: { type: Boolean, default: true },
+    image: {
+      type: String,
+    },
   },
   {},
 );
@@ -50,6 +56,7 @@ const addOnsFlowSchema = new Schema(
           paid: false,
           price: 0,
           enabled: true,
+          image: ["https://dummyimage.com/400x300/fff/aaa"],
           default: true,
         },
         {
@@ -62,6 +69,7 @@ const addOnsFlowSchema = new Schema(
           paid: false,
           price: 0,
           enabled: true,
+          image: ["https://dummyimage.com/400x300/fff/aaa"],
           default: true,
         },
       ],
@@ -88,6 +96,7 @@ const CreateAddOnsFlowValidationSchema = z.object({
       enabled: z.boolean(),
       default: z.boolean(),
       addOnType: z.string().optional(),
+      image: z.string().optional(),
     }),
   ),
   checkInOutAddOns: z.array(
@@ -101,6 +110,7 @@ const CreateAddOnsFlowValidationSchema = z.object({
       price: z.number(),
       enabled: z.boolean(),
       default: z.boolean(),
+      image: z.string().optional(),
     }),
   ),
 });
@@ -116,6 +126,7 @@ const UpdateAddOnsFlowValidationSchema = z.object({
         enabled: z.boolean().optional(),
         default: z.boolean().optional(),
         addOnType: z.string().optional(),
+        image: z.any().optional(),
       }),
     )
     .optional(),
@@ -131,6 +142,7 @@ const UpdateAddOnsFlowValidationSchema = z.object({
         price: z.number().optional(),
         enabled: z.boolean().optional(),
         default: z.boolean().optional(),
+        image: z.string().optional(),
       }),
     )
     .optional(),

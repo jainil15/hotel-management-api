@@ -130,7 +130,7 @@ const update = async (req, res, next) => {
   session.startTransaction();
   try {
     const { propertyId } = req.params;
-    const {
+    let {
       homeFlow,
       addOnsFlow,
       preArrivalFlow,
@@ -138,6 +138,13 @@ const update = async (req, res, next) => {
       checkedOutFlow,
       reviewFlow,
     } = req.body;
+    homeFlow = JSON.parse(homeFlow);
+    addOnsFlow = JSON.parse(addOnsFlow);
+    preArrivalFlow = JSON.parse(preArrivalFlow);
+    inHouseFlow = JSON.parse(inHouseFlow);
+    checkedOutFlow = JSON.parse(checkedOutFlow);
+    reviewFlow = JSON.parse(reviewFlow);
+    const files = req.files;
     const homeFlowResult = UpdateHomeFlowValidationSchema.safeParse(homeFlow);
     const addOnsFlowResult =
       UpdateAddOnsFlowValidationSchema.safeParse(addOnsFlow);
@@ -149,7 +156,7 @@ const update = async (req, res, next) => {
       UpdateCheckedOutFlowValidationSchema.safeParse(checkedOutFlow);
     const reviewFlowResult =
       UpdateReviewsFlowValidationSchema.safeParse(reviewFlow);
-
+    // console.log("ffffffffffffffffffff", addOnsFlowResult.data.customAddOns);
     if (
       !homeFlowResult.success ||
       !addOnsFlowResult.success ||
@@ -167,7 +174,7 @@ const update = async (req, res, next) => {
         ...reviewFlowResult?.error?.flatten().fieldErrors,
       });
     }
-
+    //console.log("done", addOnsFlowResult.data);
     const updatedHomeFlow = await homeFlowService.update(
       propertyId,
       homeFlowResult.data,
@@ -177,6 +184,7 @@ const update = async (req, res, next) => {
       propertyId,
       addOnsFlowResult.data,
       session,
+      files,
     );
     const updatedPreArrivalFlow = await preArrivalFlowService.update(
       propertyId,
@@ -210,6 +218,7 @@ const update = async (req, res, next) => {
       reviewsFlow: updatedReviewFlow,
     });
   } catch (e) {
+    console.log("eeeeeeeeeeeeeeeeeeeeeeeeeeeee", e);
     await session.abortTransaction();
     session.endSession();
     if (e instanceof APIError) {

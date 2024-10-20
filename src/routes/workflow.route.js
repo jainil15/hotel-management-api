@@ -6,7 +6,8 @@ const {
   checkPropertyAccess,
   checkPermissions,
 } = require("../middlewares/propertyaccess.middleware");
-
+const multer = require("multer");
+const upload = multer().any();
 router.post(
   "/:propertyId",
   authenticateToken,
@@ -20,6 +21,7 @@ router.put(
   authenticateToken,
   checkPropertyAccess,
   checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
+  upload,
   workflowController.update,
 );
 

@@ -7,7 +7,7 @@ const { HomeFlow } = require("../models/homeFlow.model");
  */
 const getByPropertyId = async (propertyId) => {
   const homeFlow = await HomeFlow.findOne({ propertyId });
-  console.log("HomeFlow Data:", homeFlow);
+  //console.log("HomeFlow Data:", homeFlow);
   return homeFlow;
 };
 
