@@ -29,7 +29,7 @@ const checkInOutAddOnsSchema = new Schema(
     enabled: { type: Boolean, default: true },
     default: { type: Boolean, default: true },
     image: {
-      type: String,
+      type: [String],
     },
   },
   {},
@@ -56,7 +56,10 @@ const addOnsFlowSchema = new Schema(
           paid: false,
           price: 0,
           enabled: true,
-          image: ["https://dummyimage.com/400x300/fff/aaa"],
+          image: [
+            "https://onelyk-images-bucket.s3.amazonaws.com/addOns/checkin.png",
+          ],
+
           default: true,
         },
         {
@@ -69,7 +72,9 @@ const addOnsFlowSchema = new Schema(
           paid: false,
           price: 0,
           enabled: true,
-          image: ["https://dummyimage.com/400x300/fff/aaa"],
+          image: [
+            "https://onelyk-images-bucket.s3.amazonaws.com/addOns/late-check-out-in-hotel.jpg",
+          ],
           default: true,
         },
       ],
@@ -110,7 +115,7 @@ const CreateAddOnsFlowValidationSchema = z.object({
       price: z.number(),
       enabled: z.boolean(),
       default: z.boolean(),
-      image: z.string().optional(),
+      image: z.union([z.string(), z.array(z.string())]).optional(),
     }),
   ),
 });
@@ -126,7 +131,7 @@ const UpdateAddOnsFlowValidationSchema = z.object({
         enabled: z.boolean().optional(),
         default: z.boolean().optional(),
         addOnType: z.string().optional(),
-        image: z.any().optional(),
+        image: z.union([z.string(), z.array(z.string())]).optional(),
       }),
     )
     .optional(),
