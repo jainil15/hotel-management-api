@@ -1,4 +1,5 @@
 const { CheckInOutRequest } = require("../models/checkInOutRequest.model");
+const { AddOnsFlow } = require("../models/addOnsFlow.model");
 const { REQUEST_STATUS } = require("../constants/guestStatus.contant");
 /**
  * Create a new check in/out request
@@ -85,7 +86,26 @@ const getByPropertyIdAndGuestId = async (propertyId, guestId) => {
     propertyId: propertyId,
     guestId: guestId,
   });
-  return checkInOutRequest;
+  console.log("88999999");
+  if (checkInOutRequest.length == 0) {
+    return [];
+  }
+  console.log("88999999ccccc");
+  const addOnsFlow = await AddOnsFlow.findOne({ propertyId: propertyId });
+  console.log("oooooooo", addOnsFlow);
+  const result = checkInOutRequest.map((request) => {
+    const checkInOutAddOn = addOnsFlow.checkInOutAddOns.find(
+      (addon) =>
+        addon._id.toString() === request.checkInOutRequestId?.toString(),
+    );
+
+    return {
+      ...request.toObject(),
+      addOnDetails: checkInOutAddOn || null, // Include the add-on details or null if not found
+    };
+  });
+
+  return result;
 };
 
 /**
@@ -165,17 +185,34 @@ const updateFieldByPropertyIdAndGuestId = async (
   updateData,
   session,
 ) => {
-  const checkInOutRequests = await CheckInOutRequest.find({
-    propertyId: propertyId,
-    guestId: guestId,
-  });
+  console.log("Updating data:", updateData);
 
-  for (let request of checkInOutRequests) {
-    Object.assign(request, updateData);
-    await request.save({ session });
-  }
+  // Define the allowed fields based on the schema
+  const allowedFields = [
+    "requestStatus",
+    "requestType",
+    "earlyCheckInDateTime",
+    "lateCheckOutDateTime",
+    "extendStayDateTime",
+  ];
 
-  return checkInOutRequests;
+  // Filter updateData to include only allowed fields
+  const filteredUpdateData = Object.keys(updateData)
+    .filter((key) => allowedFields.includes(key))
+    .reduce((obj, key) => {
+      obj[key] = updateData[key];
+      return obj;
+    }, {});
+
+  // Perform the update on all matching documents
+  const result = await CheckInOutRequest.updateMany(
+    { propertyId, guestId }, // Find matching records by propertyId and guestId
+    { $set: filteredUpdateData }, // Update the filtered fields
+    { session, new: true }, // Use the session for transaction support
+  );
+
+  console.log(`${result.nModified} documents updated.`);
+  return result;
 };
 
 module.exports = {

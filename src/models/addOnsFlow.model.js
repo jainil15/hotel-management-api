@@ -29,7 +29,7 @@ const checkInOutAddOnsSchema = new Schema(
     enabled: { type: Boolean, default: true },
     default: { type: Boolean, default: true },
     image: {
-      type: [String],
+      type: String,
     },
   },
   {},
@@ -115,7 +115,7 @@ const CreateAddOnsFlowValidationSchema = z.object({
       price: z.number(),
       enabled: z.boolean(),
       default: z.boolean(),
-      image: z.union([z.string(), z.array(z.string())]).optional(),
+      image: z.string().optional(),
     }),
   ),
 });
@@ -131,7 +131,7 @@ const UpdateAddOnsFlowValidationSchema = z.object({
         enabled: z.boolean().optional(),
         default: z.boolean().optional(),
         addOnType: z.string().optional(),
-        image: z.union([z.string(), z.array(z.string())]).optional(),
+        // image: z.union([z.string(), z.array(z.string())]).optional(),
       }),
     )
     .optional(),
