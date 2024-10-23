@@ -189,11 +189,19 @@ const createCheckInOutRequest = async (req, res, next) => {
     let datePart = moment().format("YYYY-MM-DD"); // Current date or a specific date
 
     // Combine date and time into a single Date object
-    let formatted = moment(
-      `${datePart} ${checkInOutRequest.earlyCheckInDateTime}`,
-      "YYYY-MM-DD HH:mm",
-    ).toDate();
-    checkInOutRequest.earlyCheckInDateTime = formatted;
+    if (checkInOutRequest.requestType == "earlyCheckIn") {
+      let formatted = moment(
+        `${datePart} ${checkInOutRequest.earlyCheckInDateTime}`,
+        "YYYY-MM-DD HH:mm",
+      ).toDate();
+      checkInOutRequest.earlyCheckInDateTime = formatted;
+    } else {
+      let formatted2 = moment(
+        `${datePart} ${checkInOutRequest.lateCheckOutDateTime}`,
+        "YYYY-MM-DD HH:mm",
+      ).toDate();
+      checkInOutRequest.lateCheckOutDateTime = formatted2;
+    }
 
     // if (checkInOutRequest.requestType === "earlyCheckIn") {
     //   if (
