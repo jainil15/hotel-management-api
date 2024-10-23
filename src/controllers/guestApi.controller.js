@@ -1,4 +1,5 @@
 const { default: mongoose } = require("mongoose");
+const moment = require("moment");
 const {
   APIError,
   InternalServerError,
@@ -156,6 +157,7 @@ const createCheckInOutRequest = async (req, res, next) => {
   try {
     const { propertyId, guestId } = req.guestSession;
     const checkInOutRequest = req.body;
+    console.log("laaaaaaaaa", checkInOutRequest);
 
     const checkInOutRequestResult =
       CreateCheckInOutRequestValidationSchema.safeParse(checkInOutRequest);
@@ -184,32 +186,40 @@ const createCheckInOutRequest = async (req, res, next) => {
         guest: ["Guest not found"],
       });
     }
+    let datePart = moment().format("YYYY-MM-DD"); // Current date or a specific date
 
-    if (checkInOutRequest.requestType === "earlyCheckIn") {
-      if (
-        compareDateGt(
-          new Date(checkInOutRequest.earlyCheckInDateTime),
-          new Date(existingGuestStatus.checkIn),
-        )
-      ) {
-        throw new ValidationError("Invalid date", {
-          earlyCheckInDateTime: [
-            "Early check in date should be before the check In date",
-          ],
-        });
-      }
-    } else if (checkInOutRequest.requestType === "lateCheckOut") {
-      if (
-        compareDateGt(
-          new Date(existingGuestStatus.checkOut),
-          new Date(checkInOutRequest.lateCheckOutDateTime),
-        )
-      ) {
-        throw new ValidationError("Invalid date", {
-          date: ["Late check out date should be after the check out date"],
-        });
-      }
-    }
+    // Combine date and time into a single Date object
+    let formatted = moment(
+      `${datePart} ${checkInOutRequest.earlyCheckInDateTime}`,
+      "YYYY-MM-DD HH:mm",
+    ).toDate();
+    checkInOutRequest.earlyCheckInDateTime = formatted;
+
+    // if (checkInOutRequest.requestType === "earlyCheckIn") {
+    //   if (
+    //     compareDateGt(
+    //       new Date(checkInOutRequest.earlyCheckInDateTime),
+    //       new Date(existingGuestStatus.checkIn),
+    //     )
+    //   ) {
+    //     throw new ValidationError("Invalid date", {
+    //       earlyCheckInDateTime: [
+    //         "Early check in date should be before the check In date",
+    //       ],
+    //     });
+    //   }
+    // } else if (checkInOutRequest.requestType === "lateCheckOut") {
+    //   if (
+    //     compareDateGt(
+    //       new Date(existingGuestStatus.checkOut),
+    //       new Date(checkInOutRequest.lateCheckOutDateTime),
+    //     )
+    //   ) {
+    //     throw new ValidationError("Invalid date", {
+    //       date: ["Late check out date should be after the check out date"],
+    //     });
+    //   }
+    // }
     // else {
     //   throw new ValidationError("Invalid request type", {
     //     requestType: ["Invalid request type"],
@@ -370,6 +380,7 @@ const createPreArrival = async (req, res, next) => {
       CreatePreArrivalValidationSchema.safeParse(preArrival);
 
     if (!preArrivalResult.success) {
+      console.log("qqqqqqqqqqqqqq373");
       throw new ValidationError("Input Validation Error", {
         ...preArrivalResult.error.flatten().fieldErrors,
       });
@@ -380,6 +391,7 @@ const createPreArrival = async (req, res, next) => {
       preArrivalFlow._doc,
       preArrival,
     );
+    console.log("qqqqqqqqqqqqqq378884444444443");
     if (!validationResult.success) {
       throw new ValidationError("Validation Error", {
         ...validationResult.error.flatten().fieldErrors,
@@ -400,7 +412,7 @@ const createPreArrival = async (req, res, next) => {
       { preArrivalStatus: PRE_ARRIVAL_STATUS.APPLIED },
       session,
     );
-
+    console.log("qqqqqqqqqqqqqq3734005555555");
     const newPreArrival = await preArrivalService.create(
       propertyId,
       guestId,

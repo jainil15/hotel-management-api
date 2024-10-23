@@ -51,12 +51,7 @@ const CreateCheckInOutRequestValidationSchema = z
     requestType: z.enum(Object.keys(requestType)),
     earlyCheckInDateTime: z
       .string()
-      .refine(
-        (val) => datetimeregex.test(val) && !Number.isNaN(Date.parse(val)),
-        {
-          message: "Invalid date format",
-        },
-      )
+
       .optional(),
     requestStatus: z
       .enum([
