@@ -66,7 +66,6 @@ function modifyMessageTemplateBody(
     const time = messageTemplate.name.includes("Early")
       ? guestInfo.checkIn
       : guestInfo.checkOut;
-
     // Format time as UTC
     const formattedTime = new Date(time).toLocaleString("en", {
       day: "2-digit",
@@ -74,31 +73,8 @@ function modifyMessageTemplateBody(
       hour: "2-digit",
       minute: "2-digit",
       hour12: true,
-      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      timeZone: "UTC",
     });
-    const options = {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      timeZoneName: "short",
-    };
-    const localDate = new Intl.DateTimeFormat("en-US", options).format(
-      new Date(time),
-    );
-    console.log("Setting", formattedTime);
-    console.log("Settinaag", localDate);
-    console.log(
-      "Settinggggggg",
-      formatDateWithLocalTimezone(time, "Asia/Kolkata"),
-    );
-    console.log(
-      "Settinggggggggggggg",
-      formatDateWithLocalTimezone(formatDateToUTC(time)),
-    );
-    // Replace placeholders with dynamic values
     messageTemplate.message = messageTemplate.message
       .replace("[Time]", formattedTime + ` ${propertySetting.timezone}`)
       .replace("[Hotel Name]", hotelName);
@@ -107,27 +83,8 @@ function modifyMessageTemplateBody(
       year: "numeric",
       day: "2-digit",
       month: "2-digit",
-      // hour: "2-digit",
-      // minute: "2-digit",
-      // hour12: true,
-      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      timeZone: "UTC",
     });
-    const options = {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      // hour: "2-digit",
-      // minute: "2-digit",
-      // second: "2-digit",
-      timeZoneName: "short",
-    };
-    const localDate = new Intl.DateTimeFormat("en-US", options).format(
-      new Date(guestInfo.checkOut),
-    );
-    console.log("Setting", formattedTime);
-    console.log("Settinaag", localDate);
-    const formattedDate = formatDateToUTC(guestInfo.checkOut);
-
     messageTemplate.message = messageTemplate.message
       .replace(
         "[New Checkout Date]",
@@ -141,24 +98,8 @@ function modifyMessageTemplateBody(
       hour: "2-digit",
       minute: "2-digit",
       hour12: true,
-      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      timeZone: "UTC",
     });
-    const options = {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      // hour: "2-digit",
-      // minute: "2-digit",
-      // second: "2-digit",
-      timeZoneName: "short",
-    };
-    const localDate = new Intl.DateTimeFormat("en-US", options).format(
-      new Date(guestInfo.checkOut),
-    );
-    console.log("Setting", formattedTime);
-    console.log("Settinaag", localDate);
-    const formattedDate = formatDateToUTC(guestInfo.checkOut);
-
     messageTemplate.message = messageTemplate.message
       .replace(
         "[Original Checkout Date]",
@@ -188,23 +129,8 @@ function modifyMessageTemplateBody(
       hour: "2-digit",
       minute: "2-digit",
       hour12: true,
-      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      timeZone: "UTC",
     });
-    const options = {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      // hour: "2-digit",
-      // minute: "2-digit",
-      // second: "2-digit",
-      timeZoneName: "short",
-    };
-    const localDate = new Intl.DateTimeFormat("en-US", options).format(
-      new Date(guestInfo.checkOut),
-    );
-    console.log("Setting", formattedTime);
-    console.log("Settinaag", localDate);
-
     messageTemplate.message = messageTemplate.message
       .replace("[Time]", formattedTime + ` ${propertySetting.timezone}`)
       .replace("[Hotel Name]", hotelName);
@@ -215,23 +141,8 @@ function modifyMessageTemplateBody(
       hour: "2-digit",
       minute: "2-digit",
       hour12: true,
-      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      timeZone: "UTC",
     });
-    const options = {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      // hour: "2-digit",
-      // minute: "2-digit",
-      // second: "2-digit",
-      timeZoneName: "short",
-    };
-    const localDate = new Intl.DateTimeFormat("en-US", options).format(
-      new Date(guestInfo.checkIn),
-    );
-    console.log("Setting", formattedTime);
-    console.log("Settinaag", localDate);
-
     messageTemplate.message = messageTemplate.message
       .replace("[Time]", formattedTime + ` ${propertySetting.timezone}`)
       .replace("[Hotel Name]", hotelName);

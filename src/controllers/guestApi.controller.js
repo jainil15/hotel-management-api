@@ -189,50 +189,49 @@ const createCheckInOutRequest = async (req, res, next) => {
     let datePart = moment().format("YYYY-MM-DD"); // Current date or a specific date
 
     // Combine date and time into a single Date object
-    if (checkInOutRequest.requestType == "earlyCheckIn") {
-      let formatted = moment(
-        `${datePart} ${checkInOutRequest.earlyCheckInDateTime}`,
-        "YYYY-MM-DD HH:mm",
-      ).toDate();
-      checkInOutRequest.earlyCheckInDateTime = formatted;
-    } else {
-      let formatted2 = moment(
-        `${datePart} ${checkInOutRequest.lateCheckOutDateTime}`,
-        "YYYY-MM-DD HH:mm",
-      ).toDate();
-      checkInOutRequest.lateCheckOutDateTime = formatted2;
-    }
+    // if (checkInOutRequest.requestType == "earlyCheckIn") {
+    //   let formatted = moment(
+    //     `${datePart} ${checkInOutRequest.earlyCheckInDateTime}`,
+    //     "YYYY-MM-DD HH:mm",
+    //   ).toDate();
+    //   checkInOutRequest.earlyCheckInDateTime = formatted;
+    // } else {
+    //   let formatted2 = moment(
+    //     `${datePart} ${checkInOutRequest.lateCheckOutDateTime}`,
+    //     "YYYY-MM-DD HH:mm",
+    //   ).toDate();
+    //   checkInOutRequest.lateCheckOutDateTime = formatted2;
+    // }
 
-    // if (checkInOutRequest.requestType === "earlyCheckIn") {
-    //   if (
-    //     compareDateGt(
-    //       new Date(checkInOutRequest.earlyCheckInDateTime),
-    //       new Date(existingGuestStatus.checkIn),
-    //     )
-    //   ) {
-    //     throw new ValidationError("Invalid date", {
-    //       earlyCheckInDateTime: [
-    //         "Early check in date should be before the check In date",
-    //       ],
-    //     });
-    //   }
-    // } else if (checkInOutRequest.requestType === "lateCheckOut") {
-    //   if (
-    //     compareDateGt(
-    //       new Date(existingGuestStatus.checkOut),
-    //       new Date(checkInOutRequest.lateCheckOutDateTime),
-    //     )
-    //   ) {
-    //     throw new ValidationError("Invalid date", {
-    //       date: ["Late check out date should be after the check out date"],
-    //     });
-    //   }
-    // }
-    // else {
-    //   throw new ValidationError("Invalid request type", {
-    //     requestType: ["Invalid request type"],
-    //   });
-    // }
+    if (checkInOutRequest.requestType === "earlyCheckIn") {
+      if (
+        compareDateGt(
+          new Date(checkInOutRequest.earlyCheckInDateTime),
+          new Date(existingGuestStatus.checkIn),
+        )
+      ) {
+        throw new ValidationError("Invalid date", {
+          earlyCheckInDateTime: [
+            "Early check in date should be before the check In date",
+          ],
+        });
+      }
+    } else if (checkInOutRequest.requestType === "lateCheckOut") {
+      if (
+        compareDateGt(
+          new Date(existingGuestStatus.checkOut),
+          new Date(checkInOutRequest.lateCheckOutDateTime),
+        )
+      ) {
+        throw new ValidationError("Invalid date", {
+          date: ["Late check out date should be after the check out date"],
+        });
+      }
+    } else {
+      throw new ValidationError("Invalid request type", {
+        requestType: ["Invalid request type"],
+      });
+    }
     const oldGuestStatus = await guestStatusService.getByGuestId(guestId);
 
     const updatedGuestStatus = await guestStatusService.update(

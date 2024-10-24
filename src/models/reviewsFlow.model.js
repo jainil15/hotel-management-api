@@ -31,11 +31,16 @@ const ReviewsFlow = mongoose.model("ReviewsFlow", reviewsFlowSchema);
 const CreateReviewsFlowValidationSchema = z.object({
   reviewsEnabled: z.boolean(),
   reviewsLink: z.string(),
+  startLimitForReviewLink: z.number().optional(),
 });
 
 const UpdateReviewsFlowValidationSchema = z.object({
   reviewsEnabled: z.boolean().optional(),
   reviewsLink: z.string().optional(),
+  startLimitForReviewLink: z.preprocess(
+    (value) => (value !== undefined ? Number(value) : undefined),
+    z.number().optional(),
+  ),
 });
 
 ReviewsFlow.init().then(() => {
