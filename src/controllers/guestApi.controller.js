@@ -157,7 +157,6 @@ const createCheckInOutRequest = async (req, res, next) => {
   try {
     const { propertyId, guestId } = req.guestSession;
     const checkInOutRequest = req.body;
-    console.log("laaaaaaaaa", checkInOutRequest);
 
     const checkInOutRequestResult =
       CreateCheckInOutRequestValidationSchema.safeParse(checkInOutRequest);
@@ -227,11 +226,12 @@ const createCheckInOutRequest = async (req, res, next) => {
           date: ["Late check out date should be after the check out date"],
         });
       }
-    } else {
-      throw new ValidationError("Invalid request type", {
-        requestType: ["Invalid request type"],
-      });
     }
+    // else {
+    //   throw new ValidationError("Invalid request type", {
+    //     requestType: ["Invalid request type"],
+    //   });
+    // }
     const oldGuestStatus = await guestStatusService.getByGuestId(guestId);
 
     const updatedGuestStatus = await guestStatusService.update(
@@ -408,11 +408,11 @@ const createPreArrival = async (req, res, next) => {
     if (!existingGuest) {
       throw new ForbiddenError("Guest does not exist", {});
     }
-    const existingPreArrival = await preArrivalService.getByGuestId(guestId);
+    // const existingPreArrival = await preArrivalService.getByGuestId(guestId);
 
-    if (existingPreArrival) {
-      throw new ConflictError("Pre arrival already exists", {});
-    }
+    // if (existingPreArrival) {
+    //   throw new ConflictError("Pre arrival already exists", {});
+    // }
 
     const updatedGuestStatus = await guestStatusService.update(
       guestId,

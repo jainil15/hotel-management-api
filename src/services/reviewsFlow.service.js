@@ -33,7 +33,10 @@ const update = async (propertyId, reviewFlow) => {
   const updatedReviewFlow = await ReviewsFlow.findOneAndUpdate(
     { propertyId },
     reviewFlow,
-    { new: true },
+    {
+      new: true, // Return the updated document
+      upsert: true, // Create a new document if none is found
+    },
   );
   return updatedReviewFlow;
 };

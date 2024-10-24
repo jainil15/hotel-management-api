@@ -156,7 +156,6 @@ const update = async (req, res, next) => {
       UpdateCheckedOutFlowValidationSchema.safeParse(checkedOutFlow);
     const reviewFlowResult =
       UpdateReviewsFlowValidationSchema.safeParse(reviewFlow);
-    // console.log("ffffffffffffffffffff", addOnsFlowResult.data.customAddOns);
     if (
       !homeFlowResult.success ||
       !addOnsFlowResult.success ||
@@ -203,7 +202,7 @@ const update = async (req, res, next) => {
     );
     const updatedReviewFlow = await reviewFlowService.update(
       propertyId,
-      checkedOutFlowResult.data,
+      reviewFlowResult.data,
       session,
     );
 
