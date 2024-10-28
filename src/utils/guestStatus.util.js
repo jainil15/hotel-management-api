@@ -41,8 +41,69 @@ const validateUpdate = (currentGuestStatus, updateGuestStatus) => {
  * @param {import('../models/guestStatus.model.js').GuestStatusType} updateGuestStatus - updated guest status
  * @returns {boolean} - true if valid, false otherwise
  */
+// const validateUpdatev3 = (currentGuestStatus, updateGuestStatus) => {
+//   console.log(currentGuestStatus, updateGuestStatus);
+//   if (currentGuestStatus.currentStatus === updateGuestStatus.currentStatus) {
+//     switch (currentGuestStatus.currentStatus) {
+//       case GUEST_CURRENT_STATUS.RESERVED:
+//         if (
+//           currentGuestStatus.reservationStatus === RESERVATION_STATUS.CANCELLED
+//         ) {
+//           if (
+//             updateGuestStatus.reservationStatus !==
+//             currentGuestStatus.reservationStatus
+//           ) {
+//             return true;
+//           }
+//           return false;
+//         }
+//         if (
+//           currentGuestStatus.reservationStatus === RESERVATION_STATUS.CONFIRMED
+//         ) {
+//         }
+
+//         return true;
+//       case GUEST_CURRENT_STATUS.IN_HOUSE:
+//         if (currentGuestStatus.reservationStatus === "Cancelled") {
+//           return false;
+//         }
+//         if (
+//           currentGuestStatus.preArrivalStatus !==
+//             updateGuestStatus.preArrivalStatus ||
+//           currentGuestStatus.earlyCheckInStatus !==
+//             updateGuestStatus.earlyCheckInStatus
+//         ) {
+//           console.log("should be false");
+//           return false;
+//         }
+//         return true;
+//       case GUEST_CURRENT_STATUS.CHECKED_OUT:
+//         if (currentGuestStatus.reservationStatus === "Cancelled") {
+//           return false;
+//         }
+//         if (
+//           currentGuestStatus.preArrivalStatus !==
+//             updateGuestStatus.preArrivalStatus ||
+//           currentGuestStatus.earlyCheckInStatus !==
+//             updateGuestStatus.earlyCheckInStatus ||
+//           currentGuestStatus.lateCheckOutStatus !==
+//             updateGuestStatus.lateCheckOutStatus
+//         ) {
+//           return false;
+//         }
+//         return true;
+//     }
+//   }
+//   return validateStatusV2(currentGuestStatus, updateGuestStatus);
+// };
 const validateUpdatev3 = (currentGuestStatus, updateGuestStatus) => {
   console.log(currentGuestStatus, updateGuestStatus);
+
+  const result = {
+    isValid: true,
+    reasons: [],
+  };
+
   if (currentGuestStatus.currentStatus === updateGuestStatus.currentStatus) {
     switch (currentGuestStatus.currentStatus) {
       case GUEST_CURRENT_STATUS.RESERVED:
@@ -53,19 +114,28 @@ const validateUpdatev3 = (currentGuestStatus, updateGuestStatus) => {
             updateGuestStatus.reservationStatus !==
             currentGuestStatus.reservationStatus
           ) {
-            return true;
+            return { isValid: true, reasons: [] };
           }
-          return false;
+          result.isValid = false;
+          result.reasons.push(
+            "Cannot update a cancelled reservation in RESERVED status",
+          );
+          return result;
         }
         if (
           currentGuestStatus.reservationStatus === RESERVATION_STATUS.CONFIRMED
         ) {
+          // Add any specific validation for confirmed reservations here
         }
+        return { isValid: true, reasons: [] };
 
-        return true;
       case GUEST_CURRENT_STATUS.IN_HOUSE:
         if (currentGuestStatus.reservationStatus === "Cancelled") {
-          return false;
+          result.isValid = false;
+          result.reasons.push(
+            "Cannot update a cancelled reservation in IN_HOUSE status",
+          );
+          return result;
         }
         if (
           currentGuestStatus.preArrivalStatus !==
@@ -74,12 +144,21 @@ const validateUpdatev3 = (currentGuestStatus, updateGuestStatus) => {
             updateGuestStatus.earlyCheckInStatus
         ) {
           console.log("should be false");
-          return false;
+          result.isValid = false;
+          result.reasons.push(
+            "Cannot modify preArrival or earlyCheckIn status for IN_HOUSE guest",
+          );
+          return result;
         }
-        return true;
+        return { isValid: true, reasons: [] };
+
       case GUEST_CURRENT_STATUS.CHECKED_OUT:
         if (currentGuestStatus.reservationStatus === "Cancelled") {
-          return false;
+          result.isValid = false;
+          result.reasons.push(
+            "Cannot update a cancelled reservation in CHECKED_OUT status",
+          );
+          return result;
         }
         if (
           currentGuestStatus.preArrivalStatus !==
@@ -89,13 +168,18 @@ const validateUpdatev3 = (currentGuestStatus, updateGuestStatus) => {
           currentGuestStatus.lateCheckOutStatus !==
             updateGuestStatus.lateCheckOutStatus
         ) {
-          return false;
+          result.isValid = false;
+          result.reasons.push(
+            "Cannot modify preArrival, earlyCheckIn, or lateCheckOut status for CHECKED_OUT guest",
+          );
+          return result;
         }
-        return true;
+        return { isValid: true, reasons: [] };
     }
   }
   return validateStatusV2(currentGuestStatus, updateGuestStatus);
 };
+
 const IGNORE_KEYS = [
   "currentStatus",
   "_id",
@@ -135,27 +219,61 @@ const validateStatus = (guestStatus) => {
  * @param {import('../models/guestStatus.model.js').GuestStatusType} newGuestStatus - new guest status
  * @returns {boolean} - true if valid, false otherwise
  */
+// const validateStatusV2 = (oldGuestStatus, newGuestStatus) => {
+//   const currentStatus = newGuestStatus.currentStatus;
+//   const allowedStatus = AllowStatusForCurrentStatus[currentStatus];
+
+//   for (const key in newGuestStatus) {
+//     if (allowedStatus.includes(key)) {
+//       if (oldGuestStatus[key] !== newGuestStatus[key]) {
+//         if (!AllowedStatus[currentStatus][key].includes(newGuestStatus[key])) {
+//           return false;
+//         }
+//       }
+//     } else if (
+//       !IGNORE_KEYS.includes(key) &&
+//       oldGuestStatus[key] !== newGuestStatus[key]
+//     ) {
+//       return false;
+//     }
+//   }
+//   return true;
+// };
 const validateStatusV2 = (oldGuestStatus, newGuestStatus) => {
+  const result = {
+    isValid: true,
+    reasons: [],
+  };
+
   const currentStatus = newGuestStatus.currentStatus;
   const allowedStatus = AllowStatusForCurrentStatus[currentStatus];
 
   for (const key in newGuestStatus) {
+    // Check allowed status fields
     if (allowedStatus.includes(key)) {
       if (oldGuestStatus[key] !== newGuestStatus[key]) {
         if (!AllowedStatus[currentStatus][key].includes(newGuestStatus[key])) {
-          return false;
+          result.isValid = false;
+          result.reasons.push(
+            `Invalid value "${newGuestStatus[key]}" for field "${key}" in status "${currentStatus}"`,
+          );
         }
       }
-    } else if (
+    }
+    // Check non-ignored fields that shouldn't change
+    else if (
       !IGNORE_KEYS.includes(key) &&
       oldGuestStatus[key] !== newGuestStatus[key]
     ) {
-      return false;
+      result.isValid = false;
+      result.reasons.push(
+        `Field "${key}" cannot be modified in status "${currentStatus}"`,
+      );
     }
   }
-  return true;
-};
 
+  return result;
+};
 const GUEST_ALLOWED_STATUS = {
   [GUEST_CURRENT_STATUS.RESERVED]: {
     reservationStatus: [RESERVATION_STATUS.CANCELLED],

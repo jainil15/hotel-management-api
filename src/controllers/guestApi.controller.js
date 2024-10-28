@@ -242,11 +242,22 @@ const createCheckInOutRequest = async (req, res, next) => {
       session,
     );
 
-    if (!validateUpdatev3(oldGuestStatus._doc, updatedGuestStatus._doc)) {
-      throw new ValidationError("Invalid Status", {
-        currentStatus: ["Invalid Status"],
+    // if (!validateUpdatev3(oldGuestStatus._doc, updatedGuestStatus._doc)) {
+    //   throw new ValidationError("Invalid Status", {
+    //     currentStatus: ["Invalid Status"],
+    //   });
+    // }
+    const validationResult = validateUpdatev3(
+      oldGuestStatus._doc,
+      updatedGuestStatus._doc,
+    );
+
+    if (!validationResult.isValid) {
+      throw new ValidationError(validationResult.reasons.join(", "), {
+        currentStatus: ["Invalid Status"], // Pass the reasons array as the error message
       });
     }
+
     const checkInOutRequestId = checkInOutRequest.checkInOutRequestId;
     const newCheckInOutRequest = await checkInOutRequestService.create(
       propertyId,

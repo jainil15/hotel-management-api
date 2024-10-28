@@ -119,11 +119,23 @@ const create = async (req, res, next) => {
       session,
     );
 
-    if (!validateUpdatev3(oldGuestStatus._doc, updatedGuestStatus._doc)) {
-      throw new ValidationError("Invalid Status", {
-        currentStatus: ["Invalid Status"],
+    const validationResult = validateUpdatev3(
+      oldGuestStatus._doc,
+      updatedGuestStatus._doc,
+    );
+    if (!validationResult.isValid) {
+      throw new ValidationError(validationResult.reasons.join(", "), {
+        currentStatus: ["Invalid Status"], // Pass the reasons array as the error message
       });
     }
+
+    // if (
+    //   !validateUpdatev3(oldGuestStatus._doc, updatedGuestStatus._doc)
+    // ) {
+    //   throw new ValidationError("Invalid Status", {
+    //     currentStatus: ["Invalid Status"],
+    //   });
+    // }
 
     const newCheckInOutRequest = await checkInOutRequestService.create(
       propertyId,
@@ -188,20 +200,14 @@ const updateRequestStatus = async (req, res, next) => {
   try {
     const { propertyId, guestId, checkInOutRequestId } = req.params;
     const checkInOutRequest = req.body;
-    console.log("qqqqqqqqqqqqqqqqqqq", checkInOutRequest);
     const checkInOutRequestResult =
       UpdateRequestStatusValidationSchema.safeParse(checkInOutRequest);
     if (!checkInOutRequestResult.success) {
-      console.log(
-        "Validation Error",
-        checkInOutRequestResult.error.flatten().fieldErrors,
-      );
       throw new ValidationError(
         "Validation Error",
         checkInOutRequestResult.error.flatten().fieldErrors,
       );
     }
-    console.log("Validation Error");
     const existingCheckInOutRequest = await checkInOutRequestService.findOne(
       propertyId,
       guestId,
@@ -227,9 +233,7 @@ const updateRequestStatus = async (req, res, next) => {
         checkInOutRequestResult.data,
         session,
       );
-    console.log("updatedCheckInOutRequest", updatedCheckInOutRequest);
     const oldGuestStatus = await guestStatusService.getByGuestId(guestId);
-    console.log("oldGuestStatus", oldGuestStatus);
     const updatedGuestStatus = await guestStatusService.update(
       guestId,
       {
@@ -238,13 +242,23 @@ const updateRequestStatus = async (req, res, next) => {
       },
       session,
     );
-    console.log("updatedGuestStatus", updatedGuestStatus);
 
-    if (!validateUpdatev3(oldGuestStatus._doc, updatedGuestStatus._doc)) {
-      throw new ValidationError("Invalid Status", {
-        currentStatus: ["Invalid Status"],
+    // if (!validateUpdatev3(oldGuestStatus._doc, updatedGuestStatus._doc)) {
+    //   throw new ValidationError("Invalid Status", {
+    //     currentStatus: ["Invalid Status"],
+    //   });
+    // }
+    const validationResult = validateUpdatev3(
+      oldGuestStatus._doc,
+      updatedGuestStatus._doc,
+    );
+
+    if (!validationResult.isValid) {
+      throw new ValidationError(validationResult.reasons.join(", "), {
+        currentStatus: ["Invalid Status"], // Pass the reasons array as the error message
       });
     }
+
     console.log("updatedGuestStatusssss");
     let updatedGuest = "";
     if (updatedCheckInOutRequest.requestStatus === REQUEST_STATUS.ACCEPTED) {
