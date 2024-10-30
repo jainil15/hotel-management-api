@@ -86,13 +86,10 @@ const getByPropertyIdAndGuestId = async (propertyId, guestId) => {
     propertyId: propertyId,
     guestId: guestId,
   });
-  console.log("88999999");
   if (checkInOutRequest.length == 0) {
     return [];
   }
-  console.log("88999999ccccc");
   const addOnsFlow = await AddOnsFlow.findOne({ propertyId: propertyId });
-  console.log("oooooooo", addOnsFlow);
   const result = checkInOutRequest.map((request) => {
     const checkInOutAddOn = addOnsFlow.checkInOutAddOns.find(
       (addon) =>
@@ -182,11 +179,9 @@ const getByRequestType = async (propertyId, guestId, requestType) => {
 const updateFieldByPropertyIdAndGuestId = async (
   propertyId,
   guestId,
-  updateData,
+  updateDataArray,
   session,
 ) => {
-  console.log("Updating data:", updateData);
-
   // Define the allowed fields based on the schema
   const allowedFields = [
     "requestStatus",
@@ -196,23 +191,26 @@ const updateFieldByPropertyIdAndGuestId = async (
     "extendStayDateTime",
   ];
 
-  // Filter updateData to include only allowed fields
-  const filteredUpdateData = Object.keys(updateData)
-    .filter((key) => allowedFields.includes(key))
-    .reduce((obj, key) => {
-      obj[key] = updateData[key];
-      return obj;
-    }, {});
+  // Loop through each item in the updateData array
+  for (const updateData of updateDataArray) {
+    console.log("Updating data:", updateData);
 
-  // Perform the update on all matching documents
-  const result = await CheckInOutRequest.updateMany(
-    { propertyId, guestId }, // Find matching records by propertyId and guestId
-    { $set: filteredUpdateData }, // Update the filtered fields
-    { session, new: true }, // Use the session for transaction support
-  );
+    // Filter updateData to include only allowed fields
+    delete updateData.addOnDetails;
+    // const filteredUpdateData = Object.keys(updateData)
+    //   .filter((key) => allowedFields.includes(key))
+    //   .reduce((obj, key) => {
+    //     obj[key] = updateData[key];
+    //     return obj;
+    //   }, {});
 
-  console.log(`${result.nModified} documents updated.`);
-  return result;
+    // Perform the update on each matching document
+    const result = await CheckInOutRequest.findByIdAndUpdate(
+      updateData._id,
+      updateData,
+      { new: true },
+    );
+  }
 };
 
 module.exports = {
