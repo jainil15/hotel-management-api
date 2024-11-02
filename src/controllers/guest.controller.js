@@ -696,7 +696,6 @@ const getAllGuestsWithStatus = async (req, res, next) => {
   try {
     const filters = req.query;
     const filtersResult = GetGuestFiltersValidationSchema.safeParse(filters);
-
     const propertyId = req.params.propertyId;
     if (!filtersResult.success) {
       throw new ValidationError(
