@@ -204,7 +204,7 @@ const scheduleDailyCheckoutMessages = async () => {
   }
 };
 const scheduleDailyCancellationJob = () => {
-  cron.schedule("* * * * *", async () => {
+  cron.schedule("0 0 * * *", async () => {
     logger.info("Running daily cancellation job...");
     await cancelExpiredReservations();
   });
