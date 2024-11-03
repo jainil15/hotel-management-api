@@ -131,7 +131,7 @@ const UpdateAddOnsFlowValidationSchema = z.object({
         enabled: z.boolean().optional(),
         default: z.boolean().optional(),
         addOnType: z.string().optional(),
-        //c image: z.union([z.string(), z.array(z.string())]).optional(),
+        image: z.any(),
       }),
     )
     .optional(),
