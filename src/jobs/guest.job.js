@@ -96,8 +96,7 @@ const sendMessageToTodayCheckoutGuests = async (propertyId) => {
       }
       const twilioSubClient =
         await twilioService.getTwilioClient(twilioAccount);
-
-      const messageBody = `Hello ${guest.firstName}, we hope you enjoyed your stay! Please check out by ${formattedTime} ${propertySetting.timezone}.\nYour guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`;
+      const messageBody = `Hi ${guest.firstName}! A friendly remainder that your checkout is scheduled for today at ${formattedTime} ${propertySetting.timezone}.If you’d like a late checkout or to extend your stay, please click here:\n ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}. or feel free to reply with any questions.`;
       const recipientPhoneNumber = `${guest.countryCode}${guest.phoneNumber}`;
       const senderPhoneNumber = `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`;
 
