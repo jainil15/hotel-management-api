@@ -168,14 +168,23 @@ const getAllGuestWithStatusv2 = async (propertyId, filters) => {
   );
 
   if (filters.currentStatus) {
-    guestPipeline.push({
+    const statusMatch = {
       $match: {
-        "status.currentStatus": {
-          $eq: filters.currentStatus,
-        },
+        $or: [{ "status.currentStatus": { $eq: filters.currentStatus } }],
       },
-    });
+    };
+
+    if (
+      !filters.checkIn &&
+      !filters.checkOut &&
+      filters.currentStatus === "Reservation"
+    ) {
+      statusMatch.$match.$or.push({ "status.currentStatus": "Cancelled" });
+    }
+
+    guestPipeline.push(statusMatch);
   }
+
   if (filters.search) {
     guestPipeline.push(
       {

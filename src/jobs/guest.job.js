@@ -63,60 +63,67 @@ const sendMessageToTodayCheckoutGuests = async (propertyId) => {
 
     for (const guest of guestsCheckingOutToday) {
       const guestId = guest._id;
-      const guestSession = await guestSessionService.getGuestSession(
-        propertyId,
-        guestId,
-      );
-      if (!guestSession) {
-        logger.error(`Guest session not found for guest ID: ${guestId}`);
-        continue;
-      }
-      const propertySetting = await settingService.getByPropertyId(propertyId);
-      if (!propertySetting) {
-        console.error(
-          `Property settings not found for property ID: ${propertyId}`,
+      const checkGuestStatus = await GuestStatus.findOne({ guestId });
+      if (
+        checkGuestStatus.currentStatus === "In House" &&
+        checkGuestStatus.lateCheckOutStatus !== "Accepted"
+      ) {
+        const guestSession = await guestSessionService.getGuestSession(
+          propertyId,
+          guestId,
         );
-        continue;
-      }
-      const formattedTime = new Date(guest.checkOut).toLocaleString("en", {
-        day: "2-digit",
-        month: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
-        timeZone: "UTC",
-      });
-      const twilioAccount =
-        await twilioAccountService.getByPropertyId(propertyId);
-      if (!twilioAccount) {
-        console.error(
-          `Twilio account not found for property ID: ${propertyId}`,
+        if (!guestSession) {
+          logger.error(`Guest session not found for guest ID: ${guestId}`);
+          continue;
+        }
+        const propertySetting =
+          await settingService.getByPropertyId(propertyId);
+        if (!propertySetting) {
+          console.error(
+            `Property settings not found for property ID: ${propertyId}`,
+          );
+          continue;
+        }
+        const formattedTime = new Date(guest.checkOut).toLocaleString("en", {
+          day: "2-digit",
+          month: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+          timeZone: "UTC",
+        });
+        const twilioAccount =
+          await twilioAccountService.getByPropertyId(propertyId);
+        if (!twilioAccount) {
+          console.error(
+            `Twilio account not found for property ID: ${propertyId}`,
+          );
+          continue;
+        }
+        const twilioSubClient =
+          await twilioService.getTwilioClient(twilioAccount);
+        const messageBody = `Hi ${guest.firstName}! A friendly remainder that your checkout is scheduled for today at ${formattedTime} ${propertySetting.timezone}.If you’d like a late checkout or to extend your stay, please click here:\n ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}. or feel free to reply with any questions.`;
+        const recipientPhoneNumber = `${guest.countryCode}${guest.phoneNumber}`;
+        const senderPhoneNumber = `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`;
+
+        const sentSms = await smsService.send(
+          twilioSubClient,
+          senderPhoneNumber,
+          recipientPhoneNumber,
+          messageBody,
         );
-        continue;
+
+        await messageService.create({
+          propertyId: propertyId,
+          guestId: guestId,
+          senderId: propertyId,
+          receiverId: guestId,
+          content: messageBody,
+          messageTriggerType: messageTriggerType.AUTOMATIC,
+          messageType: messageType.SMS,
+          messageSid: sentSms.sid,
+        });
       }
-      const twilioSubClient =
-        await twilioService.getTwilioClient(twilioAccount);
-      const messageBody = `Hi ${guest.firstName}! A friendly remainder that your checkout is scheduled for today at ${formattedTime} ${propertySetting.timezone}.If you’d like a late checkout or to extend your stay, please click here:\n ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}. or feel free to reply with any questions.`;
-      const recipientPhoneNumber = `${guest.countryCode}${guest.phoneNumber}`;
-      const senderPhoneNumber = `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`;
-
-      const sentSms = await smsService.send(
-        twilioSubClient,
-        senderPhoneNumber,
-        recipientPhoneNumber,
-        messageBody,
-      );
-
-      await messageService.create({
-        propertyId: propertyId,
-        guestId: guestId,
-        senderId: propertyId,
-        receiverId: guestId,
-        content: messageBody,
-        messageTriggerType: messageTriggerType.AUTOMATIC,
-        messageType: messageType.SMS,
-        messageSid: sentSms.sid,
-      });
     }
 
     logger.info(
