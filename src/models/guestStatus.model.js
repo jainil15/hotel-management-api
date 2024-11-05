@@ -90,6 +90,10 @@ const GetGuestFiltersValidationSchema = z.object({
     .optional(),
   currentStatus: z.enum(Object.values(GUEST_CURRENT_STATUS)).optional(),
   search: z.string().optional(),
+  todaysDate: z
+    .string()
+    .refine((date) => dateValidation(date))
+    .optional(),
 });
 
 const GuestStatus = mongoose.model("GuestStatus", guestStatusSchema);

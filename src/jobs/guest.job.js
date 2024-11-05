@@ -146,7 +146,6 @@ const cancelExpiredReservations = async () => {
     const guestsStatuses = await GuestStatus.find({
       currentStatus: GUEST_CURRENT_STATUS.RESERVED,
     }).populate("guestId");
-    console.log("================================", guestsStatuses);
     const guestsToCancel = guestsStatuses.filter((guestStatus) => {
       const guest = guestStatus.guestId; // Accessing the guest details
       if (!guest) {
@@ -159,7 +158,7 @@ const cancelExpiredReservations = async () => {
     const updates = guestsToCancel.map((guestStatus) => {
       return GuestStatus.updateOne(
         { _id: guestStatus._id },
-        { currentStatus: RESERVATION_STATUS.CANCELLED },
+        { reservationStatus: RESERVATION_STATUS.CANCELLED },
       );
     });
 
