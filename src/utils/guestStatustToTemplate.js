@@ -46,6 +46,9 @@ const guestStatusToTemplateOnCreate = (status) => {
       if (status.lateCheckOutStatus === LATE_CHECK_OUT_STATUS.ACCEPTED) {
         return "Late Check Out Accepted";
       }
+      if (status.reservationStatus === RESERVATION_STATUS.CANCELLED) {
+        return "Reservation Cancelled";
+      }
       return "Reservation Confirmed";
     case GUEST_CURRENT_STATUS.IN_HOUSE:
       if (

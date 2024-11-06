@@ -799,9 +799,10 @@ const guestedit = async (req, res, next) => {
   session.startTransaction();
   try {
     const { guestId, propertyId } = req.params;
-    const { guest, preArrival } = req.body;
+    const { guest, status, preArrival } = req.body;
     let updatedGuest = null,
-      updatedPreArrival = null;
+      updatedPreArrival = null,
+      statusResult = null;
     // updatedAddOns = null,
     // updatedCheckInOutRequest = null;
     if (guest) {
@@ -823,6 +824,10 @@ const guestedit = async (req, res, next) => {
       if (!updatedGuest || updatedGuest.modifiedCount === 0) {
         throw new Error("Failed to update guest");
       }
+    }
+    if (status) {
+      statusResult =
+        await UpdateGuestStatusValidationSchema.safeParseAsync(status);
     }
 
     // Conditionally update pre-arrival information if provided
@@ -870,6 +875,11 @@ const guestedit = async (req, res, next) => {
     // }
 
     // Commit the transaction if all updates succeed
+    const updatedGuestStatus = await guestStatusService.update(
+      guestId,
+      status,
+      session,
+    );
     await session.commitTransaction();
     session.endSession();
     req.app.io.to(`property:${propertyId}`).emit("guest:guestUpdate", {
@@ -884,6 +894,7 @@ const guestedit = async (req, res, next) => {
     return responseHandler(res, {
       updatedGuest,
       updatedPreArrival,
+      updatedGuestStatus,
       // updatedAddOns,
       // updatedCheckInOutRequest,
     });
