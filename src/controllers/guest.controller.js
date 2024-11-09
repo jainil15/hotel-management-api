@@ -325,9 +325,7 @@ const update = async (req, res, next) => {
   session.startTransaction();
   try {
     // TODO: add messageGuest
-    console.log("111111");
     const { sendMessage, status, ...guest } = req.body;
-    console.log("11111bbbbbb1");
     const propertyId = req.params.propertyId;
     const guestId = req.params.guestId;
     const guestResult = await UpdateGuestValidationSchema.safeParseAsync(guest);
@@ -360,7 +358,6 @@ const update = async (req, res, next) => {
         ...roomNumberResult?.error?.flatten().fieldErrors,
       });
     }
-    console.log("111112222222221");
     let checkCheckInUpdated = false;
     let checkCheckOutUpdated = false;
     const guestInfo = await guestService.getById(guestId, propertyId);
@@ -383,14 +380,12 @@ const update = async (req, res, next) => {
     ) {
       checkCheckOutUpdated = true;
     }
-    console.log("111111xxxxxxxxxx");
     const oldGuestStatus = await guestStatusService.getByGuestId(guestId);
     const updatedGuestStatus = await guestStatusService.update(
       guestId,
       status,
       session,
     );
-    console.log("zzzzzzzzzzzzzzzz111111");
 
     // Check for early check in or late check out
     const existingCheckInOutRequests =
@@ -398,7 +393,6 @@ const update = async (req, res, next) => {
         propertyId,
         guestId,
       );
-    console.log("nnnnnnnnnnnnnnnn111111");
     for (const existingCheckInOutRequest of existingCheckInOutRequests) {
       if (
         updatedGuestStatus[`${existingCheckInOutRequest.requestType}Status`] !==
@@ -477,7 +471,6 @@ const update = async (req, res, next) => {
         }
       }
     }
-    console.log("11cccccccc1111");
     // Send message to the guest according to the status
     if (sendMessage === true) {
       const { property } = await propertyService.getById(propertyId);
@@ -605,7 +598,6 @@ const update = async (req, res, next) => {
         );
       }
     }
-    console.log("1111mmmmmmmmmmmmm11");
     await session.commitTransaction();
     session.endSession();
 
@@ -618,7 +610,6 @@ const update = async (req, res, next) => {
     req.app.io.to(`property:${propertyId}`).emit("chatList:update", {});
     // Emit to guest messages updated
     req.app.io.to(`guest:${guestId}`).emit("message:newMessage", {});
-    console.log("111111999999999999");
     return responseHandler(
       res,
       {
@@ -706,6 +697,33 @@ const getAllGuestsWithStatus = async (req, res, next) => {
 
     // let guests = await guestService.getAllGuestsWithStatus(propertyId);
     const guests = await guestStatusService.getAllGuestWithStatusv2(
+      propertyId,
+      filtersResult.data,
+    );
+
+    return responseHandler(res, { guests: guests });
+  } catch (e) {
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError(e.message));
+  }
+};
+
+const getCheckInOutPendingGuests = async (req, res, next) => {
+  try {
+    const filters = req.query;
+    const filtersResult = GetGuestFiltersValidationSchema.safeParse(filters);
+    const propertyId = req.params.propertyId;
+    if (!filtersResult.success) {
+      throw new ValidationError(
+        "Validation Error",
+        filtersResult.error.flatten().fieldErrors,
+      );
+    }
+
+    // let guests = await guestService.getAllGuestsWithStatus(propertyId);
+    const guests = await guestStatusService.getCheckInOutPendingGuests(
       propertyId,
       filtersResult.data,
     );
@@ -921,6 +939,7 @@ module.exports = {
   update,
   remove,
   getAllGuestsWithStatus,
+  getCheckInOutPendingGuests,
   getGuestById,
   getGuestData,
   guestedit,

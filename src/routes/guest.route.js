@@ -8,7 +8,8 @@ const {
   getAllGuestsWithStatus,
   getGuestById,
   getGuestData, // Newly added
-  guestedit,    // Newly added
+  guestedit, // Newly added
+  getCheckInOutPendingGuests, // Newly added
 } = require("../controllers/guest.controller");
 
 const { authenticateToken } = require("../middlewares/jwt.middleware");
@@ -40,6 +41,13 @@ router.get(
   checkPropertyAccess,
   checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
   getAllGuestsWithStatus,
+);
+router.get(
+  "/:propertyId/pending",
+  authenticateToken,
+  checkPropertyAccess,
+  checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
+  getCheckInOutPendingGuests,
 );
 
 // Get a guest by their ID (for admins, front desk, and guest roles)
@@ -77,7 +85,7 @@ router.get(
   "/getGuestData/:propertyId/:guestId",
   authenticateToken,
   checkPropertyAccess,
-  getGuestData
+  getGuestData,
 );
 
 // Edit guest data (fields like name, email, check-in, check-out, etc.)
@@ -86,7 +94,7 @@ router.patch(
   authenticateToken,
   checkPropertyAccess,
   checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
-  guestedit
+  guestedit,
 );
 
 module.exports = router;

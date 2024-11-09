@@ -88,6 +88,7 @@ const getAllGuestWithStatus = async (propertyId) => {
  * @returns {Promise<Guest[]>} - The list of guests with status
  */
 const getAllGuestWithStatusv2 = async (propertyId, filters) => {
+  // console.log("getAllGuestWithStatusv2", filters);
   const guestPipeline = [];
   guestPipeline.push({
     $match: {
@@ -123,42 +124,19 @@ const getAllGuestWithStatusv2 = async (propertyId, filters) => {
       },
     );
   }
-  // if (filters.checkOut) {
-  //   guestPipeline.push(
-  //     {
-  //       $addFields: {
-  //         checkOutParts: {
-  //           $dateToParts: {
-  //             date: "$checkOut",
-  //           },
-  //         },
-  //         filterCheckOutParts: {
-  //           $dateToParts: {
-  //             date: new Date(filters.checkOut),
-  //           },
-  //         },
-  //       },
-  //     },
-  //     {
-  //       $match: {
-  //         $expr: {
-  //           $and: [
-  //             { $eq: ["$checkOutParts.year", "$filterCheckOutParts.year"] },
-  //             { $eq: ["$checkOutParts.month", "$filterCheckOutParts.month"] },
-  //             { $eq: ["$checkOutParts.day", "$filterCheckOutParts.day"] },
-  //           ],
-  //         },
-  //       },
-  //     },
-  //   );
-  // }
   if (filters.checkOut) {
     guestPipeline.push(
       {
         $addFields: {
-          checkOutParts: { $dateToParts: { date: "$checkOut" } },
+          checkOutParts: {
+            $dateToParts: {
+              date: "$checkOut",
+            },
+          },
           filterCheckOutParts: {
-            $dateToParts: { date: new Date(filters.checkOut) },
+            $dateToParts: {
+              date: new Date(filters.checkOut),
+            },
           },
         },
       },
@@ -166,51 +144,74 @@ const getAllGuestWithStatusv2 = async (propertyId, filters) => {
         $match: {
           $expr: {
             $and: [
-              { $lte: ["$checkOutParts.year", "$filterCheckOutParts.year"] },
-              {
-                $cond: {
-                  if: {
-                    $eq: ["$checkOutParts.year", "$filterCheckOutParts.year"],
-                  },
-                  then: {
-                    $lte: [
-                      "$checkOutParts.month",
-                      "$filterCheckOutParts.month",
-                    ],
-                  },
-                  else: true,
-                },
-              },
-              {
-                $cond: {
-                  if: {
-                    $and: [
-                      {
-                        $eq: [
-                          "$checkOutParts.year",
-                          "$filterCheckOutParts.year",
-                        ],
-                      },
-                      {
-                        $eq: [
-                          "$checkOutParts.month",
-                          "$filterCheckOutParts.month",
-                        ],
-                      },
-                    ],
-                  },
-                  then: {
-                    $lte: ["$checkOutParts.day", "$filterCheckOutParts.day"],
-                  },
-                  else: true,
-                },
-              },
+              { $eq: ["$checkOutParts.year", "$filterCheckOutParts.year"] },
+              { $eq: ["$checkOutParts.month", "$filterCheckOutParts.month"] },
+              { $eq: ["$checkOutParts.day", "$filterCheckOutParts.day"] },
             ],
           },
         },
       },
     );
   }
+  // if (filters.checkOut) {
+  //   guestPipeline.push(
+  //     {
+  //       $addFields: {
+  //         checkOutParts: { $dateToParts: { date: "$checkOut" } },
+  //         filterCheckOutParts: {
+  //           $dateToParts: { date: new Date(filters.checkOut) },
+  //         },
+  //       },
+  //     },
+  //     {
+  //       $match: {
+  //         $expr: {
+  //           $and: [
+  //             { $lte: ["$checkOutParts.year", "$filterCheckOutParts.year"] },
+  //             {
+  //               $cond: {
+  //                 if: {
+  //                   $eq: ["$checkOutParts.year", "$filterCheckOutParts.year"],
+  //                 },
+  //                 then: {
+  //                   $lte: [
+  //                     "$checkOutParts.month",
+  //                     "$filterCheckOutParts.month",
+  //                   ],
+  //                 },
+  //                 else: true,
+  //               },
+  //             },
+  //             {
+  //               $cond: {
+  //                 if: {
+  //                   $and: [
+  //                     {
+  //                       $eq: [
+  //                         "$checkOutParts.year",
+  //                         "$filterCheckOutParts.year",
+  //                       ],
+  //                     },
+  //                     {
+  //                       $eq: [
+  //                         "$checkOutParts.month",
+  //                         "$filterCheckOutParts.month",
+  //                       ],
+  //                     },
+  //                   ],
+  //                 },
+  //                 then: {
+  //                   $lte: ["$checkOutParts.day", "$filterCheckOutParts.day"],
+  //                 },
+  //                 else: true,
+  //               },
+  //             },
+  //           ],
+  //         },
+  //       },
+  //     },
+  //   );
+  // }
 
   guestPipeline.push(
     {
@@ -226,37 +227,133 @@ const getAllGuestWithStatusv2 = async (propertyId, filters) => {
     },
   );
 
+  // if (filters.currentStatus) {
+  //   const statusMatch = {
+  //     $match: {
+  //       $or: [{ "status.currentStatus": { $eq: filters.currentStatus } }],
+  //     },
+  //   };
+
+  //   if (
+  //     !filters.checkIn &&
+  //     !filters.checkOut &&
+  //     filters.currentStatus === "Reservation"
+  //   ) {
+  //     statusMatch.$match.$or.push({
+  //       "status.currentStatus": {
+  //         $in: ["Reservation", "In House", "Checked Out"],
+  //       },
+  //     });
+  //     statusMatch.$match.$or.push({
+  //       "status.reservationStatus": "Cancelled",
+  //     });
+  //   }
+
+  //   // if (
+  //   //   filters.currentStatus === "In House" &&
+  //   //   !filters.checkIn &&
+  //   //   !filters.checkOut
+  //   // ) {
+  //   //   statusMatch.$match = {
+  //   //     $or: [
+  //   //       {
+  //   //         "status.currentStatus": "In House",
+  //   //         checkOut: { $gte: new Date(filters.todaysDate) },
+  //   //       },
+  //   //     ],
+  //   //   };
+  //   // }
+  //   if (
+  //     filters.currentStatus === "Checked Out" &&
+  //     !filters.checkIn &&
+  //     !filters.checkOut
+  //   ) {
+  //     statusMatch = [
+  //       {
+  //         $addFields: {
+  //           checkOutParts: {
+  //             $dateToParts: { date: "$checkOut" },
+  //           },
+  //           filterCheckOutParts: {
+  //             $dateToParts: { date: new Date(filters.selectedDate) },
+  //           },
+  //         },
+  //       },
+  //       {
+  //         $match: {
+  //           "status.currentStatus": "Checked Out",
+  //           $expr: {
+  //             $and: [
+  //               { $eq: ["$checkOutParts.year", "$filterCheckOutParts.year"] },
+  //               { $eq: ["$checkOutParts.month", "$filterCheckOutParts.month"] },
+  //               { $eq: ["$checkOutParts.day", "$filterCheckOutParts.day"] },
+  //             ],
+  //           },
+  //         },
+  //       },
+  //     ];
+  //   }
+
+  //   guestPipeline.push(statusMatch);
+  // }
   if (filters.currentStatus) {
-    const statusMatch = {
+    let statusMatch = {
       $match: {
         $or: [{ "status.currentStatus": { $eq: filters.currentStatus } }],
       },
     };
 
+    // If currentStatus is "Reservation" and no checkIn or checkOut filters
     if (
       !filters.checkIn &&
       !filters.checkOut &&
       filters.currentStatus === "Reservation"
     ) {
-      statusMatch.$match.$or.push({ "status.currentStatus": "Cancelled" });
+      statusMatch.$match.$or.push({
+        "status.currentStatus": {
+          $in: ["Reservation", "In House", "Checked Out"],
+        },
+      });
+      statusMatch.$match.$or.push({
+        "status.reservationStatus": "Cancelled",
+      });
     }
 
+    // If currentStatus is "Checked Out" and no checkIn or checkOut filters
     if (
-      filters.currentStatus === "In House" &&
+      filters.currentStatus === "Checked Out" &&
       !filters.checkIn &&
       !filters.checkOut
     ) {
-      statusMatch.$match = {
-        $or: [
-          {
-            "status.currentStatus": "In House",
-            checkOut: { $gte: new Date(filters.todaysDate) },
+      // Instead of reassigning, we push the pipeline stages
+      guestPipeline.push(
+        {
+          $addFields: {
+            checkOutParts: {
+              $dateToParts: { date: "$checkOut" },
+            },
+            filterCheckOutParts: {
+              $dateToParts: { date: new Date(filters.selectedDate) },
+            },
           },
-        ],
-      };
+        },
+        {
+          $match: {
+            "status.currentStatus": "Checked Out",
+            $expr: {
+              $and: [
+                { $eq: ["$checkOutParts.year", "$filterCheckOutParts.year"] },
+                { $eq: ["$checkOutParts.month", "$filterCheckOutParts.month"] },
+                { $eq: ["$checkOutParts.day", "$filterCheckOutParts.day"] },
+              ],
+            },
+          },
+        },
+      );
+    } else {
+      // If not in the "Checked Out" case, add statusMatch as usual
+      guestPipeline.push(statusMatch);
     }
-
-    guestPipeline.push(statusMatch);
   }
 
   if (filters.search) {
@@ -392,6 +489,102 @@ const getAllGuestWithStatusv2 = async (propertyId, filters) => {
   const guests = await Guest.aggregate(guestPipeline);
   return guests;
 };
+const getCheckInOutPendingGuests = async (propertyId, filters) => {
+  console.log("getCheckInOutPendingGuests", filters);
+  const guestPipeline = [];
+  guestPipeline.push({
+    $match: {
+      propertyId: new mongoose.Types.ObjectId(propertyId),
+    },
+  });
+
+  guestPipeline.push(
+    {
+      $lookup: {
+        from: "gueststatuses",
+        localField: "_id",
+        foreignField: "guestId",
+        as: "status",
+      },
+    },
+    {
+      $unwind: "$status",
+    },
+    {
+      $addFields: {
+        checkInDateOnly: {
+          $dateToString: { format: "%Y-%m-%d", date: "$checkIn" },
+        },
+        checkOutDateOnly: {
+          $dateToString: { format: "%Y-%m-%d", date: "$checkOut" },
+        },
+        todaysDateOnly: {
+          $dateToString: {
+            format: "%Y-%m-%d",
+            date: new Date(filters.todaysDate),
+          },
+        },
+      },
+    },
+    {
+      $match: {
+        "status.currentStatus": filters.currentStatus,
+        $expr: {
+          $cond: {
+            if: { $eq: [filters.currentStatus, "Reservation"] },
+            then: {
+              $and: [
+                { $lt: ["$checkInDateOnly", "$todaysDateOnly"] }, // Check-in is before today
+                { $gt: ["$checkOutDateOnly", "$todaysDateOnly"] }, // Check-out is after today
+              ],
+            },
+            else: {
+              $and: [
+                { $eq: ["$status.currentStatus", "In House"] },
+                { $lt: ["$checkOutDateOnly", "$todaysDateOnly"] }, // Check-out is after today
+              ],
+            },
+          },
+        },
+      },
+    },
+  );
+
+  guestPipeline.push({
+    $project: {
+      _id: 1,
+      propertyId: 1,
+      countryCode: 1,
+      phoneNumber: 1,
+      source: 1,
+      checkIn: 1,
+      checkOut: 1,
+      confirmationNumber: 1,
+      roomNumber: 1,
+      firstName: 1,
+      lastName: 1,
+      email: 1,
+      active: 1,
+      status: {
+        currentStatus: 1,
+        lateCheckOutStatus: 1,
+        earlyCheckInStatus: 1,
+        reservationStatus: 1,
+        preArrivalStatus: 1,
+      },
+      updatedAt: 1,
+      createdAt: 1,
+    },
+  });
+  // sort :: In future if we want to sort the guest based on some field ::
+  guestPipeline.push({
+    $sort: {
+      updatedAt: -1,
+    },
+  });
+  const guests = await Guest.aggregate(guestPipeline);
+  return guests;
+};
 
 /**
  * Update guest status
@@ -463,4 +656,5 @@ module.exports = {
   update,
   getAllGuestWithStatus,
   getAllGuestWithStatusv2,
+  getCheckInOutPendingGuests,
 };

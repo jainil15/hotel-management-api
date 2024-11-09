@@ -94,6 +94,10 @@ const GetGuestFiltersValidationSchema = z.object({
     .string()
     .refine((date) => dateValidation(date))
     .optional(),
+  selectedDate: z
+    .string()
+    .refine((date) => dateValidation(date))
+    .optional(),
 });
 
 const GuestStatus = mongoose.model("GuestStatus", guestStatusSchema);
