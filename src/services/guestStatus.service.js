@@ -350,10 +350,47 @@ const getAllGuestWithStatusv2 = async (propertyId, filters) => {
           },
         },
       );
-    } else {
-      // If not in the "Checked Out" case, add statusMatch as usual
-      guestPipeline.push(statusMatch);
     }
+    if (
+      filters.currentStatus === "In House" &&
+      !filters.checkIn &&
+      !filters.checkOut
+    ) {
+      guestPipeline.push(
+        {
+          $addFields: {
+            checkOutParts: { $dateToParts: { date: "$checkOut" } },
+            todaysDateParts: {
+              $dateToParts: { date: new Date(filters.todaysDate) },
+            },
+          },
+        },
+        {
+          $match: {
+            "status.currentStatus": "In House",
+            $expr: {
+              $or: [
+                { $gt: ["$checkOutParts.year", "$todaysDateParts.year"] },
+                {
+                  $and: [
+                    { $eq: ["$checkOutParts.year", "$todaysDateParts.year"] },
+                    { $gt: ["$checkOutParts.month", "$todaysDateParts.month"] },
+                  ],
+                },
+                {
+                  $and: [
+                    { $eq: ["$checkOutParts.year", "$todaysDateParts.year"] },
+                    { $eq: ["$checkOutParts.month", "$todaysDateParts.month"] },
+                    { $gte: ["$checkOutParts.day", "$todaysDateParts.day"] },
+                  ],
+                },
+              ],
+            },
+          },
+        },
+      );
+    }
+    guestPipeline.push(statusMatch);
   }
 
   if (filters.search) {
