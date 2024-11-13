@@ -28,6 +28,11 @@ const messageSchema = new Schema(
   },
   { timestamps: true, toJSON: { virtuals: true } },
 );
+messageSchema.index({ guestId: 1, propertyId: 1 });
+messageSchema.index({ senderId: 1 });
+messageSchema.index({ receiverId: 1 });
+messageSchema.index({ messageTriggerType: 1 });
+messageSchema.index({ status: 1 });
 messageSchema.virtual("request", {
   ref: "CheckInOutRequest",
   localField: "requestId",
