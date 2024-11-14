@@ -38,6 +38,11 @@ const getAll = async (propertyId, guestId) => {
       },
     },
     {
+      $match: {
+        guestId: new mongoose.Types.ObjectId(guestId),
+      },
+    },
+    {
       $lookup: {
         from: "checkinoutrequests",
         localField: "requestId",
