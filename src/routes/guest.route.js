@@ -10,6 +10,7 @@ const {
   getGuestData, // Newly added
   guestedit, // Newly added
   getCheckInOutPendingGuests, // Newly added
+  getGuestAddonsRequests,
 } = require("../controllers/guest.controller");
 
 const { authenticateToken } = require("../middlewares/jwt.middleware");
@@ -24,6 +25,12 @@ const router = Router();
 
 // Get guest information by guestId
 router.get("/getByGuestId/:guestId", getGuestById);
+router.get(
+  "/addons/:propertyId",
+  authenticateToken,
+  checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
+  getGuestAddonsRequests,
+);
 
 // Create a new guest (for admins and front desk roles)
 router.post(

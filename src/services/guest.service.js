@@ -3,7 +3,10 @@ const logger = require("../configs/winston.config");
 const { NotFoundError } = require("../lib/CustomErrors");
 const { Guest } = require("../models/guest.model");
 const { GuestStatus } = require("../models/guestStatus.model");
-
+const { CheckInOutRequest } = require("../models/checkInOutRequest.model");
+const { AddOnsRequest } = require("../models/addOnsRequest.model");
+const { AddOnsFlow } = require("../models/addOnsFlow.model");
+const addOnsFlowService = require("../services/addOnsFlow.service");
 /**
  * Create a new guest
  * @param {import('../models/guest.model').GuestType} guest - guest object
@@ -219,6 +222,57 @@ const findWithStatus = async (guestFilter, statusFilter) => {
   return guest;
 };
 
+const getGuestAddonsRequests = async (propertyId, requestStatus) => {
+  const propertyAddons = await AddOnsFlow.findOne({
+    propertyId: propertyId,
+  }).lean();
+
+  let checkInOutRequests = await CheckInOutRequest.find({
+    propertyId: propertyId,
+    requestStatus: requestStatus,
+  })
+    .populate("guestId")
+    .sort({ createdAt: -1 })
+    .lean();
+
+  checkInOutRequests = await Promise.all(
+    checkInOutRequests.map(async (req) => {
+      const addOnData = propertyAddons?.checkInOutAddOns?.find(
+        (addon) =>
+          addon._id.toString() === req?.checkInOutRequestId?.toString(),
+      );
+      req.guestId.status = await GuestStatus.findOne({
+        guestId: req.guestId._id,
+      });
+      return { ...req, addOnData };
+    }),
+  );
+
+  let customAddonsRequests = await AddOnsRequest.find({
+    propertyId: propertyId,
+    requestStatus: requestStatus,
+  })
+    .populate("guestId")
+    .sort({ createdAt: -1 })
+    .lean();
+
+  customAddonsRequests = await Promise.all(
+    customAddonsRequests.map(async (req) => {
+      const addOnData = propertyAddons?.customAddOns?.find(
+        (addon) => addon._id.toString() === req.addOnsId.toString(),
+      );
+      req.guestId.status = await GuestStatus.findOne({
+        guestId: req.guestId._id,
+      });
+      return { ...req, addOnData };
+    }),
+  );
+
+  const requests = [...checkInOutRequests, ...customAddonsRequests];
+
+  return { requests, propertyAddons };
+};
+
 module.exports = {
   create,
   getAll,
@@ -230,4 +284,5 @@ module.exports = {
   getPhoneNumbers,
   find,
   findWithStatus,
+  getGuestAddonsRequests,
 };

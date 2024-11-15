@@ -932,6 +932,24 @@ const guestedit = async (req, res, next) => {
   }
 };
 
+const getGuestAddonsRequests = async (req, res, next) => {
+  try {
+    const propertyId = req.params.propertyId;
+    const { requestStatus } = req.query;
+    const { requests, propertyAddons } =
+      await guestService.getGuestAddonsRequests(propertyId, requestStatus);
+    return responseHandler(res, {
+      requests,
+      propertyAddons,
+    });
+  } catch (e) {
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError());
+  }
+};
+
 module.exports = {
   getAll,
   create,
@@ -943,4 +961,5 @@ module.exports = {
   getGuestById,
   getGuestData,
   guestedit,
+  getGuestAddonsRequests,
 };
