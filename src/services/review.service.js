@@ -48,9 +48,27 @@ const update = async (propertyId, guestId, review, session) => {
   );
   return updatedReview;
 };
+const updateCompleteReview = async (
+  propertyId,
+  guestId,
+  overAllRating,
+  roomRating,
+  service,
+  location,
+  comments,
+  session,
+) => {
+  const updatedReview = await Review.findOneAndUpdate(
+    { propertyId, guestId },
+    { overAllRating, roomRating, service, location, comments },
+    { session: session, upsert: true, new: true },
+  );
+  return updatedReview;
+};
 
 module.exports = {
   create,
   getByGuestId,
   update,
+  updateCompleteReview,
 };

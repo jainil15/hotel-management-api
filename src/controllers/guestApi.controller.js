@@ -602,7 +602,6 @@ const updateReview = async (req, res, next) => {
   try {
     const { propertyId, guestId } = req.guestSession;
     const { review } = req.body;
-    console.log("rrrrrrrrrrrrrrrrrr", req.body);
     const createdReview = await reviewService.update(
       propertyId,
       guestId,
@@ -745,6 +744,40 @@ const getAddOns = async (req, res, next) => {
   }
 };
 
+const updateCompleteReview = async (req, res, next) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const { propertyId, guestId } = req.guestSession;
+    const { overAllRating, roomRating, service, location, comments } = req.body;
+    const createdReview = await reviewService.updateCompleteReview(
+      propertyId,
+      guestId,
+      overAllRating,
+      roomRating,
+      service,
+      location,
+      comments,
+      session,
+    );
+    await session.commitTransaction();
+    session.endSession();
+    return responseHandler(
+      res,
+      { review: createdReview },
+      200,
+      "Review updated successfully",
+    );
+  } catch (e) {
+    await session.abortTransaction();
+    session.endSession();
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError(e.message));
+  }
+};
+
 module.exports = {
   getGuest,
   getWorkflow,
@@ -761,4 +794,5 @@ module.exports = {
   updateReview,
   createAddOnsRequest,
   getAddOnRequest,
+  updateCompleteReview,
 };

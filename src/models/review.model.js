@@ -22,10 +22,44 @@ const reviewSchema = new Schema({
     enum: [0, 1, 2, 3, 4, 5],
     default: 0,
   },
+  roomRating: {
+    type: Number,
+    required: true,
+    enum: [0, 1, 2, 3, 4, 5],
+    default: 0,
+  },
+  service: {
+    type: Number,
+    required: true,
+    enum: [0, 1, 2, 3, 4, 5],
+    default: 0,
+  },
+  location: {
+    type: Number,
+    required: true,
+    enum: [0, 1, 2, 3, 4, 5],
+    default: 0,
+  },
+  overAllRating: {
+    type: Number,
+    required: true,
+    default: 0,
+  },
+  comments: {
+    type: String,
+    default: "",
+    trim: true,
+    maxlength: 500,
+  },
 });
 
 const CreateReviewValidationSchema = z.object({
   rating: z.enum([1, 2, 3, 4, 5]),
+  roomRating: z.enum([1, 2, 3, 4, 5]),
+  service: z.enum([1, 2, 3, 4, 5]),
+  location: z.enum([1, 2, 3, 4, 5]),
+  overAllRating: z.enum([1, 2, 3, 4, 5]),
+  comments: z.string().max(500).optional(),
 });
 
 /**

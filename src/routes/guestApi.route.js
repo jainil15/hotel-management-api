@@ -29,6 +29,7 @@ router.post(
 router.post("/review", guestApiController.createReview);
 router.get("/review", guestApiController.getReview);
 router.patch("/review", guestApiController.updateReview);
+router.patch("/complete-review", guestApiController.updateCompleteReview);
 router.post("/addOnsRequest", guestApiController.createAddOnsRequest);
 guestApiRouter.use("/:guestSessionId", authenticateGuestSession, router);
 
