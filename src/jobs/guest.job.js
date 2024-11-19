@@ -105,24 +105,25 @@ const sendMessageToTodayCheckoutGuests = async (propertyId) => {
         const messageBody = `Hi ${guest.firstName}! A friendly remainder that your checkout is scheduled for today at ${formattedTime} ${propertySetting.timezone}.If you’d like a late checkout or to extend your stay, please click here:\n ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}. or feel free to reply with any questions.`;
         const recipientPhoneNumber = `${guest.countryCode}${guest.phoneNumber}`;
         const senderPhoneNumber = `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`;
+        if (guest.phoneNumber && guest.countryCode && !guest.draft) {
+          const sentSms = await smsService.send(
+            twilioSubClient,
+            senderPhoneNumber,
+            recipientPhoneNumber,
+            messageBody,
+          );
 
-        const sentSms = await smsService.send(
-          twilioSubClient,
-          senderPhoneNumber,
-          recipientPhoneNumber,
-          messageBody,
-        );
-
-        await messageService.create({
-          propertyId: propertyId,
-          guestId: guestId,
-          senderId: propertyId,
-          receiverId: guestId,
-          content: messageBody,
-          messageTriggerType: messageTriggerType.AUTOMATIC,
-          messageType: messageType.SMS,
-          messageSid: sentSms.sid,
-        });
+          await messageService.create({
+            propertyId: propertyId,
+            guestId: guestId,
+            senderId: propertyId,
+            receiverId: guestId,
+            content: messageBody,
+            messageTriggerType: messageTriggerType.AUTOMATIC,
+            messageType: messageType.SMS,
+            messageSid: sentSms.sid,
+          });
+        }
       }
     }
 

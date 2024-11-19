@@ -36,10 +36,14 @@ const { default: mongoose } = require("mongoose");
 const update = async (req, res, next) => {
   const session = await mongoose.startSession();
   session.startTransaction();
+  let newMessage, chatList; // Declare outside try-catch so they are accessible in the finally block
+
   try {
     const { propertyId, guestId, addOnsRequestId } = req.params;
     const { requestStatus } = req.body;
     console.log("requestStatus", requestStatus);
+
+    // Validate the requestStatus
     const requestStatusResult = z
       .object({
         requestStatus: z.enum([
@@ -47,24 +51,28 @@ const update = async (req, res, next) => {
           REQUEST_STATUS.DECLINED,
         ]),
       })
-      .safeParse({
-        requestStatus,
-      });
+      .safeParse({ requestStatus });
+
     if (!requestStatusResult.success) {
       throw new ValidationError(
         "Validation Error",
         requestStatusResult.error.flatten().fieldErrors,
       );
     }
+
+    // Fetch the existing add-ons request
     const existingAddOnsRequest = await addOnsRequestService.getById(
       propertyId,
       guestId,
       addOnsRequestId,
     );
+
     if (!existingAddOnsRequest) {
       throw new APIError("Add Ons Request not found", {});
     }
     console.log("Add Ons Request", existingAddOnsRequest);
+
+    // Update the add-ons request status
     const updatedAddOnsRequest = await addOnsRequestService.update(
       propertyId,
       guestId,
@@ -72,62 +80,54 @@ const update = async (req, res, next) => {
       { requestStatus },
       session,
     );
-    // const messageTemplateName = guestStatusToTemplateOnUpdate(
-    //   oldGuestStatus,
-    //   updatedGuestStatus,
-    // );
+
+    // Fetch guest details
     const oldGuest = await guestService.getById(guestId, propertyId);
-    // const messageTemplate = await messageTemplateService.getByNameAndPropertyId(
-    //   propertyId,
-    //   messageTemplateName,
-    // );
-    // if (!messageTemplate) {
-    //   await session.commitTransaction();
-    //   session.endSession();
-    //   req.app.io.to(`property:${propertyId}`).emit("guest:guestStatusUpdate", {
-    //     guestStatus: updatedGuestStatus,
-    //   });
-    //   return responseHandler(res, {
-    //     checkInOutRequest: updatedCheckInOutRequest,
-    //   });
-    // }
-    const twilioAccount =
-      await twilioAccountService.getByPropertyId(propertyId);
-    const twilioSubClient = await twilioService.getTwilioClient(twilioAccount);
-    const sentSms = await smsService.send(
-      twilioSubClient,
-      `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
-      `${oldGuest.countryCode}${oldGuest.phoneNumber}`,
-      `Your request for ${existingAddOnsRequest.name} addon  is ${requestStatus.toLowerCase()}`,
-    );
-    const newMessage = await messageService.create(
-      {
-        propertyId: propertyId,
-        guestId: guestId,
-        senderId: propertyId,
-        receiverId: guestId,
-        content: `Your request for ${existingAddOnsRequest.name} addon is ${requestStatus.toLowerCase()}`,
-        messageTriggerType: messageTriggerType.AUTOMATIC,
-        messageType: messageType.SMS,
-        messageSid: sentSms.sid,
-      },
-      session,
-    );
 
-    const chatList = await chatListService.update(
-      propertyId,
-      guestId,
-      {
-        latestMessage: newMessage._id,
-      },
-      session,
-    );
+    // Check if SMS needs to be sent
+    if (oldGuest.phoneNumber && oldGuest.countryCode && !oldGuest.draft) {
+      const twilioAccount =
+        await twilioAccountService.getByPropertyId(propertyId);
+      const twilioSubClient =
+        await twilioService.getTwilioClient(twilioAccount);
 
-    // TODO: Send message to the guest
+      const sentSms = await smsService.send(
+        twilioSubClient,
+        `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
+        `${oldGuest.countryCode}${oldGuest.phoneNumber}`,
+        `Your request for ${existingAddOnsRequest.name} addon is ${requestStatus.toLowerCase()}`,
+      );
+
+      // Create the new message
+      newMessage = await messageService.create(
+        {
+          propertyId,
+          guestId,
+          senderId: propertyId,
+          receiverId: guestId,
+          content: `Your request for ${existingAddOnsRequest.name} addon is ${requestStatus.toLowerCase()}`,
+          messageTriggerType: messageTriggerType.AUTOMATIC,
+          messageType: messageType.SMS,
+          messageSid: sentSms.sid,
+        },
+        session,
+      );
+
+      // Update the chat list
+      chatList = await chatListService.update(
+        propertyId,
+        guestId,
+        { latestMessage: newMessage._id },
+        session,
+      );
+    }
+
+    // Commit the transaction
     await session.commitTransaction();
-    session.endSession();
     req.app.io.to(`guest:${guestId}`).emit("message:newMessage", {
-      message: newMessage,
+      message: newMessage
+        ? newMessage
+        : "Message not sent since phone number is not available",
     });
 
     req.app.io.to(`property:${propertyId}`).emit("guest:guestStatusUpdate", {
@@ -135,16 +135,20 @@ const update = async (req, res, next) => {
     });
 
     req.app.io.to(`property:${propertyId}`).emit("chatList:update", {
-      chatList: chatList,
+      chatList,
     });
+
     return responseHandler(res, { addOnsRequest: updatedAddOnsRequest });
   } catch (e) {
+    // Rollback transaction in case of error
     await session.abortTransaction();
-    session.endSession();
     if (e instanceof APIError) {
       return next(e);
     }
     return next(new InternalServerError(e.message));
+  } finally {
+    // Ensure the session is properly ended whether the transaction is successful or not
+    session.endSession();
   }
 };
 

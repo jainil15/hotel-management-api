@@ -373,7 +373,7 @@ const getGuestStatus = async (req, res, next) => {
 const createPreArrival = async (req, res, next) => {
   const session = await mongoose.startSession();
   session.startTransaction();
-
+  let newMessage, chatList;
   try {
     const { propertyId, guestId } = req.guestSession;
     const preArrival = req.body;
@@ -459,40 +459,44 @@ const createPreArrival = async (req, res, next) => {
       property,
       propertySetting,
     );
-    const sentSms = await smsService.send(
-      twilioSubClient,
-      `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
-      `${oldGuest.countryCode}${oldGuest.phoneNumber}`,
-      `${updatedMessageBody.message}.\nYour guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
-    );
-    const newMessage = await messageService.create(
-      {
-        propertyId: propertyId,
-        guestId: guestId,
-        senderId: propertyId,
-        receiverId: guestId,
-        content: `${updatedMessageBody.message}. Your online checkin is completed.\nYour guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
-        messageTriggerType: messageTriggerType.AUTOMATIC,
-        messageType: messageType.SMS,
-        messageSid: sentSms.sid,
-      },
-      session,
-    );
+    if (oldGuest.phoneNumber && oldGuest.countryCode && !oldGuest.draft) {
+      const sentSms = await smsService.send(
+        twilioSubClient,
+        `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
+        `${oldGuest.countryCode}${oldGuest.phoneNumber}`,
+        `${updatedMessageBody.message}.\nYour guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
+      );
+      newMessage = await messageService.create(
+        {
+          propertyId: propertyId,
+          guestId: guestId,
+          senderId: propertyId,
+          receiverId: guestId,
+          content: `${updatedMessageBody.message}. Your online checkin is completed.\nYour guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
+          messageTriggerType: messageTriggerType.AUTOMATIC,
+          messageType: messageType.SMS,
+          messageSid: sentSms.sid,
+        },
+        session,
+      );
 
-    const chatList = await chatListService.update(
-      propertyId,
-      guestId,
-      {
-        latestMessage: newMessage._id,
-      },
-      session,
-    );
+      const chatList = await chatListService.update(
+        propertyId,
+        guestId,
+        {
+          latestMessage: newMessage._id,
+        },
+        session,
+      );
+    }
 
     await session.commitTransaction();
     await session.endSession();
 
     req.app.io.to(`guest:${guestId}`).emit("message:newMessage", {
-      message: newMessage,
+      message: newMessage
+        ? newMessage
+        : "Message not sent since phone number is not available",
     });
 
     req.app.io.to(`property:${propertyId}`).emit("guest:guestStatusUpdate", {

@@ -23,8 +23,8 @@ const guestSchema = new Schema(
       ref: "Property",
       required: true,
     },
-    countryCode: { type: String, required: true },
-    phoneNumber: { type: String, required: true },
+    countryCode: { type: String },
+    phoneNumber: { type: String },
     source: { type: String },
     checkIn: { type: Date, required: true },
     checkOut: { type: Date, required: true },
@@ -34,6 +34,7 @@ const guestSchema = new Schema(
     lastName: { type: String, required: true },
     email: { type: String },
     active: { type: Boolean, default: true },
+    draft: { type: Boolean, default: false },
   },
   { timestamps: true },
 );
@@ -79,12 +80,18 @@ const GuestValidationScehma = z.object({
 
 const CreateGuestValidationSchema = z
   .object({
-    phoneNumber: z.string().refine((val) => nocountrycodephoneregex.test(val), {
-      message: "Invalid phone number format",
-    }),
-    countryCode: z.string().refine((val) => countrycoderegex.test(val), {
-      message: "Invalid country code format",
-    }),
+    phoneNumber: z
+      .string()
+      .optional()
+      .refine((val) => !val || nocountrycodephoneregex.test(val), {
+        message: "Invalid phone number format",
+      }),
+    countryCode: z
+      .string()
+      .optional()
+      .refine((val) => !val || countrycoderegex.test(val), {
+        message: "Invalid country code format",
+      }),
     source: z.string().min(1).optional(),
     checkIn: z
       .string()
@@ -108,6 +115,7 @@ const CreateGuestValidationSchema = z
     lastName: z.string().min(1),
     email: z.string().email().optional(),
     active: z.boolean().optional(),
+    draft: z.boolean().optional(),
   })
   .superRefine((args, ctx) => {
     if (new Date(args.checkIn) >= new Date(args.checkOut)) {
@@ -130,16 +138,16 @@ const UpdateGuestValidationSchema = z
   .object({
     phoneNumber: z
       .string()
-      .refine((val) => nocountrycodephoneregex.test(val), {
+      .optional()
+      .refine((val) => !val || nocountrycodephoneregex.test(val), {
         message: "Invalid phone number format",
-      })
-      .optional(),
+      }),
     countryCode: z
       .string()
-      .refine((val) => countrycoderegex.test(val), {
+      .optional()
+      .refine((val) => !val || countrycoderegex.test(val), {
         message: "Invalid country code format",
-      })
-      .optional(),
+      }),
     source: z.string().min(1).optional(),
     checkIn: z
       .string()
@@ -165,6 +173,7 @@ const UpdateGuestValidationSchema = z
     lastName: z.string().min(1).optional(),
     email: z.string().email().optional(),
     active: z.boolean().optional(),
+    draft: z.boolean().optional(),
   })
   .superRefine((args, ctx) => {
     if (new Date(args.checkIn) >= new Date(args.checkOut)) {
