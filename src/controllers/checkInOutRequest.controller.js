@@ -336,7 +336,7 @@ const updateRequestStatus = async (req, res, next) => {
       propertyId,
       guestId,
     );
-    if (oldGuest.phoneNumber && oldGuest.countryCode && !oldGuest.draft) {
+    if (oldGuest.phoneNumber && oldGuest.countryCode) {
       const twilioAccount =
         await twilioAccountService.getByPropertyId(propertyId);
       const twilioSubClient =

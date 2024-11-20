@@ -85,7 +85,7 @@ const update = async (req, res, next) => {
     const oldGuest = await guestService.getById(guestId, propertyId);
 
     // Check if SMS needs to be sent
-    if (oldGuest.phoneNumber && oldGuest.countryCode && !oldGuest.draft) {
+    if (oldGuest.phoneNumber && oldGuest.countryCode) {
       const twilioAccount =
         await twilioAccountService.getByPropertyId(propertyId);
       const twilioSubClient =

@@ -459,7 +459,7 @@ const createPreArrival = async (req, res, next) => {
       property,
       propertySetting,
     );
-    if (oldGuest.phoneNumber && oldGuest.countryCode && !oldGuest.draft) {
+    if (oldGuest.phoneNumber && oldGuest.countryCode) {
       const sentSms = await smsService.send(
         twilioSubClient,
         `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,

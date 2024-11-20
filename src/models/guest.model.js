@@ -34,7 +34,7 @@ const guestSchema = new Schema(
     lastName: { type: String, required: true },
     email: { type: String },
     active: { type: Boolean, default: true },
-    draft: { type: Boolean, default: false },
+    //draft: { type: Boolean, default: false },
   },
   { timestamps: true },
 );
@@ -115,7 +115,7 @@ const CreateGuestValidationSchema = z
     lastName: z.string().min(1),
     email: z.string().email().optional(),
     active: z.boolean().optional(),
-    draft: z.boolean().optional(),
+    // draft: z.boolean().optional(),
   })
   .superRefine((args, ctx) => {
     if (new Date(args.checkIn) >= new Date(args.checkOut)) {
@@ -173,7 +173,7 @@ const UpdateGuestValidationSchema = z
     lastName: z.string().min(1).optional(),
     email: z.string().email().optional(),
     active: z.boolean().optional(),
-    draft: z.boolean().optional(),
+    //draft: z.boolean().optional(),
   })
   .superRefine((args, ctx) => {
     if (new Date(args.checkIn) >= new Date(args.checkOut)) {

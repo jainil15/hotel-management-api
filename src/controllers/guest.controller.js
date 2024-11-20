@@ -127,46 +127,48 @@ const create = async (req, res, next) => {
         ...roomNumberResult?.error?.flatten().fieldErrors,
       });
     }
-    if (guest.phoneNumber) {
-      const existingInHouseGuest = await guestService.findWithStatus(
-        {
-          phoneNumber: guest.phoneNumber,
-          countryCode: guest.countryCode,
-          propertyId: propertyId,
-        },
-        {
-          currentStatus: GUEST_CURRENT_STATUS.IN_HOUSE,
-          reservationStatus: RESERVATION_STATUS.CONFIRMED,
-        },
-      );
-      if (existingInHouseGuest.length > 0) {
-        throw new ValidationError(
-          "Guest already exists with this phone number",
-          {
-            phoneNumber: ["Guest already exists with this phone number"],
-          },
-        );
-      }
-      const existingReservedGuest = await guestService.findWithStatus(
-        {
-          phoneNumber: guest.phoneNumber,
-          countryCode: guest.countryCode,
-          propertyId: propertyId,
-        },
-        {
-          currentStatus: GUEST_CURRENT_STATUS.RESERVED,
-          reservationStatus: RESERVATION_STATUS.CONFIRMED,
-        },
-      );
-      if (existingReservedGuest.length > 0) {
-        throw new ValidationError(
-          "Guest already exists with this phone number",
-          {
-            phoneNumber: ["Guest already exists with this phone number"],
-          },
-        );
-      }
+    if (
+      req.body?.status?.currentStatus !== "Reservation" &&
+      !req.body?.phoneNumber
+    ) {
+      throw new ValidationError("Phone number is required", {
+        phoneNumber: ["Phone number is required"],
+      });
     }
+
+    const existingInHouseGuest = await guestService.findWithStatus(
+      {
+        phoneNumber: guest.phoneNumber,
+        countryCode: guest.countryCode,
+        propertyId: propertyId,
+      },
+      {
+        currentStatus: GUEST_CURRENT_STATUS.IN_HOUSE,
+        reservationStatus: RESERVATION_STATUS.CONFIRMED,
+      },
+    );
+    if (existingInHouseGuest.length > 0) {
+      throw new ValidationError("Guest already exists with this phone number", {
+        phoneNumber: ["Guest already exists with this phone number"],
+      });
+    }
+    const existingReservedGuest = await guestService.findWithStatus(
+      {
+        phoneNumber: guest.phoneNumber,
+        countryCode: guest.countryCode,
+        propertyId: propertyId,
+      },
+      {
+        currentStatus: GUEST_CURRENT_STATUS.RESERVED,
+        reservationStatus: RESERVATION_STATUS.CONFIRMED,
+      },
+    );
+    if (existingReservedGuest.length > 0) {
+      throw new ValidationError("Guest already exists with this phone number", {
+        phoneNumber: ["Guest already exists with this phone number"],
+      });
+    }
+
     // Check if status is valid
     //if (!validateStatus(status)) {
     //  throw new ValidationError("Invalid Status", {
@@ -213,12 +215,7 @@ const create = async (req, res, next) => {
     //session.startTransaction();
 
     // Send message to the guest according to the status
-    if (
-      sendMessage === true &&
-      guest.phoneNumber &&
-      guest.countryCode &&
-      !guest.draft
-    ) {
+    if (sendMessage === true && guest.phoneNumber && guest.countryCode) {
       const messageTemplate =
         await messageTemplateService.getByNameAndPropertyId(
           propertyId,
@@ -399,7 +396,14 @@ const update = async (req, res, next) => {
       status,
       session,
     );
-
+    if (
+      req.body?.status?.currentStatus !== "Reservation" &&
+      !req.body?.phoneNumber
+    ) {
+      throw new ValidationError("Phone number is required", {
+        phoneNumber: ["Phone number is required"],
+      });
+    }
     // Check for early check in or late check out
     const existingCheckInOutRequests =
       await checkInOutRequestService.getByPropertyIdAndGuestId(
@@ -488,8 +492,7 @@ const update = async (req, res, next) => {
     if (
       sendMessage === true &&
       guest.phoneNumber &&
-      guest.countryCode &&
-      !guest.draft
+      guest.countryCode 
     ) {
       const { property } = await propertyService.getById(propertyId);
       if (checkCheckInUpdated || checkCheckOutUpdated) {
@@ -568,8 +571,7 @@ const update = async (req, res, next) => {
       if (
         messageTemplate &&
         guest.phoneNumber &&
-        guest.countryCode &&
-        !guest.draft
+        guest.countryCode 
       ) {
         const twilioAccount =
           await twilioAccountService.getByPropertyId(propertyId);
