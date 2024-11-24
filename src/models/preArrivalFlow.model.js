@@ -47,6 +47,7 @@ preArrivalFlowSchema.index({ propertyId: 1 }, { unique: true });
 const PreArrivalFlow = mongoose.model("PreArrivalFlow", preArrivalFlowSchema);
 
 const UpdatePreArrivalValidationSchema = z.object({
+  phoneNumber: z.boolean().optional(),
   emailAddress: z.boolean().optional(),
   arrivalTime: z.boolean().optional(),
   vehicleMakeModelColor: z.boolean().optional(),
