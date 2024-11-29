@@ -173,6 +173,9 @@ const create = async (req, res, next) => {
     req.app.io.to(`property:${propertyId}`).emit("chatList:update", {
       chatList: updatedChatList,
     });
+    req.app.io.to(`property:${propertyId}`).emit("addOn:newAddon", {
+      count: 1,
+    });
 
     req.app.io.to(`guest:${guestId}`).emit("message:newMessage", {
       message: newMessage,

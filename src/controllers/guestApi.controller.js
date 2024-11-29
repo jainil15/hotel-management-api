@@ -296,6 +296,9 @@ const createCheckInOutRequest = async (req, res, next) => {
     req.app.io.to(`property:${propertyId}`).emit("chatList:update", {
       chatList: updatedChatList,
     });
+    req.app.io.to(`property:${propertyId}`).emit("addOn:newAddon", {
+      count: 1,
+    });
 
     req.app.io.to(`guest:${guestId}`).emit("message:newMessage", {
       message: newMessage,
@@ -377,6 +380,7 @@ const createPreArrival = async (req, res, next) => {
   try {
     const { propertyId, guestId } = req.guestSession;
     const preArrival = req.body;
+    // console.log("preArrival: " + preArrival);
     preArrival.consentToText = preArrival.consentToText === "true";
     preArrival.policyAccepted = preArrival.policyAccepted === "true";
     preArrival.guestSignature = req?.files?.guestSignature;
@@ -710,6 +714,9 @@ const createAddOnsRequest = async (req, res, next) => {
     session.endSession();
     req.app.io.to(`property:${propertyId}`).emit("chatList:update", {
       chatList: updatedChatList,
+    });
+    req.app.io.to(`property:${propertyId}`).emit("addOn:newAddon", {
+      count: 1,
     });
     req.app.io.to(`guest:${guestId}`).emit("message:newMessage", {
       message: newMessage,
