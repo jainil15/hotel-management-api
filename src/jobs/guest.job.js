@@ -1,7 +1,11 @@
+require("dotenv").config();
 const cron = require("node-cron");
-
+const moment = require("moment");
+const nodemailer = require("nodemailer");
+const nodemailerConfigOptions = require("../configs/nodemailer.config");
 const logger = require("../configs/winston.config");
 const { Guest } = require("../models/guest.model");
+const { Property } = require("../models/property.model");
 const { Setting } = require("../models/setting.model");
 const { GuestStatus } = require("../models/guestStatus.model");
 const messageTemplateService = require("../services/messageTemplate.service");
@@ -40,6 +44,23 @@ const timeZoneMapping = {
   "Mountain Standard Time (North America) (UTC-07:00)": "America/Denver",
   "Central Standard Time (North America) (UTC-06:00)": "America/Chicago",
   "Eastern Standard Time (North America) (UTC-05:00)": "America/New_York",
+};
+
+const sendEmail = async (toEmail, subject, htmlContent) => {
+  try {
+    const time = new Date();
+    const transporter = nodemailer.createTransport(nodemailerConfigOptions);
+    const mailOptions = {
+      from: process.env.NODEMAILER_EMAIL,
+      to: toEmail,
+      subject,
+      html: htmlContent,
+    };
+    await transporter.sendMail(mailOptions);
+    logger.info(`[${Date.now() - time}ms] Email sent`);
+  } catch (error) {
+    console.error("Error sending email:", error);
+  }
 };
 
 const sendMessageToTodayCheckoutGuests = async (propertyId) => {
@@ -215,6 +236,58 @@ const scheduleDailyCancellationJob = () => {
     await cancelExpiredReservations();
   });
 };
+const sendFollowUpGuestStatusEmail = async () => {
+  try {
+    const today = moment().format("YYYY-MM-DD");
+    const properties = await Property.find();
+
+    for (const property of properties) {
+      const checkInFilters = {
+        currentStatus: "Reservation",
+        selectedDate: today,
+      };
+      const inHouseFilters = {
+        currentStatus: "In House",
+        selectedDate: today,
+      };
+
+      const checkInGuests = await guestStatusService.getCheckInOutPendingGuests(
+        property._id,
+        checkInFilters,
+      );
+      const inHouseGuests = await guestStatusService.getCheckInOutPendingGuests(
+        property._id,
+        inHouseFilters,
+      );
+
+      if (checkInGuests.length > 0 || inHouseGuests.length > 0) {
+        const emailContent = `
+          <p>Dear Property Owner/Manager,</p>
+          <p>I hope this message finds you well. I wanted to bring to your attention that there was a lapse in updating the guest status at the front desk:</p>
+          <ul>
+            <li><strong>${checkInGuests.length}</strong> guests were not moved from Check-In to In-House.</li>
+            <li><strong>${inHouseGuests.length}</strong> guests were not updated from In-House to Checked-Out.</li>
+          </ul>
+          <p>We are reviewing the situation internally to ensure this doesn’t recur. Ensuring timely updates to guest statuses is crucial for keeping guests informed and enhancing their overall satisfaction with their stay.</p>
+          <p>Thank you for your understanding and continued support. Please let us know if you have any specific guidance.</p>
+          <p>Best regards,<br>Team Onelyk.com</p>
+        `;
+
+        await sendEmail(
+          property.email,
+          "Follow-Up on Guest Status Update",
+          emailContent,
+        );
+      }
+    }
+  } catch (error) {
+    console.error("Error in sending follow-up email:", error);
+  }
+};
+
+cron.schedule("0 0 * * *", async () => {
+  await sendFollowUpGuestStatusEmail();
+});
 scheduleDailyCheckoutMessages();
 scheduleDailyCancellationJob();
 
