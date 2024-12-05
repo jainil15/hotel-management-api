@@ -261,17 +261,26 @@ const sendFollowUpGuestStatusEmail = async () => {
       );
 
       if (checkInGuests.length > 0 || inHouseGuests.length > 0) {
-        const emailContent = `
-          <p>Dear Property Owner/Manager,</p>
-          <p>I hope this message finds you well. I wanted to bring to your attention that there was a lapse in updating the guest status at the front desk:</p>
-          <ul>
-            <li><strong>${checkInGuests.length}</strong> guests were not moved from Check-In to In-House.</li>
-            <li><strong>${inHouseGuests.length}</strong> guests were not updated from In-House to Checked-Out.</li>
-          </ul>
-          <p>We are reviewing the situation internally to ensure this doesn’t recur. Ensuring timely updates to guest statuses is crucial for keeping guests informed and enhancing their overall satisfaction with their stay.</p>
-          <p>Thank you for your understanding and continued support. Please let us know if you have any specific guidance.</p>
-          <p>Best regards,<br>Team Onelyk.com</p>
-        `;
+        let emailContent = `
+  <p>Dear Property Owner/Manager,</p>
+  <p>I hope this message finds you well. I wanted to bring to your attention that there was a lapse in updating the guest status at the front desk:</p>
+  <ul>
+`;
+
+        if (checkInGuests.length > 0) {
+          emailContent += `<li><strong>${checkInGuests.length}</strong> guests were not moved from Check-In to In-House.</li>`;
+        }
+
+        if (inHouseGuests.length > 0) {
+          emailContent += `<li><strong>${inHouseGuests.length}</strong> guests were not updated from In-House to Checked-Out.</li>`;
+        }
+
+        emailContent += `
+  </ul>
+  <p>We are reviewing the situation internally to ensure this doesn’t recur. Ensuring timely updates to guest statuses is crucial for keeping guests informed and enhancing their overall satisfaction with their stay.</p>
+  <p>Thank you for your understanding and continued support. Please let us know if you have any specific guidance.</p>
+  <p>Best regards,<br>Team Onelyk.com</p>
+`;
 
         await sendEmail(
           property.email,
