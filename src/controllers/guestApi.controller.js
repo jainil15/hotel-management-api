@@ -12,6 +12,7 @@ const { responseHandler } = require("../middlewares/response.middleware");
 const guestService = require("../services/guest.service");
 const reviewService = require("../services/review.service");
 const addOnsRequestService = require("../services/addOnsRequest.service");
+const dndModeRequestService = require("../services/dndmode.service");
 const propertyService = require("../services/property.service");
 const workflowService = require("../services/workflow.service");
 const setttingService = require("../services/setting.service");
@@ -402,7 +403,6 @@ const createPreArrival = async (req, res, next) => {
       CreatePreArrivalValidationSchema.safeParse(preArrival);
 
     if (!preArrivalResult.success) {
-      console.log("qqqqqqqqqqqqqq373");
       throw new ValidationError("Input Validation Error", {
         ...preArrivalResult.error.flatten().fieldErrors,
       });
@@ -413,7 +413,6 @@ const createPreArrival = async (req, res, next) => {
       preArrivalFlow._doc,
       preArrival,
     );
-    console.log("qqqqqqqqqqqqqq378884444444443");
     if (!validationResult.success) {
       throw new ValidationError("Validation Error", {
         ...validationResult.error.flatten().fieldErrors,
@@ -434,7 +433,6 @@ const createPreArrival = async (req, res, next) => {
       { preArrivalStatus: PRE_ARRIVAL_STATUS.APPLIED },
       session,
     );
-    console.log("qqqqqqqqqqqqqq3734005555555");
     const newPreArrival = await preArrivalService.create(
       propertyId,
       guestId,
@@ -454,7 +452,6 @@ const createPreArrival = async (req, res, next) => {
         propertyId,
         "Pre Arrival Complete",
       );
-    console.log("messageTemplateName", messageTemplateName);
     const { property } = await propertyService.getById(propertyId);
     const propertySetting = await settingService.getByPropertyId(property._id);
     const updatedMessageBody = modifyMessageTemplateBody(
@@ -789,6 +786,180 @@ const updateCompleteReview = async (req, res, next) => {
   }
 };
 
+// const createDndModeRequest = async (req, res, next) => {
+//   const session = await mongoose.startSession();
+//   session.startTransaction();
+//   try {
+//     const { propertyId, guestId } = req.guestSession;
+//     const { dndmode } = req.body;
+//     console.log("i am in dnd mode ", req.body);
+//     if (
+//       !["requested", "not requested", "accepted", "declined"].includes(dndmode)
+//     ) {
+//       throw new ValidationError("Invalid Dndmode", {
+//         dndmode: ["Invalid Dndmode"],
+//       });
+//     }
+//     const newDndmodeRequest = await guestService.createDndRequest(
+//       propertyId,
+//       guestId,
+//       dndmode,
+//       session,
+//     );
+
+//     const newMessage = await messageService.create(
+//       {
+//         propertyId: propertyId,
+//         guestId: guestId,
+//         senderId: guestId,
+//         receiverId: propertyId,
+//         content: `Do not Disturb mode Request`,
+//         messageType: "Do not Disturb mode Request",
+//         messageTriggerType: messageTriggerType.AUTOMATIC,
+//         dndModeRequestId: newDndmodeRequest._id,
+//       },
+//       session,
+//     );
+//     const updatedChatList = await chatListService.updateAndIncUnreadMessages(
+//       propertyId,
+//       guestId,
+//       {
+//         latestMessage: newMessage._id,
+//       },
+//       session,
+//     );
+
+//     await session.commitTransaction();
+//     session.endSession();
+//     req.app.io.to(`property:${propertyId}`).emit("chatList:update", {
+//       chatList: updatedChatList,
+//     });
+//     req.app.io.to(`guest:${guestId}`).emit("message:newMessage", {
+//       message: newMessage,
+//     });
+//     return responseHandler(
+//       res,
+//       { dndModeRequest: newDndmodeRequest },
+//       201,
+//       "Do Not Disturb Mode Request Created",
+//     );
+//   } catch (e) {
+//     if (e instanceof APIError) {
+//       return next(e);
+//     }
+//     return next(new InternalServerError(e.message));
+//   }
+// };
+const createDndModeRequest = async (req, res, next) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  const DND_MODES = [
+    "requested",
+    "not requested",
+    "Accepted",
+    "Declined",
+    "unrequest",
+  ];
+
+  try {
+    // Validate the guestSession and body inputs
+    if (
+      !req.guestSession ||
+      !req.guestSession.propertyId ||
+      !req.guestSession.guestId
+    ) {
+      throw new ValidationError("Guest session data is missing", {
+        guestSession: ["Invalid guest session data"],
+      });
+    }
+
+    const { propertyId, guestId } = req.guestSession;
+    const { dndmode } = req.body;
+
+    if (!DND_MODES.includes(dndmode)) {
+      throw new ValidationError("Invalid DND mode", {
+        dndmode: ["Must be one of: " + DND_MODES.join(", ")],
+      });
+    }
+    let messageContent = "";
+    if (dndmode === "requested") {
+      messageContent = `Do not Disturb mode Requested`;
+    } else if (dndmode === "unrequest") {
+      messageContent = `End Do not Disturb mode`;
+    }
+    const newDndmodeRequest = await guestService.createDndRequest(
+      propertyId,
+      guestId,
+      dndmode,
+      session,
+    );
+    const newMessage = await messageService.create(
+      {
+        propertyId,
+        guestId,
+        senderId: guestId,
+        receiverId: propertyId,
+        content: messageContent,
+        messageType: "Do not Disturb mode Request",
+        messageTriggerType: messageTriggerType.AUTOMATIC,
+        dndModeRequestId: newDndmodeRequest._id,
+      },
+      session,
+    );
+
+    const updatedChatList = await chatListService.updateAndIncUnreadMessages(
+      propertyId,
+      guestId,
+      {
+        latestMessage: newMessage._id,
+      },
+      session,
+    );
+
+    await session.commitTransaction();
+    req.app.io.to(`property:${propertyId}`).emit("chatList:update", {
+      chatList: updatedChatList,
+    });
+
+    req.app.io.to(`guest:${guestId}`).emit("message:newMessage", {
+      message: newMessage,
+    });
+
+    return responseHandler(
+      res,
+      { dndModeRequest: newDndmodeRequest },
+      201,
+      "Do Not Disturb Mode Request Created",
+    );
+  } catch (e) {
+    await session.abortTransaction();
+    if (e instanceof APIError || e instanceof ValidationError) {
+      return next(e);
+    }
+    return next(
+      new InternalServerError(e.message || "An unexpected error occurred"),
+    );
+  } finally {
+    session.endSession();
+  }
+};
+const getdndmodeRequestStatus = async (req, res, next) => {
+  try {
+    const { propertyId, guestId } = req.guestSession;
+    const dndmodeRequest =
+      await dndModeRequestService.getByPropertyIdAndGuestId(
+        propertyId,
+        guestId,
+      );
+    return responseHandler(res, dndmodeRequest);
+  } catch (e) {
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError(e.message));
+  }
+};
+
 module.exports = {
   getGuest,
   getWorkflow,
@@ -806,4 +977,6 @@ module.exports = {
   createAddOnsRequest,
   getAddOnRequest,
   updateCompleteReview,
+  createDndModeRequest,
+  getdndmodeRequestStatus,
 };

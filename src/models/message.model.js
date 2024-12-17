@@ -22,6 +22,10 @@ const messageSchema = new Schema(
     messageType: { type: String, required: true },
     requestId: { type: Schema.Types.ObjectId, ref: "CheckInOutRequest" },
     addOnsRequestId: { type: Schema.Types.ObjectId, ref: "AddOnsRequest" },
+    dndModeRequestId: {
+      type: Schema.Types.ObjectId,
+      ref: "DoNotDisturbRequest",
+    },
     messageTriggerType: { type: String, required: true },
     status: { type: String, default: "sent" },
     messageSid: { type: String },

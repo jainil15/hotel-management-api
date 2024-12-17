@@ -44,7 +44,7 @@ const getAll = async (propertyId, guestId) => {
     },
     {
       $lookup: {
-        from: "checkinoutrequests",
+        from: "`checkinoutrequests`",
         localField: "requestId",
         foreignField: "_id",
         as: "request",
@@ -56,6 +56,14 @@ const getAll = async (propertyId, guestId) => {
         localField: "addOnsRequestId",
         foreignField: "_id",
         as: "addOnsRequest",
+      },
+    },
+    {
+      $lookup: {
+        from: "donotdisturbrequests",
+        localField: "dndModeRequestId",
+        foreignField: "_id",
+        as: "donotdisturbRequest",
       },
     },
     {

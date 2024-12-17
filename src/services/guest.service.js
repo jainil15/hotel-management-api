@@ -3,10 +3,12 @@ const logger = require("../configs/winston.config");
 const { NotFoundError } = require("../lib/CustomErrors");
 const { Guest } = require("../models/guest.model");
 const { GuestStatus } = require("../models/guestStatus.model");
+const { DoNotDisturbRequest } = require("../models/doNotDisturb.model");
 const { CheckInOutRequest } = require("../models/checkInOutRequest.model");
 const { AddOnsRequest } = require("../models/addOnsRequest.model");
 const { AddOnsFlow } = require("../models/addOnsFlow.model");
 const addOnsFlowService = require("../services/addOnsFlow.service");
+const { getByPropertyIdAndGuestId } = require("./addOnsRequest.service");
 /**
  * Create a new guest
  * @param {import('../models/guest.model').GuestType} guest - guest object
@@ -273,6 +275,53 @@ const getGuestAddonsRequests = async (propertyId, requestStatus) => {
   return { requests, propertyAddons };
 };
 
+const createDndRequest = async (propertyId, guestId, dndmode, session) => {
+  const dndRequest = new DoNotDisturbRequest({
+    propertyId,
+    guestId,
+    requestStatus: dndmode,
+  });
+  const dndModeReq = await dndRequest.save({ session });
+  return dndModeReq;
+};
+const updatedGuestDndStatus = async (
+  propertyId,
+  guestId,
+  requestStatus,
+  session,
+) => {
+  try {
+    const guest = await Guest.findOne({ propertyId, _id: guestId }).session(
+      session,
+    );
+    if (!guest) {
+      throw new Error("Guest not found");
+    }
+
+    const status =
+      requestStatus === "Accepted" ? !guest.dndmode : guest.dndmode;
+
+    const updatedGuest = await Guest.findOneAndUpdate(
+      { _id: guestId, propertyId: propertyId },
+      { dndmode: status },
+      { new: true, session },
+    );
+
+    return updatedGuest;
+  } catch (error) {
+    console.error("Error updating Guest DND status:", error.message);
+    throw error;
+  }
+};
+
+const getGuestDndStatus = async (propertyId, guestId) => {
+  const guest = await Guest.findOne({
+    _id: guestId,
+    propertyId: propertyId,
+  });
+  return guest;
+};
+
 module.exports = {
   create,
   getAll,
@@ -285,4 +334,7 @@ module.exports = {
   find,
   findWithStatus,
   getGuestAddonsRequests,
+  createDndRequest,
+  updatedGuestDndStatus,
+  getGuestDndStatus,
 };

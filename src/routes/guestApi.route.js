@@ -15,6 +15,7 @@ router.get("/settings", guestApiController.getSettings);
 router.get("/guest/status", guestApiController.getGuestStatus);
 router.get("/checkInOutRequest", guestApiController.getCheckInOutRequest);
 router.get("/addOns", guestApiController.getAddOnRequest);
+router.get("/dndmodeRequest", guestApiController.getdndmodeRequestStatus);
 
 router.post("/checkInOutRequest", guestApiController.createCheckInOutRequest);
 router.post(
@@ -31,6 +32,7 @@ router.get("/review", guestApiController.getReview);
 router.patch("/review", guestApiController.updateReview);
 router.patch("/complete-review", guestApiController.updateCompleteReview);
 router.post("/addOnsRequest", guestApiController.createAddOnsRequest);
+router.post("/dndmodeRequest", guestApiController.createDndModeRequest);
 guestApiRouter.use("/:guestSessionId", authenticateGuestSession, router);
 
 module.exports = guestApiRouter;
