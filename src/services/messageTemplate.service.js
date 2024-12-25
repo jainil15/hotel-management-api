@@ -34,8 +34,8 @@ const createDefaults = async (propertyId, session) => {
     propertyId,
     type: MESSAGE_TEMPLATE_TYPES.DEFAULT,
     name: "Pre Arrival Complete",
-    message:
-      "Your online check-in for [Hotel Name] is completed. Reply here for questions.",
+    message: `Your online check-in for [Hotel Name] is complete! ✅Ready for your stay? Explore our amenities, request services, or even set “Do Not Disturb” mode here: [Guest Link].\n Have questions? Reply to this message anytime!
+`,
   });
   messageTemplates.push(await preArrivalTemplate.save({ session }));
 
@@ -43,8 +43,9 @@ const createDefaults = async (propertyId, session) => {
     propertyId,
     type: MESSAGE_TEMPLATE_TYPES.DEFAULT,
     name: "Check In Time Update",
-    message:
-      "Your Check In at [Hotel Name] has been updated. Check-in available at [Time]. Reply here for questions.",
+    message: `Your check-in time at [Hotel Name] has been updated to [Time].
+Make the most of your stay—request services, access the Wi-Fi password, or explore amenities here: [Guest Link].
+`,
   });
   messageTemplates.push(await checkInUpdateTemplate.save({ session }));
 
@@ -52,8 +53,9 @@ const createDefaults = async (propertyId, session) => {
     propertyId,
     type: MESSAGE_TEMPLATE_TYPES.DEFAULT,
     name: "Check Out Time Update",
-    message:
-      "Your check out at [Hotel Name] has been updated. Check-out available at [Time]. Reply here for questions.",
+    message: `Your check-out time at [Hotel Name] has been updated to [Time].
+Manage your stay, share feedback, or explore other services here: [Guest Link].
+`,
   });
   messageTemplates.push(await checkOutUpdateTemplate.save({ session }));
 

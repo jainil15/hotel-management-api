@@ -459,13 +459,14 @@ const createPreArrival = async (req, res, next) => {
       oldGuest,
       property,
       propertySetting,
+      `${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
     );
     if (oldGuest.phoneNumber && oldGuest.countryCode) {
       const sentSms = await smsService.send(
         twilioSubClient,
         `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
         `${oldGuest.countryCode}${oldGuest.phoneNumber}`,
-        `${updatedMessageBody.message}.\nYour guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
+        `${updatedMessageBody.message}.`,
       );
       newMessage = await messageService.create(
         {

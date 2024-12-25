@@ -54,6 +54,7 @@ function modifyMessageTemplateBody(
   guestInfo,
   propertyInfo,
   propertySetting,
+  guestLink,
 ) {
   const { name: hotelName } = propertyInfo;
 
@@ -77,7 +78,8 @@ function modifyMessageTemplateBody(
     });
     messageTemplate.message = messageTemplate.message
       .replace("[Time]", formattedTime + ` ${propertySetting.timezone}`)
-      .replace("[Hotel Name]", hotelName);
+      .replace("[Hotel Name]", hotelName)
+      .replace("[Guest Link]", guestLink);
   } else if (messageTemplate.name === "Extend Stay Accepted") {
     const formattedTime = new Date(guestInfo.checkOut).toLocaleString("en", {
       year: "numeric",
@@ -90,7 +92,8 @@ function modifyMessageTemplateBody(
         "[New Checkout Date]",
         formattedTime + ` ${propertySetting.timezone}`,
       )
-      .replace("[Hotel Name]", hotelName);
+      .replace("[Hotel Name]", hotelName)
+      .replace("[Guest Link]", guestLink);
   } else if (messageTemplate.name === "Extend Stay Declined") {
     const formattedTime = new Date(guestInfo.checkOut).toLocaleString("en", {
       day: "2-digit",
@@ -105,23 +108,24 @@ function modifyMessageTemplateBody(
         "[Original Checkout Date]",
         formattedTime + ` ${propertySetting.timezone}`,
       )
-      .replace("[Hotel Name]", hotelName);
+      .replace("[Hotel Name]", hotelName)
+      .replace("[Guest Link]", guestLink);
   } else if (messageTemplate.name === "Reservation Confirmed") {
     const formattedDate = formatDateToUTC(guestInfo.checkIn);
 
     messageTemplate.message = messageTemplate.message
       .replace("[Date]", formattedDate + ` ${propertySetting.timezone}`)
-      .replace("[Hotel Name]", hotelName);
+      .replace("[Hotel Name]", hotelName)
+      .replace("[Guest Link]", guestLink);
   } else if (
     messageTemplate.name === "Checked In" ||
     messageTemplate.name === "Checked Out" ||
     messageTemplate.name === "Reservation Cancelled" ||
     messageTemplate.name === "Pre Arrival Complete"
   ) {
-    messageTemplate.message = messageTemplate.message.replace(
-      "[Hotel Name]",
-      hotelName,
-    );
+    messageTemplate.message = messageTemplate.message
+      .replace("[Hotel Name]", hotelName)
+      .replace("[Guest Link]", guestLink);
   } else if (messageTemplate.name === "Check Out Time Update") {
     const formattedTime = new Date(guestInfo.checkOut).toLocaleString("en", {
       day: "2-digit",
@@ -133,7 +137,8 @@ function modifyMessageTemplateBody(
     });
     messageTemplate.message = messageTemplate.message
       .replace("[Time]", formattedTime + ` ${propertySetting.timezone}`)
-      .replace("[Hotel Name]", hotelName);
+      .replace("[Hotel Name]", hotelName)
+      .replace("[Guest Link]", guestLink);
   } else if (messageTemplate.name === "Check In Time Update") {
     const formattedTime = new Date(guestInfo.checkIn).toLocaleString("en", {
       day: "2-digit",
@@ -145,7 +150,8 @@ function modifyMessageTemplateBody(
     });
     messageTemplate.message = messageTemplate.message
       .replace("[Time]", formattedTime + ` ${propertySetting.timezone}`)
-      .replace("[Hotel Name]", hotelName);
+      .replace("[Hotel Name]", hotelName)
+      .replace("[Guest Link]", guestLink);
   }
 
   return messageTemplate;

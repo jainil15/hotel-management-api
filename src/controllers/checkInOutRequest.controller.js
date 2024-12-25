@@ -334,6 +334,7 @@ const updateRequestStatus = async (req, res, next) => {
       updatedGuest,
       property,
       propertySetting,
+      `${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
     );
     const guestSession = await guestSessionService.getGuestSession(
       propertyId,
@@ -348,7 +349,7 @@ const updateRequestStatus = async (req, res, next) => {
         twilioSubClient,
         `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
         `${oldGuest.countryCode}${oldGuest.phoneNumber}`,
-        `${updatedMessageBody.message}.\nYour guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
+        `${updatedMessageBody.message}.`,
       );
 
       newMessage = await messageService.create(

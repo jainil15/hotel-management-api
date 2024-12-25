@@ -9,61 +9,65 @@ const {
 const DEFAULT_MESSAGE_TEMPLATES = {
   Reservation: {
     [RESERVATION_STATUS.CANCELLED]: {
-      message:
-        "Your reservation at [Hotel Name] has been cancelled. Reply here for questions.",
+      message: `Your reservation at [Hotel Name] has been cancelled.\n If there’s anything we can assist with or if you’d like to book again, visit [Guest Link] or reply to this message. We’d love to help!
+`,
       name: "Reservation Cancelled",
     },
   },
   "Early Check In": {
     [EARLY_CHECK_IN_STATUS.DECLINED]: {
-      message:
-        "Your early check-in request at [Hotel Name] has been declined. Check-in begins at [Time]. Reply here for questions.",
+      message: `We’re sorry, but your early check-in request at [Hotel Name] has been declined. Check-in begins at [Time].
+For other requests or assistance, visit [Guest Link] or reply to this message.
+`,
       name: "Early Check In Declined",
     },
     [EARLY_CHECK_IN_STATUS.ACCEPTED]: {
-      message:
-        "Your early check-in at [Hotel Name] is confirmed. Check-in available at [Time]. Reply here for questions.",
+      message: `Great news! Your early check-in at [Hotel Name] is confirmed! 🎉 Check-in begins at [Time].
+Get ready to relax—explore amenities, access the Wi-Fi password, or request services here: [Guest Link].
+`,
       name: "Early Check In Accepted",
     },
   },
   "Late Check Out": {
     [LATE_CHECK_OUT_STATUS.DECLINED]: {
-      message:
-        "Your request for late check-out at [Hotel Name] has been declined. Please check out by [Time]. Reply here for questions.",
+      message: `We’re sorry, but your late check-out request at [Hotel Name] was declined. Please check out by [Time].
+Need help or want to explore other options? Click here: [Guest Link].`,
       name: "Late Check Out Declined",
     },
     [LATE_CHECK_OUT_STATUS.ACCEPTED]: {
-      message:
-        "Your late check-out request at [Hotel Name] is accepted. Check out by [Time]. Reply here for questions.",
+      message: `Good news! Your late check-out at [Hotel Name] is confirmed. 🎉 Please check out by [Time].
+Enjoy more time to relax! Manage requests or explore our amenities here: [Guest Link].`,
       name: "Late Check Out Accepted",
     },
   },
   "Current Status": {
     [GUEST_CURRENT_STATUS.RESERVED]: {
-      message:
-        "Your reservation at [Hotel Name] is confirmed! We look forward to welcoming you on [Date]. Reply here for questions.",
+      message: `Your reservation for [Date] at [Hotel Name] is confirmed! 🎉From requesting housekeeping to accessing the Wi-Fi password or exploring amenities, manage everything with ease here: [Guest Link].\n Need anything else? Click the link or reply to this message—we’re here to help!`,
       name: "Reservation Confirmed",
     },
     [GUEST_CURRENT_STATUS.IN_HOUSE]: {
-      message:
-        "Welcome to [Hotel Name]! You've successfully checked in. Enjoy your stay. Reply here for questions",
+      message: `Welcome to [Hotel Name]! 🎉 You’re all checked in.
+Make your stay even better—request housekeeping, explore amenities, or chat with the front desk anytime here: [Guest Link].
+`,
       name: "Checked In",
     },
     [GUEST_CURRENT_STATUS.CHECKED_OUT]: {
-      message:
-        "Thank you for staying at [Hotel Name]. You’ve successfully checked out. We hope to welcome you back soon. Reply here for questions.",
+      message: `Thank you for staying at [Hotel Name]! 🏨 You’ve successfully checked out.
+We’d love your feedback! Share your experience or book your next stay here: [Guest Link].
+`,
       name: "Checked Out",
     },
   },
   "Extend Stay": {
     [EXTEND_STAY_STATUS.DECLINED]: {
-      message:
-        "Your request to extend your stay at [Hotel Name] has been declined. Please check out by [Original Checkout Date]. Reply here for questions.",
+      message: `We’re sorry, but your request to extend your stay at [Hotel Name] has been declined. Please check out by [Original Checkout Date].
+Have questions or need assistance? Visit [Guest Link] or reply to this message.
+`,
       name: "Extend Stay Declined",
     },
     [EXTEND_STAY_STATUS.ACCEPTED]: {
-      message:
-        "Your request to extend your stay at [Hotel Name] has been accepted. You are confirmed for an extended stay until [New Checkout Date]. Reply here for questions.",
+      message: `Your stay at [Hotel Name] is extended until [New Checkout Date]! 🎉
+Enjoy more time with us—explore amenities, request housekeeping, or share feedback here: [Guest Link].`,
       name: "Extend Stay Accepted",
     },
   },
