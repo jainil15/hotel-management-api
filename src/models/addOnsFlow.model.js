@@ -6,7 +6,8 @@ const customAddOnsSchema = new Schema(
   {
     addOnType: { type: String, default: "CustomAddon" },
     name: { type: String, required: true },
-    description: { type: String, required: true },
+    description: { type: String },
+    addonNote: { type: String },
     paid: { type: Boolean, default: true },
     price: { type: Number },
     enabled: { type: Boolean, default: true },
@@ -20,7 +21,8 @@ const customAddOnsSchema = new Schema(
 const checkInOutAddOnsSchema = new Schema(
   {
     name: { type: String, required: true },
-    description: { type: String, required: true },
+    description: { type: String },
+    addonNote: { type: String },
     defaultTimeEnabled: { type: Boolean, required: true },
     defaultTiming: { type: String },
     customTiming: { type: String, required: true },
@@ -95,11 +97,12 @@ const CreateAddOnsFlowValidationSchema = z.object({
   customAddOns: z.array(
     z.object({
       name: z.string(),
-      description: z.string(),
+      description: z.string().optional(),
       paid: z.boolean(),
       price: z.number().optional(),
       enabled: z.boolean(),
       default: z.boolean(),
+      addonNote: z.string().optional(),
       addOnType: z.string().optional(),
       image: z.string().optional(),
     }),
@@ -107,10 +110,11 @@ const CreateAddOnsFlowValidationSchema = z.object({
   checkInOutAddOns: z.array(
     z.object({
       name: z.string(),
-      description: z.string(),
+      description: z.string().optional(),
       defaultTimeEnabled: z.boolean(),
       defaultTiming: z.string().optional(),
       customTiming: z.string(),
+      addonNote: z.string().optional(),
       paid: z.boolean(),
       price: z.number(),
       enabled: z.boolean(),
@@ -131,6 +135,7 @@ const UpdateAddOnsFlowValidationSchema = z.object({
         enabled: z.boolean().optional(),
         default: z.boolean().optional(),
         addOnType: z.string().optional(),
+        addonNote: z.string().optional(),
         image: z.any(),
       }),
     )
@@ -147,6 +152,7 @@ const UpdateAddOnsFlowValidationSchema = z.object({
         price: z.number().optional(),
         enabled: z.boolean().optional(),
         default: z.boolean().optional(),
+        addonNote: z.string().optional(),
         // image: z.string().optional(),
       }),
     )
