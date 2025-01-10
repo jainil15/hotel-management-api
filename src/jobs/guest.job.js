@@ -280,7 +280,7 @@ const sendFollowUpGuestStatusEmail = async () => {
 };
 
 const cronJobForFollowGuestStatus = () => {
-  cron.schedule("0 12 * * *", async () => {
+  cron.schedule("0 8 * * *", async () => {
     logger.info("Running daily follow-up email job...");
     await sendFollowUpGuestStatusEmail();
   });
