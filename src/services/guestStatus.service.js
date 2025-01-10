@@ -20,6 +20,7 @@ const {
   dateValidation,
   zodCustomDateValidation,
 } = require("../utils/dateCompare");
+const moment = require("moment");
 
 /**
  * Create a new guest status
@@ -625,6 +626,85 @@ const getCheckInOutPendingGuests = async (propertyId, filters) => {
   return guests;
 };
 
+const getInvalidGuestsState = async (propertyId, statusType) => {
+  const statusStage =
+    statusType === "In House"
+      ? {
+          $match: {
+            "status.currentStatus": "In House",
+
+            $expr: {
+              $and: [
+                { $eq: ["$status.currentStatus", "In House"] },
+
+                { $lt: ["$checkOutDateOnly", "$todaysDateOnly"] }, // Check-out is after today
+              ],
+            },
+          },
+        }
+      : {
+          $match: {
+            "status.currentStatus": "Reservation",
+
+            $expr: {
+              $and: [
+                { $eq: ["$status.currentStatus", "Reservation"] },
+                { $lt: ["$checkInDateOnly", "$todaysDateOnly"] }, // Check-in is before today
+                { $gt: ["$checkOutDateOnly", "$todaysDateOnly"] }, // Check-out is after today
+              ],
+            },
+          },
+        };
+
+  const aggregationPipeline = [
+    {
+      $match: {
+        propertyId: new mongoose.Types.ObjectId(propertyId),
+      },
+    },
+
+    {
+      $lookup: {
+        from: "gueststatuses",
+
+        localField: "_id",
+
+        foreignField: "guestId",
+
+        as: "status",
+      },
+    },
+
+    {
+      $unwind: "$status",
+    },
+
+    {
+      $addFields: {
+        checkInDateOnly: {
+          $dateToString: { format: "%Y-%m-%d", date: "$checkIn" },
+        },
+
+        checkOutDateOnly: {
+          $dateToString: { format: "%Y-%m-%d", date: "$checkOut" },
+        },
+
+        todaysDateOnly: {
+          $dateToString: {
+            format: "%Y-%m-%d",
+            date: new Date(moment().format("YYYY-MM-DD")),
+          },
+        },
+      },
+    },
+    statusStage,
+  ];
+
+  const guests = await Guest.aggregate(aggregationPipeline);
+
+  return guests;
+};
+
 /**
  * Update guest status
  * @param {string} guestId - The guest id
@@ -696,4 +776,5 @@ module.exports = {
   getAllGuestWithStatus,
   getAllGuestWithStatusv2,
   getCheckInOutPendingGuests,
+  getInvalidGuestsState,
 };

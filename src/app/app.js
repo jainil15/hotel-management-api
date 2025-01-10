@@ -60,13 +60,6 @@ const yaml = require("yamljs");
 // Sockets import
 const messageSocket = require("../sockets/message.socket");
 
-// cron jobs
-
-const {
-  scheduleDailyCheckoutMessages,
-  scheduleDailyCancellationJob,
-} = require("../jobs/guest.job");
-
 const { errorMiddleware } = require("../middlewares/error.middleware");
 const logger = require("../configs/winston.config");
 
@@ -91,8 +84,10 @@ const createApp = () => {
   app.use(responseTime());
   // app.use(helmet());
 
-  // Logging
+  // Add Corn Jobs
+  require("../jobs/guest.job");
 
+  // Logging
   app.use(
     "/api-docs",
     swaggerUi.serve,

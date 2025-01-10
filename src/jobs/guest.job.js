@@ -1,6 +1,5 @@
 require("dotenv").config();
 const cron = require("node-cron");
-const moment = require("moment");
 const nodemailer = require("nodemailer");
 const nodemailerConfigOptions = require("../configs/nodemailer.config");
 const logger = require("../configs/winston.config");
@@ -22,20 +21,13 @@ const smsService = require("../services/sms.service");
 const guestSessionService = require("../services/guestSession.service");
 const {
   messageTriggerType,
-  requestType,
+
   messageType,
 } = require("../constants/message.constant");
 const {
   RESERVATION_STATUS,
   GUEST_CURRENT_STATUS,
 } = require("../constants/guestStatus.contant");
-const {
-  ValidationError,
-  APIError,
-  InternalServerError,
-  ConflictError,
-  NotFoundError,
-} = require("../lib/CustomErrors");
 
 const timeZoneMapping = {
   "Hawaii–Aleutian Standard Time (UTC-10:00)": "Pacific/Honolulu",
@@ -236,36 +228,29 @@ const scheduleDailyCancellationJob = () => {
     await cancelExpiredReservations();
   });
 };
+
 const sendFollowUpGuestStatusEmail = async () => {
   try {
-    const today = moment().format("YYYY-MM-DD");
     const properties = await Property.find();
 
     for (const property of properties) {
-      const checkInFilters = {
-        currentStatus: "Reservation",
-        selectedDate: today,
-      };
-      const inHouseFilters = {
-        currentStatus: "In House",
-        selectedDate: today,
-      };
-
-      const checkInGuests = await guestStatusService.getCheckInOutPendingGuests(
-        property._id,
-        checkInFilters,
+      const checkInGuests = await guestStatusService.getInvalidGuestsState(
+        property._id.toString(),
+        "Reservation",
       );
-      const inHouseGuests = await guestStatusService.getCheckInOutPendingGuests(
-        property._id,
-        inHouseFilters,
+      const inHouseGuests = await guestStatusService.getInvalidGuestsState(
+        property._id.toString(),
+        "In House",
       );
 
-      if (checkInGuests.length > 0 || inHouseGuests.length > 0) {
+      if (inHouseGuests.length > 0 || checkInGuests.length > 0) {
+        logger.info("Sent email to property " + property._id.toString());
+
         let emailContent = `
-  <p>Dear Property Owner/Manager,</p>
-  <p>I hope this message finds you well. I wanted to bring to your attention that there was a lapse in updating the guest status at the front desk:</p>
-  <ul>
-`;
+        <p>Dear Property Owner/Manager,</p>
+        <p>I hope this message finds you well. I wanted to bring to your attention that there was a lapse in updating the guest status at the front desk:</p>
+        <ul>
+          `;
 
         if (checkInGuests.length > 0) {
           emailContent += `<li><strong>${checkInGuests.length}</strong> guests were not moved from Check-In to In-House.</li>`;
@@ -276,11 +261,11 @@ const sendFollowUpGuestStatusEmail = async () => {
         }
 
         emailContent += `
-  </ul>
-  <p>We are reviewing the situation internally to ensure this doesn’t recur. Ensuring timely updates to guest statuses is crucial for keeping guests informed and enhancing their overall satisfaction with their stay.</p>
-  <p>Thank you for your understanding and continued support. Please let us know if you have any specific guidance.</p>
-  <p>Best regards,<br>Team Onelyk.com</p>
-`;
+      </ul>
+      <p>We are reviewing the situation internally to ensure this doesn’t recur. Ensuring timely updates to guest statuses is crucial for keeping guests informed and enhancing their overall satisfaction with their stay.</p>
+      <p>Thank you for your understanding and continued support. Please let us know if you have any specific guidance.</p>
+      <p>Best regards,<br>Team Onelyk.com</p>
+    `;
 
         await sendEmail(
           property.email,
@@ -294,9 +279,14 @@ const sendFollowUpGuestStatusEmail = async () => {
   }
 };
 
-cron.schedule("0 0 * * *", async () => {
-  await sendFollowUpGuestStatusEmail();
-});
+const cronJobForFollowGuestStatus = () => {
+  cron.schedule("0 12 * * *", async () => {
+    logger.info("Running daily follow-up email job...");
+    await sendFollowUpGuestStatusEmail();
+  });
+};
+
+cronJobForFollowGuestStatus();
 scheduleDailyCheckoutMessages();
 scheduleDailyCancellationJob();
 
