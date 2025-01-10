@@ -7,7 +7,7 @@ variables:
   IMAGE_TAG: $CI_COMMIT_SHORT_SHA
   IMAGE_NAME: $CI_REGISTRY_IMAGE
   PORT: 8000
-  FOLDER_NAME: "onelyk-nodejs-backend"
+  FOLDER_NAME: "onelyk-nodejs"
 
 create-env-file:
   environment: testing
@@ -48,7 +48,7 @@ deploy to testing:
     - mkdir ~/.ssh
     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
     - chmod 600 ~/.ssh/id_rsa
-  
+
   script:
     - scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ./docker-compose.yml ./.env $SSH_USER@$SSH_HOST:~/$FOLDER_NAME/
     - ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa $SSH_USER@$SSH_HOST "
