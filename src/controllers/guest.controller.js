@@ -240,7 +240,7 @@ const create = async (req, res, next) => {
           twilioSubClient,
           `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
           `${newGuest.countryCode}${newGuest.phoneNumber}`,
-          `${updatedMessageBody.message}.`,
+          `${updatedMessageBody.message}`,
         );
         const newMessage = await messageService.create(
           {
@@ -527,7 +527,7 @@ const update = async (req, res, next) => {
           twilioSubClient,
           `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
           `${updatedGuest.countryCode}${updatedGuest.phoneNumber}`,
-          `${updatedMessageBody.message}.`,
+          `${updatedMessageBody.message}`,
         );
 
         const newMessage = await messageService.create(
@@ -590,7 +590,7 @@ const update = async (req, res, next) => {
           twilioSubClient,
           `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
           `${updatedGuest.countryCode}${updatedGuest.phoneNumber}`,
-          `${updatedMessageBody.message}.`,
+          `${updatedMessageBody.message}`,
         );
 
         const newMessage = await messageService.create(

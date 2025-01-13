@@ -349,7 +349,7 @@ const updateRequestStatus = async (req, res, next) => {
         twilioSubClient,
         `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
         `${oldGuest.countryCode}${oldGuest.phoneNumber}`,
-        `${updatedMessageBody.message}.`,
+        `${updatedMessageBody.message}`,
       );
 
       newMessage = await messageService.create(
