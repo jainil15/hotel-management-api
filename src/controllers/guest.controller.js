@@ -552,6 +552,7 @@ const update = async (req, res, next) => {
             latestMessage: newMessage._id,
           },
           session,
+          0,
         );
       }
       // Get Message Template
@@ -565,7 +566,6 @@ const update = async (req, res, next) => {
           guestStatusToTemplateOnUpdate(oldGuestStatus, updatedGuestStatus),
         );
       // Send Message
-
       if (messageTemplate && guest.phoneNumber && guest.countryCode) {
         const twilioAccount =
           await twilioAccountService.getByPropertyId(propertyId);
@@ -615,6 +615,7 @@ const update = async (req, res, next) => {
             latestMessage: newMessage._id,
           },
           session,
+          0,
         );
       }
     }
