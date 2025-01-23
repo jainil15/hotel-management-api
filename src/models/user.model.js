@@ -21,7 +21,16 @@ const UserValidationSchema = z.object({
   firstName: z.string().min(1).max(255),
   lastName: z.string().min(1).max(255),
   email: z.string().email(),
-  password: z.string(),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters long")
+    .max(25, "Password must be at most 25 characters long")
+    .refine((val) => /[A-Za-z]/.test(val), {
+      message: "Password must contain at least one letter",
+    })
+    .refine((val) => /\d/.test(val), {
+      message: "Password must contain at least one number",
+    }),
   phoneNumber: z
     .string()
     .refine((val) => phoneregex.test(val), {

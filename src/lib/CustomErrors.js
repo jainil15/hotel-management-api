@@ -30,6 +30,18 @@ class ValidationError extends APIError {
   }
 }
 
+class InputValidationError extends APIError {
+  /**
+   * Custom Error class for validation errors
+   * @param {string} message - Error message
+   * @param {object} error - Error object
+   * @returns {object} - Error object
+   */
+  constructor(message, error) {
+    super(message, 422, error);
+  }
+}
+
 class BadRequestError extends APIError {
   /**
    * Custom Error class for validation errors
@@ -114,4 +126,5 @@ module.exports = {
   ConflictError,
   InternalServerError,
   BadRequestError,
+  InputValidationError,
 };

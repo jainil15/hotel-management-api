@@ -4,7 +4,6 @@ const authService = require("../services/auth.service");
 const propertyAccessService = require("../services/propertyAccess.service");
 const { generateAccessToken } = require("../utils/generateToken");
 const { z } = require("zod");
-const cookieOptions = require("../configs/cookie.config");
 const { Otp } = require("../models/otp.model");
 const sendOtp = require("../utils/sendOtp");
 const bcrypt = require("bcryptjs");
@@ -18,6 +17,7 @@ const {
   ValidationError,
   UnauthorizedError,
   InternalServerError,
+  InputValidationError,
 } = require("../lib/CustomErrors");
 const { responseHandler } = require("../middlewares/response.middleware");
 
@@ -28,6 +28,14 @@ const { responseHandler } = require("../middlewares/response.middleware");
  * @param {import('express').NextFunction} next - The next function
  * @returns {import('express').Response} - The response
  */
+
+const cookieOptions = {
+  maxAge: 24 * 60 * 60 * 1000 * 15, // Cookie will expire after 1 day
+  httpOnly: true, // Cookie is only accessible via HTTP(S) and not client-side JavaScript
+  secure: process.env.NODE_ENV === "production", // Cookie will only be sent over HTTPS if in production
+  sameSite: "strict", // SameSite attribute to prevent CSRF attacks
+};
+
 const register = async (req, res, next) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -39,7 +47,7 @@ const register = async (req, res, next) => {
 
     // validation errors
     if (!result.success) {
-      throw new ValidationError(
+      throw new InputValidationError(
         "Validation Error",
         result.error.flatten().fieldErrors,
       );
@@ -93,7 +101,8 @@ const register = async (req, res, next) => {
 const login = async (req, res, next) => {
   try {
     // get email and password from body
-    const { email, password } = req.body;
+    let { email, password, rememberMe } = req.body;
+    email = email.toLowerCase();
 
     // validate email and password
     const result = z
@@ -111,6 +120,7 @@ const login = async (req, res, next) => {
     }
     // authenticate user with email and password
     const user = await userService.authenticate(email, password);
+
     // if user is authenticated
     if (user) {
       // create session for refresh token
@@ -122,18 +132,20 @@ const login = async (req, res, next) => {
       const { password_hash, ..._user } = user._doc;
       const accessToken = generateAccessToken(
         _user,
-        "1d",
+        "1h",
         process.env.ACCESS_TOKEN_SECRET,
       );
-      const refreshToken = generateAccessToken(
-        { ..._user, sessionId: session._id },
-        "15d",
-        process.env.REFRESH_TOKEN_SECRET,
-      );
-      // set refresh token in cookie
-      res.cookie("refreshToken", refreshToken, cookieOptions);
-      // return user and access token
-      // req.user = _user;
+
+      // set refresh token if user click on remember me on login page
+      if (rememberMe) {
+        const refreshToken = generateAccessToken(
+          { ..._user, sessionId: session._id },
+          "15d",
+          process.env.REFRESH_TOKEN_SECRET,
+        );
+        // set refresh token in cookie
+        res.cookie("refreshToken", refreshToken, cookieOptions);
+      }
 
       return responseHandler(
         res,
@@ -165,8 +177,9 @@ const login = async (req, res, next) => {
 const logout = async (req, res, next) => {
   try {
     // delete session and clear refresh token
-    const session = await authService.deleteSession(req.user.email);
+    await authService.deleteSession(req.user.email);
     res.clearCookie("refreshToken");
+
     return responseHandler(res, {}, 200, "Logout Successful");
   } catch (e) {
     if (e instanceof APIError) {

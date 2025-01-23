@@ -4,7 +4,6 @@ const {
   APIError,
   InternalServerError,
 } = require("../lib/CustomErrors");
-const { generateNewAccessToken } = require("../controllers/auth.controller");
 
 /**
  * Authenticate Token middleware
@@ -24,39 +23,18 @@ const authenticateToken = async (req, res, next) => {
       throw new UnauthorizedError("Authorization Missing", {});
     }
 
-    // Verify the token
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async (err, user) => {
-      // console.log("Authorization", user);
-      if (err) {
-        if (err.name === "TokenExpiredError") {
-          // Attempt to get a new access token
-          try {
-            const decoded = jwt.decode(token);
-            req.email = decoded.email; // Ensure email is available for token generation
-            const newAccessToken = await generateNewAccessToken(req, res, next);
+    // Use Promise version of jwt.verify
+    const user = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
 
-            // Respond with the new access token
-            if (newAccessToken) {
-              res.setHeader("Authorization", `Bearer ${newAccessToken}`);
-              req.user = decoded;
-              next();
-            } else {
-              throw new UnauthorizedError("Unable to refresh access token", {});
-            }
-          } catch (refreshError) {
-            next(refreshError); // Handle errors from token refreshing
-          }
-        } else {
-          throw new UnauthorizedError("Invalid Token", {});
-        }
-      } else {
-        req.user = user;
-        next();
-      }
-    });
-  } catch (e) {
-    if (e instanceof APIError) {
-      return next(e);
+    req.user = user;
+    next();
+  } catch (err) {
+    if (err instanceof jwt.TokenExpiredError) {
+      return next(new UnauthorizedError("TokenExpiredError", {}));
+    } else if (err instanceof jwt.JsonWebTokenError) {
+      return next(new UnauthorizedError("InvalidToken", {}));
+    } else if (err instanceof APIError) {
+      return next(err);
     }
     return next(new InternalServerError());
   }

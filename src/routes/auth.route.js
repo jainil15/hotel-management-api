@@ -1,8 +1,9 @@
 const { Router } = require("express");
 const {
-	getAccessToken,
-	verifyOtp,
-	resendOtp,
+  getAccessToken,
+  verifyOtp,
+  resendOtp,
+  refreshAccessToken,
 } = require("../controllers/auth.controller");
 const authController = require("../controllers/auth.controller");
 
@@ -14,9 +15,11 @@ router.get("/accessToken", getAccessToken);
 router.post("/verifyOtp", verifyOtp);
 router.post("/resendOtp", resendOtp);
 router.get(
-	"/guestAccessToken/:guestId",
-	authController.genreateGuestAccessToken,
+  "/guestAccessToken/:guestId",
+  authController.genreateGuestAccessToken,
 );
+
+router.post("/refresh-token", refreshAccessToken);
 router.post("/guestLogin/:token", authController.guestLoginWithToken);
 router.get("/isLoggedIn", authenticateToken, authController.isLoggedIn);
 
