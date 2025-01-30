@@ -329,7 +329,7 @@ const refreshAccessToken = async (req, res, next) => {
     // Generate access token
     const accessToken = generateAccessToken(
       { ...rest },
-      "1h",
+      "24h",
       process.env.ACCESS_TOKEN_SECRET,
     );
 

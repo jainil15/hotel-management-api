@@ -132,7 +132,7 @@ const login = async (req, res, next) => {
       const { password_hash, ..._user } = user._doc;
       const accessToken = generateAccessToken(
         _user,
-        "1h",
+        "24h",
         process.env.ACCESS_TOKEN_SECRET,
       );
 

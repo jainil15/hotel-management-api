@@ -91,7 +91,7 @@ const create = async (req, res, next) => {
     // TODO: add messageGuest
     const { sendMessage, status, ...guest } = req.body;
     const propertyId = req.params.propertyId;
-    console.log("aaaaa", req.body);
+
     // Validate guest and status
     const guestResult = CreateGuestValidationSchema.safeParse(guest);
     const statusResult = CreateGuestStatusValidationSchema.safeParse(status);
@@ -264,6 +264,7 @@ const create = async (req, res, next) => {
               latestMessage: newMessage._id,
             },
             session,
+            0,
           );
       }
     }
