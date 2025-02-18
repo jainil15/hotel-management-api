@@ -13,6 +13,7 @@ const {
   getGuestAddonsRequests,
 } = require("../controllers/guest.controller");
 
+const guestApiController = require("../controllers/guestApi.controller");
 const { authenticateToken } = require("../middlewares/jwt.middleware");
 const {
   checkPropertyAccess,
@@ -102,6 +103,13 @@ router.patch(
   checkPropertyAccess,
   checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
   guestedit,
+);
+
+// Temp: Route for get guest details
+// Insecure
+router.post(
+  "/getGuestByPhoneNumber/:propertyId",
+  guestApiController.getGuestByPhoneNumber,
 );
 
 module.exports = router;

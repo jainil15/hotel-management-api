@@ -322,6 +322,70 @@ const getGuestDndStatus = async (propertyId, guestId) => {
   return guest;
 };
 
+/**
+ * Get guest by property id and guest id
+ * @param {string} propertyId - property id
+ * @param {string} countryCode - country code
+ * @param {string} phoneNumber - phone number
+ * @returns {Promise<import('../models/guest.model').GuestType>} guest - guest object
+ */
+const getGuestByPhoneNumber = async (propertyId, countryCode, phoneNumber) => {
+  const pipeline = [
+    {
+      $match: {
+        propertyId: new mongoose.Types.ObjectId(propertyId),
+      },
+    },
+    {
+      $match: {
+        phoneNumber,
+        countryCode,
+      },
+    },
+    {
+      $lookup: {
+        from: "gueststatuses",
+        localField: "_id",
+        foreignField: "guestId",
+        as: "status",
+      },
+    },
+    {
+      $match: {
+        checkOut: { $gte: new Date() },
+        checkIn: { $lte: new Date() },
+      },
+    },
+    {
+      $unwind: {
+        path: "$status",
+      },
+    },
+    {
+      $project: {
+        _id: 1,
+        name: 1,
+        email: 1,
+        phoneNumber: 1,
+        countryCode: 1,
+        checkIn: 1,
+        checkOut: 1,
+        status: 1,
+      },
+    },
+    {
+      $sort: {
+        checkIn: -1,
+      },
+    },
+    {
+      $limit: 1,
+    },
+  ];
+  const guest = await Guest.aggregate(pipeline);
+  return guest[0];
+};
+
 module.exports = {
   create,
   getAll,
@@ -337,4 +401,6 @@ module.exports = {
   createDndRequest,
   updatedGuestDndStatus,
   getGuestDndStatus,
+  getByPropertyIdAndGuestId,
+  getGuestByPhoneNumber,
 };
