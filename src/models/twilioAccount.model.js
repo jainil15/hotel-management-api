@@ -21,6 +21,7 @@ const twilioAccountSchema = new Schema(
     countryCode: { type: String },
     phoneNumberSid: { type: String },
     tollfreeVerificationSid: { type: String },
+    verificationServiceSid: { type: String },
   },
   { timestamps: true },
 );

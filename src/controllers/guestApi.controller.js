@@ -982,7 +982,19 @@ const getGuestByPhoneNumber = async (req, res, next) => {
         guest: ["Guest not found"],
       });
     }
-    return responseHandler(res, guest);
+    const session = await guestSessionService.getGuestSession(
+      propertyId,
+      guest._id,
+    );
+    if (session) {
+      return responseHandler(res, {
+        guestSession: session,
+      });
+    }
+    const newSession = await guestSessionService.create(propertyId, guest._id);
+    return responseHandler(res, {
+      guestSession: newSession,
+    });
   } catch (e) {
     if (e instanceof APIError) {
       return next(e);

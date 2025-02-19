@@ -13,6 +13,7 @@ const {
   getGuestAddonsRequests,
 } = require("../controllers/guest.controller");
 
+const guestController = require("../controllers/guest.controller");
 const guestApiController = require("../controllers/guestApi.controller");
 const { authenticateToken } = require("../middlewares/jwt.middleware");
 const {
@@ -111,5 +112,6 @@ router.post(
   "/getGuestByPhoneNumber/:propertyId",
   guestApiController.getGuestByPhoneNumber,
 );
+router.post("/guestRegistration/:propertyId", guestController.sendOtp);
 
 module.exports = router;
