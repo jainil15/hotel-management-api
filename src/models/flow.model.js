@@ -44,10 +44,11 @@ flowSchema.index({ propertyId: 1, name: 1 }, { unique: true });
 const CreateFlowSchemaValidation = z.object({
 	propertyId: z.string(),
 	messageTemplateId: z.string(),
-	trigger: z.string(),
+	trigger: z.string().optional(),
 	name: z.string(),
 	description: z.string(),
 	timeDelay: z.number(),
+	flowStatus: z.boolean()
 });
 
 const UpdateFlowSchemaValidation = z.object({
