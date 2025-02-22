@@ -20,6 +20,7 @@ const guestStatusRoutes = require("../routes/guestStatus.route");
 const messageTemplateRoutes = require("../routes/messageTemplate.route");
 const chatListRoutes = require("../routes/chatList.route");
 const smsRoutes = require("../routes/sms.route");
+const customMessageRoute = require("../routes/customMessage.route")
 const checkInOutRequestRoutes = require("../routes/checkInOutRequest.route");
 const broadcastRoutes = require("../routes/broadcast.route");
 const preArrivalFlowRoutes = require("../routes/preArrivalFlow.route");
@@ -30,6 +31,7 @@ const twilioAccountRoutes = require("../routes/twilioAccount.route");
 const guestApiRoutes = require("../routes/guestApi.route");
 const addOnsRequestRoutes = require("../routes/addOnsRequest.route");
 const dndmodeRequestRoutes = require("../routes/dndmode.route");
+const customFlowRoutes = require("../routes/customFlow.route")
 
 // Socket imports
 const guestSocket = require("../sockets/guest.socket");
@@ -126,6 +128,8 @@ const createApp = () => {
   app.use("/setting", settingRoutes);
   app.use("/preArrival", preArrivalRoutes);
   app.use("/workflow", workflowRoutes);
+  app.use("/customFlow",customFlowRoutes)
+  app.use("/customMessage",customMessageRoute)
   app.use("/twilioAccount", twilioAccountRoutes);
   app.use("/guestApi", guestApiRoutes);
   app.use("/addOnsRequest", addOnsRequestRoutes);
