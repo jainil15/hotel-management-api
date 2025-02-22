@@ -112,6 +112,10 @@ router.post(
   "/getGuestByPhoneNumber/:propertyId",
   guestApiController.getGuestByPhoneNumber,
 );
-router.post("/guestRegistration/:propertyId", guestController.sendOtp);
+router.post(
+  "/guestRegistration/:propertyId",
+  guestController.guestSelfRegistration,
+);
+router.post("/sendOtp/:propertyId", guestController.sendOtp);
 
 module.exports = router;

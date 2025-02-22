@@ -330,6 +330,7 @@ const getGuestDndStatus = async (propertyId, guestId) => {
  * @returns {Promise<import('../models/guest.model').GuestType>} guest - guest object
  */
 const getGuestByPhoneNumber = async (propertyId, countryCode, phoneNumber) => {
+  console.log(new Date());
   const pipeline = [
     {
       $match: {

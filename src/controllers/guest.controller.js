@@ -977,6 +977,29 @@ const sendOtp = async (req, res, next) => {
   try {
     const { propertyId } = req.params;
     const guest = req.body;
+    const guestResult = GuestSelfRegistrationValidationSchema.safeParse(guest);
+    const existingGuest = await guestService.getGuestByPhoneNumber(
+      propertyId,
+      guest.countryCode,
+      guest.phoneNumber,
+    );
+
+    console.log("Existing Guest", existingGuest);
+    if (existingGuest) {
+      const existingGuestSession = await guestSessionService.findOne({
+        propertyId,
+        guestId: existingGuest._id,
+      });
+      return responseHandler(res, {
+        guestSessionId: existingGuestSession._id,
+      });
+    }
+    console.log(guestResult);
+    if (!guestResult.success) {
+      throw new ValidationError("Validation Error", {
+        ...guestResult.error.flatten().fieldErrors,
+      });
+    }
     let twilioAccount = await twilioAccountService.getByPropertyId(propertyId);
     const twilioClient = await twilioService.getTwilioClient(twilioAccount);
     if (!twilioAccount) {
@@ -1011,6 +1034,14 @@ const sendOtp = async (req, res, next) => {
     return responseHandler(res, {});
   } catch (e) {
     console.log(e);
+    console.log("e.code = ", e.code);
+    if (e.code === 60200) {
+      return next(
+        new ValidationError("Invalid phone number", {
+          phoneNumber: ["Invalid phone number"],
+        }),
+      );
+    }
     if (e instanceof APIError) {
       return next(e);
     }
@@ -1020,17 +1051,6 @@ const sendOtp = async (req, res, next) => {
 
 const verifyOtp = async (req, res, next) => {
   try {
-    const { propertyId } = req.params;
-    const guest = req.body;
-    const twilioAccount =
-      await twilioAccountService.getByPropertyId(propertyId);
-    const twilioClient = await twilioService.getTwilioClient(twilioAccount);
-    const verification = await twilioClient.verify.v2
-      .services(twilioAccount.verificationServiceSid)
-      .verificationChecks.create({
-        to: `${guest.countryCode}${guest.phoneNumber}`,
-        code: guest.otp,
-      });
     return responseHandler(res, {});
   } catch (e) {
     if (e instanceof APIError) {
@@ -1051,47 +1071,62 @@ const guestSelfRegistration = async (req, res, next) => {
   try {
     // TODO: add messageGuest
     const guest = req.body;
-    const propertyId = req.params.propertyId;
+    const { propertyId } = req.params;
+    const twilioAccount =
+      await twilioAccountService.getByPropertyId(propertyId);
+    const twilioClient = await twilioService.getTwilioClient(twilioAccount);
+    const verification = await twilioClient.verify.v2
+      .services(twilioAccount.verificationServiceSid)
+      .verificationChecks.create({
+        to: `${guest.countryCode}${guest.phoneNumber}`,
+        code: guest.otp,
+      });
+    if (verification.status !== "approved") {
+      throw new ValidationError("Invalid OTP", {
+        otp: ["Invalid OTP"],
+      });
+    }
 
     const guestResult = GuestSelfRegistrationValidationSchema.safeParse(guest);
+    console.log(guestResult);
     if (!guestResult.success) {
       throw new ValidationError("Validation Error", {
         ...guestResult.error.flatten().fieldErrors,
       });
     }
 
-    const existingInHouseGuest = await guestService.findWithStatus(
-      {
-        phoneNumber: guest.phoneNumber,
-        countryCode: guest.countryCode,
-        propertyId: propertyId,
-      },
-      {
-        currentStatus: GUEST_CURRENT_STATUS.IN_HOUSE,
-        reservationStatus: RESERVATION_STATUS.CONFIRMED,
-      },
-    );
-    if (existingInHouseGuest.length > 0) {
-      throw new ValidationError("Guest already exists with this phone number", {
-        phoneNumber: ["Guest already exists with this phone number"],
-      });
-    }
-    const existingReservedGuest = await guestService.findWithStatus(
-      {
-        phoneNumber: guest.phoneNumber,
-        countryCode: guest.countryCode,
-        propertyId: propertyId,
-      },
-      {
-        currentStatus: GUEST_CURRENT_STATUS.RESERVED,
-        reservationStatus: RESERVATION_STATUS.CONFIRMED,
-      },
-    );
-    if (existingReservedGuest.length > 0) {
-      throw new ValidationError("Guest already exists with this phone number", {
-        phoneNumber: ["Guest already exists with this phone number"],
-      });
-    }
+    // const existingInHouseGuest = await guestService.findWithStatus(
+    //   {
+    //     phoneNumber: guest.phoneNumber,
+    //     countryCode: guest.countryCode,
+    //     propertyId: propertyId,
+    //   },
+    //   {
+    //     currentStatus: GUEST_CURRENT_STATUS.IN_HOUSE,
+    //     reservationStatus: RESERVATION_STATUS.CONFIRMED,
+    //   },
+    // );
+    // if (existingInHouseGuest.length > 0) {
+    //   throw new ValidationError("Guest already exists with this phone number", {
+    //     phoneNumber: ["Guest already exists with this phone number"],
+    //   });
+    // }
+    // const existingReservedGuest = await guestService.findWithStatus(
+    //   {
+    //     phoneNumber: guest.phoneNumber,
+    //     countryCode: guest.countryCode,
+    //     propertyId: propertyId,
+    //   },
+    //   {
+    //     currentStatus: GUEST_CURRENT_STATUS.RESERVED,
+    //     reservationStatus: RESERVATION_STATUS.CONFIRMED,
+    //   },
+    // );
+    // if (existingReservedGuest.length > 0) {
+    //   throw new ValidationError("Guest already exists with this phone number", {
+    //     phoneNumber: ["Guest already exists with this phone number"],
+    //   });
+    // }
 
     // Check if status is valid
     //if (!validateStatus(status)) {
@@ -1214,13 +1249,20 @@ const guestSelfRegistration = async (req, res, next) => {
 
     return responseHandler(
       res,
-      { guest: { ...newGuest._doc, status: { ...newGuestStatus._doc } } },
+      {
+        guest: {
+          ...newGuest._doc,
+          status: { ...newGuestStatus._doc },
+          guestSessionId: guestSession._id,
+        },
+      },
       201,
       "Guest Created",
     );
   } catch (e) {
     await session.abortTransaction();
     session.endSession();
+    console.log(e);
     if (e instanceof APIError) {
       return next(e);
     }
