@@ -197,13 +197,66 @@ const UpdateGuestValidationSchema = z
       });
     }
   });
+const GuestSelfRegistrationValidationSchema = z
+  .object({
+    phoneNumber: z
+      .string()
+      .refine((val) => !val || nocountrycodephoneregex.test(val), {
+        message: "Invalid phone number format",
+      }),
+    countryCode: z
+      .string()
+      .refine((val) => !val || countrycoderegex.test(val), {
+        message: "Invalid country code format",
+      }),
+    source: z.string().min(1).optional(),
+    checkIn: z
+      .string()
+      .refine(
+        (val) => datetimeregex.test(val) && !Number.isNaN(Date.parse(val)),
+        {
+          message: "Invalid date format",
+        },
+      ),
+    checkOut: z
+      .string()
+      .refine(
+        (val) => datetimeregex.test(val) && !Number.isNaN(Date.parse(val)),
+        {
+          message: "Invalid date format",
+        },
+      ),
+    roomNumber: z.string().min(1).optional(),
+    firstName: z.string().min(1),
+    lastName: z.string().min(1),
+
+    // draft: z.boolean().optional(),
+  })
+  .superRefine((args, ctx) => {
+    if (new Date(args.checkIn) >= new Date(args.checkOut)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.invalid_date,
+        path: ["checkIn"],
+        fatal: true,
+        message: "chekin date time should be before checkout date time",
+      });
+      ctx.addIssue({
+        code: z.ZodIssueCode.invalid_date,
+        path: ["checkOut"],
+        fatal: true,
+        message: "checkout date time should be after checkin date time",
+      });
+    }
+  });
 
 Guest.init().then(() => {
   logger.info("Initialized Guest Model");
 });
+
 module.exports = {
   Guest,
   GuestValidationScehma,
   CreateGuestValidationSchema,
   UpdateGuestValidationSchema,
+  GuestSelfRegistrationValidationSchema,
 };

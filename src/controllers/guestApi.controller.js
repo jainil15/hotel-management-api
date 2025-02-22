@@ -59,6 +59,7 @@ const { CreateReviewValidationSchema } = require("../models/review.model");
 const {
   CreateAddOnsRequestValidationSchema,
 } = require("../models/addOnsRequest.model");
+const { GuestStatus } = require("../models/guestStatus.model");
 
 /**
  * Get guest
@@ -961,6 +962,47 @@ const getdndmodeRequestStatus = async (req, res, next) => {
   }
 };
 
+/**
+ * Get guest by phone number
+ * @param {import('express').Request} req - Request object
+ * @param {import('express').Response} res - Response object
+ * @param {import('express').NextFunction} next - Next function
+ */
+const getGuestByPhoneNumber = async (req, res, next) => {
+  try {
+    const { propertyId } = req.params;
+    const { phoneNumber, countryCode } = req.body;
+    const guest = await guestService.getGuestByPhoneNumber(
+      propertyId,
+      countryCode,
+      phoneNumber,
+    );
+    if (!guest) {
+      throw new NotFoundError("Guest not found", {
+        guest: ["Guest not found"],
+      });
+    }
+    const session = await guestSessionService.getGuestSession(
+      propertyId,
+      guest._id,
+    );
+    if (session) {
+      return responseHandler(res, {
+        guestSession: session,
+      });
+    }
+    const newSession = await guestSessionService.create(propertyId, guest._id);
+    return responseHandler(res, {
+      guestSession: newSession,
+    });
+  } catch (e) {
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError(e.message));
+  }
+};
+
 module.exports = {
   getGuest,
   getWorkflow,
@@ -980,4 +1022,5 @@ module.exports = {
   updateCompleteReview,
   createDndModeRequest,
   getdndmodeRequestStatus,
+  getGuestByPhoneNumber,
 };

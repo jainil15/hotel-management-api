@@ -2,6 +2,7 @@ const { default: mongoose } = require("mongoose");
 const {
   CreateGuestValidationSchema,
   UpdateGuestValidationSchema,
+  GuestSelfRegistrationValidationSchema,
 } = require("../models/guest.model");
 const {
   messageType,
@@ -972,6 +973,304 @@ const getGuestAddonsRequests = async (req, res, next) => {
     return next(new InternalServerError());
   }
 };
+const sendOtp = async (req, res, next) => {
+  try {
+    const { propertyId } = req.params;
+    const guest = req.body;
+    const guestResult = GuestSelfRegistrationValidationSchema.safeParse(guest);
+    const existingGuest = await guestService.getGuestByPhoneNumber(
+      propertyId,
+      guest.countryCode,
+      guest.phoneNumber,
+    );
+
+    console.log("Existing Guest", existingGuest);
+    if (existingGuest) {
+      const existingGuestSession = await guestSessionService.findOne({
+        propertyId,
+        guestId: existingGuest._id,
+      });
+      return responseHandler(res, {
+        guestSessionId: existingGuestSession._id,
+      });
+    }
+    console.log(guestResult);
+    if (!guestResult.success) {
+      throw new ValidationError("Validation Error", {
+        ...guestResult.error.flatten().fieldErrors,
+      });
+    }
+    let twilioAccount = await twilioAccountService.getByPropertyId(propertyId);
+    const twilioClient = await twilioService.getTwilioClient(twilioAccount);
+    if (!twilioAccount) {
+      throw new NotFoundError("Twilio account not found", {
+        propertyId: ["Twilio account not found for this property"],
+      });
+    }
+    if (!guest.phoneNumber || !guest.countryCode) {
+      throw new ValidationError("Phone number is required", {
+        phoneNumber: ["Phone number is required"],
+      });
+    }
+    const property = await propertyService.find({ _id: propertyId });
+
+    if (!twilioAccount.verificationSid) {
+      const verificationService = await twilioClient.verify.v2.services.create({
+        friendlyName: property.name,
+      });
+      twilioAccount = await twilioAccountService.update(propertyId, {
+        verificationServiceSid: verificationService.sid,
+      });
+      console.log(twilioAccount);
+    }
+    console.log(twilioAccount.verificationServiceSid);
+    const verification = await twilioClient.verify.v2
+      .services(twilioAccount.verificationServiceSid)
+      .verifications.create({
+        channel: "sms",
+        to: `${guest.countryCode}${guest.phoneNumber}`,
+      });
+    console.log(verification);
+    return responseHandler(res, {});
+  } catch (e) {
+    console.log(e);
+    console.log("e.code = ", e.code);
+    if (e.code === 60200) {
+      return next(
+        new ValidationError("Invalid phone number", {
+          phoneNumber: ["Invalid phone number"],
+        }),
+      );
+    }
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError());
+  }
+};
+
+const verifyOtp = async (req, res, next) => {
+  try {
+    return responseHandler(res, {});
+  } catch (e) {
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError());
+  }
+};
+
+/**
+ * @param {import('express').Request} req - Request
+ * @param {import('express').Response} res - Response
+ * @param {import('express').NextFunction} next - Next Function
+ */
+const guestSelfRegistration = async (req, res, next) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    // TODO: add messageGuest
+    const guest = req.body;
+    const { propertyId } = req.params;
+    const twilioAccount =
+      await twilioAccountService.getByPropertyId(propertyId);
+    const twilioClient = await twilioService.getTwilioClient(twilioAccount);
+    if (guest.countryCode !== "+86") {
+      const verification = await twilioClient.verify.v2
+        .services(twilioAccount.verificationServiceSid)
+        .verificationChecks.create({
+          to: `${guest.countryCode}${guest.phoneNumber}`,
+          code: guest.otp,
+        });
+      if (verification.status !== "approved") {
+        throw new ValidationError("Invalid OTP", {
+          otp: ["Invalid OTP"],
+        });
+      }
+    }
+
+    const guestResult = GuestSelfRegistrationValidationSchema.safeParse(guest);
+    console.log(guestResult);
+    if (!guestResult.success) {
+      throw new ValidationError("Validation Error", {
+        ...guestResult.error.flatten().fieldErrors,
+      });
+    }
+
+    // const existingInHouseGuest = await guestService.findWithStatus(
+    //   {
+    //     phoneNumber: guest.phoneNumber,
+    //     countryCode: guest.countryCode,
+    //     propertyId: propertyId,
+    //   },
+    //   {
+    //     currentStatus: GUEST_CURRENT_STATUS.IN_HOUSE,
+    //     reservationStatus: RESERVATION_STATUS.CONFIRMED,
+    //   },
+    // );
+    // if (existingInHouseGuest.length > 0) {
+    //   throw new ValidationError("Guest already exists with this phone number", {
+    //     phoneNumber: ["Guest already exists with this phone number"],
+    //   });
+    // }
+    // const existingReservedGuest = await guestService.findWithStatus(
+    //   {
+    //     phoneNumber: guest.phoneNumber,
+    //     countryCode: guest.countryCode,
+    //     propertyId: propertyId,
+    //   },
+    //   {
+    //     currentStatus: GUEST_CURRENT_STATUS.RESERVED,
+    //     reservationStatus: RESERVATION_STATUS.CONFIRMED,
+    //   },
+    // );
+    // if (existingReservedGuest.length > 0) {
+    //   throw new ValidationError("Guest already exists with this phone number", {
+    //     phoneNumber: ["Guest already exists with this phone number"],
+    //   });
+    // }
+
+    // Check if status is valid
+    //if (!validateStatus(status)) {
+    //  throw new ValidationError("Invalid Status", {
+    //		currentStatus: "Invalid Status",
+    //	});
+    //}
+
+    // Create guest
+    const newGuest = await guestService.create(guest, propertyId, session);
+
+    // Create guest status
+    const newGuestStatus = await guestStatusService.create(
+      propertyId,
+      newGuest._id,
+      {
+        currentStatus: GUEST_CURRENT_STATUS.IN_HOUSE,
+        reservationStatus: RESERVATION_STATUS.CONFIRMED,
+      },
+      session,
+    );
+    // Create Guest Session
+    const guestSession = await guestSessionService.create(
+      propertyId,
+      newGuest._id,
+      session,
+    );
+    // Create chat list
+    const chatList = await chatListService.create(
+      propertyId,
+      newGuest._id,
+      session,
+    );
+
+    // todo: move to sms.service
+    // Send message to the guest
+    const { property } = await propertyService.getById(propertyId);
+    // const message = `Welcome to ${property.name}.\nYour guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`;
+    // await twilioService.sendAccessLink(
+    //   propertyId,
+    //   `${newGuest.countryCode + newGuest.phoneNumber}`,
+    //   message,
+    // );
+    // TODO: Workflow message trigger
+    // if (sendMessage === true) {
+    // }
+    //await session.commitTransaction();
+    //session.startTransaction();
+
+    // Send message to the guest according to the status
+    if (guest.phoneNumber && guest.countryCode) {
+      const messageTemplate =
+        await messageTemplateService.getByNameAndPropertyId(
+          propertyId,
+          guestStatusToTemplateOnCreate(newGuestStatus),
+        );
+      if (messageTemplate) {
+        const twilioAccount =
+          await twilioAccountService.getByPropertyId(propertyId);
+        const twilioSubClient =
+          await twilioService.getTwilioClient(twilioAccount);
+        const propertySetting = await settingService.getByPropertyId(
+          property._id,
+        );
+        const updatedMessageBody = modifyMessageTemplateBody(
+          messageTemplate,
+          newGuest,
+          property,
+          propertySetting,
+          `${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
+        );
+        const sentMessage = await smsService.send(
+          twilioSubClient,
+          `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
+          `${newGuest.countryCode}${newGuest.phoneNumber}`,
+          `${updatedMessageBody.message}`,
+        );
+        const newMessage = await messageService.create(
+          {
+            propertyId: propertyId,
+            guestId: newGuest._id,
+            senderId: propertyId,
+            receiverId: newGuest._id,
+            content: sentMessage.body,
+            messageSid: sentMessage.sid,
+            messageType: messageType.SMS,
+            messageTriggerType: messageTriggerType.AUTOMATIC,
+            status: sentMessage.status,
+          },
+          session,
+        );
+        const updatedChatList =
+          await chatListService.updateAndIncUnreadMessages(
+            propertyId,
+            newGuest._id,
+            {
+              latestMessage: newMessage._id,
+            },
+            session,
+            0,
+          );
+      }
+    }
+    await session.commitTransaction();
+    session.endSession();
+
+    // Trigger events
+    // Emit to guest list updated
+    req.app.io.to(`property:${propertyId}`).emit("guest:guestUpdate", {
+      guest: { ...newGuest._doc, status: { ...newGuestStatus._doc } },
+    });
+    // Emit to chat list updated
+    req.app.io.to(`property:${propertyId}`).emit("chatList:update", {
+      chatList: chatList,
+    });
+    // Emit to guest messages updated
+    req.app.io.to(`guest:${newGuest._id}`).emit("message:newMessage", {
+      message: {},
+    });
+
+    return responseHandler(
+      res,
+      {
+        guest: {
+          ...newGuest._doc,
+          status: { ...newGuestStatus._doc },
+          guestSessionId: guestSession._id,
+        },
+      },
+      201,
+      "Guest Created",
+    );
+  } catch (e) {
+    await session.abortTransaction();
+    session.endSession();
+    console.log(e);
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError(e.message));
+  }
+};
 
 module.exports = {
   getAll,
@@ -985,4 +1284,6 @@ module.exports = {
   getGuestData,
   guestedit,
   getGuestAddonsRequests,
+  guestSelfRegistration,
+  sendOtp,
 };

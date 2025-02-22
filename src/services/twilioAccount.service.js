@@ -7,9 +7,27 @@ const { TwilioAccount } = require("../models/twilioAccount.model");
  * @returns {Promise<TwilioAccount>} - The twilio account
  */
 const getByPropertyId = async (propertyId) => {
-	const twilioAccount = await TwilioAccount.findOne({ propertyId: propertyId });
-	
-	return twilioAccount;
+  const twilioAccount = await TwilioAccount.findOne({ propertyId: propertyId });
+
+  return twilioAccount;
+};
+
+/**
+ * Update twilio account
+ * @param {string} propertyId - The propertyId to filter twilio account
+ * @param {object} twilioAccount - The twilio account to update
+ * @returns {Promise<TwilioAccount>} - The updated twilio account
+ */
+const update = async (propertyId, twilioAccount) => {
+  const updatedTwilioAccount = await TwilioAccount.findOneAndUpdate(
+    { propertyId: propertyId },
+    twilioAccount,
+    { new: true },
+  );
+  if (!updatedTwilioAccount) {
+    throw new NotFoundError("Twilio account not found");
+  }
+  return updatedTwilioAccount;
 };
 
 /**
@@ -18,7 +36,7 @@ const getByPropertyId = async (propertyId) => {
  * @returns {Promise<TwilioAccount>} - The list of twilio account
  */
 const findOne = async (filter) => {
-	return await TwilioAccount.findOne(filter);
+  return await TwilioAccount.findOne(filter);
 };
 
-module.exports = { getByPropertyId, findOne };
+module.exports = { getByPropertyId, findOne, update };

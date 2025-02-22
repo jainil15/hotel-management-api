@@ -158,6 +158,7 @@ const getTollFreeVerificationStatus = async (req, res, next) => {
 
     return responseHandler(res, { ...tollFreeVerificationStatus });
   } catch (e) {
+    console.log(e);
     if (e instanceof APIError) {
       return next(e);
     }
