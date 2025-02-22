@@ -229,6 +229,7 @@ const GuestSelfRegistrationValidationSchema = z
     roomNumber: z.string().min(1).optional(),
     firstName: z.string().min(1),
     lastName: z.string().min(1),
+
     // draft: z.boolean().optional(),
   })
   .superRefine((args, ctx) => {

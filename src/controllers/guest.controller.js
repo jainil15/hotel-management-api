@@ -1075,16 +1075,18 @@ const guestSelfRegistration = async (req, res, next) => {
     const twilioAccount =
       await twilioAccountService.getByPropertyId(propertyId);
     const twilioClient = await twilioService.getTwilioClient(twilioAccount);
-    const verification = await twilioClient.verify.v2
-      .services(twilioAccount.verificationServiceSid)
-      .verificationChecks.create({
-        to: `${guest.countryCode}${guest.phoneNumber}`,
-        code: guest.otp,
-      });
-    if (verification.status !== "approved") {
-      throw new ValidationError("Invalid OTP", {
-        otp: ["Invalid OTP"],
-      });
+    if (guest.countryCode !== "+86") {
+      const verification = await twilioClient.verify.v2
+        .services(twilioAccount.verificationServiceSid)
+        .verificationChecks.create({
+          to: `${guest.countryCode}${guest.phoneNumber}`,
+          code: guest.otp,
+        });
+      if (verification.status !== "approved") {
+        throw new ValidationError("Invalid OTP", {
+          otp: ["Invalid OTP"],
+        });
+      }
     }
 
     const guestResult = GuestSelfRegistrationValidationSchema.safeParse(guest);
