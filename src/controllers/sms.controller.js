@@ -200,12 +200,22 @@ const status = async (req, res, next) => {
       messageStatus,
       session,
     );
+    const twilioAccount = await twilioAccountService.findOne({
+      sid: updatedMessage.twilioAccountId,
+    });
+    const guest = await guestService.getById(updatedMessage.guestId);
+    const property = await propertyService.getById(updatedMessage.propertyId);
     if (
       messageStatus === "undelivered" ||
       messageStatus === "failed" ||
       messageStatus === "sent"
     ) {
-      const mailMessage = `Message with sid ${messageSid} failed to deliver`;
+      const mailMessage = mailUtil.failedMessageTemplate(
+        property._id,
+        twilioAccount._id,
+        twilioAccount.phoneNumber,
+        guest.phoneNumber,
+      );
       const mail = mailUtil.sendMail(
         "jainilpatel115@gmail.com, jainilpatel145@gmail.com",
         "Failed to send sms",

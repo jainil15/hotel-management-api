@@ -10,14 +10,14 @@ const failedMessageTemplate = (propertyId, twilioAccountId, from, to) => {
   <table role="presentation" style="width: 100%; height: 100%; border: 0; cellpadding: 0; cellspacing: 0; background-color: #ffffff;">
     <tr>
       <td align="center" style="padding: 0; margin: 0;">
-        <table role="presentation" style="width: 600px; border: 0; cellpadding: 0; cellspacing: 0; text-align: center; color: #424242;">
+        <table role="presentation" style="width: 600px; border: 0; cellpadding: 0; cellspacing: 0; color: #424242;">
           <tr>
-            <td style="font-size: xx-large; padding: 20px;">
+            <td style="font-size: xx-large; padding: 10px;">
               Onelyk
             </td>
           </tr>
           <tr>
-            <td style="font-size: x-large; padding: 10px;">
+            <td style="font-size: x-large; padding: 10px; color:red">
               Failed to send message
             </td>
           </tr>
