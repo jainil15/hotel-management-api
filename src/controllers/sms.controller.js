@@ -7,6 +7,7 @@ const messageService = require("../services/message.service");
 const chatListService = require("../services/chatList.service");
 const twilio = require("twilio");
 const mailUtil = require("../utils/mail.util");
+const mailConstant = require("../constants/mail.constant");
 const { responseHandler } = require("../middlewares/response.middleware");
 const {
   APIError,
@@ -200,27 +201,39 @@ const status = async (req, res, next) => {
       messageStatus,
       session,
     );
-    const twilioAccount = await twilioAccountService.findOne({
-      sid: updatedMessage.twilioAccountId,
-    });
     const guest = await guestService.getById(
       updatedMessage.guestId,
       updatedMessage.propertyId,
     );
-    const property = await propertyService.getById(updatedMessage.propertyId);
-    if (
-      messageStatus === "undelivered" ||
-      messageStatus === "failed" ||
-      messageStatus === "sent"
-    ) {
+    if (!guest) {
+      throw new NotFoundError("Guest not found", {
+        guestId: ["Guest not found for the given id"],
+      });
+    }
+    const property = await propertyService.getById(guest.propertyId);
+    if (!property) {
+      throw new NotFoundError("Property not found", {
+        propertyId: ["Property not found for the given id"],
+      });
+    }
+    console.log("Property: ", property);
+    const twilioAccount = await twilioAccountService.findOne({
+      propertyId: property.property._id,
+    });
+    if (!twilioAccount) {
+      throw new NotFoundError("Twilio Account not found", {
+        sid: ["Twilio account found for the given propertyId", property._id],
+      });
+    }
+    if (messageStatus === "undelivered" || messageStatus === "failed") {
       const mailMessage = mailUtil.failedMessageTemplate(
-        property._id,
+        property.property._id,
         twilioAccount._id,
         twilioAccount.phoneNumber,
         guest.phoneNumber,
       );
       const mail = mailUtil.sendMail(
-        "jainilpatel115@gmail.com, jainilpatel145@gmail.com",
+        mailConstant.adminMails.join(","),
         "Failed to send sms",
         mailMessage,
       );

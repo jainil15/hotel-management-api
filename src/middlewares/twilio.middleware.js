@@ -63,7 +63,8 @@ const twilioAuthV2 = async (req, res, next) => {
     const valid = twilio.validateRequest(
       twilioAccount.authToken,
       twilioSignature,
-      `${process.env.TWILIO_CALLBACK_URL}${req.originalUrl}`,
+      // `${process.env.TWILIO_CALLBACK_URL}${req.originalUrl}`,
+      process.env.TWILIO_STATUS_CALLBACK,
       req.body,
     );
 
