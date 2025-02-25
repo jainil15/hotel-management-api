@@ -32,6 +32,7 @@ const sendsms = async (req, res, next) => {
       body: result.data.content,
       from: property.countryCode + property.phoneNumber,
       to: guest.countryCode + guest.phoneNumber,
+      statusCallback: process.env.TWILIO_STATUS_CALLBACK,
     });
 
     const newMessage = await Message.create({
@@ -87,6 +88,7 @@ const incomingMessage = async (req, res, next) => {
 // useless
 const errorLogging = async (req, res, next) => {
   try {
+    console.log("Error");
     return res.status(200).json({ result: { message: "Error received" } });
   } catch (e) {
     return res

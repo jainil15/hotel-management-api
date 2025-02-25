@@ -24,7 +24,7 @@ router.post(
   authenticateToken,
   checkPropertyAccess,
   checkPermissions("admin"),
-  createSubaccount
+  createSubaccount,
 );
 
 router.post(
@@ -32,7 +32,7 @@ router.post(
   authenticateToken,
   checkPropertyAccess,
   checkPermissions("admin"),
-  buyPhoneNumber
+  buyPhoneNumber,
 );
 
 router.get(
@@ -40,7 +40,7 @@ router.get(
   authenticateToken,
   checkPropertyAccess,
   checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
-  getTollFreeVerificationStatus
+  getTollFreeVerificationStatus,
 );
 
 router.get(
@@ -48,7 +48,7 @@ router.get(
   authenticateToken,
   checkPropertyAccess,
   checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
-  twilioController.isTwilioSetup
+  twilioController.isTwilioSetup,
 );
 
 router.get(
@@ -56,7 +56,7 @@ router.get(
   authenticateToken,
   checkPropertyAccess,
   checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
-  twilioController.subaccountBilling
+  twilioController.subaccountBilling,
 );
 
 // Resubmit Toll-Free Verification
@@ -65,7 +65,7 @@ router.post(
   authenticateToken,
   checkPropertyAccess,
   checkPermissions([ROLE.ADMIN]), // Only allow admin
-  resubmitTollFreeVerification // Use the controller function
+  resubmitTollFreeVerification, // Use the controller function
 );
 
 module.exports = router;

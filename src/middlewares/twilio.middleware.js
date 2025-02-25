@@ -1,12 +1,13 @@
 const {
-	UnauthorizedError,
-	APIError,
-	InternalServerError,
-	NotFoundError,
+  UnauthorizedError,
+  APIError,
+  InternalServerError,
+  NotFoundError,
 } = require("../lib/CustomErrors");
 const twilio = require("twilio");
 const twilioAccountService = require("../services/twilioAccount.service");
 require("dotenv").config();
+
 /**
  * Twilio Auth Middleware
  * @param {import('express').Request} req - request object
@@ -15,30 +16,30 @@ require("dotenv").config();
  * @returns {void}
  */
 const twilioAuth = async (req, res, next) => {
-	try {
-		const twilioSignature = req.headers["x-twilio-signature"];
+  try {
+    const twilioSignature = req.headers["x-twilio-signature"];
 
-		const twilioAccount = await twilioAccountService.findOne({
-			sid: req.body.AccountSid,
-		});
+    const twilioAccount = await twilioAccountService.findOne({
+      sid: req.body.AccountSid,
+    });
 
-		const valid = twilio.validateRequest(
-			twilioAccount.authToken,
-			twilioSignature,
-			process.env.TWILIO_STATUS_CALLBACK,
-			req.body,
-		);
+    const valid = twilio.validateRequest(
+      twilioAccount.authToken,
+      twilioSignature,
+      process.env.TWILIO_STATUS_CALLBACK,
+      req.body,
+    );
 
-		if (!valid) {
-			throw new UnauthorizedError("Unauthorized", {});
-		}
-		next();
-	} catch (e) {
-		if (e instanceof APIError) {
-			return next(e);
-		}
-		return next(new InternalServerError(e.message));
-	}
+    if (!valid) {
+      throw new UnauthorizedError("Unauthorized", {});
+    }
+    next();
+  } catch (e) {
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError(e.message));
+  }
 };
 
 /**
@@ -49,32 +50,32 @@ const twilioAuth = async (req, res, next) => {
  * @returns {void}
  */
 const twilioAuthV2 = async (req, res, next) => {
-	try {
-		const twilioSignature = req.headers["x-twilio-signature"];
-		const twilioAccount = await twilioAccountService.findOne({
-			sid: req.body.AccountSid,
-		});
+  try {
+    const twilioSignature = req.headers["x-twilio-signature"];
+    const twilioAccount = await twilioAccountService.findOne({
+      sid: req.body.AccountSid,
+    });
 
-		if (!twilioAccount) {
-			throw new NotFoundError("Twilio Account not found", {});
-		}
+    if (!twilioAccount) {
+      throw new NotFoundError("Twilio Account not found", {});
+    }
 
-		const valid = twilio.validateRequest(
-			twilioAccount.authToken,
-			twilioSignature,
-			`${process.env.TWILIO_CALLBACK_URL}${req.originalUrl}`,
-			req.body,
-		);
+    const valid = twilio.validateRequest(
+      twilioAccount.authToken,
+      twilioSignature,
+      `${process.env.TWILIO_CALLBACK_URL}${req.originalUrl}`,
+      req.body,
+    );
 
-		if (!valid) {
-			throw new UnauthorizedError("Unauthorized", {});
-		}
-		next();
-	} catch (e) {
-		if (e instanceof APIError) {
-			return next(e);
-		}
-		return next(new InternalServerError(e.message));
-	}
+    if (!valid) {
+      throw new UnauthorizedError("Unauthorized", { token: "Invalid Token" });
+    }
+    next();
+  } catch (e) {
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError(e.message));
+  }
 };
 module.exports = { twilioAuth, twilioAuthV2 };

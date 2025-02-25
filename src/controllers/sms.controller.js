@@ -6,6 +6,7 @@ const propertyService = require("../services/property.service");
 const messageService = require("../services/message.service");
 const chatListService = require("../services/chatList.service");
 const twilio = require("twilio");
+const mailUtil = require("../utils/mail.util");
 const { responseHandler } = require("../middlewares/response.middleware");
 const {
   APIError,
@@ -199,7 +200,22 @@ const status = async (req, res, next) => {
       messageStatus,
       session,
     );
+    if (
+      messageStatus === "undelivered" ||
+      messageStatus === "failed" ||
+      messageStatus === "sent"
+    ) {
+      const mailMessage = `Message with sid ${messageSid} failed to deliver`;
+      const mail = mailUtil.sendMail(
+        "jainilpatel115@gmail.com, jainilpatel145@gmail.com",
+        "Failed to send sms",
+        mailMessage,
+      );
+      logger.error(mailMessage);
+    }
 
+    console.log("Request: ", req.body);
+    console.log("Message Status: ", messageStatus);
     await session.commitTransaction();
     session.endSession();
     req.app.io
