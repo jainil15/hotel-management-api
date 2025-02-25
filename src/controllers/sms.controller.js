@@ -203,7 +203,10 @@ const status = async (req, res, next) => {
     const twilioAccount = await twilioAccountService.findOne({
       sid: updatedMessage.twilioAccountId,
     });
-    const guest = await guestService.getById(updatedMessage.guestId);
+    const guest = await guestService.getById(
+      updatedMessage.guestId,
+      updatedMessage.propertyId,
+    );
     const property = await propertyService.getById(updatedMessage.propertyId);
     if (
       messageStatus === "undelivered" ||
