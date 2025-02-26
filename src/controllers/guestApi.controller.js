@@ -30,7 +30,10 @@ const messageService = require("../services/message.service");
 const chatListService = require("../services/chatList.service");
 const preArrivalService = require("../services/preArrival.service");
 const preArrivalFlowService = require("../services/preArrivalFlow.service");
-const { PRE_ARRIVAL_STATUS } = require("../constants/guestStatus.contant");
+const {
+  PRE_ARRIVAL_STATUS,
+  GUEST_CURRENT_STATUS,
+} = require("../constants/guestStatus.contant");
 const { ROLE } = require("../constants/role.constant");
 const {
   validatePreArrivalFlow,
@@ -969,6 +972,8 @@ const getdndmodeRequestStatus = async (req, res, next) => {
  * @param {import('express').NextFunction} next - Next function
  */
 const getGuestByPhoneNumber = async (req, res, next) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
   try {
     const { propertyId } = req.params;
     const { phoneNumber, countryCode } = req.body;
@@ -982,20 +987,34 @@ const getGuestByPhoneNumber = async (req, res, next) => {
         guest: ["Guest not found"],
       });
     }
-    const session = await guestSessionService.getGuestSession(
+    if (guest.status.currentStatus === GUEST_CURRENT_STATUS.RESERVED) {
+      const updatedGuest = await guestStatusService.update(
+        guest._id,
+        { currentStatus: GUEST_CURRENT_STATUS.IN_HOUSE },
+        session,
+      );
+    }
+    const guestSession = await guestSessionService.getGuestSession(
       propertyId,
       guest._id,
     );
-    if (session) {
+
+    if (guestSession) {
+      await session.commitTransaction();
+      session.endSession();
       return responseHandler(res, {
-        guestSession: session,
+        guestSession: guestSession,
       });
     }
     const newSession = await guestSessionService.create(propertyId, guest._id);
+    await session.commitTransaction();
+    session.endSession();
     return responseHandler(res, {
       guestSession: newSession,
     });
   } catch (e) {
+    await session.abortTransaction();
+    session.endSession();
     if (e instanceof APIError) {
       return next(e);
     }

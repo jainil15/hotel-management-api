@@ -36,6 +36,19 @@ const checkInOutAddOnsSchema = new Schema(
   },
   {},
 );
+const houseKeepingAddOnsSchema = new Schema(
+  {
+    name: { type: String, required: true },
+    description: { type: String },
+    addonNote: { type: String },
+    enabled: { type: Boolean, default: true },
+    default: { type: Boolean, default: true },
+    image: {
+      type: [String],
+    },
+  },
+  {},
+);
 
 const addOnsFlowSchema = new Schema(
   {
@@ -78,6 +91,21 @@ const addOnsFlowSchema = new Schema(
             "https://onelyk-images-bucket.s3.amazonaws.com/addOns/late-check-out-in-hotel.jpg",
           ],
           default: true,
+        },
+      ],
+    },
+    houseKeepingAddOns: {
+      type: [houseKeepingAddOnsSchema],
+      default: [
+        {
+          name: "Housekeeping",
+          description:
+            "Housekeeping services include cleaning and tidying guest rooms, making beds, changing bed linens, and replenishing towels and toiletries.",
+          enabled: true,
+          default: true,
+          image: [
+            "https://onelyk-images-bucket.s3.amazonaws.com/addOns/housekeeping.jpg",
+          ],
         },
       ],
     },

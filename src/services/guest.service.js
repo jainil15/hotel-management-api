@@ -9,6 +9,7 @@ const { AddOnsRequest } = require("../models/addOnsRequest.model");
 const { AddOnsFlow } = require("../models/addOnsFlow.model");
 const addOnsFlowService = require("../services/addOnsFlow.service");
 const { getByPropertyIdAndGuestId } = require("./addOnsRequest.service");
+const { GUEST_CURRENT_STATUS } = require("../constants/guestStatus.contant");
 /**
  * Create a new guest
  * @param {import('../models/guest.model').GuestType} guest - guest object
@@ -349,6 +350,14 @@ const getGuestByPhoneNumber = async (propertyId, countryCode, phoneNumber) => {
         localField: "_id",
         foreignField: "guestId",
         as: "status",
+      },
+    },
+    {
+      $match: {
+        $or: [
+          { "status.currentStatus": GUEST_CURRENT_STATUS.IN_HOUSE },
+          { "status.currentStatus": GUEST_CURRENT_STATUS.RESERVED },
+        ],
       },
     },
     {
