@@ -21,6 +21,15 @@ const create = async (propertyId, addOnsFlow, session) => {
   return newAddOnsFlow;
 };
 
+const updateToDefault = async (propertyId, addOnsFlow, session) => {
+  const updatedAddOnsFlow = await AddOnsFlow.findOneAndUpdate(
+    { propertyId },
+    addOnsFlow,
+    { new: true, session },
+  );
+  return updatedAddOnsFlow;
+};
+
 const update = async (propertyId, addOnsFlow, session, files) => {
   const client = new S3Client(awsS3Config);
   const updatedAddOns = { ...addOnsFlow };
@@ -108,4 +117,5 @@ module.exports = {
   remove,
   update,
   findOneAddOn,
+  updateToDefault,
 };

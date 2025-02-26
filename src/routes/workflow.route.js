@@ -1,5 +1,3 @@
-const router = require("express").Router();
-const { ROLE } = require("../constants/role.constant");
 const workflowController = require("../controllers/workflow.controller");
 const { authenticateToken } = require("../middlewares/jwt.middleware");
 const {
@@ -39,6 +37,11 @@ router.get(
   checkPropertyAccess,
   checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
   workflowController.getByPropertyId,
+);
+
+router.post(
+  "/default/:propertyId/houseService",
+  workflowController.createDefaultHouseKeepingFlow,
 );
 
 module.exports = router;

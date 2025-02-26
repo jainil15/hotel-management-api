@@ -227,9 +227,47 @@ const update = async (req, res, next) => {
   }
 };
 
+/**
+ * @deprecated
+ */
+const createDefaultHouseKeepingFlow = async (req, res, next) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const { propertyId } = req.params;
+    const houseKeepingAddOns = {
+      name: "House Keeping",
+      description:
+        "Housekeeping services include cleaning and tidying guest rooms, making beds, changing bed linens, and replenishing towels and toiletries.",
+      enabled: true,
+      default: true,
+      image: [
+        "https://onelyk-images-bucket.s3.amazonaws.com/addOns/house-keeping.jpg",
+      ],
+    };
+    const updatedFlow = await addOnsFlowService.updateToDefault(
+      propertyId,
+      { houseKeepingAddOns: houseKeepingAddOns },
+      session,
+    );
+    await session.commitTransaction();
+    session.endSession();
+    return responseHandler(res, { flow: updatedFlow });
+  } catch (e) {
+    await session.abortTransaction();
+    session.endSession();
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError(e.message));
+  }
+};
+
 module.exports = {
   createDefaults,
   removeDefaults,
   getByPropertyId,
+
   update,
+  createDefaultHouseKeepingFlow,
 };

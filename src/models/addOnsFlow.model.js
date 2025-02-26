@@ -40,7 +40,6 @@ const houseKeepingAddOnsSchema = new Schema(
   {
     name: { type: String, required: true },
     description: { type: String },
-    addonNote: { type: String },
     enabled: { type: Boolean, default: true },
     default: { type: Boolean, default: true },
     image: {
@@ -95,19 +94,17 @@ const addOnsFlowSchema = new Schema(
       ],
     },
     houseKeepingAddOns: {
-      type: [houseKeepingAddOnsSchema],
-      default: [
-        {
-          name: "Housekeeping",
-          description:
-            "Housekeeping services include cleaning and tidying guest rooms, making beds, changing bed linens, and replenishing towels and toiletries.",
-          enabled: true,
-          default: true,
-          image: [
-            "https://onelyk-images-bucket.s3.amazonaws.com/addOns/housekeeping.jpg",
-          ],
-        },
-      ],
+      type: houseKeepingAddOnsSchema,
+      default: {
+        name: "House Keeping",
+        description:
+          "Housekeeping services include cleaning and tidying guest rooms, making beds, changing bed linens, and replenishing towels and toiletries.",
+        enabled: true,
+        default: true,
+        image: [
+          "https://onelyk-images-bucket.s3.amazonaws.com/addOns/house-keeping.jpg",
+        ],
+      },
     },
   },
   { timestamps: true },
@@ -182,6 +179,18 @@ const UpdateAddOnsFlowValidationSchema = z.object({
         default: z.boolean().optional(),
         addonNote: z.string().optional(),
         // image: z.string().optional(),
+      }),
+    )
+    .optional(),
+  houseKeepingAddons: z
+    .array(
+      z.object({
+        name: z.string().optional(),
+        description: z.string().optional(),
+        enabled: z.boolean().optional(),
+        default: z.boolean().optional(),
+        addonNote: z.string().optional(),
+        image: z.any(),
       }),
     )
     .optional(),

@@ -1,8 +1,17 @@
 const { default: mongoose } = require("mongoose");
 const { responseHandler } = require("../middlewares/response.middleware");
-const { CreateFlowSchemaValidation, Flow, UpdateFlowSchemaValidation } = require("../models/flow.model");
+const {
+  CreateFlowSchemaValidation,
+  Flow,
+  UpdateFlowSchemaValidation,
+} = require("../models/flow.model");
 const flowService = require("../services/flow.service");
-const { ValidationError, InternalServerError,APIError } = require("../lib/CustomErrors");
+const addOnsFlowService = require("../services/addOnsFlow.service");
+const {
+  ValidationError,
+  InternalServerError,
+  APIError,
+} = require("../lib/CustomErrors");
 
 const create = async (req, res, next) => {
   const session = await mongoose.startSession();
@@ -20,7 +29,7 @@ const create = async (req, res, next) => {
     const newFlow = await flowService.create(propertyId, flowResult.data);
     await session.commitTransaction();
     session.endSession();
-    return responseHandler(res, { flow: newFlow },201,"Flow Created");
+    return responseHandler(res, { flow: newFlow }, 201, "Flow Created");
   } catch (e) {
     await session.abortTransaction();
     session.endSession();
@@ -32,19 +41,19 @@ const create = async (req, res, next) => {
 };
 
 const getCustomFlow = async (req, res, next) => {
-  try{
+  try {
     const { propertyId } = req.params;
-    const customFlow = await flowService.getAllByPropertyId(propertyId)
+    const customFlow = await flowService.getAllByPropertyId(propertyId);
     return responseHandler(res, {
-      customFlow
+      customFlow,
     });
-  } catch(error) {
+  } catch (error) {
     if (e instanceof APIError) {
       return next(e);
     }
     return next(new InternalServerError(e.message));
   }
-}
+};
 
 const update = async (req, res, next) => {
   const session = await mongoose.startSession();
@@ -60,7 +69,11 @@ const update = async (req, res, next) => {
       );
     }
     //console.log("DATA",flowResult.data)
-    const updatedFlow = await flowService.update(flow._id, flowResult.data,session);
+    const updatedFlow = await flowService.update(
+      flow._id,
+      flowResult.data,
+      session,
+    );
     // console.log("Updated Flow    ",updatedFlow)
     await session.commitTransaction();
     session.endSession();
@@ -75,4 +88,8 @@ const update = async (req, res, next) => {
   }
 };
 
-module.exports = { create, getCustomFlow, update };
+module.exports = {
+  create,
+  getCustomFlow,
+  update,
+};
