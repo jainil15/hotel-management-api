@@ -10,6 +10,7 @@ const guestService = require("../services/guest.service");
 const twilioAccountService = require("../services/twilioAccount.service");
 const twilioService = require("../services/twilio.service");
 const { REQUEST_STATUS } = require("../constants/guestStatus.contant");
+const checkInOutRequestService = require("../services/checkInOutRequest.service");
 const {
   guestStatusToTemplate,
   guestStatusToTemplateOnUpdate,
@@ -97,7 +98,6 @@ const update = async (req, res, next) => {
         `${oldGuest.countryCode}${oldGuest.phoneNumber}`,
         `Your request for ${existingAddOnsRequest.name} addon is ${requestStatus.toLowerCase()}`,
       );
-
       // Create the new message
       newMessage = await messageService.create(
         {
@@ -169,6 +169,7 @@ const getAllByPropertyId = async (req, res, next) => {
     );
     return responseHandler(res, { addOnsRequests });
   } catch (e) {
+    console.log(e);
     if (e instanceof APIError) {
       return next(e);
     }

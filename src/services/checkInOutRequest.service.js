@@ -213,6 +213,19 @@ const updateFieldByPropertyIdAndGuestId = async (
   }
 };
 
+const deleteCheckInOutRequest = async (
+  propertyId,
+  guestId,
+  requestId,
+  session,
+) => {
+  const deletedCheckInOutRequest = await CheckInOutRequest.findOneAndDelete({
+    propertyId: propertyId,
+    guestId: guestId,
+    _id: requestId,
+  }).session(session);
+  return deletedCheckInOutRequest;
+};
 module.exports = {
   create,
   getByPropertyId,
@@ -221,4 +234,5 @@ module.exports = {
   updateRequestStatus,
   getByRequestType,
   updateFieldByPropertyIdAndGuestId,
+  deleteCheckInOutRequest,
 };

@@ -244,8 +244,12 @@ const getGuestAddonsRequests = async (propertyId, requestStatus) => {
         (addon) =>
           addon._id.toString() === req?.checkInOutRequestId?.toString(),
       );
+      if (!req.guestId) {
+        console.log(req);
+        return req;
+      }
       req.guestId.status = await GuestStatus.findOne({
-        guestId: req.guestId._id,
+        guestId: req?.guestId?._id,
       });
       return { ...req, addOnData };
     }),
@@ -264,6 +268,10 @@ const getGuestAddonsRequests = async (propertyId, requestStatus) => {
       const addOnData = propertyAddons?.customAddOns?.find(
         (addon) => addon._id.toString() === req.addOnsId.toString(),
       );
+      if (!req.guestId) {
+        console.log(req);
+        return req;
+      }
       req.guestId.status = await GuestStatus.findOne({
         guestId: req.guestId._id,
       });
@@ -274,6 +282,164 @@ const getGuestAddonsRequests = async (propertyId, requestStatus) => {
   const requests = [...checkInOutRequests, ...customAddonsRequests];
 
   return { requests, propertyAddons };
+};
+
+const getGuestAddonsRequestsv2 = async (propertyId, requestStatus) => {
+  // Pipeline for checkInOutRequests
+  const checkInOutPipeline = [
+    {
+      $match: {
+        propertyId: propertyId,
+        requestStatus: requestStatus,
+      },
+    },
+    { $sort: { createdAt: -1 } },
+    {
+      $lookup: {
+        from: "guests",
+        localField: "guestId",
+        foreignField: "_id",
+        as: "guest",
+      },
+    },
+    { $unwind: "$guest" },
+    {
+      $lookup: {
+        from: "gueststatuses",
+        localField: "guestId",
+        foreignField: "guestId",
+        as: "guestStatus",
+      },
+    },
+    {
+      $unwind: { path: "$guestStatus", preserveNullAndEmptyArrays: true },
+    },
+    {
+      // Lookup the AddOnsFlow document to get checkInOutAddOns for this property
+      $lookup: {
+        from: "addOnsFlows",
+        let: { pid: "$propertyId" },
+        pipeline: [
+          { $match: { $expr: { $eq: ["$propertyId", "$$pid"] } } },
+          { $project: { checkInOutAddOns: 1 } },
+        ],
+        as: "propertyAddons",
+      },
+    },
+    {
+      $addFields: {
+        propertyAddons: { $arrayElemAt: ["$propertyAddons", 0] },
+      },
+    },
+    {
+      $addFields: {
+        addOnData: {
+          $arrayElemAt: [
+            {
+              $filter: {
+                input: "$propertyAddons.checkInOutAddOns",
+                as: "addon",
+                // Compare the addon _id with the checkInOutRequestId from the request
+                cond: { $eq: ["$$addon._id", "$checkInOutRequestId"] },
+              },
+            },
+            0,
+          ],
+        },
+      },
+    },
+    {
+      $project: {
+        propertyAddons: 0,
+      },
+    },
+  ];
+
+  // Pipeline for custom add‑on requests
+  const customAddOnsPipeline = [
+    {
+      $match: {
+        propertyId: propertyId,
+        requestStatus: requestStatus,
+      },
+    },
+    { $sort: { createdAt: -1 } },
+    {
+      $lookup: {
+        from: "guests",
+        localField: "guestId",
+        foreignField: "_id",
+        as: "guest",
+      },
+    },
+    { $unwind: "$guest" },
+    {
+      $lookup: {
+        from: "gueststatuses",
+        localField: "guestId",
+        foreignField: "guestId",
+        as: "guestStatus",
+      },
+    },
+    {
+      $unwind: { path: "$guestStatus", preserveNullAndEmptyArrays: true },
+    },
+    {
+      // Lookup the AddOnsFlow document to get customAddOns for this property
+      $lookup: {
+        from: "addOnsFlows",
+        let: { pid: "$propertyId" },
+        pipeline: [
+          { $match: { $expr: { $eq: ["$propertyId", "$$pid"] } } },
+          { $project: { customAddOns: 1 } },
+        ],
+        as: "propertyAddons",
+      },
+    },
+    {
+      $addFields: {
+        propertyAddons: { $arrayElemAt: ["$propertyAddons", 0] },
+      },
+    },
+    {
+      $addFields: {
+        addOnData: {
+          $arrayElemAt: [
+            {
+              $filter: {
+                input: "$propertyAddons.customAddOns",
+                as: "addon",
+                // Compare the addon _id with the addOnsId from the request
+                cond: { $eq: ["$$addon._id", "$addOnsId"] },
+              },
+            },
+            0,
+          ],
+        },
+      },
+    },
+    {
+      $project: {
+        propertyAddons: 0,
+      },
+    },
+  ];
+
+  // Combine both pipelines using unionWith (run the first and union the second)
+  const finalPipeline = [
+    ...checkInOutPipeline,
+    {
+      $unionWith: {
+        coll: "addOnsRequests", // Ensure this is the correct collection name for custom add-on requests
+        pipeline: customAddOnsPipeline,
+      },
+    },
+    // Optionally, sort the final results
+    { $sort: { createdAt: -1 } },
+  ];
+  const requests = await AddOnsRequest.aggregate(finalPipeline);
+  console.log(requests);
+  return requests;
 };
 
 const createDndRequest = async (propertyId, guestId, dndmode, session) => {
@@ -413,4 +579,5 @@ module.exports = {
   getGuestDndStatus,
   getByPropertyIdAndGuestId,
   getGuestByPhoneNumber,
+  getGuestAddonsRequestsv2,
 };

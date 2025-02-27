@@ -105,6 +105,13 @@ router.patch(
   checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
   guestedit,
 );
+router.delete(
+  "/addons/:propertyId/:guestId/:requestId",
+  authenticateToken,
+  checkPropertyAccess,
+  checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
+  guestController.deleteAddOnsRequest,
+);
 
 // Temp: Route for get guest details
 // Insecure

@@ -9,6 +9,7 @@ const {
   messageTriggerType,
 } = require("../constants/message.constant");
 const messageTemplateService = require("../services/messageTemplate.service");
+const addOnsRequestService = require("../services/addOnsRequest.service");
 const messageService = require("../services/message.service");
 const smsService = require("../services/sms.service");
 const guestService = require("../services/guest.service");
@@ -967,6 +968,7 @@ const getGuestAddonsRequests = async (req, res, next) => {
       propertyAddons,
     });
   } catch (e) {
+    console.log(e);
     if (e instanceof APIError) {
       return next(e);
     }
@@ -1271,6 +1273,51 @@ const guestSelfRegistration = async (req, res, next) => {
     return next(new InternalServerError(e.message));
   }
 };
+const deleteAddOnsRequest = async (req, res, next) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const { propertyId, guestId, requestId } = req.params;
+    const { requestType } = req.query;
+    if (
+      requestType === "extendStay" ||
+      requestType === "earlyCheckIn" ||
+      requestType === "lateCheckOut"
+    ) {
+      const deletedCheckInOutRequest =
+        await checkInOutRequestService.deleteCheckInOutRequest(
+          propertyId,
+          guestId,
+          requestId,
+          session,
+        );
+    } else if (requestType === "addOns") {
+      const deletedAddOnsRequest =
+        await addOnsRequestService.deleteAddOnsRequest(
+          propertyId,
+          guestId,
+          requestId,
+          session,
+        );
+    } else {
+      throw new NotFoundError("Addon type not found", {
+        addonType: requestType,
+      });
+    }
+    req.app.io.to(`property:${propertyId}`).emit("request:update", {});
+    await session.commitTransaction();
+    session.endSession();
+    return responseHandler(res, { message: "Successfully deleted" });
+  } catch (e) {
+    console.log(e);
+    await session.abortTransaction();
+    session.endSession();
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError(e.message));
+  }
+};
 
 module.exports = {
   getAll,
@@ -1286,4 +1333,5 @@ module.exports = {
   getGuestAddonsRequests,
   guestSelfRegistration,
   sendOtp,
+  deleteAddOnsRequest,
 };

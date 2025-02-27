@@ -196,6 +196,14 @@ const getByPropertyIdAndGuestId = async (propertyId, guestId) => {
   });
   return addOnRequest;
 };
+const deleteAddOnsRequest = async (propertyId, guestId, addOnsId) => {
+  const addOnsRequest = await AddOnsRequest.deleteOne({
+    propertyId: propertyId,
+    guestId: guestId,
+    _id: addOnsId,
+  });
+  return addOnsRequest;
+};
 
 module.exports = {
   create,
@@ -205,4 +213,5 @@ module.exports = {
   getAllByPropertyId,
   updateAllByGuestId,
   getByPropertyIdAndGuestId,
+  deleteAddOnsRequest,
 };
