@@ -108,6 +108,9 @@ const findOneAddOn = async (propertyId, addOnsId) => {
   addOn = addOnsFlow.checkInOutAddOns.find(
     (addOns) => addOns._id.toString() === addOnsId,
   );
+  addOn = addOnsFlow.houseKeepingAddOns.find(
+    (addOns) => addOns._id.toString() === addOnsId,
+  );
   return addOn;
 };
 
