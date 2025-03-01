@@ -1,5 +1,6 @@
 const houseKeepingService = require("../services/houseKeepingRequest.service");
 const { default: mongoose } = require("mongoose");
+const propertyService = require("../services/property.service");
 const {
   houseKeepingRequestMailTemplate,
   sendMail,
@@ -40,6 +41,10 @@ const create = async (req, res, next) => {
     if (new Date(guest.checkIn) > new Date()) {
       throw new ValidationError("Guest has not checked in yet", {});
     }
+    const property = await propertyService.getById(propertyId);
+    if (!property.property) {
+      throw new NotFoundError("Property not found", {});
+    }
 
     const newHouseKeepingRequest = await houseKeepingService.create(
       propertyId,
@@ -47,10 +52,10 @@ const create = async (req, res, next) => {
       request,
       session,
     );
-    console.log(guest);
+    console.log(property.property.email);
     const message = houseKeepingRequestMailTemplate(guest);
     sendMail(
-      "jainilpatel115@gmail.com",
+      property.property.email,
       "House Keeping Request",
       message,
       "House Keeping Request",
