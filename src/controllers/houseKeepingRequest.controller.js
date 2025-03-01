@@ -55,8 +55,7 @@ const create = async (req, res, next) => {
     console.log(property.property.email);
     const message = houseKeepingRequestMailTemplate(guest);
     sendMail(
-      // property.property.email,
-      "jainilpatel115@gmail.com",
+      property.property.email,
       "Request for house keeping",
       message,
       "House Keeping Request",
