@@ -79,7 +79,7 @@ const houseKeepingRequestMailTemplate = (guest) => {
           </tr>
           <tr>
             <td style="font-size: large; padding: 10px;">
-              You have recevied new house keeping request for ${guest.roomNumber}. Click <a href="https://testhotel.onelyk.com/dashboard">link</a> to accept the request
+              You have recevied new house keeping request for ${guest.roomNumber}. Click <a href="https://testhotel.onelyk.com/dashboard?openAddOnsRequest=true">link</a> to accept the request
             </td>
           </tr>
         </table>
