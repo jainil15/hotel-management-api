@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const guestApiController = require("../controllers/guestApi.controller");
+const houseKeepingRequestController = require("../controllers/houseKeepingRequest.controller");
 const {
   authenticateGuestSession,
 } = require("../middlewares/guestAccess.middleware");
@@ -33,6 +34,7 @@ router.patch("/review", guestApiController.updateReview);
 router.patch("/complete-review", guestApiController.updateCompleteReview);
 router.post("/addOnsRequest", guestApiController.createAddOnsRequest);
 router.post("/dndmodeRequest", guestApiController.createDndModeRequest);
+router.post("/houseKeepingRequest", houseKeepingRequestController.create);
 guestApiRouter.use("/:guestSessionId", authenticateGuestSession, router);
 
 module.exports = guestApiRouter;

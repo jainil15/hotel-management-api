@@ -12,6 +12,7 @@ const {
   getCheckInOutPendingGuests, // Newly added
   getGuestAddonsRequests,
 } = require("../controllers/guest.controller");
+const houseKeepingRequestController = require("../controllers/houseKeepingRequest.controller");
 
 const guestController = require("../controllers/guest.controller");
 const guestApiController = require("../controllers/guestApi.controller");
@@ -122,6 +123,10 @@ router.post(
 router.post(
   "/guestRegistration/:propertyId",
   guestController.guestSelfRegistration,
+);
+router.patch(
+  "/houseKeepingRequest/:propertyId/:guestId/:requestId",
+  houseKeepingRequestController.updateStatus,
 );
 router.post("/sendOtp/:propertyId", guestController.sendOtp);
 

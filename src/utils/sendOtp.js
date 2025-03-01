@@ -9,7 +9,7 @@ require("dotenv").config();
  * @returns {string} - The email template
  */
 const generateTemplate = (otp) => {
-	return `
+  return `
 <html>
 <body style="font-family: Helvetica, Arial, sans-serif; margin: 0px; padding: 0px; background-color: #ffffff;">
   <table role="presentation" style="width: 100%; height: 100%; border: 0; cellpadding: 0; cellspacing: 0; background-color: #ffffff;">
@@ -58,19 +58,19 @@ const generateTemplate = (otp) => {
  * @returns {Promise<object>} - The sent mail object
  */
 const sendOtp = async (email, otp) => {
-	const time = new Date();
-	// send otp to user email
+  const time = new Date();
+  // send otp to user email
 
-	const transporter = nodemailer.createTransport(nodemailerConfigOptions);
-	const mail = {
-		from: process.env.NODEMAILER_EMAIL,
-		to: email,
-		subject: "OTP for email verification",
-		html: generateTemplate(otp),
-	};
-	const sentMail = await transporter.sendMail(mail);
-	logger.info(`[${Date.now() - time}ms] Email sent`);
-	return sentMail;
+  const transporter = nodemailer.createTransport(nodemailerConfigOptions);
+  const mail = {
+    from: process.env.NODEMAILER_EMAIL,
+    to: email,
+    subject: "OTP for email verification",
+    html: generateTemplate(otp),
+  };
+  const sentMail = await transporter.sendMail(mail);
+  logger.info(`[${Date.now() - time}ms] Email sent`);
+  return sentMail;
 };
 
 module.exports = sendOtp;

@@ -10,6 +10,7 @@ const { AddOnsFlow } = require("../models/addOnsFlow.model");
 const addOnsFlowService = require("../services/addOnsFlow.service");
 const { getByPropertyIdAndGuestId } = require("./addOnsRequest.service");
 const { GUEST_CURRENT_STATUS } = require("../constants/guestStatus.contant");
+const { HouseKeepingRequest } = require("../models/houseKeepingRequest.model");
 /**
  * Create a new guest
  * @param {import('../models/guest.model').GuestType} guest - guest object
@@ -279,7 +280,33 @@ const getGuestAddonsRequests = async (propertyId, requestStatus) => {
     }),
   );
 
-  const requests = [...checkInOutRequests, ...customAddonsRequests];
+  let houseKeepingRequests = await HouseKeepingRequest.find({
+    propertyId: propertyId,
+    requestStatus: requestStatus,
+  })
+    .populate("guestId")
+    .sort({ createdAt: -1 })
+    .lean();
+  console.log("HouseKeeping Request, :", houseKeepingRequests);
+
+  houseKeepingRequests = await Promise.all(
+    houseKeepingRequests.map(async (req) => {
+      if (!req.guestId) {
+        console.log(req);
+        return req;
+      }
+      req.guestId.status = await GuestStatus.findOne({
+        guestId: req?.guestId?._id,
+      });
+      return { ...req };
+    }),
+  );
+
+  const requests = [
+    ...checkInOutRequests,
+    ...customAddonsRequests,
+    ...houseKeepingRequests,
+  ];
 
   return { requests, propertyAddons };
 };
