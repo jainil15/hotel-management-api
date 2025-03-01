@@ -1304,7 +1304,7 @@ const deleteAddOnsRequest = async (req, res, next) => {
         addonType: requestType,
       });
     }
-    req.app.io.to(`property:${propertyid}`).emit("request:update", {});
+    req.app.io.to(`property:${propertyId}`).emit("request:update", {});
     await session.commitTransaction();
     session.endSession();
     return responseHandler(res, { message: "Successfully deleted" });
