@@ -79,17 +79,7 @@ const houseKeepingRequestMailTemplate = (guest) => {
           </tr>
           <tr>
             <td style="font-size: large; padding: 10px;">
-              ${guest.firstName} ${guest.lastName} has requested housekeeping service
-            </td>
-          </tr>
-          <tr>
-            <td style="font-size: large; padding: 10px;">
-              Guest RoomNo: ${guest?.roomNumber}
-            </td>
-          </tr>
-          <tr>
-            <td style="font-weight: lighter; color: #828282; font-size: small; padding: 5px;">
-              Onelyk, California, US
+              You have recevied new house keeping request for ${guest.roomNumber}. Click <a href="https://testhotel.onelyk.com/dashboard">link</a> to accept the request
             </td>
           </tr>
         </table>
