@@ -96,10 +96,10 @@ const updateStatus = async (req, res, next) => {
       updatedHouseKeepingRequest.propertyId,
     );
     if (!guest) {
-      throw new APIError("Guest not found", 404);
+      throw new NotFoundError("Guest not found", {});
     }
-    if (new Date(guest.checkIn) < new Date()) {
-      throw new APIError("Guest has already checked out", 400);
+    if (new Date(guest.checkOut) < new Date()) {
+      throw new ValidationError("Guest has already checked out", {});
     }
     req.app.io
       .to(`property:${updatedHouseKeepingRequest.propertyId}`)
