@@ -86,18 +86,21 @@ const updateStatus = async (req, res, next) => {
         ...houseKeepingRequestResult?.error?.flatten().fieldErrors,
       });
     }
-    const guest = await guestService.getById(req.guestSession.guestId);
+
+    const updatedHouseKeepingRequest = await houseKeepingService.update(
+      requestId,
+      { requestStatus },
+    );
+    const guest = await guestService.getById(
+      updatedHouseKeepingRequest.guestId,
+      updatedHouseKeepingRequest.propertyId,
+    );
     if (!guest) {
       throw new APIError("Guest not found", 404);
     }
     if (new Date(guest.checkIn) < new Date()) {
       throw new APIError("Guest has already checked out", 400);
     }
-
-    const updatedHouseKeepingRequest = await houseKeepingService.update(
-      requestId,
-      { requestStatus },
-    );
     req.app.io
       .to(`property:${updatedHouseKeepingRequest.propertyId}`)
       .emit("request:update", {});
