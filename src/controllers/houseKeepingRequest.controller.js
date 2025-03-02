@@ -58,13 +58,11 @@ const create = async (req, res, next) => {
       request,
       session,
     );
-    console.log(property.property.email);
     const message = houseKeepingRequestMailTemplate(guest);
     sendMail(
       property.property.email,
-      "Request for house keeping",
+      `Room - ${guest.roomNumber}, New Housekeeping Service Request Received`,
       message,
-      "House Keeping Request",
     );
     req.app.io.to(`property:${propertyId}`).emit("addOn:newAddon", {
       count: 1,

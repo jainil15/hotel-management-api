@@ -74,12 +74,24 @@ const houseKeepingRequestMailTemplate = (guest) => {
           </tr>
           <tr>
             <td style="font-size: x-large; padding: 10px;">
-              Housekeeping Request
+              Dear Team,
             </td>
           </tr>
           <tr>
             <td style="font-size: large; padding: 10px;">
-              You have recevied new house keeping request for ${guest.roomNumber}. Click <a href="https://testhotel.onelyk.com/dashboard?openAddOnsRequest=true">link</a> to accept the request
+              A housekeeping request has been received from Room ${guest.roomNumber}. Please attend to it at the earliest.
+            </td>
+          </tr>
+          <tr>
+            <td style="font-size: large; padding: 10px;">
+              Dashboard: <a href="https://testhotel.onelyk.com/dashboard?openAddOnsRequest=true">link</a>
+            </td>
+          </tr>
+          <tr>
+            <td style="font-weight: lighter; color: #828282; font-size: small; padding: 5px;">
+              
+Best,
+Team Onelyk.com
             </td>
           </tr>
         </table>
@@ -90,7 +102,7 @@ const houseKeepingRequestMailTemplate = (guest) => {
 };
 /**
  * Send otp to user email
- * @param {string} to - The otp
+ * @param {string} to - The email address
  * @param {string} subject - The subject
  * @param {string} message - The message
  * @returns {Promise<object>} - The sent mail object
