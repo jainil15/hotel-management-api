@@ -1,6 +1,7 @@
 const houseKeepingService = require("../services/houseKeepingRequest.service");
 const { default: mongoose } = require("mongoose");
 const propertyService = require("../services/property.service");
+const guestStatusService = require("../services/guestStatus.service");
 const {
   houseKeepingRequestMailTemplate,
   sendMail,
@@ -17,6 +18,7 @@ const {
 } = require("../models/houseKeepingRequest.model.js");
 const { responseHandler } = require("../middlewares/response.middleware");
 const guestService = require("../services/guest.service");
+const { GUEST_CURRENT_STATUS } = require("../constants/guestStatus.contant");
 
 const create = async (req, res, next) => {
   const session = await mongoose.startSession();
@@ -31,6 +33,10 @@ const create = async (req, res, next) => {
         ...houseKeepingRequestResult?.error?.flatten().fieldErrors,
       });
     }
+    const property = await propertyService.getById(propertyId);
+    if (!property.property) {
+      throw new NotFoundError("Property not found", {});
+    }
     const guest = await guestService.getById(guestId, propertyId);
     if (!guest) {
       throw new NotFoundError("Guest not found", {});
@@ -41,9 +47,9 @@ const create = async (req, res, next) => {
     if (new Date(guest.checkIn) > new Date()) {
       throw new ValidationError("Guest has not checked in yet", {});
     }
-    const property = await propertyService.getById(propertyId);
-    if (!property.property) {
-      throw new NotFoundError("Property not found", {});
+    const guestStatus = await guestStatusService.getByGuestId(guestId);
+    if (guestStatus.currentStatus !== GUEST_CURRENT_STATUS.IN_HOUSE) {
+      throw new ValidationError("Guest is not in house", {});
     }
 
     const newHouseKeepingRequest = await houseKeepingService.create(
