@@ -1,8 +1,14 @@
 const { QrCodeScan } = require("../models/qrCodeScan.model");
 const { Guest } = require("../models/guest.model");
 const { HouseKeepingRequest } = require("../models/houseKeepingRequest.model");
+const { AddOnsRequest } = require("../models/addOnsRequest.model");
+const { CheckInOutRequest } = require("../models/checkInOutRequest.model");
+
 const mongoose = require("mongoose");
-const { GUEST_CURRENT_STATUS } = require("../constants/guestStatus.contant");
+const {
+  GUEST_CURRENT_STATUS,
+  REQUEST_STATUS,
+} = require("../constants/guestStatus.contant");
 
 const getAnalytics = async (propertyId) => {
   const totalRoomsOccupiedPipeline = [
@@ -65,10 +71,72 @@ const getAnalytics = async (propertyId) => {
     },
   ];
 
+  const totalCheckInOutRequestPipeline = [
+    {
+      $match: {
+        propertyId: new mongoose.Types.ObjectId(propertyId),
+      },
+    },
+    {
+      $match: {
+        requestStatus: REQUEST_STATUS.REQUESTED,
+      },
+    },
+    {
+      $match: {
+        createdAt: {
+          $gte: new Date(new Date().setHours(0, 0, 0)),
+          $lt: new Date(new Date().setHours(23, 59, 59)),
+        },
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        total: {
+          $sum: 1,
+        },
+      },
+    },
+  ];
+  const totalAddOnsRequestPipeline = [
+    {
+      $match: {
+        propertyId: new mongoose.Types.ObjectId(propertyId),
+      },
+    },
+    {
+      $match: {
+        requestStatus: REQUEST_STATUS.REQUESTED,
+      },
+    },
+    {
+      $match: {
+        createdAt: {
+          $gte: new Date(new Date().setHours(0, 0, 0)),
+          $lt: new Date(new Date().setHours(23, 59, 59)),
+        },
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        total: {
+          $sum: 1,
+        },
+      },
+    },
+  ];
+
   const totalHouseKeepingRequestPipeline = [
     {
       $match: {
         propertyId: new mongoose.Types.ObjectId(propertyId),
+      },
+    },
+    {
+      $match: {
+        requestStatus: REQUEST_STATUS.REQUESTED,
       },
     },
     {
@@ -94,19 +162,72 @@ const getAnalytics = async (propertyId) => {
   let totalHouseKeepingRequest = await HouseKeepingRequest.aggregate(
     totalHouseKeepingRequestPipeline,
   );
+  let totalCheckInOutRequest = await CheckInOutRequest.aggregate(
+    totalCheckInOutRequestPipeline,
+  );
+  let totalAddOnsRequest = await AddOnsRequest.aggregate(
+    totalAddOnsRequestPipeline,
+  );
   totalRoomsOccupied =
     totalRoomsOccupied.length > 0 ? totalRoomsOccupied[0].total : 0;
   totalQrCodeScan = totalQrCodeScan.length > 0 ? totalQrCodeScan[0].total : 0;
   totalHouseKeepingRequest =
     totalHouseKeepingRequest.length > 0 ? totalHouseKeepingRequest[0].total : 0;
+  totalCheckInOutRequest =
+    totalCheckInOutRequest.length > 0 ? totalCheckInOutRequest[0].total : 0;
+  totalAddOnsRequest =
+    totalAddOnsRequest.length > 0 ? totalAddOnsRequest[0].total : 0;
 
   return {
-    qrCodeScan: totalQrCodeScan,
-    guest: totalRoomsOccupied,
-    houseKeepingRequest: totalHouseKeepingRequest,
+    totalQrCodeScan,
+    totalServicesRequest: totalAddOnsRequest + totalCheckInOutRequest,
+    totalHouseKeepingRequest,
   };
+};
+
+const getQrCodeScannedPerRoom = async (propertyId, date) => {
+  const qrCodeScannedPerRoomPipeline = [
+    {
+      $match: {
+        propertyId: new mongoose.Types.ObjectId(propertyId),
+      },
+    },
+    {
+      $match: {
+        createdAt: {
+          $gte: new Date(date),
+          $lt: new Date(new Date(date).setHours(23, 59, 59)),
+        },
+      },
+    },
+    {
+      $match: {
+        roomNumber: { $ne: null },
+      },
+    },
+    {
+      $group: {
+        _id: "$roomNumber",
+        total: {
+          $sum: 1,
+        },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        roomNumber: "$_id",
+        total: 1,
+      },
+    },
+  ];
+  const qrCodeScannedPerRoom = await QrCodeScan.aggregate(
+    qrCodeScannedPerRoomPipeline,
+  );
+  return qrCodeScannedPerRoom;
 };
 
 module.exports = {
   getAnalytics,
+  getQrCodeScannedPerRoom,
 };

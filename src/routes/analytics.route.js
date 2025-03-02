@@ -15,5 +15,12 @@ router.get(
   checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
   analyticsController.getAnalytics,
 );
+router.get(
+  "/:propertyId/qrCodeScans",
+  authenticateToken,
+  checkPropertyAccess,
+  checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
+  analyticsController.getQrCodeScannedPerRoom,
+);
 
 module.exports = router;

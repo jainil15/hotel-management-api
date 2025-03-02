@@ -3,20 +3,23 @@ const { z } = require("zod");
 const { REQUEST_STATUS } = require("../constants/guestStatus.contant");
 const Schema = mongoose.Schema;
 
-const addOnsRequestSchema = new Schema({
-  propertyId: { type: Schema.Types.ObjectId, ref: "Property" },
-  guestId: { type: Schema.Types.ObjectId, ref: "Guest" },
-  addOnsId: { type: Schema.Types.ObjectId, required: true },
-  name: { type: String, required: true },
-  description: { type: String, required: true },
-  price: { type: Number, required: true },
-  paid: { type: Boolean, required: true },
-  requestStatus: {
-    type: String,
-    enum: Object.values(REQUEST_STATUS),
-    default: REQUEST_STATUS.REQUESTED,
+const addOnsRequestSchema = new Schema(
+  {
+    propertyId: { type: Schema.Types.ObjectId, ref: "Property" },
+    guestId: { type: Schema.Types.ObjectId, ref: "Guest" },
+    addOnsId: { type: Schema.Types.ObjectId, required: true },
+    name: { type: String, required: true },
+    description: { type: String, required: true },
+    price: { type: Number, required: true },
+    paid: { type: Boolean, required: true },
+    requestStatus: {
+      type: String,
+      enum: Object.values(REQUEST_STATUS),
+      default: REQUEST_STATUS.REQUESTED,
+    },
   },
-});
+  { timestamps: true },
+);
 
 const CreateAddOnsRequestValidationSchema = z.object({
   name: z.string(),
