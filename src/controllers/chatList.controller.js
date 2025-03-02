@@ -53,15 +53,16 @@ const update = async (req, res, next) => {
       chatList,
       session,
     );
-    await session.commitTransaction();
-    session.endSession();
     req.app.io.to(`property:${propertyId}`).emit("chatList:update", {
       chatList: updatedChatList,
     });
+    await session.commitTransaction();
+    session.endSession();
     return responseHandler(res, { chatList: updatedChatList });
   } catch (e) {
     await session.abortTransaction();
     session.endSession();
+    console.log(e);
     if (e instanceof APIError) {
       return next(e);
     }
