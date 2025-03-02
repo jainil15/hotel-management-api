@@ -33,6 +33,7 @@ const addOnsRequestRoutes = require("../routes/addOnsRequest.route");
 const dndmodeRequestRoutes = require("../routes/dndmode.route");
 const customFlowRoutes = require("../routes/customFlow.route");
 const qrCodeScanRoutes = require("../routes/qrCodeScan.route");
+const analyticsRoutes = require("../routes/analytics.route");
 
 // Socket imports
 const guestSocket = require("../sockets/guest.socket");
@@ -138,6 +139,7 @@ const createApp = () => {
   app.use("/addOnsRequest", addOnsRequestRoutes);
   app.use("/dndmodeRequest", dndmodeRequestRoutes);
   app.use("/qrCodeScan", qrCodeScanRoutes);
+  app.use("/analytics", analyticsRoutes);
   // Health Check
   app.get("/health", (req, res, next) => {
     return responseHandler(res, {}, 200, "Server is running");
