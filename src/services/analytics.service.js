@@ -226,8 +226,199 @@ const getQrCodeScannedPerRoom = async (propertyId, date) => {
   );
   return qrCodeScannedPerRoom;
 };
+const getHouseKeepingRequestPerRoom = async (propertyId, date) => {
+  const houseKeepingRequestPerRoomPipeline = [
+    {
+      $match: {
+        propertyId: new mongoose.Types.ObjectId(propertyId),
+      },
+    },
+    {
+      $match: {
+        createdAt: {
+          $gte: new Date(date),
+          $lt: new Date(new Date(date).setHours(23, 59, 59)),
+        },
+      },
+    },
+    {
+      $match: {
+        requestStatus: REQUEST_STATUS.REQUESTED,
+      },
+    },
+    {
+      $lookup: {
+        from: "guests",
+        localField: "guestId",
+        foreignField: "_id",
+        as: "guest",
+      },
+    },
+    {
+      $unwind: "$guest",
+    },
+    {
+      $project: {
+        roomNumber: "$guest.roomNumber",
+      },
+    },
+    {
+      $match: {
+        roomNumber: { $ne: null },
+      },
+    },
+    {
+      $group: {
+        _id: "$roomNumber",
+        total: {
+          $sum: 1,
+        },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        roomNumber: "$_id",
+        total: 1,
+      },
+    },
+  ];
+  const houseKeepingRequestPerRoom = await HouseKeepingRequest.aggregate(
+    houseKeepingRequestPerRoomPipeline,
+  );
+  return houseKeepingRequestPerRoom;
+};
+
+const getAddOnsRequestPerRoom = async (propertyId, date) => {
+  const addOnsRequestPerRoomPipeline = [
+    {
+      $match: {
+        propertyId: new mongoose.Types.ObjectId(propertyId),
+      },
+    },
+    {
+      $match: {
+        createdAt: {
+          $gte: new Date(date),
+          $lt: new Date(new Date(date).setHours(23, 59, 59)),
+        },
+      },
+    },
+    {
+      $match: {
+        requestStatus: REQUEST_STATUS.REQUESTED,
+      },
+    },
+    {
+      $lookup: {
+        from: "guests",
+        localField: "guestId",
+        foreignField: "_id",
+        as: "guest",
+      },
+    },
+    {
+      $unwind: "$guest",
+    },
+    {
+      $project: {
+        roomNumber: "$guest.roomNumber",
+      },
+    },
+    {
+      $match: {
+        roomNumber: { $ne: null },
+      },
+    },
+    {
+      $group: {
+        _id: "$roomNumber",
+        total: {
+          $sum: 1,
+        },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        roomNumber: "$_id",
+        total: 1,
+      },
+    },
+  ];
+  const addOnsRequestPerRoom = await AddOnsRequest.aggregate(
+    addOnsRequestPerRoomPipeline,
+  );
+  return addOnsRequestPerRoom;
+};
+
+const getCheckInOutRequestPerRoom = async (propertyId, date) => {
+  const checkInOutRequestPerRoomPipeline = [
+    {
+      $match: {
+        propertyId: new mongoose.Types.ObjectId(propertyId),
+      },
+    },
+    {
+      $match: {
+        createdAt: {
+          $gte: new Date(date),
+          $lt: new Date(new Date(date).setHours(23, 59, 59)),
+        },
+      },
+    },
+    {
+      $match: {
+        requestStatus: REQUEST_STATUS.REQUESTED,
+      },
+    },
+    {
+      $lookup: {
+        from: "guests",
+        localField: "guestId",
+        foreignField: "_id",
+        as: "guest",
+      },
+    },
+    {
+      $unwind: "$guest",
+    },
+    {
+      $project: {
+        roomNumber: "$guest.roomNumber",
+      },
+    },
+    {
+      $match: {
+        roomNumber: { $ne: null },
+      },
+    },
+    {
+      $group: {
+        _id: "$roomNumber",
+        total: {
+          $sum: 1,
+        },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        roomNumber: "$_id",
+        total: 1,
+      },
+    },
+  ];
+  const checkInOutRequestPerRoom = await CheckInOutRequest.aggregate(
+    checkInOutRequestPerRoomPipeline,
+  );
+  return checkInOutRequestPerRoom;
+};
 
 module.exports = {
   getAnalytics,
   getQrCodeScannedPerRoom,
+  getHouseKeepingRequestPerRoom,
+  getAddOnsRequestPerRoom,
+  getCheckInOutRequestPerRoom,
 };

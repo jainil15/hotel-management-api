@@ -16,16 +16,54 @@ const getAnalytics = async (req, res, next) => {
   }
 };
 
-const getQrCodeScannedPerRoom = async (req, res, next) => {
+const getAnalyticsDetails = async (req, res, next) => {
   try {
     const { propertyId } = req.params;
-    const { date } = req.query;
-    console.log(new Date(date));
-    const qrCodeScannedPerRoom = await analyticsService.getQrCodeScannedPerRoom(
-      propertyId,
-      date,
-    );
-    return responseHandler(res, qrCodeScannedPerRoom);
+    const { type, date } = req.query;
+    switch (type) {
+      case "service": {
+        const addOnsRequestPerRoom =
+          await analyticsService.getAddOnsRequestPerRoom(propertyId, date);
+        const checkInOutRequestPerRoom =
+          await analyticsService.getCheckInOutRequestPerRoom(propertyId, date);
+        const uniqueRoomNumbers = [
+          ...new Set([
+            ...addOnsRequestPerRoom.map((item) => item.roomNumber),
+            ...checkInOutRequestPerRoom.map((item) => item.roomNumber),
+          ]),
+        ];
+
+        const mergedList = uniqueRoomNumbers.map((roomNumber) => {
+          const addOns = addOnsRequestPerRoom.find(
+            (addOns) => addOns.roomNumber === roomNumber,
+          );
+          const checkInOut = checkInOutRequestPerRoom.find(
+            (checkInOut) => checkInOut.roomNumber === roomNumber,
+          );
+          return {
+            roomNumber: roomNumber,
+            total:
+              (addOns ? addOns.total : 0) + (checkInOut ? checkInOut.total : 0),
+          };
+        });
+        return responseHandler(res, mergedList);
+      }
+      case "houseKeeping": {
+        const houseKeepingRequestPerRoom =
+          await analyticsService.getHouseKeepingRequestPerRoom(
+            propertyId,
+            date,
+          );
+        return responseHandler(res, houseKeepingRequestPerRoom);
+      }
+      case "qrCode": {
+        const qrCodeScannedPerRoom =
+          await analyticsService.getQrCodeScannedPerRoom(propertyId, date);
+        return responseHandler(res, qrCodeScannedPerRoom);
+      }
+      default:
+        throw new NotFoundError("Invalid type", { type: ["Invalid Type"] });
+    }
   } catch (e) {
     console.log(e);
     if (e instanceof APIError) {
@@ -37,5 +75,5 @@ const getQrCodeScannedPerRoom = async (req, res, next) => {
 
 module.exports = {
   getAnalytics,
-  getQrCodeScannedPerRoom,
+  getAnalyticsDetails,
 };

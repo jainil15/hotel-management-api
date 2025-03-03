@@ -16,11 +16,11 @@ router.get(
   analyticsController.getAnalytics,
 );
 router.get(
-  "/:propertyId/qrCodeScans",
+  "/:propertyId/details",
   authenticateToken,
   checkPropertyAccess,
   checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
-  analyticsController.getQrCodeScannedPerRoom,
+  analyticsController.getAnalyticsDetails,
 );
 
 module.exports = router;
