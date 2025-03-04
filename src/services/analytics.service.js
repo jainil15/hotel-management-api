@@ -10,6 +10,11 @@ const {
   REQUEST_STATUS,
 } = require("../constants/guestStatus.contant");
 
+/**
+ * Get analytics for a property
+ * @param {string} propertyId - property id
+ * @returns {object} - analytics data
+ */
 const getAnalytics = async (propertyId) => {
   const totalRoomsOccupiedPipeline = [
     {
@@ -157,6 +162,28 @@ const getAnalytics = async (propertyId) => {
     },
   ];
 
+  const totalInHouseGuestPipeline = [
+    {
+      $match: {
+        propertyId: new mongoose.Types.ObjectId(propertyId),
+      },
+    },
+    {
+      $match: {
+        checkIn: { $lte: new Date() },
+        checkOut: { $gte: new Date() },
+      },
+    },
+    {
+      $group: {
+        _id: "$roomNumber",
+      },
+    },
+    {
+      $count: "total",
+    },
+  ];
+
   let totalRoomsOccupied = await Guest.aggregate(totalRoomsOccupiedPipeline);
   let totalQrCodeScan = await QrCodeScan.aggregate(totalQrCodeScanPipeline);
   let totalHouseKeepingRequest = await HouseKeepingRequest.aggregate(
@@ -168,6 +195,7 @@ const getAnalytics = async (propertyId) => {
   let totalAddOnsRequest = await AddOnsRequest.aggregate(
     totalAddOnsRequestPipeline,
   );
+  let totalInHouseGuest = await Guest.aggregate(totalInHouseGuestPipeline);
   totalRoomsOccupied =
     totalRoomsOccupied.length > 0 ? totalRoomsOccupied[0].total : 0;
   totalQrCodeScan = totalQrCodeScan.length > 0 ? totalQrCodeScan[0].total : 0;
@@ -177,14 +205,23 @@ const getAnalytics = async (propertyId) => {
     totalCheckInOutRequest.length > 0 ? totalCheckInOutRequest[0].total : 0;
   totalAddOnsRequest =
     totalAddOnsRequest.length > 0 ? totalAddOnsRequest[0].total : 0;
+  totalInHouseGuest =
+    totalInHouseGuest.length > 0 ? totalInHouseGuest[0].total : 0;
 
   return {
     totalQrCodeScan,
     totalServicesRequest: totalAddOnsRequest + totalCheckInOutRequest,
     totalHouseKeepingRequest,
+    totalInHouseGuest,
   };
 };
 
+/**
+ * Get qr code scanned per room for a property
+ * @param {string} propertyId - property id
+ * @param {string} date - date
+ * @returns {object} - analytics data
+ */
 const getQrCodeScannedPerRoom = async (propertyId, date) => {
   const qrCodeScannedPerRoomPipeline = [
     {
@@ -226,6 +263,13 @@ const getQrCodeScannedPerRoom = async (propertyId, date) => {
   );
   return qrCodeScannedPerRoom;
 };
+
+/**
+ * Get house keeping per room for a property
+ * @param {string} propertyId - property id
+ * @param {string} date - date
+ * @returns {object} - analytics data
+ */
 const getHouseKeepingRequestPerRoom = async (propertyId, date) => {
   const houseKeepingRequestPerRoomPipeline = [
     {
@@ -415,10 +459,32 @@ const getCheckInOutRequestPerRoom = async (propertyId, date) => {
   return checkInOutRequestPerRoom;
 };
 
+const getCurrentInHouseGuests = async (propertyId, date) => {
+  const currentInHouseGuestPipeline = [
+    {
+      $match: {
+        propertyId: new mongoose.Types.ObjectId(propertyId),
+      },
+    },
+    {
+      $match: {
+        checkIn: { $lte: new Date(date) },
+        checkOut: { $gte: new Date(date) },
+      },
+    },
+  ];
+
+  const currentInHouseGuests = await Guest.aggregate(
+    currentInHouseGuestPipeline,
+  );
+  return currentInHouseGuests;
+};
+
 module.exports = {
   getAnalytics,
   getQrCodeScannedPerRoom,
   getHouseKeepingRequestPerRoom,
   getAddOnsRequestPerRoom,
   getCheckInOutRequestPerRoom,
+  getCurrentInHouseGuests,
 };

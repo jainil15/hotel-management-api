@@ -61,6 +61,11 @@ const getAnalyticsDetails = async (req, res, next) => {
           await analyticsService.getQrCodeScannedPerRoom(propertyId, date);
         return responseHandler(res, qrCodeScannedPerRoom);
       }
+      case "currentInHouseGuests": {
+        const currentInHouseGuests =
+          await analyticsService.getCurrentInHouseGuests(propertyId, date);
+        return responseHandler(res, currentInHouseGuests);
+      }
       default:
         throw new NotFoundError("Invalid type", { type: ["Invalid Type"] });
     }
