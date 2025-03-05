@@ -1015,10 +1015,11 @@ const sendOtp = async (req, res, next) => {
       });
     }
     const property = await propertyService.find({ _id: propertyId });
+    console.log("Property name", property.name);
 
     if (!twilioAccount.verificationSid) {
       const verificationService = await twilioClient.verify.v2.services.create({
-        friendlyName: property.name,
+        friendlyName: property.name.trim(),
       });
       twilioAccount = await twilioAccountService.update(propertyId, {
         verificationServiceSid: verificationService.sid,
