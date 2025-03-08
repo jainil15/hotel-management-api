@@ -161,7 +161,7 @@ const update = async (propertyId, guestId, chatList, session) => {
   const updatedChatList = await ChatList.findOneAndUpdate(
     { propertyId: propertyId, guestId: guestId },
     chatList,
-    { new: true, session },
+    { new: true, session, retryWrites: true },
   );
   return updatedChatList;
 };
