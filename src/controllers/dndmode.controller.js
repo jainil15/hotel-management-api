@@ -43,6 +43,7 @@ const update = async (req, res, next) => {
     }
 
     // Fetch the existing add-ons request
+
     const guestDndModeStatus = await guestService.updatedGuestDndStatus(
       propertyId,
       guestId,
