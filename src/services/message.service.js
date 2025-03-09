@@ -2,6 +2,7 @@ const { default: mongoose } = require("mongoose");
 const { NotFoundError } = require("../lib/CustomErrors");
 const { Message } = require("../models/message.model");
 const guestService = require("./guest.service");
+const logger = require("../configs/winston.config");
 /**
  * Create a new message
  * @param {import('../models/message.model').MessageType} message - The message object
@@ -22,6 +23,7 @@ const create = async (message, session) => {
  */
 const getAll = async (propertyId, guestId) => {
   const guest = await guestService.getById(guestId, propertyId);
+  const time = new Date();
   const messages = await Message.aggregate([
     {
       $lookup: {
@@ -78,6 +80,9 @@ const getAll = async (propertyId, guestId) => {
       },
     },
   ]);
+  logger.info(
+    `GuestId: ${guestId} PropertyId: ${propertyId} Time taken: ${new Date() - time}ms`,
+  );
 
   return messages;
 };

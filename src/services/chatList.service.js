@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const { ChatList } = require("../models/chatList.model");
+const logger = require("../configs/winston.config");
 
 /**
  * Create a chat list for a property and guest
@@ -144,8 +145,9 @@ const getByPropertyId = async (propertyId) => {
       },
     },
   ];
-
+  const time = Date.now();
   const chatList = await ChatList.aggregate(pipeline);
+  logger.info(`End time: ${Date.now() - time}ms`);
   return chatList[0];
 };
 
