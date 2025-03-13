@@ -50,6 +50,8 @@ const twilioAuthV2 = async (req, res, next) => {
   try {
     const twilioSignature = req.headers["x-twilio-signature"];
     logger.info("Twilio Signature", twilioSignature);
+    logger.info(req.headers.toString());
+    console.log(req.headers);
     const twilioAccount = await twilioAccountService.findOne({
       sid: req.body.AccountSid,
     });
