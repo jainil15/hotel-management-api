@@ -18,6 +18,8 @@ const create = async (propertyId, guestId, session) => {
   return savedChatList;
 };
 
+const getByPropertyIdv2 = async (propertyId) => {};
+
 /**
  * Get chat list by propertyId
  * @param {string} propertyId - propertyId
@@ -25,56 +27,106 @@ const create = async (propertyId, guestId, session) => {
  */
 const getByPropertyId = async (propertyId) => {
   const pipeline = [
-    // Match the documents with the given propertyId
-    { $match: { propertyId: new mongoose.Types.ObjectId(propertyId) } },
+    // 1. Match the documents with the given propertyId.
+    {
+      $match: { propertyId: new mongoose.Types.ObjectId(propertyId) },
+    },
 
-    // Lookup to populate the guestId field
+    // 2. Lookup to populate the guest field.
     {
       $lookup: {
-        from: "guests", // The name of the Guest collection
+        from: "guests",
         localField: "guestId",
         foreignField: "_id",
         as: "guest",
       },
     },
+    // 3. Lookup to populate the latestMessage field.
     {
       $lookup: {
-        from: "messages", // The name of the Message collection
+        from: "messages",
         localField: "latestMessage",
         foreignField: "_id",
         as: "latestMessage",
       },
     },
+    // 4. Lookup to populate the gueststatus field.
     {
       $lookup: {
-        localField: "guestId",
         from: "gueststatuses",
+        localField: "guestId",
         foreignField: "guestId",
         as: "gueststatus",
       },
     },
 
-    {
-      $unwind: "$gueststatus",
-    },
+    // 5. Unwind arrays for guest and gueststatus.
+    { $unwind: "$gueststatus" },
     { $unwind: "$guest" },
+
+    // 6. Create a unique identifier combining countryCode and phoneNumber.
+    {
+      $addFields: {
+        uniquePhone: {
+          $concat: ["$guest.countryCode", "-", "$guest.phoneNumber"],
+        },
+      },
+    },
+
+    // 7. Add a computed field to check if the guest is currently checked in.
+    {
+      $addFields: {
+        currentlyCheckedIn: {
+          $cond: {
+            if: {
+              $and: [
+                { $lte: ["$guest.checkIn", "$$NOW"] },
+                { $gte: ["$guest.checkOut", "$$NOW"] },
+              ],
+            },
+            then: 1,
+            else: 0,
+          },
+        },
+      },
+    },
+
+    // 8. Sort by currentlyCheckedIn (desc) and then by guest.checkIn (desc).
+    {
+      $sort: { currentlyCheckedIn: -1, "guest.checkIn": -1 },
+    },
+
+    // 9. Group by uniquePhone to pick the best chat for each phone number.
+    {
+      $group: {
+        _id: "$uniquePhone",
+        latestChat: { $first: "$$ROOT" },
+      },
+    },
+
+    // 10. Replace the root with the selected chat document.
+    {
+      $replaceRoot: { newRoot: "$latestChat" },
+    },
+
+    // 11. Group by propertyId to accumulate all unique chats.
     {
       $group: {
         _id: "$propertyId",
         chatLists: { $push: "$$ROOT" },
         totalUnreadMessages: {
           $sum: {
-            // biome-ignore lint/suspicious/noThenProperty: <explanation>
             $cond: { if: { $gte: ["$unreadMessages", 1] }, then: 1, else: 0 },
           },
         },
       },
     },
+
+    // 12. Project the required fields and reformat chatLists.
     {
       $project: {
         _id: 0,
         propertyId: "$_id",
-
         chatLists: {
           $map: {
             input: "$chatLists",
@@ -83,7 +135,6 @@ const getByPropertyId = async (propertyId) => {
               latestMessageTime: {
                 $cond: {
                   if: { $gt: [{ $size: "$$chatList.latestMessage" }, 0] },
-                  // biome-ignore lint/suspicious/noThenProperty: <explanation>
                   then: {
                     $arrayElemAt: ["$$chatList.latestMessage.createdAt", 0],
                   },
@@ -134,6 +185,8 @@ const getByPropertyId = async (propertyId) => {
         totalUnreadMessages: 1,
       },
     },
+
+    // 13. Optionally, sort the chatLists array by latestMessageTime descending.
     {
       $addFields: {
         chatLists: {
@@ -145,6 +198,7 @@ const getByPropertyId = async (propertyId) => {
       },
     },
   ];
+
   const time = Date.now();
   const chatList = await ChatList.aggregate(pipeline);
   logger.info(`End time: ${Date.now() - time}ms`);

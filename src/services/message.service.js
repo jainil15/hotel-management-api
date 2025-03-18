@@ -25,6 +25,7 @@ const getAll = async (propertyId, guestId) => {
   const guest = await guestService.getById(guestId, propertyId);
   const time = new Date();
   const messages = await Message.aggregate([
+    // 1. Lookup to populate the guest field.
     {
       $lookup: {
         from: "guests",
@@ -33,25 +34,38 @@ const getAll = async (propertyId, guestId) => {
         as: "guest",
       },
     },
+
+    // 2. Match messages by propertyId and guest phoneNumber & countryCode.
     {
       $match: {
         propertyId: new mongoose.Types.ObjectId(propertyId),
-        "guest.phoneNumber": guest.phoneNumber,
+        guest: {
+          $elemMatch: {
+            phoneNumber: guest.phoneNumber,
+            countryCode: guest.countryCode,
+          },
+        },
       },
     },
-    {
-      $match: {
-        guestId: new mongoose.Types.ObjectId(guestId),
-      },
-    },
+
+    // Optionally, if you also want to match a specific guestId, uncomment below:
+    // {
+    //   $match: {
+    //     guestId: new mongoose.Types.ObjectId(guestId)
+    //   }
+    // },
+
+    // 3. Lookup for check-in/out requests.
     {
       $lookup: {
-        from: "`checkinoutrequests`",
+        from: "checkinoutrequests",
         localField: "requestId",
         foreignField: "_id",
         as: "request",
       },
     },
+
+    // 4. Lookup for add-ons requests.
     {
       $lookup: {
         from: "addonsrequests",
@@ -60,6 +74,8 @@ const getAll = async (propertyId, guestId) => {
         as: "addOnsRequest",
       },
     },
+
+    // 5. Lookup for do-not-disturb requests.
     {
       $lookup: {
         from: "donotdisturbrequests",
@@ -68,18 +84,23 @@ const getAll = async (propertyId, guestId) => {
         as: "donotdisturbRequest",
       },
     },
+
+    // 6. Unwind the request array while preserving nulls.
     {
       $unwind: {
         path: "$request",
         preserveNullAndEmptyArrays: true,
       },
     },
+
+    // 7. Remove the requestId field from the output.
     {
       $project: {
         requestId: 0,
       },
     },
   ]);
+
   logger.info(
     `GuestId: ${guestId} PropertyId: ${propertyId} Time taken: ${new Date() - time}ms`,
   );
