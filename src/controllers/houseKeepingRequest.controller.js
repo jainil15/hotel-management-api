@@ -130,6 +130,9 @@ const updateStatus = async (req, res, next) => {
     req.app.io
       .to(`property:${updatedHouseKeepingRequest.propertyId}`)
       .emit("request:update", {});
+    req.app.io.to(`property:${propertyId}`).emit("addOn:newAddon", {
+      count: 1,
+    });
     await session.commitTransaction();
     session.endSession();
     return responseHandler(res, updatedHouseKeepingRequest);
@@ -143,7 +146,24 @@ const updateStatus = async (req, res, next) => {
   }
 };
 
+const get = async (req, res, next) => {
+  try {
+    const { propertyId, guestId } = req.guestSession;
+    const houseKeepingRequests = await houseKeepingService.getByGuestId(
+      propertyId,
+      guestId,
+    );
+    return responseHandler(res, houseKeepingRequests);
+  } catch (e) {
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError(e.message));
+  }
+};
+
 module.exports = {
   create,
   updateStatus,
+  get,
 };

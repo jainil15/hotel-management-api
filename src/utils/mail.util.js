@@ -61,43 +61,11 @@ const failedMessageTemplate = (propertyId, twilioAccountId, from, to) => {
  */
 const houseKeepingRequestMailTemplate = (guest) => {
   return `
-<html>
-<body style="font-family: Helvetica, Arial, sans-serif; margin: 0px; padding: 0px; background-color: #ffffff;">
-  <table role="presentation" style="width: 100%; height: 100%; border: 0; cellpadding: 0; cellspacing: 0; background-color: #ffffff;">
-    <tr>
-      <td align="center" style="padding: 0; margin: 0;">
-        <table role="presentation" style="width: 600px; border: 0; cellpadding: 0; cellspacing: 0; color: #424242;">
-          <tr>
-            <td style="font-size: xx-large; padding: 10px;">
-              Onelyk
-            </td>
-          </tr>
-          <tr>
-            <td style="font-size: x-large; padding: 10px;">
-              Dear Team,
-            </td>
-          </tr>
-          <tr>
-            <td style="font-size: large; padding: 10px;">
-              A housekeeping request has been received from Room ${guest.roomNumber}. Please attend to it at the earliest.
-            </td>
-          </tr>
-          <tr>
-            <td style="font-size: large; padding: 10px;">
-              Dashboard: <a href="https://testhotel.onelyk.com/dashboard?openAddOnsRequest=true">link</a>
-            </td>
-          </tr>
-          <tr>
-            <td style="font-weight: lighter; color: #828282; font-size: small; padding: 5px;">
-              
-Best,
-Team Onelyk.com
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  </table>
+<p>Dear Team,</p>
+<p>A housekeeping request has been received from Room ${guest.roomNumber}. Please attend to it at the earliest.</p>
+<p>Dashboard: <a href="https://testhotel.onelyk.com/dashboard?openAddOnsRequest=true">link</a></p>
+<p>Best,
+<br/>Team Onelyk.com</p>
 `;
 };
 /**
