@@ -17,6 +17,7 @@ const create = async (propertyId, guestId, request, session) => {
     name: request.name,
     description: request.description,
     requestStatus: REQUEST_STATUS.REQUESTED,
+    options: request.options,
   });
   const savedHouseKeepingRequest = await newHouseKeepingRequest.save({
     session,
@@ -51,8 +52,23 @@ const update = async (requestId, updateData, session) => {
   return updatedHouseKeepingRequest;
 };
 
+/**
+ * Get all houseKeeping requests by Guest Id
+ * @param {string} propertyId
+ * @param {string} guestId
+ * @returns {Promise<Object>}
+ */
+const getByGuestId = async (propertyId, guestId) => {
+  const houseKeepingRequests = await HouseKeepingRequest.find({
+    propertyId,
+    guestId,
+  });
+  return houseKeepingRequests;
+};
+
 module.exports = {
   create,
   findByPropertyId,
   update,
+  getByGuestId,
 };

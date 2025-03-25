@@ -35,6 +35,7 @@ router.patch("/complete-review", guestApiController.updateCompleteReview);
 router.post("/addOnsRequest", guestApiController.createAddOnsRequest);
 router.post("/dndmodeRequest", guestApiController.createDndModeRequest);
 router.post("/houseKeepingRequest", houseKeepingRequestController.create);
+router.get("/houseKeepingRequest", houseKeepingRequestController.get);
 guestApiRouter.use("/:guestSessionId", authenticateGuestSession, router);
 
 module.exports = guestApiRouter;

@@ -19,6 +19,7 @@ const houseKeepingRequestSchema = new Schema(
       enum: Object.values(REQUEST_STATUS),
       required: true,
     },
+    options: { type: [String], default: [] },
     requestType: { type: String, default: "houseKeeping" },
   },
   { timestamps: true },
@@ -27,6 +28,7 @@ const houseKeepingRequestSchema = new Schema(
 const CreateHouseKeepingRequestValidationSchema = z.object({
   name: z.string(),
   description: z.string(),
+  options: z.array(z.string()),
 });
 const UpdateHouseKeepingRequestValidationSchema = z.object({
   requestStatus: z.string(),

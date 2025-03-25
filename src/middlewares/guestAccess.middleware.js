@@ -23,7 +23,6 @@ const authenticateGuestSession = async (req, res, next) => {
     const { guestSessionId } = req.params;
 
     if (!guestSessionId) {
-      console.log("Guest Session");
       return next(new UnauthorizedError("Unauthorized", {}));
     }
     const guestSession = await guestSessionService.getById(guestSessionId);

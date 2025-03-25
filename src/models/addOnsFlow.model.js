@@ -45,6 +45,7 @@ const houseKeepingAddOnsSchema = new Schema(
     image: {
       type: [String],
     },
+    options: { type: [String], default: [] },
   },
   {},
 );
@@ -104,6 +105,7 @@ const addOnsFlowSchema = new Schema(
         image: [
           "https://onelyk-images-bucket.s3.amazonaws.com/addOns/house-keeping.jpg",
         ],
+        options: [],
       },
     },
   },
@@ -182,17 +184,15 @@ const UpdateAddOnsFlowValidationSchema = z.object({
       }),
     )
     .optional(),
-  houseKeepingAddons: z
-    .array(
-      z.object({
-        name: z.string().optional(),
-        description: z.string().optional(),
-        enabled: z.boolean().optional(),
-        default: z.boolean().optional(),
-        addonNote: z.string().optional(),
-        image: z.any(),
-      }),
-    )
+  houseKeepingAddOns: z
+    .object({
+      name: z.string().optional(),
+      description: z.string().optional(),
+      enabled: z.boolean().optional(),
+      default: z.boolean().optional(),
+      image: z.any(),
+      options: z.array(z.string().min(1)).optional(),
+    })
     .optional(),
 });
 

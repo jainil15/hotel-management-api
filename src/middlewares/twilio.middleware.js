@@ -6,15 +6,12 @@ const {
 } = require("../lib/CustomErrors");
 const twilio = require("twilio");
 const twilioAccountService = require("../services/twilioAccount.service");
+const logger = require("../configs/winston.config");
 require("dotenv").config();
 
 /**
  * Twilio Auth Middleware
- * @param {import('express').Request} req - request object
- * @param {import('express').Response} res - response object
- * @param {import('express').NextFunction} next - next middleware
- * @returns {void}
- */
+ * @param {import('express').Request} req - request object @param {import('express').Response} res - response object @param {import('express').NextFunction} next - next middleware @returns {void} */
 const twilioAuth = async (req, res, next) => {
   try {
     const twilioSignature = req.headers["x-twilio-signature"];
@@ -63,8 +60,8 @@ const twilioAuthV2 = async (req, res, next) => {
     const valid = twilio.validateRequest(
       twilioAccount.authToken,
       twilioSignature,
-      // `${process.env.TWILIO_CALLBACK_URL}${req.originalUrl}`,
-      process.env.TWILIO_STATUS_CALLBACK,
+      `${process.env.TWILIO_CALLBACK_URL}${req.originalUrl}`,
+      // process.env.TWILIO_STATUS_CALLBACK,
       req.body,
     );
 

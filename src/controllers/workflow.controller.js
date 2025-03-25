@@ -173,6 +173,11 @@ const update = async (req, res, next) => {
         ...reviewFlowResult?.error?.flatten().fieldErrors,
       });
     }
+    console.log(
+      "House Keeping without validation: ",
+      addOnsFlow.houseKeepingAddOns,
+    );
+    console.log("HouseKeeping: ", addOnsFlowResult.data.houseKeepingAddons);
     //console.log("done", addOnsFlowResult.data);
     const updatedHomeFlow = await homeFlowService.update(
       propertyId,
@@ -217,7 +222,7 @@ const update = async (req, res, next) => {
       reviewsFlow: updatedReviewFlow,
     });
   } catch (e) {
-    console.log("eeeeeeeeeeeeeeeeeeeeeeeeeeeee", e);
+    console.log(e);
     await session.abortTransaction();
     session.endSession();
     if (e instanceof APIError) {

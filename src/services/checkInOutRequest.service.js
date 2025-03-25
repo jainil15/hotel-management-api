@@ -193,8 +193,6 @@ const updateFieldByPropertyIdAndGuestId = async (
 
   // Loop through each item in the updateData array
   for (const updateData of updateDataArray) {
-    console.log("Updating data:", updateData);
-
     // Filter updateData to include only allowed fields
     delete updateData.addOnDetails;
     // const filteredUpdateData = Object.keys(updateData)

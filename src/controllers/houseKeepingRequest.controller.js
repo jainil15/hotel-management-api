@@ -2,6 +2,7 @@ const houseKeepingService = require("../services/houseKeepingRequest.service");
 const { default: mongoose } = require("mongoose");
 const propertyService = require("../services/property.service");
 const guestStatusService = require("../services/guestStatus.service");
+const workflowService = require("../services/workflow.service");
 const {
   houseKeepingRequestMailTemplate,
   sendMail,
@@ -26,6 +27,7 @@ const create = async (req, res, next) => {
   try {
     const { propertyId, guestId } = req.guestSession;
     const request = req.body;
+    console.log(request);
     const houseKeepingRequestResult =
       CreateHouseKeepingRequestValidationSchema.safeParse(request);
     if (!houseKeepingRequestResult.success) {
@@ -37,6 +39,21 @@ const create = async (req, res, next) => {
     if (!property.property) {
       throw new NotFoundError("Property not found", {});
     }
+
+    // check if the house keeping option match the options in the workflow
+    const workflow = await workflowService.getByPropertyId(propertyId);
+    if (!workflow) {
+      throw new NotFoundError("Workflow not found", {});
+    }
+    console.log(workflow.addOnsFlow);
+    const houseKeepingOptions = workflow.addOnsFlow.houseKeepingAddOns.options;
+    const houseKeepingOption = houseKeepingRequestResult.data.options;
+    for (const option of houseKeepingOption) {
+      if (!houseKeepingOptions.includes(option)) {
+        throw new ValidationError("Invalid house keeping option", {});
+      }
+    }
+
     const guest = await guestService.getById(guestId, propertyId);
     if (!guest) {
       throw new NotFoundError("Guest not found", {});
@@ -55,7 +72,7 @@ const create = async (req, res, next) => {
     const newHouseKeepingRequest = await houseKeepingService.create(
       propertyId,
       guestId,
-      request,
+      houseKeepingRequestResult.data,
       session,
     );
     const message = houseKeepingRequestMailTemplate(guest);
@@ -113,6 +130,9 @@ const updateStatus = async (req, res, next) => {
     req.app.io
       .to(`property:${updatedHouseKeepingRequest.propertyId}`)
       .emit("request:update", {});
+    req.app.io.to(`property:${propertyId}`).emit("addOn:newAddon", {
+      count: 1,
+    });
     await session.commitTransaction();
     session.endSession();
     return responseHandler(res, updatedHouseKeepingRequest);
@@ -126,7 +146,24 @@ const updateStatus = async (req, res, next) => {
   }
 };
 
+const get = async (req, res, next) => {
+  try {
+    const { propertyId, guestId } = req.guestSession;
+    const houseKeepingRequests = await houseKeepingService.getByGuestId(
+      propertyId,
+      guestId,
+    );
+    return responseHandler(res, houseKeepingRequests);
+  } catch (e) {
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError(e.message));
+  }
+};
+
 module.exports = {
   create,
   updateStatus,
+  get,
 };
