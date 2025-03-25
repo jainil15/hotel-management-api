@@ -27,7 +27,6 @@ const create = async (req, res, next) => {
   try {
     const { propertyId, guestId } = req.guestSession;
     const request = req.body;
-    console.log(request);
     const houseKeepingRequestResult =
       CreateHouseKeepingRequestValidationSchema.safeParse(request);
     if (!houseKeepingRequestResult.success) {
@@ -45,7 +44,6 @@ const create = async (req, res, next) => {
     if (!workflow) {
       throw new NotFoundError("Workflow not found", {});
     }
-    console.log(workflow.addOnsFlow);
     const houseKeepingOptions = workflow.addOnsFlow.houseKeepingAddOns.options;
     const houseKeepingOption = houseKeepingRequestResult.data.options;
     for (const option of houseKeepingOption) {
@@ -58,12 +56,12 @@ const create = async (req, res, next) => {
     if (!guest) {
       throw new NotFoundError("Guest not found", {});
     }
-    if (new Date(guest.checkOut) < new Date()) {
-      throw new ValidationError("Guest has already checked out", {});
-    }
-    if (new Date(guest.checkIn) > new Date()) {
-      throw new ValidationError("Guest has not checked in yet", {});
-    }
+    // if (new Date(guest.checkOut) < new Date()) {
+    //   throw new ValidationError("Guest has already checked out", {});
+    // }
+    // if (new Date(guest.checkIn) > new Date()) {
+    //   throw new ValidationError("Guest has not checked in yet", {});
+    // }
     const guestStatus = await guestStatusService.getByGuestId(guestId);
     if (guestStatus.currentStatus !== GUEST_CURRENT_STATUS.IN_HOUSE) {
       throw new ValidationError("Guest is not in house", {});
@@ -89,7 +87,6 @@ const create = async (req, res, next) => {
     session.endSession();
     return responseHandler(res, newHouseKeepingRequest);
   } catch (e) {
-    console.log(e);
     await session.abortTransaction();
     session.endSession();
     if (e instanceof APIError) {
