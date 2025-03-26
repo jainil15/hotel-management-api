@@ -3,6 +3,8 @@ const { default: mongoose } = require("mongoose");
 const propertyService = require("../services/property.service");
 const guestStatusService = require("../services/guestStatus.service");
 const workflowService = require("../services/workflow.service");
+const messageService = require("../services/message.service");
+const chatListService = require("../services/chatList.service");
 const {
   houseKeepingRequestMailTemplate,
   sendMail,
@@ -20,6 +22,10 @@ const {
 const { responseHandler } = require("../middlewares/response.middleware");
 const guestService = require("../services/guest.service");
 const { GUEST_CURRENT_STATUS } = require("../constants/guestStatus.contant");
+const {
+  messageType,
+  messageTriggerType,
+} = require("../constants/message.constant.js");
 
 const create = async (req, res, next) => {
   const session = await mongoose.startSession();
@@ -79,8 +85,39 @@ const create = async (req, res, next) => {
       `Room - ${guest.roomNumber}, New Housekeeping Service Request Received`,
       message,
     );
+    const newMessage = await messageService.create(
+      {
+        propertyId: propertyId,
+        guestId: guestId,
+        senderId: guestId,
+        receiverId: propertyId,
+        content: `House keeping request ${houseKeepingRequestResult.data.options !== 0 ? "(" : ""}${houseKeepingRequestResult.data.options.join(
+          ", ",
+        )}${houseKeepingRequestResult.data.options !== 0 ? ")" : ""} received`,
+        messageType: messageType.REQUEST,
+        messageTriggerType: messageTriggerType.AUTOMATIC,
+        houseKeepingRequestId: newHouseKeepingRequest._id,
+      },
+      session,
+    );
+    const updatedChatList = await chatListService.updateAndIncUnreadMessages(
+      propertyId,
+      guestId,
+      {
+        latestMessage: newMessage._id,
+      },
+      session,
+    );
+
+    req.app.io.to(`property:${propertyId}`).emit("chatList:update", {
+      chatList: updatedChatList,
+    });
     req.app.io.to(`property:${propertyId}`).emit("addOn:newAddon", {
       count: 1,
+    });
+
+    req.app.io.to(`guest:${guestId}`).emit("message:newMessage", {
+      message: newMessage,
     });
     req.app.io.to(`property:${propertyId}`).emit("request:update", {});
     await session.commitTransaction();
@@ -127,7 +164,7 @@ const updateStatus = async (req, res, next) => {
     req.app.io
       .to(`property:${updatedHouseKeepingRequest.propertyId}`)
       .emit("request:update", {});
-    req.app.io.to(`property:${propertyId}`).emit("addOn:newAddon", {
+    req.app.io.to(`property:${guest.propertyId}`).emit("addOn:newAddon", {
       count: 1,
     });
     await session.commitTransaction();
