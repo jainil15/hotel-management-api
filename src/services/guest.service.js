@@ -230,14 +230,23 @@ const getGuestAddonsRequests = async (propertyId, requestStatus) => {
   const propertyAddons = await AddOnsFlow.findOne({
     propertyId: propertyId,
   }).lean();
-
-  let checkInOutRequests = await CheckInOutRequest.find({
-    propertyId: propertyId,
-    requestStatus: requestStatus,
-  })
-    .populate("guestId")
-    .sort({ createdAt: -1 })
-    .lean();
+  let checkInOutRequests;
+  if (requestStatus === "all") {
+    checkInOutRequests = await CheckInOutRequest.find({
+      propertyId: propertyId,
+    })
+      .populate("guestId")
+      .sort({ createdAt: -1 })
+      .lean();
+  } else {
+    checkInOutRequests = await CheckInOutRequest.find({
+      propertyId: propertyId,
+      requestStatus: requestStatus,
+    })
+      .populate("guestId")
+      .sort({ createdAt: -1 })
+      .lean();
+  }
 
   checkInOutRequests = await Promise.all(
     checkInOutRequests.map(async (req) => {
@@ -255,14 +264,23 @@ const getGuestAddonsRequests = async (propertyId, requestStatus) => {
       return { ...req, addOnData };
     }),
   );
-
-  let customAddonsRequests = await AddOnsRequest.find({
-    propertyId: propertyId,
-    requestStatus: requestStatus,
-  })
-    .populate("guestId")
-    .sort({ createdAt: -1 })
-    .lean();
+  let customAddonsRequests;
+  if (requestStatus === "all") {
+    customAddonsRequests = await AddOnsRequest.find({
+      propertyId: propertyId,
+    })
+      .populate("guestId")
+      .sort({ createdAt: -1 })
+      .lean();
+  } else {
+    customAddonsRequests = await AddOnsRequest.find({
+      propertyId: propertyId,
+      requestStatus: requestStatus,
+    })
+      .populate("guestId")
+      .sort({ createdAt: -1 })
+      .lean();
+  }
 
   customAddonsRequests = await Promise.all(
     customAddonsRequests.map(async (req) => {
@@ -279,14 +297,23 @@ const getGuestAddonsRequests = async (propertyId, requestStatus) => {
       return { ...req, addOnData };
     }),
   );
-
-  let houseKeepingRequests = await HouseKeepingRequest.find({
-    propertyId: propertyId,
-    requestStatus: requestStatus,
-  })
-    .populate("guestId")
-    .sort({ createdAt: -1 })
-    .lean();
+  let houseKeepingRequests;
+  if (requestStatus === "all") {
+    houseKeepingRequests = await HouseKeepingRequest.find({
+      propertyId: propertyId,
+    })
+      .populate("guestId")
+      .sort({ createdAt: -1 })
+      .lean();
+  } else {
+    houseKeepingRequests = await HouseKeepingRequest.find({
+      propertyId: propertyId,
+      requestStatus: requestStatus,
+    })
+      .populate("guestId")
+      .sort({ createdAt: -1 })
+      .lean();
+  }
   console.log("HouseKeeping Request, :", houseKeepingRequests);
 
   houseKeepingRequests = await Promise.all(
