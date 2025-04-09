@@ -29,6 +29,7 @@ const propertySchema = new Schema(
     zipcode: { type: String, required: true },
     countryCode: { type: String, required: true },
 
+    pmsId: { type: String },
     active: { type: Boolean, default: true },
   },
   { timestamps: true },

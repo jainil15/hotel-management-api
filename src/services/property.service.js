@@ -196,4 +196,22 @@ const find = async (filter) => {
   const property = await Property.findOne(filter);
   return property;
 };
-module.exports = { create, getAll, update, remove, getById, getByEmail, find };
+
+/**
+ * @param {object} pmsId - The pms id
+ * @returns {Promise<import('../models/property.model.js').PropertyType}
+ */
+const findByPmsId = async (pmsId) => {
+  const property = await Property.findOne({ pmsId: pmsId });
+  return property;
+};
+module.exports = {
+  create,
+  getAll,
+  update,
+  remove,
+  getById,
+  getByEmail,
+  find,
+  findByPmsId,
+};

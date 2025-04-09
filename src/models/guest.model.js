@@ -38,6 +38,7 @@ const guestSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    pmsId: { type: String },
     //draft: { type: Boolean, default: false },
   },
   { timestamps: true },

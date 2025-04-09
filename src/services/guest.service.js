@@ -57,18 +57,16 @@ const getByGuestId = async (guestId) => {
 /**
  * Get guest by id
  * @param {string} guestId - guest id
- * @param {string} propertyId - property id
- * @returns {Promise<import('../models/guest.model').GuestType>} guest - guest object
- */
-const getById = async (guestId, propertyId) => {
-  const guest = await Guest.findOne({ _id: guestId, propertyId: propertyId });
-  if (!guest) {
-    throw new NotFoundError("Guest not found", {
-      guestId: ["Guest not found for the given id"],
-    });
-  }
-  return guest;
-};
+ * @param {string} propertyId - property id @returns {Promise<import('../models/guest.model').GuestType>} guest - guest object */ const getById =
+  async (guestId, propertyId) => {
+    const guest = await Guest.findOne({ _id: guestId, propertyId: propertyId });
+    if (!guest) {
+      throw new NotFoundError("Guest not found", {
+        guestId: ["Guest not found for the given id"],
+      });
+    }
+    return guest;
+  };
 /**
  * Update guest
  * @param {object} guest - guest object
@@ -615,6 +613,23 @@ const getGuestByPhoneNumber = async (propertyId, countryCode, phoneNumber) => {
   const guest = await Guest.aggregate(pipeline);
   return guest[0];
 };
+/**
+ * Get guest by property id and guest id
+ * @param {string} propertyId - property id
+ * @param {string} pmsId - pms id
+ * @returns {Promise<import('../models/guest.model').GuestType>} guest - guest object
+ */
+const getByGuestPmsId = async (propertyId, pmsId) => {
+  try {
+    const guest = await Guest.findOne({ propertyId: propertyId, pmsId: pmsId });
+    return guest;
+  } catch (e) {
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError(e.message));
+  }
+};
 
 module.exports = {
   create,
@@ -634,4 +649,5 @@ module.exports = {
   getByPropertyIdAndGuestId,
   getGuestByPhoneNumber,
   getGuestAddonsRequestsv2,
+  getByGuestPmsId,
 };
