@@ -46,6 +46,7 @@ const bookingCreate = async (req, res, next) => {
       //
       phoneNumber: GuestInformation.Phone.split("-").join(""),
       countryCode: GuestInformation.CountryCode,
+      draft: true,
     };
     const guestStatusData = {
       currentStatus: GUEST_CURRENT_STATUS.RESERVED,
