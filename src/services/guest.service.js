@@ -631,6 +631,25 @@ const getByGuestPmsId = async (propertyId, pmsId) => {
   }
 };
 
+/**
+ * Upsert guest
+ * @param {object} guest - guest object
+ * @param {string} propertyId - property id
+ * @param {object} session - mongoose session
+ * @returns {Promise<import('../models/guest.model').GuestType>} guest - guest object
+ */
+const upsert = async (guest, propertyId, session) => {
+  const updatedGuest = await Guest.findOneAndUpdate(
+    { _id: guest._id, propertyId: propertyId },
+    {
+      ...guest,
+      propertyId: propertyId,
+    },
+    { session: session, new: true },
+  );
+  return updatedGuest;
+};
+
 module.exports = {
   create,
   getAll,
@@ -650,4 +669,5 @@ module.exports = {
   getGuestByPhoneNumber,
   getGuestAddonsRequestsv2,
   getByGuestPmsId,
+  upsert,
 };
