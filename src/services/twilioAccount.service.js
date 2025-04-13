@@ -1,5 +1,6 @@
 const { NotFoundError } = require("../lib/CustomErrors");
 const { TwilioAccount } = require("../models/twilioAccount.model");
+const twilio = require('twilio');
 
 /**
  * Get twilio account by propertyId
@@ -8,8 +9,30 @@ const { TwilioAccount } = require("../models/twilioAccount.model");
  */
 const getByPropertyId = async (propertyId) => {
   const twilioAccount = await TwilioAccount.findOne({ propertyId: propertyId });
-
   return twilioAccount;
+};
+
+const getMessageCount = async (sid,authToken) => {
+  try{
+    const client = twilio(sid, authToken);
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    const today = new Date();
+    if(!client) {
+      console.error('Failed to get Client');
+    }
+
+    const messages = await client.messages.list({
+      dateSentAfter: startOfMonth.toISOString(),
+      dateSentBefore: today.toISOString(),
+      limit: 1000,
+    });
+
+    return messages.length;
+  } catch (error) {
+    console.error('Failed to fetch messages:', error.message);
+    return -1;
+  }
 };
 
 /**
@@ -39,4 +62,9 @@ const findOne = async (filter) => {
   return await TwilioAccount.findOne(filter);
 };
 
-module.exports = { getByPropertyId, findOne, update };
+module.exports = { 
+  getByPropertyId, 
+  findOne, 
+  update, 
+  getMessageCount, 
+};
