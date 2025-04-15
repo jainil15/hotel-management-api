@@ -580,12 +580,12 @@ const getGuestByPhoneNumber = async (propertyId, countryCode, phoneNumber) => {
         ],
       },
     },
-    {
-      $match: {
-        checkOut: { $gte: new Date() },
-        checkIn: { $lte: new Date() },
-      },
-    },
+    // {
+    //   $match: {
+    //     checkOut: { $gte: new Date() },
+    //     checkIn: { $lte: new Date() },
+    //   },
+    // },
     {
       $unwind: {
         path: "$status",

@@ -103,7 +103,7 @@ const sendMessageToTodayCheckoutGuests = async (propertyId) => {
           hour: "2-digit",
           minute: "2-digit",
           hour12: true,
-          timeZone: "UTC",
+          //timeZone: "UTC",
         });
         const twilioAccount =
           await twilioAccountService.getByPropertyId(propertyId);
@@ -115,7 +115,8 @@ const sendMessageToTodayCheckoutGuests = async (propertyId) => {
         }
         const twilioSubClient =
           await twilioService.getTwilioClient(twilioAccount);
-        const messageBody = `Hi ${guest.firstName}! A friendly remainder that your checkout is scheduled for today at ${formattedTime} ${propertySetting.timezone}.If you’d like a late checkout or to extend your stay, please click here:\n ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}. or feel free to reply with any questions.`;
+        //const messageBody = `Hi ${guest.firstName}! A friendly remainder that your checkout is scheduled for today at ${formattedTime} ${propertySetting.timezone}.If you’d like a late checkout or to extend your stay, please click here:\n ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}. or feel free to reply with any questions.`;
+        const messageBody = `Hi ${guest.firstName}! A friendly remainder that your checkout is scheduled for today at ${formattedTime}.If you’d like a late checkout or to extend your stay, please click here:\n ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}. or feel free to reply with any questions.`;
         const recipientPhoneNumber = `${guest.countryCode}${guest.phoneNumber}`;
         const senderPhoneNumber = `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`;
         if (guest.phoneNumber && guest.countryCode) {
