@@ -793,7 +793,6 @@ const getGuestById = async (req, res, next) => {
  * @param {Object} res
  * @param {Function} next
  */
-
 const getGuestData = async (req, res, next) => {
   try {
     const guestId = req.params.guestId;
@@ -837,7 +836,6 @@ const getGuestData = async (req, res, next) => {
  * @param {Object} res
  * @param {Function} next
  */
-
 const guestedit = async (req, res, next) => {
   const session = await mongoose.startSession();
   session.startTransaction();

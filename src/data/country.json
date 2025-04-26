@@ -1,5 +1,12 @@
 [
   {
+    "id": 91,
+    "name": "India",
+    "iso3": "IND",
+    "iso2": "IN",
+    "phone_code": "91"
+  },
+  {
     "id": 14,
     "name": "Australia",
     "iso3": "AUS",
@@ -19,56 +26,42 @@
     "nationality": "Australian",
     "timezones": [
       {
-        "zoneName": [
-          "Australia/Perth"
-        ],
+        "zoneName": ["Australia/Perth"],
         "gmtOffset": 28800,
         "gmtOffsetName": "UTC+08:00",
         "abbreviation": "AWST",
         "tzName": "Australian Western Standard Time"
       },
       {
-        "zoneName": [
-          "Australia/Eucla"
-        ],
+        "zoneName": ["Australia/Eucla"],
         "gmtOffset": 31500,
         "gmtOffsetName": "UTC+08:45",
         "abbreviation": "ACWST",
         "tzName": "Australian Central Western Standard Time (Unofficial)"
       },
       {
-        "zoneName": [
-          "Australia/Darwin"
-        ],
+        "zoneName": ["Australia/Darwin"],
         "gmtOffset": 34200,
         "gmtOffsetName": "UTC+09:30",
         "abbreviation": "ACST",
         "tzName": "Australian Central Standard Time"
       },
       {
-        "zoneName": [
-          "Australia/Brisbane",
-          "Australia/Lindeman"
-        ],
+        "zoneName": ["Australia/Brisbane", "Australia/Lindeman"],
         "gmtOffset": 36000,
         "gmtOffsetName": "UTC+10:00",
         "abbreviation": "AEST",
         "tzName": "Australian Eastern Standard Time"
       },
       {
-        "zoneName": [
-          "Australia/Adelaide",
-          "Australia/Broken_Hill"
-        ],
+        "zoneName": ["Australia/Adelaide", "Australia/Broken_Hill"],
         "gmtOffset": 37800,
         "gmtOffsetName": "UTC+10:30",
         "abbreviation": "ACDT",
         "tzName": "Australian Central Daylight Saving Time"
       },
       {
-        "zoneName": [
-          "Antarctica/Macquarie"
-        ],
+        "zoneName": ["Antarctica/Macquarie"],
         "gmtOffset": 39600,
         "gmtOffsetName": "UTC+11:00",
         "abbreviation": "MIST",
@@ -87,9 +80,7 @@
         "tzName": "Australian Eastern Daylight Saving Time"
       },
       {
-        "zoneName": [
-          "Australia/Lord_Howe"
-        ],
+        "zoneName": ["Australia/Lord_Howe"],
         "gmtOffset": 39600,
         "gmtOffsetName": "UTC+11:00",
         "abbreviation": "LHST",
@@ -113,7 +104,7 @@
     },
     "latitude": "-27.00000000",
     "longitude": "133.00000000",
-    "emoji": "🇦🇺",
+    "emoji": "🇦",
     "emojiU": "U+1F1E6 U+1F1FA"
   },
   {
@@ -136,9 +127,7 @@
     "nationality": "Canadian",
     "timezones": [
       {
-        "zoneName": [
-          "America/Vancouver"
-        ],
+        "zoneName": ["America/Vancouver"],
         "gmtOffset": -28800,
         "gmtOffsetName": "UTC-08:00",
         "abbreviation": "PST",
@@ -203,9 +192,7 @@
         "tzName": "Atlantic Standard Time"
       },
       {
-        "zoneName": [
-          "America/St_Johns"
-        ],
+        "zoneName": ["America/St_Johns"],
         "gmtOffset": -12600,
         "gmtOffsetName": "UTC-03:30",
         "abbreviation": "NST",
@@ -229,7 +216,7 @@
     },
     "latitude": "60.00000000",
     "longitude": "-95.00000000",
-    "emoji": "🇨🇦",
+    "emoji": "🇨",
     "emojiU": "U+1F1E8 U+1F1E6"
   },
   {
@@ -252,9 +239,7 @@
     "nationality": "British, UK",
     "timezones": [
       {
-        "zoneName": [
-          "Europe/London"
-        ],
+        "zoneName": ["Europe/London"],
         "gmtOffset": 0,
         "gmtOffsetName": "UTC±00",
         "abbreviation": "GMT",
@@ -278,7 +263,7 @@
     },
     "latitude": "54.00000000",
     "longitude": "-2.00000000",
-    "emoji": "🇬🇧",
+    "emoji": "🇬",
     "emojiU": "U+1F1EC U+1F1E7"
   },
   {
@@ -301,10 +286,7 @@
     "nationality": "American",
     "timezones": [
       {
-        "zoneName": [
-          "America/Adak",
-          "Pacific/Honolulu"
-        ],
+        "zoneName": ["America/Adak", "Pacific/Honolulu"],
         "gmtOffset": -36000,
         "gmtOffsetName": "UTC-10:00",
         "abbreviation": "HST",
@@ -325,20 +307,14 @@
         "tzName": "Alaska Standard Time"
       },
       {
-        "zoneName": [
-          "America/Los_Angeles"
-        ],
+        "zoneName": ["America/Los_Angeles"],
         "gmtOffset": -28800,
         "gmtOffsetName": "UTC-08:00",
         "abbreviation": "PST",
         "tzName": "Pacific Standard Time (North America)"
       },
       {
-        "zoneName": [
-          "America/Boise",
-          "America/Denver",
-          "America/Phoenix"
-        ],
+        "zoneName": ["America/Boise", "America/Denver", "America/Phoenix"],
         "gmtOffset": -25200,
         "gmtOffsetName": "UTC-07:00",
         "abbreviation": "MST",
@@ -395,7 +371,8 @@
     },
     "latitude": "38.00000000",
     "longitude": "-97.00000000",
-    "emoji": "🇺🇸",
+    "emoji": "🇺",
     "emojiU": "U+1F1FA U+1F1F8"
   }
 ]
+

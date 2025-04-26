@@ -182,4 +182,12 @@ const updateStatus = async (messageSid, status, session) => {
   return updatedMessage;
 };
 
-module.exports = { create, getAll, getById, updateStatus };
+const getAllByPropertyId = async (propertyId) => {
+  const messages = await Message.find({
+    propertyId: new mongoose.Types.ObjectId(propertyId),
+  });
+
+  return messages;
+};
+
+module.exports = { create, getAll, getById, updateStatus, getAllByPropertyId };

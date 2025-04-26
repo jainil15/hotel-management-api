@@ -1,4 +1,9 @@
 const propertyService = require("../services/property.service");
+const {
+  APIError,
+  InternalServerError,
+  ForbiddenError,
+} = require("../lib/CustomErrors");
 
 /**
  * Check if the user has access to the property
@@ -9,8 +14,10 @@ const propertyService = require("../services/property.service");
  */
 const checkPropertyPms = async (req, res, next) => {
   try {
-    const pmsId = req.body.ClientInformation.ClientId;
-    const property = propertyService.findByPmsId(pmsId);
+    const pmsId = req.body[0].ClientInformation.ClientID;
+    console.log(pmsId);
+    const property = await propertyService.findByPmsId(pmsId);
+    console.log(pmsId, property);
     if (!property) {
       throw new ForbiddenError("Property Access Denied", {});
     }

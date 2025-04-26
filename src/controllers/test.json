@@ -1,0 +1,118 @@
+[
+  {
+    "ClientInformation": {
+      "ClientID": "10028",
+      "ClientName": "DEMO HOTEL",
+      "ClientAddress": "35 E, 1OTH STREET, TRACY, CA, 95376, USA",
+      "IsNightAuditProcess": false
+    },
+    "Folios": [
+      {
+        "Transaction": {
+          "ID": "R-24884",
+          "Type": "Reservation",
+          "EventName": "Reservation-Create"
+        },
+        "FolioInformation": {
+          "CreationDate": "2024-08-11T22:29:00",
+          "Number": "110824082924377",
+          "CRSFolioNumber": "",
+          "Prepaid": false,
+          "NonRefundable": false,
+          "NoOfGuest": {
+            "Adults": 2,
+            "Childs": 0,
+            "Teens": 0,
+            "Infants": 0,
+            "Pets": 0
+          },
+          "OCIInvitationCode": null,
+          "OCIInvitationURL": null
+        },
+        "BusinessSource": { "Category": "Travel Agent", "Name": "" },
+        "GroupInformation": {
+          "GroupID": "-1",
+          "GroupTransactionID": "-1",
+          "GroupFolioNumber": "",
+          "GroupName": "",
+          "GroupLeaderName": {
+            "Title": "",
+            "FirstName": "",
+            "MiddleName": "",
+            "LastName": "",
+            "Suffix": "",
+            "Gender": "",
+            "Nationality": "",
+            "DateOfBirth": "0001-01-01T00:00:00"
+          }
+        },
+        "GuestInformation": {
+          "GuestID": 64364,
+          "GuestName": {
+            "Title": "",
+            "FirstName": "Test",
+            "MiddleName": "",
+            "LastName": "Test",
+            "Suffix": "",
+            "Gender": "Other",
+            "Nationality": "",
+            "DateOfBirth": "1900-01-01T00:00:00"
+          },
+          "Company": { "Designation": "", "Department": "", "Company": "" },
+          "ContactInformation": {
+            "HomePhone": "9104470843",
+            "BusinessPhone": "",
+            "OtherPhone": "",
+            "CellPhone": "",
+            "HomeEmail": "",
+            "BusinessEmail": "",
+            "OtherEmail": ""
+          },
+          "HomeAddress": {
+            "Street": "",
+            "City": "",
+            "State": "",
+            "Zip": "",
+            "Country": "USA"
+          },
+          "BusinessAddress": {
+            "Street": "",
+            "City": "",
+            "State": "",
+            "Zip": "",
+            "Country": ""
+          },
+          "OtherAddress": {
+            "Street": "",
+            "City": "",
+            "State": "",
+            "Zip": "",
+            "Country": ""
+          }
+        },
+        "StayInformation": {
+          "CheckInDate": "2024-08-11T15:00:00",
+          "CheckOutDate": "2024-08-12T11:00:00",
+          "BuildingID": 1,
+          "Building": "DEMO HOTEL",
+          "FloorID": 1,
+          "Floor": "All Floors",
+          "RoomTypeID": 5,
+          "RoomType": "2 Queen Non Smoking",
+          "RoomID": 44,
+          "Room": "104",
+          "RateType": "Best Available",
+          "Currency": "USD",
+          "TotalRent": 0,
+          "OccpancyTax": 0,
+          "TotalOtherCharges": 0,
+          "TotalDiscount": 0,
+          "TotalPayment": 0
+        },
+        "RentalInfo": null,
+        "ChargeInfo": null,
+        "PaymentInfo": null
+      }
+    ]
+  }
+]

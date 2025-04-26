@@ -299,7 +299,30 @@ const subaccountBilling = async (req, res, next) => {
     });
 
     const billing = await twilioService.subaccountBilling(twilioSubClient);
-    return responseHandler(res, { billing });
+    const messages = await twilioSubClient.messages.list({
+      from: twilioAccount.phoneNumber,
+    });
+    const count = messages.length;
+    const messageCount = await messageService.getAllByPropertyId(
+      twilioAccount.propertyId,
+    );
+
+    // const count = messageCount.reduce((acc, message) => {
+    //   console.log(
+    //     message.senderId,
+    //     twilioAccount.propertyId,
+    //     message.senderId.toString() === twilioAccount.propertyId.toString(),
+    //   );
+    //   if (
+    //     message.messageType === messageType.SMS &&
+    //     message.senderId.toString() === twilioAccount.propertyId.toString()
+    //   ) {
+    //     return acc + 1;
+    //   }
+    //   return acc;
+    // }, 0);
+
+    return responseHandler(res, { count });
   } catch (e) {
     if (e instanceof APIError) {
       return next(e);

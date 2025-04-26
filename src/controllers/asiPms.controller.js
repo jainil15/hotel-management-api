@@ -1,36 +1,103 @@
+const pmsHandler = require("../handlers/apiPms.handler.js");
+const {
+  APIError,
+  InternalServerError,
+  NotFoundError,
+} = require("../lib/CustomErrors.js");
+const { responseHandler } = require("../middlewares/response.middleware.js");
+
 /**
+ * Handles the folio request.
  * @param {import('express').Request} req - Request
  * @param {import('express').Response} res - Response
  * @param {import('express').NextFunction} next - Next function
  * @returns {Promise<void>}
  */
-const folioDispatcher = (req, res, next) => {
-  const payload = req.body;
-  const { EventType } = payload.Transaction;
-  switch (EventType) {
-    case "Booking-Create":
-    // TODO: Booking create
-    case "Booking-Update":
-    // TODO: Booking update
-    case "Booking-NoShowCancel":
-    // TODO: Booking no show or cancel
-    case "Reservation-Create":
-    // TODO: Reservation create
-    case "Reservation-Update":
-    // TODO: Reservation update
-    case "Reservation-NoShowCancel":
-    // TODO: Reservation no show or cancel
-    case "CheckIn-Create":
-    // TODO: Reservation check in
-    case "CheckIn-Update":
-    // TODO: Check in update
-    case "Check-Out":
-    // TODO: Guest checked out
-    case "Undo":
-    // TODO: Idk
+const folioDispatcher = async (req, res, next) => {
+  try {
+    const payload = req.body;
+    console.log(JSON.stringify(payload));
+    const propertyId = req.params.propertyId;
+    const pmsId = payload[0].ClientInformation.ClientId;
+    console.log(`pmsId: ${pmsId}`);
+    const result = [];
+    for (const folio of payload[0].Folios) {
+      const { EventName } = folio.Transaction;
+      switch (EventName) {
+        case "Booking-Create":
+          result.push(
+            await pmsHandler.bookingCreate(folio, pmsId, propertyId, req),
+          );
+          break;
+        case "Booking-Update":
+          result.push(
+            await pmsHandler.bookingUpdate(folio, pmsId, propertyId, req),
+          );
+          break;
+        case "Booking-NoShowCancel":
+          result.push(
+            await pmsHandler.bookingNoShowCancel(folio, pmsId, propertyId, req),
+          );
+          break;
+        case "Reservation-Create":
+          result.push(
+            await pmsHandler.reservationCreate(folio, pmsId, propertyId, req),
+          );
+          break;
+        case "Reservation-Update":
+          result.push(
+            await pmsHandler.reservationUpdate(folio, pmsId, propertyId, req),
+          );
+          break;
+        case "Reservation-NoShowCancel":
+          result.push(
+            await pmsHandler.reservationNoShowCancel(
+              folio,
+              pmsId,
+              propertyId,
+              req,
+            ),
+          );
+          break;
+        case "CheckIn-Create":
+          result.push(
+            await pmsHandler.checkInCreate(folio, pmsId, propertyId, req),
+          );
+          break;
+        case "CheckIn-Update":
+          result.push(
+            await pmsHandler.checkInUpdate(folio, pmsId, propertyId, req),
+          );
+          break;
+        case "Check-Out":
+          result.push(await pmsHandler.checkOut(folio, pmsId, propertyId, req));
+          break;
+        // case "Undo":
+        //    await pmsHandler.bookingCreate(req, res, next);
+        default:
+          console.log("here");
+          throw new NotFoundError(`EventType ${EventType} not found`, {});
+      }
+      return responseHandler(res, result);
+    }
+  } catch (e) {
+    console.log(e);
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError(e.message));
   }
 };
 
+/**
+ * Handles the room status dispatcher
+ * @param {import('express').Request} req - Request
+ * @param {import('express').Response} res - Response
+ * @param {import('express').NextFunction} next - Next function
+ * @returns {Promise<void>}
+ */
+const roomStatusDispatcher = async (req, res, next) => {};
 module.exports = {
   folioDispatcher,
+  roomStatusDispatcher,
 };

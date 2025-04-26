@@ -198,7 +198,7 @@ const find = async (filter) => {
 };
 
 /**
- * @param {object} pmsId - The pms id
+ * @param {string} pmsId - The pms id
  * @returns {Promise<import('../models/property.model.js').PropertyType}
  */
 const findByPmsId = async (pmsId) => {

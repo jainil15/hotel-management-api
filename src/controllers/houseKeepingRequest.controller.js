@@ -5,6 +5,8 @@ const guestStatusService = require("../services/guestStatus.service");
 const workflowService = require("../services/workflow.service");
 const messageService = require("../services/message.service");
 const chatListService = require("../services/chatList.service");
+const asiPmsService = require("../services/asiPms.service");
+const { ROOM_STATUS_CODE } = require("../constants/asi.constant");
 const {
   houseKeepingRequestMailTemplate,
   sendMail,
@@ -79,6 +81,18 @@ const create = async (req, res, next) => {
       houseKeepingRequestResult.data,
       session,
     );
+    // TODO: Change house keeping status in pms
+    console.log(property);
+    if (property.property.pmsId) {
+      const asiPmsResponse = await asiPmsService.changeRoomStatus(
+        property.property.pmsId,
+        "813D2A24-6B5D-463C-BA76-CB9369C8375F",
+        "5T9OPcFv&jipS87^VaMfvsMLTghH209276Vcdg#mAP0^$",
+        guest.roomNumber,
+        ROOM_STATUS_CODE.IN_HOUSE_DIRTY,
+      );
+      console.log(asiPmsResponse);
+    }
     const message = houseKeepingRequestMailTemplate(guest);
     sendMail(
       property.property.email,
@@ -124,6 +138,7 @@ const create = async (req, res, next) => {
     session.endSession();
     return responseHandler(res, newHouseKeepingRequest);
   } catch (e) {
+    console.log(e);
     await session.abortTransaction();
     session.endSession();
     if (e instanceof APIError) {
