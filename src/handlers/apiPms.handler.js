@@ -76,29 +76,51 @@ const bookingCreate = async (folio, pmsId, propertyId, req) => {
   try {
     const {
       FolioInformation,
-      BuissnessSource,
+      BusinessSource,
       GroupInformation,
       GuestInformation,
       StayInformation,
     } = folio;
+    console.log(folio, pmsId, propertyId);
+    const guestPmsId = GuestInformation.GuestID;
+    const country =
+      GuestInformation.HomeAddress.Country ||
+      GuestInformation.BusinessAddress.Country ||
+      GuestInformation.BusinessAddress.Country;
+    const email =
+      GuestInformation.ContactInformation.HomeEmail ||
+      GuestInformation.ContactInformation.BusinessEmail ||
+      GuestInformation.ContactInformation.OtherEmail;
+    const number =
+      GuestInformation.ContactInformation.HomePhone ||
+      GuestInformation.ContactInformation.BusinessPhone ||
+      GuestInformation.ContactInformation.OtherPhone ||
+      GuestInformation.ContactInformation.CellPhone;
     const guestData = {
       propertyId: propertyId,
-      pmsId: pmsId,
-
-      firstName: GuestInformation.FirstName,
-      lastName: GuestInformation.LastName,
-      email: GuestInformation.Email,
-      source: BuissnessSource.Source,
-      checkIn: StayInformation.CheckInDate,
-      checkOut: StayInformation.CheckOutDate,
+      firstName: GuestInformation.GuestName.FirstName,
+      lastName: GuestInformation.GuestName.LastName,
+      email: email,
+      source: BusinessSource.Name,
+      checkIn: `${StayInformation.CheckInDate}Z`,
+      checkOut: `${StayInformation.CheckOutDate}Z`,
       roomNumber: StayInformation.Room,
       confirmationNumber: FolioInformation.CRSFolioNumber,
-      // TODO: country code and phonenumber test
-      //
-      phoneNumber: GuestInformation.Phone.split("-").join(""),
-      countryCode: GuestInformation.CountryCode,
-      draft: true,
+      draft: false,
+      pmsId: GuestInformation.GuestID,
     };
+    if (number) {
+      const phoneNumber = number.slice(number.length - 10);
+      let countryCode = number.slice(0, number.length - 10);
+      if (countryCode === "") {
+        countryCode = `+${getCountryCode(country)}`;
+      }
+      if (!countryCode.startsWith("+")) {
+        countryCode = `+${countryCode}`;
+      }
+      guestData.phoneNumber = phoneNumber;
+      guestData.countryCode = countryCode;
+    }
     const guestStatusData = {
       currentStatus: GUEST_CURRENT_STATUS.RESERVED,
       reservationStatus: RESERVATION_STATUS.CONFIRMED,
@@ -181,39 +203,59 @@ const bookingCreate = async (folio, pmsId, propertyId, req) => {
 const bookingUpdate = async (folio, pmsId, propertyId, req) => {
   const session = await mongoose.startSession();
   session.startTransaction();
-
   try {
     const {
       FolioInformation,
-      BuissnessSource,
+      BusinessSource,
       GroupInformation,
       GuestInformation,
       StayInformation,
     } = folio;
+    console.log(folio, pmsId, propertyId);
+    const guestPmsId = GuestInformation.GuestID;
+    const country =
+      GuestInformation.HomeAddress.Country ||
+      GuestInformation.BusinessAddress.Country ||
+      GuestInformation.BusinessAddress.Country;
+    const email =
+      GuestInformation.ContactInformation.HomeEmail ||
+      GuestInformation.ContactInformation.BusinessEmail ||
+      GuestInformation.ContactInformation.OtherEmail;
+    const number =
+      GuestInformation.ContactInformation.HomePhone ||
+      GuestInformation.ContactInformation.BusinessPhone ||
+      GuestInformation.ContactInformation.OtherPhone ||
+      GuestInformation.ContactInformation.CellPhone;
     const guestData = {
       propertyId: propertyId,
-      pmsId: pmsId,
-
-      firstName: GuestInformation.FirstName,
-      lastName: GuestInformation.LastName,
-      email: GuestInformation.Email,
-      source: BuissnessSource.Source,
-      checkIn: StayInformation.CheckInDate,
-      checkOut: StayInformation.CheckOutDate,
+      firstName: GuestInformation.GuestName.FirstName,
+      lastName: GuestInformation.GuestName.LastName,
+      email: email,
+      source: BusinessSource.Name,
+      checkIn: `${StayInformation.CheckInDate}Z`,
+      checkOut: `${StayInformation.CheckOutDate}Z`,
       roomNumber: StayInformation.Room,
       confirmationNumber: FolioInformation.CRSFolioNumber,
-      // TODO: country code and phonenumber test
-      //
-      phoneNumber: GuestInformation.Phone.split("-").join(""),
-      countryCode: GuestInformation.CountryCode,
+      draft: false,
+      pmsId: GuestInformation.GuestID,
     };
-
+    if (number) {
+      const phoneNumber = number.slice(number.length - 10);
+      let countryCode = number.slice(0, number.length - 10);
+      if (countryCode === "") {
+        countryCode = `+${getCountryCode(country)}`;
+      }
+      if (!countryCode.startsWith("+")) {
+        countryCode = `+${countryCode}`;
+      }
+      guestData.phoneNumber = phoneNumber;
+      guestData.countryCode = countryCode;
+    }
     const guestStatusData = {
       currentStatus: GUEST_CURRENT_STATUS.RESERVED,
       reservationStatus: RESERVATION_STATUS.CONFIRMED,
     };
-    const guest = await guestService.getByGuestPmsId(pmsId);
-
+    const guest = await guestService.getByGuestPmsId(propertyId, guestPmsId);
     // Update guest
     const updatedGuest = await guestService.update(
       guestData,
@@ -224,7 +266,6 @@ const bookingUpdate = async (folio, pmsId, propertyId, req) => {
 
     // Update guest status
     const updatedGuestStatus = await guestStatusService.update(
-      propertyId,
       updatedGuest._id,
       guestStatusData,
       session,
@@ -256,35 +297,81 @@ const bookingUpdate = async (folio, pmsId, propertyId, req) => {
  * @throws {Error} - Error
  */
 const bookingNoShowCancel = async (folio, pmsId, propertyId, req) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
   try {
-    const folio = req.body.Folios[0];
     const {
       FolioInformation,
-      BuissnessSource,
+      BusinessSource,
       GroupInformation,
       GuestInformation,
       StayInformation,
     } = folio;
-    const guest = await guestService.findByPmsId(propertyId, pmsId);
+    console.log(folio, pmsId, propertyId);
+    const guestPmsId = GuestInformation.GuestID;
+    const country =
+      GuestInformation.HomeAddress.Country ||
+      GuestInformation.BusinessAddress.Country ||
+      GuestInformation.BusinessAddress.Country;
+    const email =
+      GuestInformation.ContactInformation.HomeEmail ||
+      GuestInformation.ContactInformation.BusinessEmail ||
+      GuestInformation.ContactInformation.OtherEmail;
+    const number =
+      GuestInformation.ContactInformation.HomePhone ||
+      GuestInformation.ContactInformation.BusinessPhone ||
+      GuestInformation.ContactInformation.OtherPhone ||
+      GuestInformation.ContactInformation.CellPhone;
+    const guestData = {
+      propertyId: propertyId,
+      firstName: GuestInformation.GuestName.FirstName,
+      lastName: GuestInformation.GuestName.LastName,
+      email: email,
+      source: BusinessSource.Name,
+      checkIn: `${StayInformation.CheckInDate}Z`,
+      checkOut: `${StayInformation.CheckOutDate}Z`,
+      roomNumber: StayInformation.Room,
+      confirmationNumber: FolioInformation.CRSFolioNumber,
+      draft: false,
+      pmsId: GuestInformation.GuestID,
+    };
+    if (number) {
+      const phoneNumber = number.slice(number.length - 10);
+      let countryCode = number.slice(0, number.length - 10);
+      if (countryCode === "") {
+        countryCode = `+${getCountryCode(country)}`;
+      }
+      if (!countryCode.startsWith("+")) {
+        countryCode = `+${countryCode}`;
+      }
+      guestData.phoneNumber = phoneNumber;
+      guestData.countryCode = countryCode;
+    }
+    const guestStatusData = {
+      currentStatus: GUEST_CURRENT_STATUS.RESERVED,
+      reservationStatus: RESERVATION_STATUS.CANCELLED,
+    };
+    const guest = await guestService.getByGuestPmsId(propertyId, guestPmsId);
+    console.log(guest);
     if (!guest) {
       throw new NotFoundError("Guest not found", {
         guestId: ["Guest not found for the given id"],
       });
     }
-    const guestStatus = await guestStatusService.findByGuestId(
+    const upsertedGuest = await guestService.upsert(
+      guestPmsId,
+      guestData,
       propertyId,
-      guest._id,
+      session,
     );
+    const guestStatus = await guestStatusService.getByGuestId(guest._id);
     if (!guestStatus) {
       throw new NotFoundError("Guest status not found", {
         guestId: ["Guest status not found for the given id"],
       });
     }
-    const guestStatusData = {
-      reservationStatus: RESERVATION_STATUS.CANCELLED,
-    };
+    console.log(guest._id);
     const updatedGuestStatus = await guestStatusService.update(
-      propertyId,
       guest._id,
       guestStatusData,
       session,
@@ -296,7 +383,7 @@ const bookingNoShowCancel = async (folio, pmsId, propertyId, req) => {
 
     // Emit to guest list updated
     req.app.io.to(`property:${propertyId}`).emit("guest:guestUpdate", {
-      guest: { ...guest._doc, status: { ...updatedGuestStatus._doc } },
+      guest: { ...upsertedGuest._doc, status: { ...updatedGuestStatus._doc } },
     });
     return { ...guest._doc, status: { ...updatedGuestStatus._doc } };
   } catch (e) {
@@ -384,13 +471,13 @@ const reservationCreate = async (folio, pmsId, propertyId, req) => {
       session,
     );
     // Create Guest Session
-    const guestSession = await guestSessionService.create(
+    const guestSession = await guestSessionService.upsert(
       propertyId,
       upsertedGuest._id,
       session,
     );
     // Create chat list
-    const chatList = await chatListService.create(
+    const chatList = await chatListService.upsert(
       propertyId,
       upsertedGuest._id,
       session,
@@ -569,6 +656,10 @@ const reservationUpdate = async (folio, pmsId, propertyId, req) => {
       session,
     );
     const { property } = await propertyService.getById(propertyId);
+    const guestSession = await guestSessionService.getGuestSession(
+      propertyId,
+      updatedGuest._id,
+    );
 
     if (updatedGuest.phoneNumber && updatedGuest.countryCode) {
       const messageTemplate =
@@ -587,7 +678,7 @@ const reservationUpdate = async (folio, pmsId, propertyId, req) => {
         );
         const updatedMessageBody = modifyMessageTemplateBody(
           messageTemplate,
-          guest,
+          updatedGuest,
           property,
           propertySetting,
           `${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
@@ -595,15 +686,15 @@ const reservationUpdate = async (folio, pmsId, propertyId, req) => {
         const sentMessage = await smsService.send(
           twilioSubClient,
           `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
-          `${guest.countryCode}${guest.phoneNumber}`,
+          `${updatedGuest.countryCode}${updatedGuest.phoneNumber}`,
           `${updatedMessageBody.message}`,
         );
         const newMessage = await messageService.create(
           {
             propertyId: propertyId,
-            guestId: guest._id,
+            guestId: updatedGuest._id,
             senderId: propertyId,
-            receiverId: guest._id,
+            receiverId: updatedGuest._id,
             content: sentMessage.body,
             messageSid: sentMessage.sid,
             messageType: messageType.SMS,
@@ -701,6 +792,12 @@ const reservationNoShowCancel = async (folio, pmsId, propertyId, req) => {
         guestId: ["Guest not found for the given id"],
       });
     }
+    const upsertedGuest = await guestService.upsert(
+      guestPmsId,
+      guestData,
+      propertyId,
+      session,
+    );
     console.log(guest._id);
     const guestStatus = await guestStatusService.getByGuestId(guest._id);
     if (!guestStatus) {
@@ -722,7 +819,7 @@ const reservationNoShowCancel = async (folio, pmsId, propertyId, req) => {
       guest._id,
     );
     const { property } = await propertyService.getById(propertyId);
-    if (guest.phoneNumber && guest.countryCode) {
+    if (upsertedGuest.phoneNumber && upsertedGuest.countryCode) {
       const messageTemplate =
         await messageTemplateService.getByNameAndPropertyId(
           propertyId,
@@ -739,7 +836,7 @@ const reservationNoShowCancel = async (folio, pmsId, propertyId, req) => {
         );
         const updatedMessageBody = modifyMessageTemplateBody(
           messageTemplate,
-          guest,
+          upsertedGuest,
           property,
           propertySetting,
           `${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
@@ -747,15 +844,15 @@ const reservationNoShowCancel = async (folio, pmsId, propertyId, req) => {
         const sentMessage = await smsService.send(
           twilioSubClient,
           `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
-          `${guest.countryCode}${guest.phoneNumber}`,
+          `${upsertedGuest.countryCode}${upsertedGuest.phoneNumber}`,
           `${updatedMessageBody.message}`,
         );
         const newMessage = await messageService.create(
           {
             propertyId: propertyId,
-            guestId: guest._id,
+            guestId: upsertedGuest._id,
             senderId: propertyId,
-            receiverId: guest._id,
+            receiverId: upsertedGuest._id,
             content: sentMessage.body,
             messageSid: sentMessage.sid,
             messageType: messageType.SMS,
@@ -773,9 +870,9 @@ const reservationNoShowCancel = async (folio, pmsId, propertyId, req) => {
 
     // Emit to guest list updated
     req.app.io.to(`property:${propertyId}`).emit("guest:guestUpdate", {
-      guest: { ...guest._doc, status: { ...updatedGuestStatus._doc } },
+      guest: { ...upsertedGuest._doc, status: { ...updatedGuestStatus._doc } },
     });
-    req.app.io.to(`guest:${guest._id}`).emit("message:newMessage", {
+    req.app.io.to(`guest:${upsertedGuest._id}`).emit("message:newMessage", {
       message: {},
     });
     // Emit to chat list updated
@@ -853,7 +950,10 @@ const checkInCreate = async (folio, pmsId, propertyId, req) => {
     };
 
     const { property } = await propertyService.getById(propertyId);
-    const existingGuest = await guestService.getByGuestPmsId(propertyId, pmsId);
+    const existingGuest = await guestService.getByGuestPmsId(
+      propertyId,
+      guestPmsId,
+    );
 
     // Upsert guest
     const upsertedGuest = await guestService.upsert(
@@ -886,7 +986,7 @@ const checkInCreate = async (folio, pmsId, propertyId, req) => {
       );
       const { property } = await propertyService.getById(propertyId);
 
-      if (guest.phoneNumber && guest.countryCode) {
+      if (upsertedGuest.phoneNumber && upsertedGuest.countryCode) {
         const messageTemplate =
           await messageTemplateService.getByNameAndPropertyId(
             propertyId,
@@ -902,7 +1002,7 @@ const checkInCreate = async (folio, pmsId, propertyId, req) => {
           );
           const updatedMessageBody = modifyMessageTemplateBody(
             messageTemplate,
-            guest,
+            upsertedGuest,
             property,
             propertySetting,
             `${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
@@ -910,15 +1010,15 @@ const checkInCreate = async (folio, pmsId, propertyId, req) => {
           const sentMessage = await smsService.send(
             twilioSubClient,
             `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
-            `${guest.countryCode}${guest.phoneNumber}`,
+            `${upsertedGuest.countryCode}${upsertedGuest.phoneNumber}`,
             `${updatedMessageBody.message}`,
           );
           const newMessage = await messageService.create(
             {
               propertyId: propertyId,
-              guestId: guest._id,
+              guestId: upsertedGuest._id,
               senderId: propertyId,
-              receiverId: guest._id,
+              receiverId: upsertedGuest._id,
               content: sentMessage.body,
               messageSid: sentMessage.sid,
               messageType: messageType.SMS,

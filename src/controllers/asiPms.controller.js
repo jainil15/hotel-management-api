@@ -72,8 +72,35 @@ const folioDispatcher = async (req, res, next) => {
         case "Check-Out":
           result.push(await pmsHandler.checkOut(folio, pmsId, propertyId, req));
           break;
-        // case "Undo":
-        //    await pmsHandler.bookingCreate(req, res, next);
+        case "Undo":
+          switch (folio.Transaction.Type) {
+            case "CheckIn":
+              result.push(
+                await pmsHandler.checkInUpdate(folio, pmsId, propertyId, req),
+              );
+              break;
+            case "CheckOut":
+              result.push(
+                await pmsHandler.checkOut(folio, pmsId, propertyId, req),
+              );
+              break;
+            case "Reservation":
+              result.push(
+                await pmsHandler.reservationUpdate(
+                  folio,
+                  pmsId,
+                  propertyId,
+                  req,
+                ),
+              );
+              break;
+            case "Booking":
+              result.push(
+                await pmsHandler.bookingUpdate(folio, pmsId, propertyId, req),
+              );
+              break;
+          }
+          break;
         default:
           console.log("here");
           throw new NotFoundError(`EventType ${EventType} not found`, {});

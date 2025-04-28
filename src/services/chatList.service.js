@@ -264,10 +264,27 @@ const updateAndIncUnreadMessages = async (
   return updatedChatList;
 };
 
+const upsert = async (propertyId, guestId, session) => {
+  const existingChatList = await ChatList.findOne({
+    propertyId: propertyId,
+    guestId: guestId,
+  });
+  if (existingChatList) {
+    return existingChatList;
+  }
+  const newChatList = new ChatList({
+    propertyId: propertyId,
+    guestId: guestId,
+  });
+  const savedChatList = await newChatList.save({ session });
+  return savedChatList;
+};
+
 module.exports = {
   create,
   getByPropertyId,
   update,
   remove,
   updateAndIncUnreadMessages,
+  upsert,
 };

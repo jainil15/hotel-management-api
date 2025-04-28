@@ -620,15 +620,8 @@ const getGuestByPhoneNumber = async (propertyId, countryCode, phoneNumber) => {
  * @returns {Promise<import('../models/guest.model').GuestType>} guest - guest object
  */
 const getByGuestPmsId = async (propertyId, pmsId) => {
-  try {
-    const guest = await Guest.findOne({ propertyId: propertyId, pmsId: pmsId });
-    return guest;
-  } catch (e) {
-    if (e instanceof APIError) {
-      return next(e);
-    }
-    return next(new InternalServerError(e.message));
-  }
+  const guest = await Guest.findOne({ propertyId: propertyId, pmsId: pmsId });
+  return guest;
 };
 
 /**
@@ -671,6 +664,35 @@ const updateByPmsId = async (guest, pmsId, propertyId, session) => {
   return updatedGuest;
 };
 
+const upsertWithRetry = async (
+  propertyId,
+  guestId,
+  guest,
+  session,
+  maxRetries = 3,
+) => {
+  let attempt = 0;
+  let result;
+  while (attempt < maxRetries) {
+    try {
+      const existingGuest = await Guest.findOne({
+        propertyId,
+        _id: guestId,
+      }).session(session);
+      if (existingGuest) {
+        result = existingGuest;
+      } else {
+        result = await create(guest, propertyId, session);
+      }
+      break; // Exit loop if successful
+    } catch (error) {
+      attempt++;
+      logger.error(`Attempt ${attempt} failed: ${error.message}`);
+    }
+  }
+  return result;
+};
+
 module.exports = {
   create,
   getAll,
@@ -692,4 +714,5 @@ module.exports = {
   getByGuestPmsId,
   upsert,
   updateByPmsId,
+  upsertWithRetry,
 };
