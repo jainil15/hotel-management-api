@@ -1,3 +1,4 @@
+const { GuestStatus } = require("../models/guestStatus.model");
 const { Review } = require("../models/review.model");
 
 /**
@@ -14,7 +15,7 @@ const create = async (propertyId, guestId, review, session) => {
     guestId,
     ...review,
   });
-  const savedReview = await newReview({ session: session });
+  const savedReview = await newReview.save({ session: session });
   return savedReview;
 };
 
@@ -31,6 +32,26 @@ const getByGuestId = async (propertyId, guestId) => {
   });
   return review;
 };
+
+const getByPropertyId = async (propertyId) => {
+  console.log("Here");
+  const review = await Review.find({
+    propertyId
+  })
+  .populate('guestId');
+
+  const populatedReviews = await Promise.all(
+    review.map(async (review) => {
+      const guestStatus = await GuestStatus.findOne({ guestId: review.guestId._id });
+      return {
+        ...review.toObject(),
+        guestStatus: guestStatus ? guestStatus.toObject() : null,
+      };
+    })
+  );
+
+  return populatedReviews;
+}
 
 /**
  * Update guest review
@@ -69,6 +90,7 @@ const updateCompleteReview = async (
 module.exports = {
   create,
   getByGuestId,
+  getByPropertyId,
   update,
   updateCompleteReview,
 };
