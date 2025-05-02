@@ -6,9 +6,11 @@ const replyController = require("../controllers/reply.controller");
 const router = require("express").Router();
 
 router.post(
-    ":/propertyId",
+    "/:propertyId",
     authenticateToken,
     checkPropertyAccess,
     checkPermissions([ROLE.ADMIN,ROLE.FRONTDESK]),
     replyController.create
 );
+
+module.exports = router

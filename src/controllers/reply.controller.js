@@ -1,5 +1,5 @@
 const { default: mongoose } = require("mongoose");
-const { APIError, InternalServerError } = require("../lib/CustomErrors");
+const { APIError, InternalServerError, ValidationError } = require("../lib/CustomErrors");
 const { responseHandler } = require("../middlewares/response.middleware");
 const { CreateReplyValidationSchema } = require("../models/reply.model");
 const replyService = require("../services/reply.service");

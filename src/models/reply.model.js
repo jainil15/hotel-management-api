@@ -16,6 +16,12 @@ const replySchema = new Schema({
     required: true,
     immutable: true,
   },
+  reviewId: {
+    type: Schema.Types.ObjectId,
+    ref: "Review",
+    required: true,
+    immutable: true,
+  },
   reply: {
     type: String,
     required: true,

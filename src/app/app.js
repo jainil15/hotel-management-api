@@ -143,7 +143,7 @@ const createApp = () => {
   app.use("/qrCodeScan", qrCodeScanRoutes);
   app.use("/analytics", analyticsRoutes);
   app.use("/review",reviewRoutes);
-  app.use("/reply",replyRoutes)
+  app.use("/reply",replyRoutes);
   // Health Check
   app.get("/health", (req, res, next) => {
     return responseHandler(res, {}, 200, "Server is running");
