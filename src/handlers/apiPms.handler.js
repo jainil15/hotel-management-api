@@ -125,40 +125,6 @@ const bookingCreate = async (folio, pmsId, propertyId, req) => {
       currentStatus: GUEST_CURRENT_STATUS.RESERVED,
       reservationStatus: RESERVATION_STATUS.CONFIRMED,
     };
-    // const existingInHouseGuest = await guestService.findWithStatus(
-    //   {
-    //     phoneNumber: guestData.phoneNumber,
-    //     countryCode: guestData.countryCode,
-    //     propertyId: guestData.propertyId,
-    //   },
-    //   {
-    //     currentStatus: GUEST_CURRENT_STATUS.IN_HOUSE,
-    //     reservationStatus: RESERVATION_STATUS.CONFIRMED,
-    //   },
-    // );
-    // console.log("Exisint guest  inhouse confirmed", existingInHouseGuest);
-    // if (existingInHouseGuest.length > 0) {
-    //   throw new ValidationError("Guest already exists with this phone number", {
-    //     phoneNumber: ["Guest already exists with this phone number"],
-    //   });
-    // }
-    // const existingReservedGuest = await guestService.findWithStatus(
-    //   {
-    //     phoneNumber: guestData.phoneNumber,
-    //     countryCode: guestData.countryCode,
-    //     propertyId: guestData.propertyId,
-    //   },
-    //   {
-    //     currentStatus: GUEST_CURRENT_STATUS.RESERVED,
-    //     reservationStatus: RESERVATION_STATUS.CONFIRMED,
-    //   },
-    // );
-    // console.log("Exisint guest  reservation confirmed", existingInHouseGuest);
-    // if (existingReservedGuest.length > 0) {
-    //   throw new ValidationError("Guest already exists with this phone number", {
-    //     phoneNumber: ["Guest already exists with this phone number"],
-    //   });
-    // }
 
     // Create guest
     const newGuest = await guestService.create(guestData, propertyId, session);
@@ -178,14 +144,9 @@ const bookingCreate = async (folio, pmsId, propertyId, req) => {
     req.app.io.to(`property:${propertyId}`).emit("guest:guestUpdate", {
       guest: { ...newGuest._doc, status: { ...newGuestStatus._doc } },
     });
-    // return responseHandler(
-    //   res,
-    //   { guest: { ...newGuest._doc, status: { ...newGuestStatus._doc } } },
-    //   201,
-    //   "Guest Created",
-    // );
     return { ...newGuest._doc, status: { ...newGuestStatus._doc } };
   } catch (e) {
+    console.log(e);
     await session.abortTransaction();
     session.endSession();
     throw e;
@@ -483,20 +444,8 @@ const reservationCreate = async (folio, pmsId, propertyId, req) => {
       session,
     );
 
-    // todo: move to sms.service
     // Send message to the guest
     const { property } = await propertyService.getById(propertyId);
-    // const message = `Welcome to ${property.name}.\nYour guest portal link is: ${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`;
-    // await twilioService.sendAccessLink(
-    //   propertyId,
-    //   `${upsertedGuest.countryCode + upsertedGuest.phoneNumber}`,
-    //   message,
-    // );
-    // TODO: Workflow message trigger
-    // if (sendMessage === true) {
-    // }
-    //await session.commitTransaction();
-    //session.startTransaction();
 
     // Send message to the guest according to the status
     if (upsertedGuest.phoneNumber && upsertedGuest.countryCode) {
@@ -1213,6 +1162,10 @@ const checkInUpdate = async (folio, pmsId, propertyId, req) => {
           propertyId,
           guestStatusToTemplateOnUpdate(oldGuestStatus, updatedGuestStatus),
         );
+      const guestSession = await guestSessionService.getGuestSession(
+        propertyId,
+        updatedGuest._id,
+      );
       if (messageTemplate) {
         const twilioAccount =
           await twilioAccountService.getByPropertyId(propertyId);
@@ -1273,6 +1226,7 @@ const checkInUpdate = async (folio, pmsId, propertyId, req) => {
       };
     }
   } catch (e) {
+    console.log(e);
     await session.abortTransaction();
     session.endSession();
     throw e;

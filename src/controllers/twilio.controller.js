@@ -380,7 +380,7 @@ const resubmitTollFreeVerification = async (req, res, next) => {
     const { propertyId } = req.params;
 
     // Check if property exists
-    const property = await twilioService.findPropertyById(propertyId);
+    const { property } = await propertyService.getById(propertyId);
     if (!property) {
       throw new NotFoundError("Property not found", {
         propertyId: ["Property not found for the given id"],
@@ -389,7 +389,7 @@ const resubmitTollFreeVerification = async (req, res, next) => {
 
     // Check if Twilio account exists for the property
     const twilioAccount =
-      await twilioService.findTwilioAccountByPropertyId(propertyId);
+      await twilioAccountService.getByPropertyId(propertyId);
     if (!twilioAccount) {
       throw new NotFoundError("Twilio Account not found", {
         propertyId: ["Twilio account not found for the given property id"],
@@ -403,41 +403,8 @@ const resubmitTollFreeVerification = async (req, res, next) => {
       });
     }
 
-    const result = z
-      .object({
-        verificationDetails: z.object({
-          businessName: z.string(),
-          businessAddress: z.string(),
-          contactName: z.string(),
-          contactEmail: z.string().email(),
-          contactPhone: z.string(),
-          businessType: z.string(),
-          businessWebsite: z.string().url(),
-          businessDescription: z.string(),
-          supportingDocuments: z.array(
-            z.object({
-              documentType: z.string(),
-              documentUrl: z.string().url(),
-            }),
-          ),
-        }),
-      })
-      .safeParse({ verificationDetails });
-
-    if (!result.success) {
-      throw new ValidationError(
-        "Validation Error",
-        result.error.flatten().fieldErrors,
-      );
-    }
-
     const updatedVerification =
-      await twilioService.resubmitTollFreeVerification(
-        propertyId,
-        twilioAccount.phoneNumber,
-        verificationDetails,
-        req.user,
-      );
+      await twilioService.resubmitTollFreeVerification(req.user, propertyId);
 
     return responseHandler(
       res,
@@ -446,6 +413,7 @@ const resubmitTollFreeVerification = async (req, res, next) => {
       "Successfully resubmitted toll-free verification",
     );
   } catch (e) {
+    console.log(e);
     if (e instanceof APIError) {
       return next(e);
     }
