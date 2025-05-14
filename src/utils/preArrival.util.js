@@ -1,3 +1,4 @@
+const { PRE_ARRIVAL_INPUT } = require("../constants/preArrivalFlow.constant");
 const {
   CreatePreArrivalValidationSchema,
 } = require("../models/preArrival.model");
@@ -29,7 +30,10 @@ const validatePreArrivalFlow = (preArrivalFlow, preArrival) => {
     if (ignoreKeys.includes(key)) {
       continue;
     }
-    if (preArrivalFlow[key] && !preArrival[key]) {
+    if (
+      preArrivalFlow[key] === PRE_ARRIVAL_INPUT.REQUIRED &&
+      !preArrival[key]
+    ) {
       console.log(key, preArrivalFlow[key], preArrival[key]);
       return {
         key,
@@ -38,7 +42,7 @@ const validatePreArrivalFlow = (preArrivalFlow, preArrival) => {
         success: false,
       };
     }
-    if (!preArrivalFlow[key] && preArrival[key]) {
+    if (preArrivalFlow[key] === PRE_ARRIVAL_INPUT.DISABLED && preArrival[key]) {
       console.log(key, preArrivalFlow[key], preArrival[key]);
       return {
         key,
@@ -64,7 +68,10 @@ const zodValidatePreArrivalFlow = (preArrivalFlow, preArrival) => {
       if (ignoreKeys.includes(key)) {
         continue;
       }
-      if (!preArrivalFlow[key] && preArrival[key]) {
+      if (
+        preArrivalFlow[key] === PRE_ARRIVAL_INPUT.DISABLED &&
+        preArrival[key]
+      ) {
         ctx.addIssue({
           code: "invalid",
           message: `${key} is not required`,
@@ -74,7 +81,10 @@ const zodValidatePreArrivalFlow = (preArrivalFlow, preArrival) => {
       // if (ignoreOptionalKeys.includes(key)) {
       //   continue;
       // }
-      if (preArrivalFlow[key] && !preArrival[key]) {
+      if (
+        preArrivalFlow[key] === PRE_ARRIVAL_INPUT.REQUIRED &&
+        !preArrival[key]
+      ) {
         ctx.addIssue({
           code: "invalid",
           message: `${key} is required`,

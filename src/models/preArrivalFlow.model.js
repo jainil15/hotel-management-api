@@ -2,6 +2,7 @@ const { default: mongoose } = require("mongoose");
 const { z } = require("zod");
 const logger = require("../configs/winston.config");
 
+const { PRE_ARRIVAL_INPUT } = require("../constants/preArrivalFlow.constant");
 const Schema = mongoose.Schema;
 
 const policySchema = new Schema({
@@ -17,15 +18,51 @@ const preArrivalFlowSchema = new Schema(
       ref: "Property",
       required: true,
     },
-    phoneNumber: { type: Boolean, default: true },
-    emailAddress: { type: Boolean, default: true },
-    arrivalTime: { type: Boolean, default: true },
-    vehicleMakeModelColor: { type: Boolean, default: true },
-    licensePlateNo: { type: Boolean, default: true },
-    specialRequests: { type: Boolean, default: true },
-    guestSignature: { type: Boolean, default: true },
-    guestIdProof: { type: Boolean, default: true },
-    policies: { type: Boolean, default: true },
+    phoneNumber: {
+      type: String,
+      enum: Object.values(PRE_ARRIVAL_INPUT),
+      default: PRE_ARRIVAL_INPUT.REQUIRED,
+    },
+    emailAddress: {
+      type: String,
+      enum: Object.values(PRE_ARRIVAL_INPUT),
+      default: PRE_ARRIVAL_INPUT.REQUIRED,
+    },
+    arrivalTime: {
+      type: String,
+      enum: Object.values(PRE_ARRIVAL_INPUT),
+      default: PRE_ARRIVAL_INPUT.REQUIRED,
+    },
+    vehicleMakeModelColor: {
+      type: String,
+      enum: Object.values(PRE_ARRIVAL_INPUT),
+      default: PRE_ARRIVAL_INPUT.REQUIRED,
+    },
+    licensePlateNo: {
+      type: String,
+      enum: Object.values(PRE_ARRIVAL_INPUT),
+      default: PRE_ARRIVAL_INPUT.REQUIRED,
+    },
+    specialRequests: {
+      type: String,
+      enum: Object.values(PRE_ARRIVAL_INPUT),
+      default: PRE_ARRIVAL_INPUT.OPTIONAL,
+    },
+    guestSignature: {
+      type: String,
+      enum: Object.values(PRE_ARRIVAL_INPUT),
+      default: PRE_ARRIVAL_INPUT.REQUIRED,
+    },
+    guestIdProof: {
+      type: String,
+      enum: Object.values(PRE_ARRIVAL_INPUT),
+      default: PRE_ARRIVAL_INPUT.REQUIRED,
+    },
+    policies: {
+      type: String,
+      enum: Object.values(PRE_ARRIVAL_INPUT),
+      default: PRE_ARRIVAL_INPUT.REQUIRED,
+    },
     primaryPolicy: {
       type: String,
       default:
@@ -47,15 +84,15 @@ preArrivalFlowSchema.index({ propertyId: 1 }, { unique: true });
 const PreArrivalFlow = mongoose.model("PreArrivalFlow", preArrivalFlowSchema);
 
 const UpdatePreArrivalValidationSchema = z.object({
-  phoneNumber: z.boolean().optional(),
-  emailAddress: z.boolean().optional(),
-  arrivalTime: z.boolean().optional(),
-  vehicleMakeModelColor: z.boolean().optional(),
-  licensePlateNo: z.boolean().optional(),
-  specialRequests: z.boolean().optional(),
-  guestSignature: z.boolean().optional(),
-  guestIdProof: z.boolean().optional(),
-  policies: z.boolean().optional(),
+  phoneNumber: z.enum(Object.values(PRE_ARRIVAL_INPUT)).optional(),
+  emailAddress: z.enum(Object.values(PRE_ARRIVAL_INPUT)).optional(),
+  arrivalTime: z.enum(Object.values(PRE_ARRIVAL_INPUT)).optional(),
+  vehicleMakeModelColor: z.enum(Object.values(PRE_ARRIVAL_INPUT)).optional(),
+  licensePlateNo: z.enum(Object.values(PRE_ARRIVAL_INPUT)).optional(),
+  specialRequests: z.enum(Object.values(PRE_ARRIVAL_INPUT)).optional(),
+  guestSignature: z.enum(Object.values(PRE_ARRIVAL_INPUT)).optional(),
+  guestIdProof: z.enum(Object.values(PRE_ARRIVAL_INPUT)).optional(),
+  policies: z.enum(Object.values(PRE_ARRIVAL_INPUT)).optional(),
   primaryPolicy: z.string().optional(),
   policyLink: z.string().optional(),
   extraPolicies: z.array(z.string()).optional(),

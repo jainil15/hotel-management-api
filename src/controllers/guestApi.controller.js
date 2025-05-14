@@ -413,6 +413,7 @@ const createPreArrival = async (req, res, next) => {
     }
     const preArrivalFlow =
       await preArrivalFlowService.getByPropertyId(propertyId);
+    console.log(preArrival);
     const validationResult = zodValidatePreArrivalFlow(
       preArrivalFlow._doc,
       preArrival,
