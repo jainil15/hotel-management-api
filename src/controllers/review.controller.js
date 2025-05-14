@@ -8,7 +8,7 @@ const reviewService = require("../services/review.service");
  * @param {import('express').NextFunction} next - NextFunction
  * @returns {Promise<import('express').Response>} - Response
  */
-
+  
 const getAllByPropertyId = async (req, res, next) => {
   try {
     const { propertyId } = req.params;
@@ -24,5 +24,5 @@ const getAllByPropertyId = async (req, res, next) => {
 };
 
 module.exports = {
-    getAllByPropertyId
+  getAllByPropertyId,
 }

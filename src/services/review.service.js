@@ -34,24 +34,24 @@ const getByGuestId = async (propertyId, guestId) => {
 };
 
 const getByPropertyId = async (propertyId) => {
-  console.log("Here");
   const review = await Review.find({
-    propertyId
-  })
-  .populate('guestId');
+    propertyId,
+  }).populate("guestId");
 
   const populatedReviews = await Promise.all(
     review.map(async (review) => {
-      const guestStatus = await GuestStatus.findOne({ guestId: review.guestId._id });
+      const guestStatus = await GuestStatus.findOne({
+        guestId: review.guestId._id,
+      });
       return {
         ...review.toObject(),
         guestStatus: guestStatus ? guestStatus.toObject() : null,
       };
-    })
+    }),
   );
 
   return populatedReviews;
-}
+};
 
 /**
  * Update guest review
@@ -87,10 +87,21 @@ const updateCompleteReview = async (
   return updatedReview;
 };
 
+const getById = async (reviewId) => {
+  const review = await Review.findOne({ _id: reviewId });
+  if (!review) {
+    throw new NotFoundError("Review not found", {
+      reviewId: ["Review not found for the given id"],
+    });
+  }
+  return review;
+};
+
 module.exports = {
   create,
   getByGuestId,
   getByPropertyId,
   update,
   updateCompleteReview,
+  getById
 };

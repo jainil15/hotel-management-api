@@ -51,6 +51,11 @@ const reviewSchema = new Schema({
     trim: true,
     maxlength: 500,
   },
+  createdAt: {
+    type: Date,
+    required: true,
+    default: Date.now
+  }
 });
 
 const CreateReviewValidationSchema = z.object({

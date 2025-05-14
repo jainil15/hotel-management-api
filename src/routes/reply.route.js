@@ -13,4 +13,20 @@ router.post(
     replyController.create
 );
 
+router.get(
+    "/property/:propertyId",
+    authenticateToken,
+    checkPropertyAccess,
+    checkPermissions([ROLE.ADMIN,ROLE.FRONTDESK]),
+    replyController.getByPropertyId
+);
+
+router.get(
+    "/review/:propertyId/:reviewId",
+    authenticateToken,
+    checkPropertyAccess,
+    checkPermissions([ROLE.ADMIN,ROLE.FRONTDESK]),
+    replyController.getByReviewId
+);
+
 module.exports = router
