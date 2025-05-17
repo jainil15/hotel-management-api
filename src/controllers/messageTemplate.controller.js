@@ -16,7 +16,6 @@ const {
   UpdateManyMessageTemplateValidationSchema,
   CreateCustomMessageTemplateValidationSchema,
 } = require("../models/messageTemplates.model");
-
 const {
   guestStatusToTemplateOnUpdate,
   guestStatusToTemplateOnCreate,
@@ -455,6 +454,29 @@ const getMessageTemplateByStatusForUpdate = async (req, res, next) => {
   }
 };
 
+const createDefaultsAddOns = async (req, res, next) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const { propertyId } = req.params;
+    const messageTemplates =
+      await messageTemplateService.createAddOnMessageTemplateDefaults(
+        propertyId,
+      );
+
+    await session.commitTransaction();
+    session.endSession();
+    return responseHandler(res, messageTemplates);
+  } catch (e) {
+    await session.abortTransaction();
+    session.endSession();
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError(e.message));
+  }
+};
+
 module.exports = {
   create,
   getById,
@@ -465,4 +487,5 @@ module.exports = {
   createAllDefaultTemplates,
   getMessageTemplateByStatusForCreate,
   getMessageTemplateByStatusForUpdate,
+  createDefaultsAddOns,
 };
