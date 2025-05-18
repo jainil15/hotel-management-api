@@ -1127,7 +1127,10 @@ const checkInUpdate = async (folio, pmsId, propertyId, req) => {
       pmsId: GuestInformation.GuestID,
     };
     const guestStatusData = {
-      currentStatus: GUEST_CURRENT_STATUS.IN_HOUSE,
+      currentStatus:
+        folio.Transaction.Type === "CheckIn"
+          ? GUEST_CURRENT_STATUS.IN_HOUSE
+          : GUEST_CURRENT_STATUS.CHECKED_OUT,
       reservationStatus: RESERVATION_STATUS.CONFIRMED,
     };
 
