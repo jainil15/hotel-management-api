@@ -2,6 +2,7 @@ const messageType = {
   SMS: "SMS",
   REQUEST: "Request",
   ADDONS_REQUEST: "Addons Request",
+  REVIEW_REPLY: "Review Reply"
 };
 
 const messageTriggerType = {
