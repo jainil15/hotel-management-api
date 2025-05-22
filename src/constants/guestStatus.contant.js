@@ -27,6 +27,7 @@ const EXTEND_STAY_STATUS = {
 const RESERVATION_STATUS = {
   CONFIRMED: "Confirmed",
   CANCELLED: "Cancelled",
+  NO_SHOW: "No Show",
 };
 
 const PRE_ARRIVAL_STATUS = {

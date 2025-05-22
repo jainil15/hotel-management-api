@@ -341,9 +341,22 @@ const update = async (req, res, next) => {
   session.startTransaction();
   try {
     // TODO: add messageGuest
-    const { sendMessage, status, ...guest } = req.body;
+    let { sendMessage, status, ...guest } = req.body;
     const propertyId = req.params.propertyId;
     const guestId = req.params.guestId;
+    if (guest.email === "") {
+      const { email, ...temp } = guest;
+      guest = temp;
+    }
+    if (guest.confirmationNumber === "") {
+      const { confirmationNumber, ...temp } = guest;
+      guest = temp;
+    }
+    if (guest.source === "") {
+      const { source, ...temp } = guest;
+      guest = temp;
+    }
+
     const guestResult = await UpdateGuestValidationSchema.safeParseAsync(guest);
     const statusResult =
       await UpdateGuestStatusValidationSchema.safeParseAsync(status);

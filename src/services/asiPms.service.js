@@ -15,13 +15,14 @@ const changeRoomStatus = async (
   roomNo,
   status,
 ) => {
+  console.log("Changing room status in ASI PMS");
   const url = "http://demo.asifrontdesk.com:8010/v610/hk/roomstatus";
   const headers = {
     "Content-Type": "application/json",
     ClientID: clientId,
     ApplicationID: applicationId,
     SecurityKey: securityKey,
-    Host: "demo.asifrontdesk.cloud:8010",
+    Host: "demo.asifrontdesk.com:8010",
   };
   const body = [
     {

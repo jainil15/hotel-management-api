@@ -312,7 +312,6 @@ const getGuestAddonsRequests = async (propertyId, requestStatus) => {
       .sort({ createdAt: -1 })
       .lean();
   }
-  console.log("HouseKeeping Request, :", houseKeepingRequests);
 
   houseKeepingRequests = await Promise.all(
     houseKeepingRequests.map(async (req) => {
