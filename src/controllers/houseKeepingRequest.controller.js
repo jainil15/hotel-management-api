@@ -45,7 +45,9 @@ const create = async (req, res, next) => {
     if (!property.property) {
       throw new NotFoundError("Property not found", {});
     }
-    const type = request.type || request.requestType || "houseKeeping";
+    console.log("Received request body:", request);
+    const type = (request.type || request.requestType || "houseKeeping").trim();
+    console.log("Type resolved in backend:", type);
     const workflow = await workflowService.getByPropertyId(propertyId);
     if (!workflow) {
       throw new NotFoundError("Workflow not found", {});
