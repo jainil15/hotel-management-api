@@ -1,0 +1,823 @@
+const { default: mongoose } = require("mongoose");
+const messageService = require("./message.service");
+const {
+  GUEST_CURRENT_STATUS,
+  GUEST_REQUEST,
+} = require("../constants/guestStatus.contant");
+const { GuestStatus } = require("../models/guestStatus.model");
+const {
+  validateUpdate,
+  validateStatusForGuest,
+} = require("../utils/guestStatus.util");
+const {
+  ValidationError,
+  NotFoundError,
+  UnauthorizedError,
+  ForbiddenError,
+} = require("../lib/CustomErrors");
+const { Guest } = require("../models/guest.model");
+const {
+  dateValidation,
+  zodCustomDateValidation,
+} = require("../utils/dateCompare");
+const moment = require("moment");
+
+/**
+ * Create a new guest status
+ * @param {string} propertyId - The property id
+ * @param {string} guestId - The guest id
+ * @param {object} status - The status object
+ * @param {object} session - The mongoose session
+ * @returns {Promise<GuestStatus>} - The saved guest status
+ */
+const create = async (propertyId, guestId, status, session) => {
+  try {
+    const newGuestStatus = new GuestStatus({
+      guestId: guestId,
+      propertyId: propertyId,
+      ...status,
+    });
+
+    const savedGuestStatus = await newGuestStatus.save({ session });
+    return savedGuestStatus;
+  } catch (e) {
+    throw new Error(e.message);
+  }
+};
+
+/**
+ * Get guest status by guestId
+ * @param {string} guestId - The guestId to filter guest status
+ * @returns {Promise<GuestStatus>} - The guest status
+ */
+const getByGuestId = async (guestId) => {
+  const guestStatus = await GuestStatus.findOne({ guestId: guestId });
+  return guestStatus;
+};
+
+/**
+ * Get guest status by propertyId
+ * @param {string} propertyId - The propertyId to filter guest status
+ * @returns {Promise<GuestStatus>} - The guest status
+ */
+const getByPropertyId = async (propertyId) => {
+  const guestStatus = await GuestStatus.find({ propertyId: propertyId });
+  return guestStatus;
+};
+
+/**
+ * Get all guest with status
+ * @param {string} propertyId - The propertyId to filter guest status
+ * @returns {Promise<Guest[]>} - The list of guests with status
+ */
+const getAllGuestWithStatus = async (propertyId) => {
+  const guest = await GuestStatus.find({ propertyId: propertyId }).populate(
+    "guestId",
+  );
+  return guest.map((guest) => {
+    return {
+      ...guest.guestId,
+      status: guest.status,
+    };
+  });
+};
+
+/**
+ * Get all guest with status
+ * @param {string} propertyId - The propertyId to filter guest status
+ * @param {object} filters - The filters
+ * @returns {Promise<Guest[]>} - The list of guests with status
+ */
+const getAllGuestWithStatusv2 = async (propertyId, filters) => {
+  // console.log("getAllGuestWithStatusv2", filters);
+  const guestPipeline = [];
+  guestPipeline.push({
+    $match: {
+      propertyId: new mongoose.Types.ObjectId(propertyId),
+    },
+  });
+  if (filters.checkIn) {
+    guestPipeline.push(
+      {
+        $addFields: {
+          checkInParts: {
+            $dateToParts: {
+              date: "$checkIn",
+            },
+          },
+          filterCheckInParts: {
+            $dateToParts: {
+              date: new Date(filters.checkIn),
+            },
+          },
+        },
+      },
+      {
+        $match: {
+          $expr: {
+            $and: [
+              { $eq: ["$checkInParts.year", "$filterCheckInParts.year"] },
+              { $eq: ["$checkInParts.month", "$filterCheckInParts.month"] },
+              { $eq: ["$checkInParts.day", "$filterCheckInParts.day"] },
+            ],
+          },
+        },
+      },
+    );
+  }
+  if (filters.checkOut) {
+    guestPipeline.push(
+      {
+        $addFields: {
+          checkOutParts: {
+            $dateToParts: {
+              date: "$checkOut",
+            },
+          },
+          filterCheckOutParts: {
+            $dateToParts: {
+              date: new Date(filters.checkOut),
+            },
+          },
+        },
+      },
+      {
+        $match: {
+          $expr: {
+            $and: [
+              { $eq: ["$checkOutParts.year", "$filterCheckOutParts.year"] },
+              { $eq: ["$checkOutParts.month", "$filterCheckOutParts.month"] },
+              { $eq: ["$checkOutParts.day", "$filterCheckOutParts.day"] },
+            ],
+          },
+        },
+      },
+    );
+  }
+  // if (filters.checkOut) {
+  //   guestPipeline.push(
+  //     {
+  //       $addFields: {
+  //         checkOutParts: { $dateToParts: { date: "$checkOut" } },
+  //         filterCheckOutParts: {
+  //           $dateToParts: { date: new Date(filters.checkOut) },
+  //         },
+  //       },
+  //     },
+  //     {
+  //       $match: {
+  //         $expr: {
+  //           $and: [
+  //             { $lte: ["$checkOutParts.year", "$filterCheckOutParts.year"] },
+  //             {
+  //               $cond: {
+  //                 if: {
+  //                   $eq: ["$checkOutParts.year", "$filterCheckOutParts.year"],
+  //                 },
+  //                 then: {
+  //                   $lte: [
+  //                     "$checkOutParts.month",
+  //                     "$filterCheckOutParts.month",
+  //                   ],
+  //                 },
+  //                 else: true,
+  //               },
+  //             },
+  //             {
+  //               $cond: {
+  //                 if: {
+  //                   $and: [
+  //                     {
+  //                       $eq: [
+  //                         "$checkOutParts.year",
+  //                         "$filterCheckOutParts.year",
+  //                       ],
+  //                     },
+  //                     {
+  //                       $eq: [
+  //                         "$checkOutParts.month",
+  //                         "$filterCheckOutParts.month",
+  //                       ],
+  //                     },
+  //                   ],
+  //                 },
+  //                 then: {
+  //                   $lte: ["$checkOutParts.day", "$filterCheckOutParts.day"],
+  //                 },
+  //                 else: true,
+  //               },
+  //             },
+  //           ],
+  //         },
+  //       },
+  //     },
+  //   );
+  // }
+
+  guestPipeline.push(
+    {
+      $lookup: {
+        from: "gueststatuses",
+        localField: "_id",
+        foreignField: "guestId",
+        as: "status",
+      },
+    },
+    {
+      $unwind: "$status",
+    },
+  );
+
+  // if (filters.currentStatus) {
+  //   const statusMatch = {
+  //     $match: {
+  //       $or: [{ "status.currentStatus": { $eq: filters.currentStatus } }],
+  //     },
+  //   };
+
+  //   if (
+  //     !filters.checkIn &&
+  //     !filters.checkOut &&
+  //     filters.currentStatus === "Reservation"
+  //   ) {
+  //     statusMatch.$match.$or.push({
+  //       "status.currentStatus": {
+  //         $in: ["Reservation", "In House", "Checked Out"],
+  //       },
+  //     });
+  //     statusMatch.$match.$or.push({
+  //       "status.reservationStatus": "Cancelled",
+  //     });
+  //   }
+
+  //   // if (
+  //   //   filters.currentStatus === "In House" &&
+  //   //   !filters.checkIn &&
+  //   //   !filters.checkOut
+  //   // ) {
+  //   //   statusMatch.$match = {
+  //   //     $or: [
+  //   //       {
+  //   //         "status.currentStatus": "In House",
+  //   //         checkOut: { $gte: new Date(filters.todaysDate) },
+  //   //       },
+  //   //     ],
+  //   //   };
+  //   // }
+  //   if (
+  //     filters.currentStatus === "Checked Out" &&
+  //     !filters.checkIn &&
+  //     !filters.checkOut
+  //   ) {
+  //     statusMatch = [
+  //       {
+  //         $addFields: {
+  //           checkOutParts: {
+  //             $dateToParts: { date: "$checkOut" },
+  //           },
+  //           filterCheckOutParts: {
+  //             $dateToParts: { date: new Date(filters.selectedDate) },
+  //           },
+  //         },
+  //       },
+  //       {
+  //         $match: {
+  //           "status.currentStatus": "Checked Out",
+  //           $expr: {
+  //             $and: [
+  //               { $eq: ["$checkOutParts.year", "$filterCheckOutParts.year"] },
+  //               { $eq: ["$checkOutParts.month", "$filterCheckOutParts.month"] },
+  //               { $eq: ["$checkOutParts.day", "$filterCheckOutParts.day"] },
+  //             ],
+  //           },
+  //         },
+  //       },
+  //     ];
+  //   }
+
+  //   guestPipeline.push(statusMatch);
+  // }
+  if (filters.currentStatus) {
+    let statusMatch = {
+      $match: {
+        $or: [{ "status.currentStatus": { $eq: filters.currentStatus } }],
+      },
+    };
+
+    // If currentStatus is "Reservation" and no checkIn or checkOut filters
+    if (
+      !filters.checkIn &&
+      !filters.checkOut &&
+      filters.currentStatus === "Reservation"
+    ) {
+      statusMatch.$match.$or.push({
+        "status.currentStatus": {
+          $in: ["Reservation", "In House", "Checked Out"],
+        },
+      });
+      statusMatch.$match.$or.push({
+        "status.reservationStatus": "Cancelled",
+      });
+    }
+
+    // If currentStatus is "Checked Out" and no checkIn or checkOut filters
+    if (
+      filters.currentStatus === "Checked Out" &&
+      !filters.checkIn &&
+      !filters.checkOut
+    ) {
+      // Instead of reassigning, we push the pipeline stages
+      guestPipeline.push(
+        {
+          $addFields: {
+            checkOutParts: {
+              $dateToParts: { date: "$checkOut" },
+            },
+            filterCheckOutParts: {
+              $dateToParts: { date: new Date(filters.selectedDate) },
+            },
+          },
+        },
+        {
+          $match: {
+            "status.currentStatus": "Checked Out",
+            $expr: {
+              $and: [
+                { $eq: ["$checkOutParts.year", "$filterCheckOutParts.year"] },
+                { $eq: ["$checkOutParts.month", "$filterCheckOutParts.month"] },
+                { $eq: ["$checkOutParts.day", "$filterCheckOutParts.day"] },
+              ],
+            },
+          },
+        },
+      );
+    }
+    if (
+      filters.currentStatus === "In House" &&
+      !filters.checkIn &&
+      !filters.checkOut
+    ) {
+      guestPipeline.push(
+        {
+          $addFields: {
+            checkOutParts: { $dateToParts: { date: "$checkOut" } },
+            todaysDateParts: {
+              $dateToParts: { date: new Date(filters.todaysDate) },
+            },
+          },
+        },
+        {
+          $match: {
+            "status.currentStatus": "In House",
+            $expr: {
+              $or: [
+                { $gt: ["$checkOutParts.year", "$todaysDateParts.year"] },
+                {
+                  $and: [
+                    { $eq: ["$checkOutParts.year", "$todaysDateParts.year"] },
+                    { $gt: ["$checkOutParts.month", "$todaysDateParts.month"] },
+                  ],
+                },
+                {
+                  $and: [
+                    { $eq: ["$checkOutParts.year", "$todaysDateParts.year"] },
+                    { $eq: ["$checkOutParts.month", "$todaysDateParts.month"] },
+                    { $gte: ["$checkOutParts.day", "$todaysDateParts.day"] },
+                  ],
+                },
+              ],
+            },
+          },
+        },
+      );
+    }
+    guestPipeline.push(statusMatch);
+  }
+
+  if (filters.search) {
+    guestPipeline.push(
+      {
+        $addFields: {
+          fullName: {
+            $concat: ["$firstName", " ", "$lastName"],
+          },
+          reverseFullName: {
+            $concat: ["$lastName", " ", "$firstName"],
+          },
+        },
+      },
+      {
+        $addFields: Object.keys(Guest.schema.obj).reduce((acc, key) => {
+          acc[`string_${key}`] = {
+            $cond: {
+              if: { $in: [{ $type: `$${key}` }, ["date", "objectId"]] },
+              // biome-ignore lint/suspicious/noThenProperty: <explanation>
+              then: {
+                $dateToString: { format: "%d/%m/%YT%H:%M", date: `$${key}` },
+              },
+              else: { $toString: `$${key}` },
+            },
+          };
+          return acc;
+        }, {}),
+      },
+      {
+        $addFields: Object.keys(GuestStatus.schema.obj).reduce((acc, key) => {
+          acc[`string_status_${key}`] = {
+            $cond: {
+              if: { $in: [{ $type: `$status.${key}` }, ["date", "objectId"]] },
+              // biome-ignore lint/suspicious/noThenProperty: <explanation>
+              then: {
+                $dateToString: {
+                  format: "%d/%m/%YT%H:%M",
+                  date: `$status.${key}`,
+                },
+              },
+              else: {
+                $concat: [
+                  `${key
+                    .split(/(?=[A-Z])/)
+                    .slice(0, key.split(/(?=[A-Z])/).length - 1)
+                    .join(" ")} `,
+                  `$status.${key}`,
+                ],
+              },
+            },
+          };
+          return acc;
+        }, {}),
+      },
+
+      {
+        $match: {
+          $or: [
+            ...Object.keys(Guest.schema.obj).map((key) => ({
+              [`string_${key}`]: {
+                $regex: new RegExp(
+                  filters.search.replace(/[#-.]|[[-^]|[?|{}]/g, "\\$&"),
+                ),
+
+                $options: "i",
+              },
+            })),
+            ...Object.keys(GuestStatus.schema.obj).map((key) => ({
+              [`string_status_${key}`]: {
+                $regex: new RegExp(
+                  filters.search.replace(/[#-.]|[[-^]|[?|{}]/g, "\\$&"),
+                ),
+
+                $options: "i",
+              },
+            })),
+            {
+              fullName: {
+                $regex: new RegExp(
+                  filters.search.replace(/[#-.]|[[-^]|[?|{}]/g, "\\$&"),
+                ),
+
+                $options: "i",
+              },
+            },
+            {
+              reverseFullName: {
+                $regex: new RegExp(
+                  filters.search.replace(/[#-.]|[[-^]|[?|{}]/g, "\\$&"),
+                ),
+
+                $options: "i",
+              },
+            },
+          ],
+        },
+      },
+    );
+  }
+  guestPipeline.push({
+    $project: {
+      _id: 1,
+      propertyId: 1,
+      countryCode: 1,
+      phoneNumber: 1,
+      source: 1,
+      // draft: 1,
+      checkIn: 1,
+      checkOut: 1,
+      confirmationNumber: 1,
+      roomNumber: 1,
+      firstName: 1,
+      lastName: 1,
+      email: 1,
+      active: 1,
+      status: {
+        currentStatus: 1,
+        lateCheckOutStatus: 1,
+        earlyCheckInStatus: 1,
+        reservationStatus: 1,
+        preArrivalStatus: 1,
+      },
+      updatedAt: 1,
+      createdAt: 1,
+    },
+  });
+  // sort :: In future if we want to sort the guest based on some field ::
+  guestPipeline.push({
+    $sort: {
+      updatedAt: -1,
+    },
+  });
+  const guests = await Guest.aggregate(guestPipeline);
+  return guests;
+};
+const getCheckInOutPendingGuests = async (propertyId, filters) => {
+  console.log("getCheckInOutPendingGuests", filters);
+  const guestPipeline = [];
+  guestPipeline.push({
+    $match: {
+      propertyId: new mongoose.Types.ObjectId(propertyId),
+    },
+  });
+
+  guestPipeline.push(
+    {
+      $lookup: {
+        from: "gueststatuses",
+        localField: "_id",
+        foreignField: "guestId",
+        as: "status",
+      },
+    },
+    {
+      $unwind: "$status",
+    },
+    {
+      $addFields: {
+        checkInDateOnly: {
+          $dateToString: { format: "%Y-%m-%d", date: "$checkIn" },
+        },
+        checkOutDateOnly: {
+          $dateToString: { format: "%Y-%m-%d", date: "$checkOut" },
+        },
+        todaysDateOnly: {
+          $dateToString: {
+            format: "%Y-%m-%d",
+            date: new Date(filters.todaysDate),
+          },
+        },
+      },
+    },
+    {
+      $match: {
+        "status.currentStatus": filters.currentStatus,
+        $expr: {
+          $cond: {
+            if: { $eq: [filters.currentStatus, "Reservation"] },
+            then: {
+              $and: [
+                { $lt: ["$checkInDateOnly", "$todaysDateOnly"] }, // Check-in is before today
+                { $gt: ["$checkOutDateOnly", "$todaysDateOnly"] }, // Check-out is after today
+              ],
+            },
+            else: {
+              $and: [
+                { $eq: ["$status.currentStatus", "In House"] },
+                { $lt: ["$checkOutDateOnly", "$todaysDateOnly"] }, // Check-out is after today
+              ],
+            },
+          },
+        },
+      },
+    },
+  );
+
+  guestPipeline.push({
+    $project: {
+      _id: 1,
+      propertyId: 1,
+      countryCode: 1,
+      phoneNumber: 1,
+      // draft: 1,
+      source: 1,
+      checkIn: 1,
+      checkOut: 1,
+      confirmationNumber: 1,
+      roomNumber: 1,
+      firstName: 1,
+      lastName: 1,
+      email: 1,
+      active: 1,
+      status: {
+        currentStatus: 1,
+        lateCheckOutStatus: 1,
+        earlyCheckInStatus: 1,
+        reservationStatus: 1,
+        preArrivalStatus: 1,
+      },
+      updatedAt: 1,
+      createdAt: 1,
+    },
+  });
+  // sort :: In future if we want to sort the guest based on some field ::
+  guestPipeline.push({
+    $sort: {
+      updatedAt: -1,
+    },
+  });
+  const guests = await Guest.aggregate(guestPipeline);
+  return guests;
+};
+
+const getInvalidGuestsState = async (propertyId, statusType) => {
+  const statusStage =
+    statusType === "In House"
+      ? {
+          $match: {
+            "status.currentStatus": "In House",
+
+            $expr: {
+              $and: [
+                { $eq: ["$status.currentStatus", "In House"] },
+
+                { $lt: ["$checkOutDateOnly", "$todaysDateOnly"] }, // Check-out is after today
+              ],
+            },
+          },
+        }
+      : {
+          $match: {
+            "status.currentStatus": "Reservation",
+
+            $expr: {
+              $and: [
+                { $eq: ["$status.currentStatus", "Reservation"] },
+                { $lt: ["$checkInDateOnly", "$todaysDateOnly"] }, // Check-in is before today
+                { $gt: ["$checkOutDateOnly", "$todaysDateOnly"] }, // Check-out is after today
+              ],
+            },
+          },
+        };
+
+  const aggregationPipeline = [
+    {
+      $match: {
+        propertyId: new mongoose.Types.ObjectId(propertyId),
+      },
+    },
+
+    {
+      $lookup: {
+        from: "gueststatuses",
+
+        localField: "_id",
+
+        foreignField: "guestId",
+
+        as: "status",
+      },
+    },
+
+    {
+      $unwind: "$status",
+    },
+
+    {
+      $addFields: {
+        checkInDateOnly: {
+          $dateToString: { format: "%Y-%m-%d", date: "$checkIn" },
+        },
+
+        checkOutDateOnly: {
+          $dateToString: { format: "%Y-%m-%d", date: "$checkOut" },
+        },
+
+        todaysDateOnly: {
+          $dateToString: {
+            format: "%Y-%m-%d",
+            date: new Date(moment().format("YYYY-MM-DD")),
+          },
+        },
+      },
+    },
+    statusStage,
+  ];
+
+  const guests = await Guest.aggregate(aggregationPipeline);
+
+  return guests;
+};
+
+/**
+ * Update guest status
+ * @param {string} guestId - The guest id
+ * @param {object} guestStatus - The guest status object
+ * @param {object} session - The mongoose session
+ * @param {string} role - The role of the user
+ * @returns {Promise<GuestStatus>} - The updated guest status
+ */
+const update = async (guestId, guestStatus, session, role = "admin") => {
+  const oldGuestStatus = await GuestStatus.findOne({ guestId });
+  const updatedGuestStatus = await GuestStatus.findOneAndUpdate(
+    { guestId: guestId },
+    guestStatus,
+    {
+      new: true,
+      session: session,
+    },
+  );
+  if (!updatedGuestStatus) {
+    throw new NotFoundError("Guest not found", {
+      guestId: ["Guest not found"],
+    });
+  }
+  if (!validateUpdate(oldGuestStatus._doc, updatedGuestStatus._doc)) {
+    throw new ValidationError("Invalid Status", {
+      currentStatus: ["Invalid Status"],
+    });
+  }
+
+  if (
+    role === "guest" &&
+    !validateStatusForGuest(oldGuestStatus._doc, updatedGuestStatus._doc)
+  ) {
+    throw new ForbiddenError("Forbidden to update status", {
+      guestId: ["Guest is not allowed to update status"],
+    });
+  }
+
+  return updatedGuestStatus;
+};
+
+const remove = async (guestId, session) => {
+  const guestStatus = await GuestStatus.findOneAndDelete(
+    { guestId },
+    { session: session },
+  );
+  if (!guestStatus) {
+    throw new NotFoundError("Guest not found", {
+      guestId: ["Guest not found"],
+    });
+  }
+  return guestStatus;
+};
+
+const findOneGuestWithStatus = async (propertyId, guestId) => {
+  const guest = await GuestStatus.findOne({
+    propertyId: propertyId,
+    guestId: guestId,
+  }).populate("guestId");
+  return guest;
+};
+
+/**
+ * Upsert guest status
+ * @param {string} propertyId - The property id
+ * @param {string} guestId - The guest id
+ * @param {object} status - The status object
+ * @param {object} session - The session object
+ * @returns {Promise<import('../models/guestStatus.model.js').GuestStatusType>} - The guest status
+ */
+const upsert = async (propertyId, guestId, status, session) => {
+  const guestStatus = await GuestStatus.findOneAndUpdate(
+    { propertyId: propertyId, guestId: guestId },
+    status,
+    {
+      upsert: true,
+      new: true,
+      session: session,
+    },
+  );
+  return guestStatus;
+};
+
+/**
+ * Update PMS guest status
+ * @param {string} guestId - The guest id
+ * @propertyId - The property id
+ * @status - The status object
+ * @session - The session object
+ * @returns {Promise<import('../models/guestStatus.model.js').GuestStatusType>} - The guest status
+ */
+const updatePmsGuestStatus = async (guestId, propertyId, status, session) => {
+  const guestStatus = await GuestStatus.findOneAndUpdate(
+    {
+      propertyId: propertyId,
+      guestId: guestId,
+    },
+    status,
+    { session: session, new: true },
+  );
+  return guestStatus;
+};
+
+module.exports = {
+  create,
+  remove,
+  getByGuestId,
+  getByPropertyId,
+  update,
+  getAllGuestWithStatus,
+  getAllGuestWithStatusv2,
+  getCheckInOutPendingGuests,
+  getInvalidGuestsState,
+  upsert,
+  updatePmsGuestStatus,
+};

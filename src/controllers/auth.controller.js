@@ -1,0 +1,372 @@
+const userService = require("../services/user.service");
+const authService = require("../services/auth.service");
+const optService = require("../services/otp.service");
+const guestService = require("../services/guest.service");
+const guestTokenService = require("../services/guestToken.service");
+const { generateAccessToken } = require("../utils/generateToken");
+const { z } = require("zod");
+const { User } = require("../models/user.model");
+const cookieOptions = require("../configs/cookie.config");
+const { generateOtp } = require("../utils/generateOtp");
+const sendOtp = require("../utils/sendOtp");
+const {
+  ValidationError,
+  UnauthorizedError,
+  InternalServerError,
+  ForbiddenError,
+  APIError,
+} = require("../lib/CustomErrors");
+const { responseHandler } = require("../middlewares/response.middleware");
+const { GuestSession } = require("../models/guestSession.model");
+const { Guest } = require("../models/guest.model");
+const jwt = require("jsonwebtoken");
+
+/**
+ * Get access token
+ * @param {import('express').Request } req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {import('express').Response} - The response
+ */
+const getAccessToken = async (req, res, next) => {
+  try {
+    // Validate request query
+    const validation = z
+      .object({
+        email: z.string().email(),
+      })
+      .safeParse(req.query);
+    // Validation error
+    if (!validation.success) {
+      return next(
+        new ValidationError(
+          "Validation Error",
+          validation.error.flatten().fieldErrors,
+        ),
+      );
+    }
+    // Get session
+    const session = await authService.getSession(req.query.email);
+    // Get refresh token from cookies
+    const refreshToken = req.cookies.refreshToken;
+    // Check if refresh token exists
+    if (!refreshToken) {
+      return next(new UnauthorizedError("Refresh token not found", {}));
+    }
+    // Check if session exists
+    if (!session) {
+      return next(new UnauthorizedError("Session not found", {}));
+    }
+    // Check if session is valid
+    if (!session.valid) {
+      return next(new UnauthorizedError("Session is not valid", {}));
+    }
+    // Decode refresh token
+    let decoded;
+    try {
+      decoded = await authService.decodeRefreshToken(
+        refreshToken,
+        req.query.email,
+      );
+    } catch (error) {
+      console.error("Refresh token error:", error.message);
+
+      if (error.statusCode === 403) {
+        if (error.message === "Refresh token has expired") {
+          return next(new ForbiddenError("Refresh token has expired", {}));
+        } else {
+          return next(new ForbiddenError("Invalid refresh token", {}));
+        }
+      } else {
+        return next(new UnauthorizedError("Authentication failed", {}));
+      }
+    }
+    if (decoded.email !== req.query.email) {
+      return next(new UnauthorizedError("Email does not match", {}));
+    }
+    // Extract payload
+    const { __exp, sessionId, iat, exp, ...rest } = decoded;
+
+    // Generate access token
+    const accessToken = generateAccessToken(
+      { ...rest },
+      "1d",
+      process.env.ACCESS_TOKEN_SECRET,
+    );
+    console.log("Access token generated");
+    // Send response
+    return responseHandler(res, { accessToken });
+  } catch (e) {
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError());
+  }
+};
+
+/**
+ * Verify otp
+ * @param {import('express').Request } req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {import('express').Response} - The response
+ */
+const verifyOtp = async (req, res, next) => {
+  try {
+    const { email, otp } = req.body;
+    const result = z
+      .object({
+        email: z.string().email(),
+        otp: z.string(),
+      })
+      .safeParse(req.body);
+    if (!result.success) {
+      return next(
+        new ValidationError(
+          "Validation Error",
+          result.error.flatten().fieldErrors,
+        ),
+      );
+    }
+
+    const newOtp = await optService.verify(email, otp);
+    if (newOtp == null) {
+      return next(
+        new UnauthorizedError("Invalid OTP", { otp: ["Invalid OTP"] }),
+      );
+    }
+    const { user } = newOtp;
+    const newUser = new User(user);
+    await newUser.save();
+
+    const { password_hash, ..._user } = newUser._doc;
+
+    // return user and access token
+    // req.user = _user;
+    return responseHandler(
+      res,
+      { user: _user },
+      201,
+      "User created successfully",
+    );
+  } catch (e) {
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError());
+  }
+};
+
+/**
+ * Resend otp
+ * @param {import('express').Request } req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {import('express').Response} - The response
+ */
+const resendOtp = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    const result = z
+      .object({
+        email: z.string().email(),
+      })
+      .safeParse(req.body);
+    if (!result.success) {
+      return next(
+        new ValidationError(
+          "Validation Error",
+          result.error.flatten().fieldErrors,
+        ),
+      );
+    }
+    const otp = await optService.getByEmail(email);
+    if (!otp) {
+      return next(
+        new UnauthorizedError("Email not found", {
+          email: ["Email not found"],
+        }),
+      );
+    }
+    const otpValue = generateOtp();
+    otp.otp = otpValue;
+
+    otp.deleteOne();
+    const sentMail = sendOtp(otp.user.email, otpValue);
+    await otp.save();
+    return responseHandler(res, {}, 200, "Otp sent successfully");
+  } catch (e) {
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError(e.message));
+  }
+};
+
+/**
+ * Generate guest access token
+ * @param {import('express').Request } req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {import('express').Response} - The response
+ */
+const genreateGuestAccessToken = async (req, res, next) => {
+  try {
+    const guestId = req.params.guestId;
+    const guest = await Guest.findOne({ _id: guestId });
+    if (!guest) {
+      return next(new UnauthorizedError("Guest not found", {}));
+    }
+    const accessToken = authService.genreateGuestAccessToken(guest);
+    return responseHandler(res, { accessToken: accessToken });
+  } catch (e) {
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError(e.message));
+  }
+};
+
+/**
+ * Guest login with token
+ * @param {import('express').Request } req - The request
+ * @param {import('express').Response} res - The response
+ * @param {import('express').NextFunction} next - The next function
+ * @returns {import('express').Response} - The response
+ */
+const guestLoginWithToken = async (req, res, next) => {
+  try {
+    const { token } = req.params;
+    const guestToken = await guestTokenService.getByToken(token);
+    if (!guestToken || guestToken.expiry < new Date()) {
+      throw new UnauthorizedError("Invalid token", { token: ["Invalid"] });
+    }
+    const guest = await guestService.getByGuestId(guestToken.guestId);
+    const generateToken = await authService.genreateGuestAccessToken(guest);
+    await guestTokenService.deleteByGuestId(guestToken.guestId);
+    return responseHandler(res, { accessToken: generateToken });
+  } catch (e) {
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError(e.message));
+  }
+};
+
+const isLoggedIn = async (req, res, next) => {
+  try {
+    if (!req.user) {
+      throw new UnauthorizedError("User not found", {});
+    }
+    return responseHandler(res, { user: req.user });
+  } catch (e) {
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError(e.message));
+  }
+};
+
+// Unsecure
+const refreshGuestAccessToken = (req, res, next) => {
+  try {
+    const accessToken = req.headers.authorization.split(" ")[1];
+    if (!accessToken) {
+      throw new UnauthorizedError("Refresh token not found", {});
+    }
+    const decoded = authService.decodeAccessToken(accessToken);
+    if (!decoded) {
+      throw new UnauthorizedError("Invalid token", {});
+    }
+    const guest = Guest.findOne({ _id: decoded._id });
+    if (!guest) {
+      throw new UnauthorizedError("Guest not found", {});
+    }
+    const newAccessToken = authService.genreateGuestAccessToken(guest);
+    return responseHandler(res, { accessToken: newAccessToken });
+  } catch (e) {
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError(e.message));
+  }
+};
+
+const refreshAccessToken = async (req, res, next) => {
+  try {
+    // Get session
+    // Get refresh token from cookies
+    const refreshToken = req.cookies.refreshToken;
+
+    // Check if refresh token exists
+    if (!refreshToken) {
+      return next(new UnauthorizedError("Refresh token not found", {}));
+    }
+
+    const decodedToken = jwt.verify(
+      refreshToken,
+      process.env.REFRESH_TOKEN_SECRET,
+    );
+
+    if (!decodedToken) {
+      return next(new UnauthorizedError("Invalid refresh token", {}));
+    }
+
+    const session = await authService.getSession(decodedToken.email);
+    // Check if session exists
+    if (!session) {
+      return next(new UnauthorizedError("Session not found", {}));
+    }
+
+    // Check if session is valid
+    if (!session.valid) {
+      return next(new UnauthorizedError("Session is not valid", {}));
+    }
+
+    // Extract payload
+    const { __exp, sessionId, iat, exp, ...rest } = decodedToken;
+
+    // Generate access token
+    const accessToken = generateAccessToken(
+      { ...rest },
+      "24h",
+      process.env.ACCESS_TOKEN_SECRET,
+    );
+
+    const newRefreshToken = generateAccessToken(
+      { ...rest, sessionId: session._id },
+      "15d",
+      process.env.REFRESH_TOKEN_SECRET,
+    );
+
+    // set refresh token in cookie
+    res.cookie("refreshToken", newRefreshToken, {
+      maxAge: 24 * 60 * 60 * 1000 * 15, // Cookie will expire after 15 day
+      httpOnly: true, // Cookie is only accessible via HTTP(S) and not client-side JavaScript
+      secure: process.env.NODE_ENV === "production", // Cookie will only be sent over HTTPS if in production
+      sameSite: "strict", // SameSite attribute to prevent CSRF attacks
+    });
+
+    return responseHandler(
+      res,
+      { accessToken },
+      200,
+      "token refresh successfully",
+    );
+  } catch (e) {
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError());
+  }
+};
+
+module.exports = {
+  getAccessToken,
+  verifyOtp,
+  resendOtp,
+  genreateGuestAccessToken,
+  guestLoginWithToken,
+  isLoggedIn,
+  refreshAccessToken,
+};

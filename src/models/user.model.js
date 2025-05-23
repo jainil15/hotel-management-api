@@ -1,0 +1,50 @@
+const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
+const { z } = require("zod");
+const { phoneregex } = require("../constants/regex.constant");
+
+const userSchema = new Schema(
+  {
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
+    email: { type: String, required: true, unique: true, lowercase: true },
+    password_hash: { type: String, required: true },
+    phoneNumber: { type: String },
+    role: { type: String, required: true },
+    active: { type: Boolean, default: true },
+  },
+  { timestamps: true },
+);
+userSchema.index({ email: 1 }, { unique: true });
+
+const UserValidationSchema = z.object({
+  firstName: z.string().min(1).max(255),
+  lastName: z.string().min(1).max(255),
+  email: z.string().email(),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters long")
+    .max(25, "Password must be at most 25 characters long")
+    .refine((val) => /[A-Za-z]/.test(val), {
+      message: "Password must contain at least one letter",
+    })
+    .refine((val) => /\d/.test(val), {
+      message: "Password must contain at least one number",
+    }),
+  phoneNumber: z
+    .string()
+    .refine((val) => phoneregex.test(val), {
+      message: "Invalid phone number format",
+    })
+    .optional(),
+  role: z.string().min(1).max(255).optional(),
+  active: z.boolean().optional(),
+});
+
+/**
+ * @typedef {import("mongoose").Model<User>} User
+ * @typedef {typeof User.schema.obj} UserType
+ */
+const User = mongoose.model("User", userSchema);
+
+module.exports = { User, UserValidationSchema };
