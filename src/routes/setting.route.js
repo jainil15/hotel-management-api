@@ -15,5 +15,12 @@ router.get(
   settingController.getByPropertyId,
 );
 router.get("/guest/:propertyId/", settingController.getByPropertyId);
+router.put(
+  "/:propertyId",
+  authenticateToken,
+  checkPropertyAccess,
+  checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
+  settingController.update,
+);
 
 module.exports = router;

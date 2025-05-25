@@ -692,6 +692,44 @@ const upsertWithRetry = async (
   return result;
 };
 
+/**
+ * Find guest by guest status
+ * @param {string} propertyId - property id
+ * @param {object} filter - filter object
+ * @param {string} status - guest status to filter by
+ * @returns {Promise<import('../models/guest.model').GuestType>} guest - guest object
+ */
+const findGuestByGuestStatus = async (propertyId, filter, status) => {
+  const pipeline = [
+    {
+      $match: {
+        propertyId: new mongoose.Types.ObjectId(propertyId),
+      },
+    },
+    {
+      $lookup: {
+        from: "gueststatuses",
+        localField: "_id",
+        foreignField: "guestId",
+        as: "status",
+      },
+    },
+    {
+      $unwind: "$status",
+    },
+    {
+      $match: {
+        "status.currentStatus": status,
+      },
+    },
+    {
+      $project: filter,
+    },
+  ];
+  const guest = await Guest.aggregate(pipeline);
+  return guest[0];
+};
+
 module.exports = {
   create,
   getAll,
@@ -714,4 +752,5 @@ module.exports = {
   upsert,
   updateByPmsId,
   upsertWithRetry,
+  findGuestByGuestStatus,
 };

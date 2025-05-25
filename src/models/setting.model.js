@@ -13,6 +13,8 @@ const settingSchema = new Schema(
     automaticNewDay: { type: Boolean, default: true },
     defaultNewDayTime: { type: String, required: true },
     manualNewDay: { type: Date },
+    pmsId: { type: String, default: null },
+    pmsType: { type: String, default: null },
   },
   { timestamps: true },
 );
@@ -30,6 +32,8 @@ const SettingValidationSchema = z.object({
     message: "Invalid time format",
   }),
   manualNewDay: z.date().optional(),
+  pmsId: z.string().optional(),
+  pmsType: z.string().optional(),
 });
 const UpdateSettingValidationSchema = z.object({
   timezone: z.string().optional(),
@@ -53,6 +57,8 @@ const UpdateSettingValidationSchema = z.object({
     })
     .optional(),
   manualNewDay: z.date().optional(),
+  pmsId: z.string().optional(),
+  pmsType: z.string().optional(),
 });
 /**
  * @typedef {import("mongoose").Model<Setting>} Setting

@@ -63,7 +63,7 @@ const houseKeepingRequestMailTemplate = (guest) => {
   return `
 <p>Dear Team,</p>
 <p>A housekeeping request has been received from Room ${guest.roomNumber}. Please attend to it at the earliest.</p>
-<p>Dashboard: <a href="https://testhotel.onelyk.com/dashboard?openAddOnsRequest=true">link</a></p>
+<p>Dashboard: <a href="${process.env.FRONTEND_URL}/dashboard?openAddOnsRequest=true">link</a></p>
 <p>Best,
 <br/>Team Onelyk.com</p>
 `;
