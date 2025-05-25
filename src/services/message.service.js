@@ -84,6 +84,14 @@ const getAll = async (propertyId, guestId) => {
         as: "donotdisturbRequest",
       },
     },
+    {
+      $lookup: {
+        from: "housekeepingrequests",
+        localField: "houseKeepingRequestId",
+        foreignField: "_id",
+        as: "houseKeepingRequest",
+      },
+    },
 
     // 6. Unwind the request array while preserving nulls.
     {
@@ -174,4 +182,12 @@ const updateStatus = async (messageSid, status, session) => {
   return updatedMessage;
 };
 
-module.exports = { create, getAll, getById, updateStatus };
+const getAllByPropertyId = async (propertyId) => {
+  const messages = await Message.find({
+    propertyId: new mongoose.Types.ObjectId(propertyId),
+  });
+
+  return messages;
+};
+
+module.exports = { create, getAll, getById, updateStatus, getAllByPropertyId };

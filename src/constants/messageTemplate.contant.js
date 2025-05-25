@@ -5,6 +5,7 @@ const {
   EARLY_CHECK_IN_STATUS,
   EXTEND_STAY_STATUS,
 } = require("./guestStatus.contant");
+const { ADD_ONS_STATUS } = require("./addOns.constant");
 
 const DEFAULT_MESSAGE_TEMPLATES = {
   Reservation: {
@@ -69,6 +70,23 @@ Have questions or need assistance? Visit [Guest Link] or reply to this message.
       message: `Your stay at [Hotel Name] is extended until [New Checkout Date]! 🎉
 Enjoy more time with us—explore amenities, request housekeeping, or share feedback here: [Guest Link].`,
       name: "Extend Stay Accepted",
+    },
+  },
+  "Add Ons": {
+    [ADD_ONS_STATUS.REQUESTED]: {
+      message:
+        "Your request for [Service Name] has been successfully received. Our team is processing it immediately. Please do not hesitate to contact us for any further assistance.",
+      name: "AddOns Requested",
+    },
+    [ADD_ONS_STATUS.ACCEPTED]: {
+      message:
+        "Your request for [Service Name] has been accepted and is now in progress. Thank you for choosing [Hotel Name].",
+      name: "AddOns Accepted",
+    },
+    [ADD_ONS_STATUS.REJECTED]: {
+      message:
+        "Dear [Guest Name], we’re sorry, but your request for [Service Name] cannot be fulfilled at this time. Please reply back us if you need further assistance. – [Hotel Name]",
+      name: "AddOns Rejected",
     },
   },
 };

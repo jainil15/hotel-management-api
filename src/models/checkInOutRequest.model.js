@@ -42,6 +42,7 @@ const checkInOutRequest = new Schema(
     extendStayDateTime: {
       type: Date,
     },
+    reason: { type: String },
   },
   { timestamps: true },
 );

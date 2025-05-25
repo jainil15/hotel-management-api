@@ -29,166 +29,130 @@ const homeFlowSchema = new Schema(
       type: [amenitiesSchema],
       default: [
         {
-          name: "Breakfast Included",
+          name: "Free Wi-Fi",
           enabled: true,
           image:
-            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/breakfast.jpeg",
+            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/v2/Free-Wi-Fi.png",
         },
         {
-          name: "24/7 Front Desk",
-          enabled: false,
-          image:
-            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/breakfast.jpeg",
-        },
-        {
-          name: "Free WiFi",
+          name: "Complimentary Breakfast",
           enabled: true,
           image:
-            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/free-wifi.jpg",
-        },
-        {
-          name: "HouseKeeping",
-          enabled: true,
-          image:
-            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/roomservice.jpeg",
-        },
-        {
-          name: "Air conditioning",
-          enabled: true,
-          image:
-            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/ac.jpeg",
-        },
-        {
-          name: "Parking Available",
-          enabled: true,
-          image:
-            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/parkingg.jpg",
-        },
-        {
-          name: "Luggage Storage",
-          enabled: true,
-          image:
-            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/luggagestorage.jpeg",
+            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/v2/Complimentary-Breakfast.png",
         },
         {
           name: "Room Service",
           enabled: true,
           image:
-            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/roomservice.jpeg",
+            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/v2/Room-Service.png",
         },
         {
           name: "Fitness Center/Gym",
           enabled: true,
           image:
-            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/gym.jpeg",
+            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/v2/Fitness-Center-Gym.png",
         },
         {
           name: "Swimming Pool",
           enabled: true,
           image:
-            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/swimming.jpeg",
+            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/v2/Swimming-Pool.png",
         },
         {
           name: "Business Center",
           enabled: true,
           image:
-            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/business.jpeg",
+            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/v2/Business-Center.png",
         },
         {
-          name: "On-site Restaurant/Bar",
+          name: "On-Site Restaurant/Bar",
           enabled: true,
           image:
-            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/restaurant.jpeg",
+            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/v2/On-Site-Restaurant-Bar.png",
         },
         {
           name: "Concierge Service",
           enabled: true,
           image:
-            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/conceirge.jpeg",
+            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/v2/Concierge-Service.png",
         },
         {
           name: "Parking (Free or Paid)",
           enabled: true,
           image:
-            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/parking.jpg",
+            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/v2/Parking-Free-or-Paid.png",
         },
         {
           name: "Air Conditioning/Heating",
           enabled: true,
           image:
-            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/ACC.jpg",
+            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/v2/Air-Conditioning-Heating.png",
+        },
+        {
+          name: "24-Hour Front Desk",
+          enabled: true,
+          image:
+            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/v2/24-Hour-Front-Desk.png",
         },
         {
           name: "Laundry Services",
           enabled: true,
           image:
-            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/laundry.jpeg",
+            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/v2/Laundry-Services.png",
         },
         {
           name: "Airport Shuttle Service",
           enabled: true,
           image:
-            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/spaceshuttle.jpeg",
+            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/v2/Airport-Shuttle-Service.png",
         },
         {
-          name: "Pet-friendly Accommodations",
+          name: "Pet-Friendly Accommodations",
           enabled: true,
           image:
-            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/DALL%C2%B7E+2024-10-17+23.45.17+-+An+icon+of+a+paw+print+with+a+small+heart%2C+representing+'Pet-friendly+Accommodations'+on+a+light+background.webp",
+            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/v2/Pet-Friendly-Accommodations.png",
         },
         {
-          name: "In-room Safe",
+          name: "Mini-Bar",
           enabled: true,
           image:
-            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/insafe.jpeg",
-        },
-        {
-          name: "Mini-bar",
-          enabled: true,
-          image:
-            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/minibar.jpg",
+            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/v2/Mini-Bar.png",
         },
         {
           name: "Spa/Wellness Center",
           enabled: true,
           image:
-            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/spa.jpeg",
-        },
-        {
-          name: "Conference/Meeting Rooms",
-          enabled: true,
-          image:
-            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/conference.jpg",
+            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/v2/Spa-Wellness-Center.png",
         },
         {
           name: "Cable/Satellite TV",
           enabled: true,
           image:
-            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/tv.jpg",
+            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/v2/Cable-Satellite-TV.png",
         },
         {
-          name: "Coffee/Tea Maker in Room",
+          name: "Luggage Storage",
           enabled: true,
           image:
-            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/coffee.jpg",
-        },
-        {
-          name: "Hairdryer and Toiletries",
-          enabled: true,
-          image:
-            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/9b82408e-8d56-4625-864f-ce7b58fba899.jpeg",
-        },
-        {
-          name: "Iron/Ironing Board",
-          enabled: true,
-          image:
-            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/iron.jpg",
+            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/v2/Luggage-Storage.png",
         },
         {
           name: "Wheelchair Accessibility",
-          enabled: false,
+          enabled: true,
           image:
-            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/wheel.jpeg",
+            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/v2/Wheelchair-Accessibility.png",
+        },
+        {
+          name: "Microwave",
+          enabled: true,
+          image:
+            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/v2/Microwave.png",
+        },
+        {
+          name: "Refrigrator",
+          enabled: true,
+          image:
+            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/v2/Refrigrator.png",
         },
       ],
     },

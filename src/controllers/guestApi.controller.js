@@ -8,6 +8,7 @@ const {
   NotFoundError,
   ForbiddenError,
 } = require("../lib/CustomErrors");
+const { sendMail } = require("../utils/mail.util");
 const { responseHandler } = require("../middlewares/response.middleware");
 const guestService = require("../services/guest.service");
 const reviewService = require("../services/review.service");
@@ -22,7 +23,10 @@ const guestStatusService = require("../services/guestStatus.service");
 const twilioAccountService = require("../services/twilioAccount.service");
 const smsService = require("../services/sms.service");
 const settingService = require("../services/setting.service");
-const { modifyMessageTemplateBody } = require("../utils/messageTemplateUpdate");
+const {
+  modifyMessageTemplateBody,
+  modifyAddOnsMessageTemplateBody,
+} = require("../utils/messageTemplateUpdate");
 const messageTemplateService = require("../services/messageTemplate.service");
 const guestSessionService = require("../services/guestSession.service");
 const twilioService = require("../services/twilio.service");
@@ -439,6 +443,7 @@ const createPreArrival = async (req, res, next) => {
     }
     const preArrivalFlow =
       await preArrivalFlowService.getByPropertyId(propertyId);
+    console.log(preArrival);
     const validationResult = zodValidatePreArrivalFlow(
       preArrivalFlow._doc,
       preArrival,
@@ -716,9 +721,45 @@ const createAddOnsRequest = async (req, res, next) => {
       session,
       addOnsId,
     );
-
-    const guest = await guestService.getByGuestId(guestId);
+    const messageTemplate =
+      await messageTemplateService.getMessageTemplateByStatus(
+        propertyId,
+        "AddOns Requested",
+      );
     const { property } = await propertyService.getById(propertyId);
+    const guest = await guestService.getById(guestId, propertyId);
+    const messageBody = modifyAddOnsMessageTemplateBody(
+      messageTemplate,
+      property,
+      guest,
+      createdAddOnsRequest,
+    );
+
+    // const newMessage = await messageService.create(
+    //   {
+    //     propertyId: propertyId,
+    //     guestId: guestId,
+    //     senderId: guestId,
+    //     receiverId: propertyId,
+    //     content: `Request for ${createdAddOnsRequest.name}`,
+    //     messageType: messageType.ADDONS_REQUEST,
+    //     messageTriggerType: messageTriggerType.AUTOMATIC,
+    //     addOnsRequestId: createdAddOnsRequest._id,
+    //   },
+    //   session,
+    // );
+    const twilioSubClient = await twilioService.getTwilioClient(
+      await twilioAccountService.getByPropertyId(propertyId),
+    );
+    const twilioAccount =
+      await twilioAccountService.getByPropertyId(propertyId);
+    const sentMessage = await smsService.send(
+      twilioSubClient,
+      `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
+      `${guest.countryCode}${guest.phoneNumber}`,
+      `${messageBody.message}`,
+    );
+
     if (!guest) {
       throw new InternalServerError("Error Getting Guest By Guest Id");
     }
@@ -745,13 +786,14 @@ const createAddOnsRequest = async (req, res, next) => {
         guestId: guestId,
         senderId: guestId,
         receiverId: propertyId,
-        content: `Request for ${createdAddOnsRequest.name}`,
+        content: `${messageBody.message}`,
         messageType: messageType.ADDONS_REQUEST,
         messageTriggerType: messageTriggerType.AUTOMATIC,
         addOnsRequestId: createdAddOnsRequest._id,
       },
       session,
     );
+
     const updatedChatList = await chatListService.updateAndIncUnreadMessages(
       propertyId,
       guestId,
@@ -760,6 +802,13 @@ const createAddOnsRequest = async (req, res, next) => {
       },
       session,
     );
+    if (guest.email) {
+      sendMail(
+        guest.email,
+        `Add Ons ${createAddOnsRequest.name} Requested`,
+        messageBody.message,
+      );
+    }
 
     await session.commitTransaction();
     session.endSession();

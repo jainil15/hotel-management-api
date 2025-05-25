@@ -17,6 +17,7 @@ const addOnsRequestSchema = new Schema(
       enum: Object.values(REQUEST_STATUS),
       default: REQUEST_STATUS.REQUESTED,
     },
+    reason: { type: String },
   },
   { timestamps: true },
 );

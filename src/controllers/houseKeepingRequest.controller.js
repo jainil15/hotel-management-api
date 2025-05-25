@@ -3,6 +3,10 @@ const { default: mongoose } = require("mongoose");
 const propertyService = require("../services/property.service");
 const guestStatusService = require("../services/guestStatus.service");
 const workflowService = require("../services/workflow.service");
+const messageService = require("../services/message.service");
+const chatListService = require("../services/chatList.service");
+const asiPmsService = require("../services/asiPms.service");
+const { ROOM_STATUS_CODE } = require("../constants/asi.constant");
 const {
   houseKeepingRequestMailTemplate,
   sendMail,
@@ -20,6 +24,10 @@ const {
 const { responseHandler } = require("../middlewares/response.middleware");
 const guestService = require("../services/guest.service");
 const { GUEST_CURRENT_STATUS } = require("../constants/guestStatus.contant");
+const {
+  messageType,
+  messageTriggerType,
+} = require("../constants/message.constant.js");
 
 const create = async (req, res, next) => {
   const session = await mongoose.startSession();
@@ -27,7 +35,6 @@ const create = async (req, res, next) => {
   try {
     const { propertyId, guestId } = req.guestSession;
     const request = req.body;
-    console.log(request);
     const houseKeepingRequestResult =
       CreateHouseKeepingRequestValidationSchema.safeParse(request);
     if (!houseKeepingRequestResult.success) {
@@ -45,7 +52,6 @@ const create = async (req, res, next) => {
     if (!workflow) {
       throw new NotFoundError("Workflow not found", {});
     }
-    console.log(workflow.addOnsFlow);
     const houseKeepingOptions = workflow.addOnsFlow.houseKeepingAddOns.options;
     const houseKeepingOption = houseKeepingRequestResult.data.options;
     for (const option of houseKeepingOption) {
@@ -75,14 +81,57 @@ const create = async (req, res, next) => {
       houseKeepingRequestResult.data,
       session,
     );
+    // TODO: Change house keeping status in pms
+    console.log(property);
+    if (property.property.pmsId) {
+      const asiPmsResponse = await asiPmsService.changeRoomStatus(
+        property.property.pmsId,
+        "813D2A24-6B5D-463C-BA76-CB9369C8375F",
+        "5T9OPcFv&jipS87^VaMfvsMLTghH209276Vcdg#mAP0^$",
+        guest.roomNumber,
+        ROOM_STATUS_CODE.IN_HOUSE_DIRTY,
+      );
+      console.log(asiPmsResponse);
+    }
     const message = houseKeepingRequestMailTemplate(guest);
     sendMail(
       property.property.email,
       `Room - ${guest.roomNumber}, New Housekeeping Service Request Received`,
       message,
     );
+    const newMessage = await messageService.create(
+      {
+        propertyId: propertyId,
+        guestId: guestId,
+        senderId: guestId,
+        receiverId: propertyId,
+        content: `House keeping request ${houseKeepingRequestResult.data.options !== 0 ? "(" : ""}${houseKeepingRequestResult.data.options.join(
+          ", ",
+        )}${houseKeepingRequestResult.data.options !== 0 ? ")" : ""} received`,
+        messageType: messageType.REQUEST,
+        messageTriggerType: messageTriggerType.AUTOMATIC,
+        houseKeepingRequestId: newHouseKeepingRequest._id,
+      },
+      session,
+    );
+    const updatedChatList = await chatListService.updateAndIncUnreadMessages(
+      propertyId,
+      guestId,
+      {
+        latestMessage: newMessage._id,
+      },
+      session,
+    );
+
+    req.app.io.to(`property:${propertyId}`).emit("chatList:update", {
+      chatList: updatedChatList,
+    });
     req.app.io.to(`property:${propertyId}`).emit("addOn:newAddon", {
       count: 1,
+    });
+
+    req.app.io.to(`guest:${guestId}`).emit("message:newMessage", {
+      message: newMessage,
     });
     req.app.io.to(`property:${propertyId}`).emit("request:update", {});
     await session.commitTransaction();
@@ -130,7 +179,7 @@ const updateStatus = async (req, res, next) => {
     req.app.io
       .to(`property:${updatedHouseKeepingRequest.propertyId}`)
       .emit("request:update", {});
-    req.app.io.to(`property:${propertyId}`).emit("addOn:newAddon", {
+    req.app.io.to(`property:${guest.propertyId}`).emit("addOn:newAddon", {
       count: 1,
     });
     await session.commitTransaction();

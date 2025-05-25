@@ -133,7 +133,7 @@ const findOne = async (propertyId, guestId, filter) => {
 const updateRequestStatus = async (
   propertyId,
   checkInOutRequestId,
-  checkInOutRequestStatus,
+  checkInOutRequest,
   session,
 ) => {
   const updatedCheckInOutRequest = await CheckInOutRequest.findOneAndUpdate(
@@ -141,9 +141,7 @@ const updateRequestStatus = async (
       propertyId: propertyId,
       _id: checkInOutRequestId,
     },
-
-    checkInOutRequestStatus,
-
+    checkInOutRequest,
     {
       new: true,
       session: session,

@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const { ChatList } = require("../models/chatList.model");
 const logger = require("../configs/winston.config");
+const { GUEST_CURRENT_STATUS } = require("../constants/guestStatus.contant");
 
 /**
  * Create a chat list for a property and guest
@@ -74,14 +75,43 @@ const getByPropertyId = async (propertyId) => {
     },
 
     // 7. Add a computed field to check if the guest is currently checked in.
+    // {
+    //   $addFields: {
+    //     currentlyCheckedIn: {
+    //       $cond: {
+    //         if: {
+    //           $and: [
+    //             { $lte: ["$guest.checkIn", "$$NOW"] },
+    //             { $gte: ["$guest.checkOut", "$$NOW"] },
+    //           ],
+    //         },
+    //         then: 1,
+    //         else: 0,
+    //       },
+    //     },
+    //   },
+    // },
+
     {
       $addFields: {
         currentlyCheckedIn: {
           $cond: {
             if: {
               $and: [
+                {
+                  $eq: [
+                    "$gueststatus.currentStatus",
+                    GUEST_CURRENT_STATUS.IN_HOUSE,
+                  ],
+                },
                 { $lte: ["$guest.checkIn", "$$NOW"] },
                 { $gte: ["$guest.checkOut", "$$NOW"] },
+                {
+                  $eq: [
+                    "$gueststatus.reservationStatus",
+                    GUEST_CURRENT_STATUS.RESERVED,
+                  ],
+                },
               ],
             },
             then: 1,
@@ -93,7 +123,7 @@ const getByPropertyId = async (propertyId) => {
 
     // 8. Sort by currentlyCheckedIn (desc) and then by guest.checkIn (desc).
     {
-      $sort: { currentlyCheckedIn: -1, "guest.checkIn": -1 },
+      $sort: { currentlyCheckedIn: -1 },
     },
 
     // 9. Group by uniquePhone to pick the best chat for each phone number.
@@ -201,6 +231,7 @@ const getByPropertyId = async (propertyId) => {
 
   const time = Date.now();
   const chatList = await ChatList.aggregate(pipeline);
+  console.log(JSON.stringify(chatList));
   logger.info(`End time: ${Date.now() - time}ms`);
   return chatList[0];
 };
@@ -264,10 +295,27 @@ const updateAndIncUnreadMessages = async (
   return updatedChatList;
 };
 
+const upsert = async (propertyId, guestId, session) => {
+  const existingChatList = await ChatList.findOne({
+    propertyId: propertyId,
+    guestId: guestId,
+  });
+  if (existingChatList) {
+    return existingChatList;
+  }
+  const newChatList = new ChatList({
+    propertyId: propertyId,
+    guestId: guestId,
+  });
+  const savedChatList = await newChatList.save({ session });
+  return savedChatList;
+};
+
 module.exports = {
   create,
   getByPropertyId,
   update,
   remove,
   updateAndIncUnreadMessages,
+  upsert,
 };

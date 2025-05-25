@@ -157,6 +157,29 @@ function modifyMessageTemplateBody(
   return messageTemplate;
 }
 
+/**
+ * Modify the message template body for add-ons
+ * @param {object} messageTemplate - The message template object
+ * @property {object} property - The property object
+ * @property {object} guest - The guest object
+ * @property {object} addOn - The add-on object
+ * @returns {object} - The modified message template
+ */
+const modifyAddOnsMessageTemplateBody = (
+  messageTemplate,
+  property,
+  guest,
+  addOn,
+) => {
+  console.log(property.name, addOn);
+  messageTemplate.message = messageTemplate.message
+    .replace("[Hotel Name]", property.name)
+    .replace("[Guest Name]", `${guest.firstName} ${guest.lastName}`)
+    .replace("[Service Name]", addOn.name);
+  return messageTemplate;
+};
+
 module.exports = {
   modifyMessageTemplateBody,
+  modifyAddOnsMessageTemplateBody,
 };

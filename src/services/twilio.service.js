@@ -84,7 +84,10 @@ const buyPhoneNumber = async (propertyId, phoneNumber, user) => {
       messageVolume: "1,000",
       notificationEmail: property.email,
       optInType: "WEB_FORM",
-      optInImageUrls: ["https://onelyk-docs.s3.amazonaws.com/verbal_optin.txt"],
+      optInImageUrls: [
+        "https://onelyk-docs.s3.amazonaws.com/optin2.jpeg",
+        "https://onelyk-docs.s3.amazonaws.com/optin.txt",
+      ],
       productionMessageSample: `Hi [Guest_Name], your stay at [Hotel_Name] is confirmed from [Check_In_Date] to [Check_Out_Date]. Reply with any questions or text STOP to opt out of future notifications.`,
       tollfreePhoneNumberSid: incomingPhoneNumber.sid,
       useCaseCategories: ["CUSTOMER_CARE"],
@@ -217,7 +220,7 @@ const getTwilioClient = async (twilioAccount) => {
   return client;
 };
 
-const resubmitTollFreeVerification = async (propertyId) => {
+const resubmitTollFreeVerification = async (user, propertyId) => {
   const property = await Property.findById(propertyId);
   if (!property) {
     throw new NotFoundError("Property not found", {
@@ -240,12 +243,38 @@ const resubmitTollFreeVerification = async (propertyId) => {
     });
   }
 
-  const tollfreeVerification =
-    await twilioClient.messaging.v1.tollfreeVerifications.create({
+  console.log({
+    twilioAccount: twilioAccount.tollfreeVerificationSid,
+    businessCity: property.city,
+    businessContactEmail: property.email,
+    businessContactFirstName: user.firstName,
+    businessContactLastName: user.lastName,
+    businessContactPhone: property.phoneNumber,
+    businessCountry: getCountryIso2(property.country),
+    businessName: property.name,
+    businessPostalCode: property.zipcode,
+    businessStateProvinceRegion: property.state,
+    businessStreetAddress: property.address,
+    businessWebsite: property.website,
+    messageVolume: "1,000",
+    notificationEmail: property.email,
+    optInType: "WEB_FORM",
+    optInImageUrls: [
+      "https://onelyk-docs.s3.us-east-1.amazonaws.com/optin2.jpeg",
+    ],
+    productionMessageSample: `Hi [Guest_Name], your stay at [Hotel_Name] is confirmed from [Check_In_Date] to [Check_Out_Date]. Reply with any questions or text STOP to opt out of future notifications.`,
+    tollfreePhoneNumberSid: twilioAccount.phoneNumberSid,
+    useCaseCategories: ["CUSTOMER_CARE"],
+    useCaseSummary: `Our software enables hotels to communicate with guests via SMS for booking confirmations, check-in reminders, and other stay-related updates. Hotels retrieve guest phone numbers from online booking platforms. Post-checkout, guests receive a message inviting them to opt into future promotional offers by replying "YES." Promotional messages are only sent to guests who explicitly opt in, ensuring compliance with consent regulations.`,
+  });
+  const twilioSubClient = await getTwilioClient(twilioAccount);
+  const tollfreeVerification = await twilioSubClient.messaging.v1
+    .tollfreeVerifications(twilioAccount.tollfreeVerificationSid)
+    .update({
       businessCity: property.city,
       businessContactEmail: property.email,
-      businessContactFirstName: property.contactFirstName,
-      businessContactLastName: property.contactLastName,
+      businessContactFirstName: user.firstName,
+      businessContactLastName: user.lastName,
       businessContactPhone: property.phoneNumber,
       businessCountry: getCountryIso2(property.country),
       businessName: property.name,
@@ -255,12 +284,15 @@ const resubmitTollFreeVerification = async (propertyId) => {
       businessWebsite: property.website,
       messageVolume: "1,000",
       notificationEmail: property.email,
-      optInType: "VERBAL",
-      optInImageUrls: ["https://onelyk-docs.s3.amazonaws.com/verbal_optin.txt"],
-      productionMessageSample:
-        "Hi [Guest Name], your stay at [Hotel Name] is confirmed from [Check-In Date] to [Check-Out Date]. Please reply if you have any questions.",
+      optInType: "WEB_FORM",
+      optInImageUrls: [
+        "https://onelyk-docs.s3.us-east-1.amazonaws.com/optin2.jpeg",
+        "https://onelyk-docs.s3.us-east-1.amazonaws.com/optin.txt",
+      ],
+      productionMessageSample: `Hi [Guest_Name], your stay at [Hotel_Name] is confirmed from [Check_In_Date] to [Check_Out_Date]. Reply with any questions or text STOP to opt out of future notifications.`,
+      tollfreePhoneNumberSid: twilioAccount.phoneNumberSid,
       useCaseCategories: ["CUSTOMER_CARE"],
-      useCaseSummary: "Communication with guest for hotel front desk",
+      useCaseSummary: `Our software enables hotels to communicate with guests via SMS for booking confirmations, check-in reminders, and other stay-related updates. Hotels retrieve guest phone numbers from online booking platforms. Post-checkout, guests receive a message inviting them to opt into future promotional offers by replying "YES." Promotional messages are only sent to guests who explicitly opt in, ensuring compliance with consent regulations.`,
     });
 
   twilioAccount.tollfreeVerificationSid = tollfreeVerification.sid;

@@ -49,6 +49,22 @@ const houseKeepingAddOnsSchema = new Schema(
   },
   {},
 );
+const upgradeRoomSchema = new Schema(
+  {
+    name: { type: String, required: true },
+    description: { type: String },
+    enabled: { type: Boolean, default: true },
+    default: { type: Boolean, default: true },
+    image: { type: [String] },
+    options: [
+      {
+        roomNumber: { type: String, required: true },
+        roomType: { type: String, required: true },
+      },
+    ],
+  },
+  {},
+);
 
 const addOnsFlowSchema = new Schema(
   {
@@ -108,6 +124,19 @@ const addOnsFlowSchema = new Schema(
         options: [],
       },
     },
+    upgradeRoom: {
+      type: upgradeRoomSchema,
+      default: {
+        name: "Upgrade Room",
+        description: "Upgrade to a better room type.",
+        enabled: true,
+        default: true,
+        image: [
+          "https://onelyk-images-bucket.s3.amazonaws.com/addOns/upgrade-room.jpg",
+        ],
+        options: [],
+      },
+    },
   },
   { timestamps: true },
 );
@@ -149,6 +178,33 @@ const CreateAddOnsFlowValidationSchema = z.object({
       //image: z.string().optional(),
     }),
   ),
+  houseKeepingAddOns: z
+    .object({
+      name: z.string().optional(),
+      description: z.string().optional(),
+      enabled: z.boolean().optional(),
+      default: z.boolean().optional(),
+      image: z.any(),
+      options: z.array(z.string().min(1)).optional(),
+    })
+    .optional(),
+  upgradeRoom: z
+    .object({
+      name: z.string().optional(),
+      description: z.string().optional(),
+      enabled: z.boolean().optional(),
+      default: z.boolean().optional(),
+      image: z.any(),
+      options: z
+        .array(
+          z.object({
+            roomNumber: z.string(),
+            roomType: z.string(),
+          }),
+        )
+        .optional(),
+    })
+    .optional(),
 });
 
 const UpdateAddOnsFlowValidationSchema = z.object({
@@ -192,6 +248,23 @@ const UpdateAddOnsFlowValidationSchema = z.object({
       default: z.boolean().optional(),
       image: z.any(),
       options: z.array(z.string().min(1)).optional(),
+    })
+    .optional(),
+  upgradeRoom: z
+    .object({
+      name: z.string().optional(),
+      description: z.string().optional(),
+      enabled: z.boolean().optional(),
+      default: z.boolean().optional(),
+      image: z.any(),
+      options: z
+        .array(
+          z.object({
+            roomNumber: z.string(),
+            roomType: z.string(),
+          }),
+        )
+        .optional(),
     })
     .optional(),
 });

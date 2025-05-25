@@ -268,6 +268,48 @@ const createDefaultHouseKeepingFlow = async (req, res, next) => {
   }
 };
 
+const createDefaultUpgradeRoomFlow = async (req, res, next) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const { propertyId } = req.params;
+    // Fetch the current addOnsFlow for the property
+    const addOnsFlow = await addOnsFlowService.getByPropertyId(propertyId);
+    if (addOnsFlow && addOnsFlow.upgradeRoom && addOnsFlow.upgradeRoom.name) {
+      // upgradeRoom already exists, do nothing
+      await session.commitTransaction();
+      session.endSession();
+      return responseHandler(res, { flow: addOnsFlow }, 200, "upgradeRoom already exists");
+    }
+    // Otherwise, create/initialize upgradeRoom
+    const upgradeRoom = {
+      name: "Upgrade Room",
+      description: "Upgrade to a better room type.",
+      enabled: true,
+      default: true,
+      image: [
+        "https://onelyk-images-bucket.s3.amazonaws.com/addOns/upgrade-room.jpg",
+      ],
+      options: [],
+    };
+    const updatedFlow = await addOnsFlowService.updateToDefault(
+      propertyId,
+      { upgradeRoom },
+      session,
+    );
+    await session.commitTransaction();
+    session.endSession();
+    return responseHandler(res, { flow: updatedFlow }, 201, "upgradeRoom created");
+  } catch (e) {
+    await session.abortTransaction();
+    session.endSession();
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError(e.message));
+  }
+};
+
 module.exports = {
   createDefaults,
   removeDefaults,
@@ -275,4 +317,5 @@ module.exports = {
 
   update,
   createDefaultHouseKeepingFlow,
+  createDefaultUpgradeRoomFlow,
 };

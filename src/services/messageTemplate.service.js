@@ -2,6 +2,7 @@ const {
   DEFAULT_MESSAGE_TEMPLATES,
   MESSAGE_TEMPLATE_TYPES,
 } = require("../constants/messageTemplate.contant");
+const { Property } = require("../models/property.model");
 const { MessageTemplate } = require("../models/messageTemplates.model");
 const {
   guestStatusToTemplateOnCreate,
@@ -204,6 +205,25 @@ const updateByName = async (propertyId, name, messageTemplate, session) => {
   );
   return updatedMessageTemplate;
 };
+/**
+ * Create default message templates
+ * @param {string} propertyId - The property id
+ */
+const createAddOnMessageTemplateDefaults = async (propertyId, session) => {
+  const messageTemplates = [];
+  for (const [status, message] of Object.entries(
+    DEFAULT_MESSAGE_TEMPLATES["Add Ons"],
+  )) {
+    const newMessageTemplate = new MessageTemplate({
+      propertyId,
+      type: MESSAGE_TEMPLATE_TYPES.DEFAULT,
+      name: `${message.name}`,
+      message: message.message,
+    });
+    messageTemplates.push(await newMessageTemplate.save({ session }));
+  }
+  return messageTemplates;
+};
 
 module.exports = {
   getAll,
@@ -216,4 +236,5 @@ module.exports = {
   updateAll,
   getMessageTemplateByStatus,
   updateByName,
+  createAddOnMessageTemplateDefaults,
 };

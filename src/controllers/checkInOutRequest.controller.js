@@ -203,15 +203,41 @@ const updateRequestStatus = async (req, res, next) => {
   let newMessage, chatList;
   try {
     const { propertyId, guestId, checkInOutRequestId } = req.params;
-    const checkInOutRequest = req.body;
-    const checkInOutRequestResult =
-      UpdateRequestStatusValidationSchema.safeParse(checkInOutRequest);
-    if (!checkInOutRequestResult.success) {
+
+    const { requestStatus, reason } = req.body;
+
+    // Validate requestStatus
+    const requestStatusResult = z
+      .object({
+        requestStatus: z.enum([
+          REQUEST_STATUS.ACCEPTED,
+          REQUEST_STATUS.DECLINED,
+        ]),
+      })
+      .safeParse({ requestStatus });
+
+    if (!requestStatusResult.success) {
       throw new ValidationError(
         "Validation Error",
-        checkInOutRequestResult.error.flatten().fieldErrors,
+        requestStatusResult.error.flatten().fieldErrors,
       );
     }
+
+    // Declined case: reason must be present
+    if (requestStatus === REQUEST_STATUS.DECLINED && !reason) {
+      throw new ValidationError("Validation Error", {
+        reason: ["Reason is required when declining a request."],
+      });
+    }
+
+    // Build payload
+    const updatePayload =
+      requestStatus === REQUEST_STATUS.DECLINED
+        ? { requestStatus, reason }
+        : { requestStatus };
+
+    console.warn("Payload :- ", updatePayload);
+
     const existingCheckInOutRequest = await checkInOutRequestService.findOne(
       propertyId,
       guestId,
@@ -234,24 +260,20 @@ const updateRequestStatus = async (req, res, next) => {
       await checkInOutRequestService.updateRequestStatus(
         propertyId,
         checkInOutRequestId,
-        checkInOutRequestResult.data,
+        updatePayload,
         session,
       );
+    console.warn("Updated Request :- ",updatedCheckInOutRequest);
     const oldGuestStatus = await guestStatusService.getByGuestId(guestId);
     const updatedGuestStatus = await guestStatusService.update(
       guestId,
       {
         [`${updatedCheckInOutRequest.requestType}Status`]:
-          checkInOutRequest.requestStatus,
+          requestStatus,
       },
       session,
     );
 
-    // if (!validateUpdatev3(oldGuestStatus._doc, updatedGuestStatus._doc)) {
-    //   throw new ValidationError("Invalid Status", {
-    //     currentStatus: ["Invalid Status"],
-    //   });
-    // }
     const validationResult = validateUpdatev3(
       oldGuestStatus._doc,
       updatedGuestStatus._doc,
@@ -329,6 +351,10 @@ const updateRequestStatus = async (req, res, next) => {
     if (!updatedGuest) {
       updatedGuest = oldGuest;
     }
+    const guestSession = await guestSessionService.getGuestSession(
+      propertyId,
+      guestId,
+    );
     const updatedMessageBody = modifyMessageTemplateBody(
       messageTemplate,
       updatedGuest,
@@ -336,10 +362,7 @@ const updateRequestStatus = async (req, res, next) => {
       propertySetting,
       `${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
     );
-    const guestSession = await guestSessionService.getGuestSession(
-      propertyId,
-      guestId,
-    );
+    
     if (oldGuest.phoneNumber && oldGuest.countryCode) {
       const twilioAccount =
         await twilioAccountService.getByPropertyId(propertyId);
@@ -351,6 +374,7 @@ const updateRequestStatus = async (req, res, next) => {
         `${oldGuest.countryCode}${oldGuest.phoneNumber}`,
         `${updatedMessageBody.message}`,
       );
+      console.log("Twilio Message :- ",twilioAccount);
 
       newMessage = await messageService.create(
         {
@@ -366,7 +390,7 @@ const updateRequestStatus = async (req, res, next) => {
         session,
       );
 
-      const chatList = await chatListService.update(
+      chatList = await chatListService.update(
         propertyId,
         guestId,
         {
@@ -376,8 +400,8 @@ const updateRequestStatus = async (req, res, next) => {
       );
     }
 
-    await session.commitTransaction();
-    await session.endSession();
+     await session.commitTransaction();
+     await session.endSession();
 
     req.app.io.to(`guest:${guestId}`).emit("message:newMessage", {
       message: newMessage

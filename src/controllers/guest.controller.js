@@ -149,6 +149,7 @@ const create = async (req, res, next) => {
         reservationStatus: RESERVATION_STATUS.CONFIRMED,
       },
     );
+    console.log("Exisint guest  inhouse confirmed", existingInHouseGuest);
     if (existingInHouseGuest.length > 0) {
       throw new ValidationError("Guest already exists with this phone number", {
         phoneNumber: ["Guest already exists with this phone number"],
@@ -165,6 +166,7 @@ const create = async (req, res, next) => {
         reservationStatus: RESERVATION_STATUS.CONFIRMED,
       },
     );
+    console.log("Exisint guest  reservation confirmed", existingInHouseGuest);
     if (existingReservedGuest.length > 0) {
       throw new ValidationError("Guest already exists with this phone number", {
         phoneNumber: ["Guest already exists with this phone number"],
@@ -791,7 +793,6 @@ const getGuestById = async (req, res, next) => {
  * @param {Object} res
  * @param {Function} next
  */
-
 const getGuestData = async (req, res, next) => {
   try {
     const guestId = req.params.guestId;
@@ -835,7 +836,6 @@ const getGuestData = async (req, res, next) => {
  * @param {Object} res
  * @param {Function} next
  */
-
 const guestedit = async (req, res, next) => {
   const session = await mongoose.startSession();
   session.startTransaction();

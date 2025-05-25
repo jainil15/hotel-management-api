@@ -26,7 +26,12 @@ const messageSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "DoNotDisturbRequest",
     },
+    houseKeepingRequestId: {
+      type: Schema.Types.ObjectId,
+      ref: "HouseKeepingRequest",
+    },
     messageTriggerType: { type: String, required: true },
+
     status: { type: String, default: "sent" },
     messageSid: { type: String },
   },

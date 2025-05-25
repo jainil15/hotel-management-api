@@ -21,6 +21,7 @@ const houseKeepingRequestSchema = new Schema(
     },
     options: { type: [String], default: [] },
     requestType: { type: String, default: "houseKeeping" },
+    reason: { type: String },
   },
   { timestamps: true },
 );

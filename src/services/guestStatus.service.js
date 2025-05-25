@@ -767,6 +767,47 @@ const findOneGuestWithStatus = async (propertyId, guestId) => {
   return guest;
 };
 
+/**
+ * Upsert guest status
+ * @param {string} propertyId - The property id
+ * @param {string} guestId - The guest id
+ * @param {object} status - The status object
+ * @param {object} session - The session object
+ * @returns {Promise<import('../models/guestStatus.model.js').GuestStatusType>} - The guest status
+ */
+const upsert = async (propertyId, guestId, status, session) => {
+  const guestStatus = await GuestStatus.findOneAndUpdate(
+    { propertyId: propertyId, guestId: guestId },
+    status,
+    {
+      upsert: true,
+      new: true,
+      session: session,
+    },
+  );
+  return guestStatus;
+};
+
+/**
+ * Update PMS guest status
+ * @param {string} guestId - The guest id
+ * @propertyId - The property id
+ * @status - The status object
+ * @session - The session object
+ * @returns {Promise<import('../models/guestStatus.model.js').GuestStatusType>} - The guest status
+ */
+const updatePmsGuestStatus = async (guestId, propertyId, status, session) => {
+  const guestStatus = await GuestStatus.findOneAndUpdate(
+    {
+      propertyId: propertyId,
+      guestId: guestId,
+    },
+    status,
+    { session: session, new: true },
+  );
+  return guestStatus;
+};
+
 module.exports = {
   create,
   remove,
@@ -777,4 +818,6 @@ module.exports = {
   getAllGuestWithStatusv2,
   getCheckInOutPendingGuests,
   getInvalidGuestsState,
+  upsert,
+  updatePmsGuestStatus,
 };

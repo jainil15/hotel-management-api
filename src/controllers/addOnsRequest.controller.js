@@ -7,10 +7,13 @@ const addOnsRequestService = require("../services/addOnsRequest.service");
 const messageService = require("../services/message.service");
 const chatListService = require("../services/chatList.service");
 const guestService = require("../services/guest.service");
+const propertyService = require("../services/property.service");
 const twilioAccountService = require("../services/twilioAccount.service");
 const twilioService = require("../services/twilio.service");
 const { REQUEST_STATUS } = require("../constants/guestStatus.contant");
 const checkInOutRequestService = require("../services/checkInOutRequest.service");
+const { sendMail } = require("../utils/mail.util");
+
 const {
   guestStatusToTemplate,
   guestStatusToTemplateOnUpdate,
@@ -26,6 +29,9 @@ const {
 const { z } = require("zod");
 const { responseHandler } = require("../middlewares/response.middleware");
 const { default: mongoose } = require("mongoose");
+const {
+  modifyAddOnsMessageTemplateBody,
+} = require("../utils/messageTemplateUpdate");
 
 /**
  * Update the status of the add ons request
@@ -41,10 +47,10 @@ const update = async (req, res, next) => {
 
   try {
     const { propertyId, guestId, addOnsRequestId } = req.params;
-    const { requestStatus } = req.body;
-    console.log("requestStatus", requestStatus);
 
-    // Validate the requestStatus
+    const { requestStatus, reason } = req.body;
+
+    // Validate requestStatus
     const requestStatusResult = z
       .object({
         requestStatus: z.enum([
@@ -61,6 +67,20 @@ const update = async (req, res, next) => {
       );
     }
 
+    // Declined case: reason must be present
+    if (requestStatus === REQUEST_STATUS.DECLINED && !reason) {
+      throw new ValidationError("Validation Error", {
+        reason: ["Reason is required when declining a request."],
+      });
+    }
+
+    // Build payload
+    const updatePayload =
+      requestStatus === REQUEST_STATUS.DECLINED
+        ? { requestStatus, reason }
+        : { requestStatus };
+
+    console.warn("Payload :- ",updatePayload);
     // Fetch the existing add-ons request
     const existingAddOnsRequest = await addOnsRequestService.getById(
       propertyId,
@@ -78,11 +98,13 @@ const update = async (req, res, next) => {
       propertyId,
       guestId,
       addOnsRequestId,
-      { requestStatus },
+      updatePayload,
       session,
     );
+    console.log("Response :-",updatedAddOnsRequest);
+    //await session.commitTransaction();
 
-    // Fetch guest details
+    //Fetch guest details
     const oldGuest = await guestService.getById(guestId, propertyId);
 
     // Check if SMS needs to be sent
@@ -91,12 +113,26 @@ const update = async (req, res, next) => {
         await twilioAccountService.getByPropertyId(propertyId);
       const twilioSubClient =
         await twilioService.getTwilioClient(twilioAccount);
+      const messageTemplate =
+        await messageTemplateService.getMessageTemplateByStatus(
+          propertyId,
+          `AddOns ${requestStatus === REQUEST_STATUS.ACCEPTED ? "Accepted" : "Rejected"}`,
+        );
+
+      const { property } = await propertyService.getById(propertyId);
+      const messageBody = modifyAddOnsMessageTemplateBody(
+        messageTemplate,
+        property,
+        oldGuest,
+        updatedAddOnsRequest,
+      );
 
       const sentSms = await smsService.send(
         twilioSubClient,
         `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
         `${oldGuest.countryCode}${oldGuest.phoneNumber}`,
-        `Your request for ${existingAddOnsRequest.name} addon is ${requestStatus.toLowerCase()}`,
+        // `Your request for ${existingAddOnsRequest.name} addon is ${requestStatus.toLowerCase()}`,
+        messageBody.message,
       );
       // Create the new message
       newMessage = await messageService.create(
@@ -105,13 +141,20 @@ const update = async (req, res, next) => {
           guestId,
           senderId: propertyId,
           receiverId: guestId,
-          content: `Your request for ${existingAddOnsRequest.name} addon is ${requestStatus.toLowerCase()}`,
+          content: messageBody.message,
           messageTriggerType: messageTriggerType.AUTOMATIC,
           messageType: messageType.SMS,
           messageSid: sentSms.sid,
         },
         session,
       );
+      if (oldGuest.email) {
+        sendMail(
+          oldGuest.email,
+          `Add Ons ${updatedAddOnsRequest.name} ${requestStatus}`,
+          messageBody.message,
+        );
+      }
 
       // Update the chat list
       chatList = await chatListService.update(
@@ -137,10 +180,10 @@ const update = async (req, res, next) => {
     req.app.io.to(`property:${propertyId}`).emit("chatList:update", {
       chatList,
     });
-
     return responseHandler(res, { addOnsRequest: updatedAddOnsRequest });
   } catch (e) {
     // Rollback transaction in case of error
+    console.log(e);
     await session.abortTransaction();
     if (e instanceof APIError) {
       return next(e);

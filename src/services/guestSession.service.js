@@ -54,5 +54,17 @@ const getGuestSession = async (propertyId, guestId) => {
   const guestSession = await findOne({ propertyId, guestId });
   return guestSession;
 };
+const upsert = async (propertyId, guestId, session) => {
+  const existingGuestSession = await GuestSession.findOne({
+    propertyId,
+    guestId,
+  });
+  if (existingGuestSession) {
+    return existingGuestSession;
+  }
+  const guestSession = new GuestSession({ propertyId, guestId });
+  const savedGuestSession = await guestSession.save({ session });
+  return savedGuestSession;
+};
 
-module.exports = { create, getById, update, findOne, getGuestSession };
+module.exports = { create, getById, update, findOne, getGuestSession, upsert };

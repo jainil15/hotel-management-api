@@ -57,18 +57,16 @@ const getByGuestId = async (guestId) => {
 /**
  * Get guest by id
  * @param {string} guestId - guest id
- * @param {string} propertyId - property id
- * @returns {Promise<import('../models/guest.model').GuestType>} guest - guest object
- */
-const getById = async (guestId, propertyId) => {
-  const guest = await Guest.findOne({ _id: guestId, propertyId: propertyId });
-  if (!guest) {
-    throw new NotFoundError("Guest not found", {
-      guestId: ["Guest not found for the given id"],
-    });
-  }
-  return guest;
-};
+ * @param {string} propertyId - property id @returns {Promise<import('../models/guest.model').GuestType>} guest - guest object */ const getById =
+  async (guestId, propertyId) => {
+    const guest = await Guest.findOne({ _id: guestId, propertyId: propertyId });
+    if (!guest) {
+      throw new NotFoundError("Guest not found", {
+        guestId: ["Guest not found for the given id"],
+      });
+    }
+    return guest;
+  };
 /**
  * Update guest
  * @param {object} guest - guest object
@@ -615,6 +613,85 @@ const getGuestByPhoneNumber = async (propertyId, countryCode, phoneNumber) => {
   const guest = await Guest.aggregate(pipeline);
   return guest[0];
 };
+/**
+ * Get guest by property id and guest id
+ * @param {string} propertyId - property id
+ * @param {string} pmsId - pms id
+ * @returns {Promise<import('../models/guest.model').GuestType>} guest - guest object
+ */
+const getByGuestPmsId = async (propertyId, pmsId) => {
+  const guest = await Guest.findOne({ propertyId: propertyId, pmsId: pmsId });
+  return guest;
+};
+
+/**
+ * Upsert guest
+ * @param  {string } pmsId - guest Pms Id
+ * @param {object} guest - guest object
+ * @param {string} propertyId - property id
+ * @param {object} session - mongoose session
+ * @returns {Promise<import('../models/guest.model').GuestType>} guest - guest object
+ */
+const upsert = async (pmsId, guest, propertyId, session) => {
+  console.log("pmsId", pmsId);
+  const updatedGuest = await Guest.findOneAndUpdate(
+    { pmsId: pmsId, propertyId: propertyId },
+    {
+      ...guest,
+      propertyId: propertyId,
+    },
+    { session: session, new: true, upsert: true },
+  );
+  return updatedGuest;
+};
+/**
+ * Update guest by pms id
+ * @param {object} guest - guest object
+ * @param {string} pmsId - pms id
+ * @param {string} propertyId - property id
+ * @param {object} session - mongoose session
+ * @returns {Promise<import('../models/guest.model').GuestType>} guest - guest object
+ */
+const updateByPmsId = async (guest, pmsId, propertyId, session) => {
+  const updatedGuest = await Guest.findOneAndUpdate(
+    { pmsId: pmsId, propertyId: propertyId },
+    {
+      ...guest,
+      propertyId: propertyId,
+    },
+    { session: session, new: true },
+  );
+  return updatedGuest;
+};
+
+const upsertWithRetry = async (
+  propertyId,
+  guestId,
+  guest,
+  session,
+  maxRetries = 3,
+) => {
+  let attempt = 0;
+  let result;
+  while (attempt < maxRetries) {
+    try {
+      const existingGuest = await Guest.findOne({
+        propertyId,
+        _id: guestId,
+      }).session(session);
+      if (existingGuest) {
+        result = existingGuest;
+      } else {
+        result = await create(guest, propertyId, session);
+      }
+      break; // Exit loop if successful
+    } catch (error) {
+      attempt++;
+      logger.error(`Attempt ${attempt} failed: ${error.message}`);
+    }
+  }
+  return result;
+};
 
 module.exports = {
   create,
@@ -634,4 +711,8 @@ module.exports = {
   getByPropertyIdAndGuestId,
   getGuestByPhoneNumber,
   getGuestAddonsRequestsv2,
+  getByGuestPmsId,
+  upsert,
+  updateByPmsId,
+  upsertWithRetry,
 };
