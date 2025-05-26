@@ -23,7 +23,7 @@ const {
 } = require("../models/houseKeepingRequest.model.js");
 const { responseHandler } = require("../middlewares/response.middleware");
 const guestService = require("../services/guest.service");
-const { GUEST_CURRENT_STATUS } = require("../constants/guestStatus.contant");
+const { GUEST_CURRENT_STATUS, REQUEST_STATUS } = require("../constants/guestStatus.contant");
 const {
   messageType,
   messageTriggerType,
@@ -35,7 +35,8 @@ const create = async (req, res, next) => {
   try {
     const { propertyId, guestId } = req.guestSession;
     const request = req.body;
-    const validationResult = CreateHouseKeepingRequestValidationSchema.safeParse(request);
+    const validationResult =
+      CreateHouseKeepingRequestValidationSchema.safeParse(request);
     if (!validationResult.success) {
       throw new ValidationError("Validation Error", {
         ...validationResult?.error?.flatten().fieldErrors,
@@ -56,7 +57,10 @@ const create = async (req, res, next) => {
     if (type === "houseKeeping") {
       validOptions = workflow.addOnsFlow.houseKeepingAddOns.options;
     } else if (type === "upgradeRoom") {
-      validOptions = (workflow.addOnsFlow.upgradeRoom && workflow.addOnsFlow.upgradeRoom.options) || [];
+      validOptions =
+        (workflow.addOnsFlow.upgradeRoom &&
+          workflow.addOnsFlow.upgradeRoom.options) ||
+        [];
     } else {
       throw new ValidationError("Invalid add-on type", {});
     }
@@ -151,7 +155,7 @@ const updateStatus = async (req, res, next) => {
   session.startTransaction();
   try {
     const { requestId } = req.params;
-    const { requestStatus } = req.body;
+    const { requestStatus, reason } = req.body;
     const houseKeepingRequestResult =
       UpdateHouseKeepingRequestValidationSchema.safeParse({ requestStatus });
     if (!houseKeepingRequestResult.success) {
@@ -160,9 +164,14 @@ const updateStatus = async (req, res, next) => {
       });
     }
 
+    const updatePayload =
+      requestStatus === REQUEST_STATUS.DECLINED
+        ? { requestStatus, reason }
+        : { requestStatus };
+
     const updatedHouseKeepingRequest = await houseKeepingService.update(
       requestId,
-      { requestStatus },
+      { updatePayload },
     );
     const guest = await guestService.getById(
       updatedHouseKeepingRequest.guestId,
