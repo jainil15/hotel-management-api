@@ -29,6 +29,8 @@ const houseKeepingRequestSchema = new Schema(
 const CreateHouseKeepingRequestValidationSchema = z.object({
   name: z.string(),
   description: z.string(),
+  type: z.string().optional(),
+  requestType: z.string().optional(),
   options: z.array(z.string()),
 });
 const UpdateHouseKeepingRequestValidationSchema = z.object({

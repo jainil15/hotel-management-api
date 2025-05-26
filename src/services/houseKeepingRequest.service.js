@@ -18,6 +18,7 @@ const create = async (propertyId, guestId, request, session) => {
     description: request.description,
     requestStatus: REQUEST_STATUS.REQUESTED,
     options: request.options,
+    requestType: request.requestType,
   });
   const savedHouseKeepingRequest = await newHouseKeepingRequest.save({
     session,
