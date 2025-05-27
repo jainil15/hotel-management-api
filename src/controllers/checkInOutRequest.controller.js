@@ -361,6 +361,7 @@ const updateRequestStatus = async (req, res, next) => {
       property,
       propertySetting,
       `${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
+      requestStatus === REQUEST_STATUS.DECLINED ? reason : ""
     );
     
     if (oldGuest.phoneNumber && oldGuest.countryCode) {
