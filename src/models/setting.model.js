@@ -15,6 +15,9 @@ const settingSchema = new Schema(
     manualNewDay: { type: Date },
     pmsId: { type: String, default: null },
     pmsType: { type: String, default: null },
+    pmsEnabled: { type: Boolean, default: false },
+    asiApplicationId: { type: String, default: null },
+    asiSecurityKey: { type: String, default: null },
   },
   { timestamps: true },
 );
@@ -34,6 +37,9 @@ const SettingValidationSchema = z.object({
   manualNewDay: z.date().optional(),
   pmsId: z.string().optional(),
   pmsType: z.string().optional(),
+  pmsEnabled: z.boolean().optional(),
+  asiApplicationId: z.string().optional(),
+  asiSecurityKey: z.string().optional(),
 });
 const UpdateSettingValidationSchema = z.object({
   timezone: z.string().optional(),
@@ -59,6 +65,9 @@ const UpdateSettingValidationSchema = z.object({
   manualNewDay: z.date().optional(),
   pmsId: z.string().optional(),
   pmsType: z.string().optional(),
+  pmsEnabled: z.boolean().optional(),
+  asiApplicationId: z.string().optional(),
+  asiSecurityKey: z.string().optional(),
 });
 /**
  * @typedef {import("mongoose").Model<Setting>} Setting
