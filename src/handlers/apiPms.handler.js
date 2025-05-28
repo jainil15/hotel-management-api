@@ -129,10 +129,22 @@ const bookingCreate = async (folio, pmsId, propertyId, req) => {
     };
 
     // Create guest
-    const newGuest = await guestService.create(guestData, propertyId, session);
+    // const newGuest = await guestService.create(guestData, propertyId, session);
+    const newGuest = await guestService.upsert(
+      guestPmsId,
+      guestData,
+      propertyId,
+      session,
+    );
 
     // Create guest status
-    const newGuestStatus = await guestStatusService.create(
+    // const newGuestStatus = await guestStatusService.create(
+    //   propertyId,
+    //   newGuest._id,
+    //   guestStatusData,
+    //   session,
+    // );
+    const newGuestStatus = await guestStatusService.upsert(
       propertyId,
       newGuest._id,
       guestStatusData,
