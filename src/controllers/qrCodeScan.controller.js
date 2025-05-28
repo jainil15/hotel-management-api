@@ -44,4 +44,15 @@ const create = async (req, res, next) => {
   }
 };
 
-module.exports = { create };
+const getByPropertyId = async (req, res, next) => {
+  const { propertyId } = req.params;
+  const qrCodeScan = await qrCodeScanService.getByPropertyId(propertyId);
+  if (!qrCodeScan) {
+    throw new NotFoundError("QrCodeScan not found", {
+      propertyId: ["QrCodeScan not found for the given property id"],
+    });
+  }
+  return responseHandler(res, qrCodeScan, 200, "QrCodeScan fetched successfully");
+};
+
+module.exports = { create, getByPropertyId };
