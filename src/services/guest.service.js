@@ -652,12 +652,12 @@ const upsert = async (pmsId, guest, propertyId, session) => {
  * @returns {Promise<import('../models/guest.model').GuestType>} guest - guest object
  */
 const updateByPmsId = async (guest, pmsId, propertyId, session) => {
+  const { propertyId: _, pmsId: __, ...guestData } = guest; // Exclude propertyId from guest data
   const updatedGuest = await Guest.findOneAndUpdate(
     { pmsId: pmsId, propertyId: propertyId },
     { $set: { ...guest } },
     { session: session, new: true, runValidators: true },
   );
-  console.log(updatedGuest);
   return updatedGuest;
 };
 

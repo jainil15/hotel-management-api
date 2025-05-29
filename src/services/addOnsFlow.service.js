@@ -33,7 +33,7 @@ const updateToDefault = async (propertyId, addOnsFlow, session) => {
 const update = async (propertyId, addOnsFlow, session, files) => {
   const client = new S3Client(awsS3Config);
   const updatedAddOns = { ...addOnsFlow };
-  console.log("Updated", addOnsFlow);
+  // console.log("Updated", addOnsFlow);
 
   updatedAddOns.customAddOns = await Promise.all(
     addOnsFlow.customAddOns.map(async (addOn, index) => {

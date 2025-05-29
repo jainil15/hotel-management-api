@@ -1232,28 +1232,27 @@ const checkInUpdate = async (folio, pmsId, propertyId, req) => {
         );
       }
 
+      // Emit to guest list updated
       req.app.io.to(`property:${propertyId}`).emit("chatList:update", {});
 
       // Emit to guest messages updated
       req.app.io.to(`guest:${updatedGuest._id}`).emit("message:newMessage", {
         message: {},
       });
-      req.app.io.to(`property:${propertyId}`).emit("guest:guestUpdate", {
-        guest: {
-          ...updatedGuest._doc,
-          status: { ...updatedGuestStatus._doc },
-        },
-      });
-
-      await session.commitTransaction();
-      session.endSession();
-
-      // Emit to guest list updated
-      return {
+    }
+    req.app.io.to(`property:${propertyId}`).emit("guest:guestUpdate", {
+      guest: {
         ...updatedGuest._doc,
         status: { ...updatedGuestStatus._doc },
-      };
-    }
+      },
+    });
+
+    await session.commitTransaction();
+    session.endSession();
+    return {
+      ...updatedGuest._doc,
+      status: { ...updatedGuestStatus._doc },
+    };
   } catch (e) {
     console.log(e);
     await session.abortTransaction();
