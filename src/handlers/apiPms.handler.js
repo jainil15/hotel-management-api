@@ -1504,6 +1504,11 @@ const sendSmsOnNewPhoneNumber = async (
       const { property } = await propertyService.getById(
         updatedGuest.propertyId,
       );
+      const guestSession = await guestSessionService.getGuestSession(
+        updatedGuest.propertyId,
+        updatedGuest._id,
+      );
+      console.log(property);
       const updatedMessageBody = modifyMessageTemplateBody(
         messageTemplate,
         updatedGuest,
