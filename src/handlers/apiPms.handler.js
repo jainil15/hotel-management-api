@@ -1009,7 +1009,7 @@ const checkInCreate = async (folio, pmsId, propertyId, req) => {
       session.endSession();
       return { ...upsertedGuest._doc, status: { ...upsertedGuestStatus._doc } };
     }
-    const guestSession = guestSessionService.getGuestSession(
+    const guestSession = await guestSessionService.getGuestSession(
       propertyId,
       upsertedGuest._id,
     );
