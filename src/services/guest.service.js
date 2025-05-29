@@ -654,12 +654,10 @@ const upsert = async (pmsId, guest, propertyId, session) => {
 const updateByPmsId = async (guest, pmsId, propertyId, session) => {
   const updatedGuest = await Guest.findOneAndUpdate(
     { pmsId: pmsId, propertyId: propertyId },
-    {
-      ...guest,
-      propertyId: propertyId,
-    },
-    { session: session, new: true },
+    { $set: { ...guest } },
+    { session: session, new: true, runValidators: true },
   );
+  console.log(updatedGuest);
   return updatedGuest;
 };
 

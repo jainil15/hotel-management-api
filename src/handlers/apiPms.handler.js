@@ -1152,7 +1152,9 @@ const checkInUpdate = async (folio, pmsId, propertyId, req) => {
       propertyId,
       guestPmsId,
     );
+    console.log("here");
     const { property } = await propertyService.getById(propertyId);
+    console.log("here1");
     // Upsert guest
     const updatedGuest = await guestService.updateByPmsId(
       guestData,
@@ -1160,6 +1162,7 @@ const checkInUpdate = async (folio, pmsId, propertyId, req) => {
       propertyId,
       session,
     );
+    console.log("here2");
     if (!updatedGuest) {
       throw new NotFoundError("Guest not found", {
         guestId: ["Guest not found for the given id"],
