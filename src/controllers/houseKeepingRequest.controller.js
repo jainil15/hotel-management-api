@@ -7,10 +7,6 @@ const messageService = require("../services/message.service");
 const chatListService = require("../services/chatList.service");
 const asiPmsService = require("../services/asiPms.service");
 const { ROOM_STATUS_CODE } = require("../constants/asi.constant");
-const messageService = require("../services/message.service");
-const chatListService = require("../services/chatList.service");
-const asiPmsService = require("../services/asiPms.service");
-const { ROOM_STATUS_CODE } = require("../constants/asi.constant");
 const {
   houseKeepingRequestMailTemplate,
   sendMail,
