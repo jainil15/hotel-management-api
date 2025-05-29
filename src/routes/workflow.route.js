@@ -47,4 +47,9 @@ router.post(
   workflowController.createDefaultHouseKeepingFlow,
 );
 
+router.post(
+  "/default/:propertyId/upgradeRoom",
+  workflowController.createDefaultUpgradeRoomFlow,
+);
+
 module.exports = router;

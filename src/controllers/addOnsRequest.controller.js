@@ -47,10 +47,10 @@ const update = async (req, res, next) => {
 
   try {
     const { propertyId, guestId, addOnsRequestId } = req.params;
-    const { requestStatus } = req.body;
-    console.log("requestStatus", requestStatus);
 
-    // Validate the requestStatus
+    const { requestStatus, reason } = req.body;
+
+    // Validate requestStatus
     const requestStatusResult = z
       .object({
         requestStatus: z.enum([
@@ -67,6 +67,20 @@ const update = async (req, res, next) => {
       );
     }
 
+    // Declined case: reason must be present
+    if (requestStatus === REQUEST_STATUS.DECLINED && !reason) {
+      throw new ValidationError("Validation Error", {
+        reason: ["Reason is required when declining a request."],
+      });
+    }
+
+    // Build payload
+    const updatePayload =
+      requestStatus === REQUEST_STATUS.DECLINED
+        ? { requestStatus, reason }
+        : { requestStatus };
+
+    console.warn("Payload :- ",updatePayload);
     // Fetch the existing add-ons request
     const existingAddOnsRequest = await addOnsRequestService.getById(
       propertyId,
@@ -84,11 +98,13 @@ const update = async (req, res, next) => {
       propertyId,
       guestId,
       addOnsRequestId,
-      { requestStatus },
+      updatePayload,
       session,
     );
+    console.log("Response :-",updatedAddOnsRequest);
+    //await session.commitTransaction();
 
-    // Fetch guest details
+    //Fetch guest details
     const oldGuest = await guestService.getById(guestId, propertyId);
 
     // Check if SMS needs to be sent
@@ -164,7 +180,6 @@ const update = async (req, res, next) => {
     req.app.io.to(`property:${propertyId}`).emit("chatList:update", {
       chatList,
     });
-
     return responseHandler(res, { addOnsRequest: updatedAddOnsRequest });
   } catch (e) {
     // Rollback transaction in case of error

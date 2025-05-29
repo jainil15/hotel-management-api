@@ -9,4 +9,9 @@ const create = async (propertyId, roomNumber, session) => {
   return savedQrCodeScan;
 };
 
-module.exports = { create };
+const getByPropertyId = async (propertyId) => {
+  const qrCodeScan = await QrCodeScan.find({ propertyId });
+  return qrCodeScan;
+};
+
+module.exports = { create, getByPropertyId };

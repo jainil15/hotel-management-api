@@ -55,6 +55,7 @@ function modifyMessageTemplateBody(
   propertyInfo,
   propertySetting,
   guestLink,
+  reason
 ) {
   const { name: hotelName } = propertyInfo;
 
@@ -79,7 +80,9 @@ function modifyMessageTemplateBody(
     messageTemplate.message = messageTemplate.message
       .replace("[Time]", formattedTime + ` ${propertySetting.timezone}`)
       .replace("[Hotel Name]", hotelName)
-      .replace("[Guest Link]", guestLink);
+      .replace("[Guest Link]", guestLink)
+      .replace("[Reason]", reason);
+
   } else if (messageTemplate.name === "Extend Stay Accepted") {
     const formattedTime = new Date(guestInfo.checkOut).toLocaleString("en", {
       year: "numeric",
@@ -181,5 +184,6 @@ const modifyAddOnsMessageTemplateBody = (
 
 module.exports = {
   modifyMessageTemplateBody,
+  modifyAddOnsMessageTemplateBody,
   modifyAddOnsMessageTemplateBody,
 };
