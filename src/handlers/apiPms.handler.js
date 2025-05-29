@@ -1501,12 +1501,15 @@ const sendSmsOnNewPhoneNumber = async (
       const propertySetting = await settingService.getByPropertyId(
         updatedGuest.propertyId,
       );
+      const { property } = await propertyService.getById(
+        updatedGuest.propertyId,
+      );
       const updatedMessageBody = modifyMessageTemplateBody(
         messageTemplate,
         updatedGuest,
-        { _id: updatedGuest.propertyId },
+        property,
         propertySetting,
-        `${process.env.MOBILE_FRONTEND_URL}/${updatedGuest._id}`,
+        `${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
       );
       await smsService.send(
         twilioSubClient,
