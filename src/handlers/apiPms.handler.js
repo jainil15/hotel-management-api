@@ -623,7 +623,6 @@ const reservationUpdate = async (folio, pmsId, propertyId, req) => {
       propertyId,
       updatedGuest._id,
     );
-
     if (updatedGuest.phoneNumber && updatedGuest.countryCode) {
       const messageTemplate =
         await messageTemplateService.getByNameAndPropertyId(
@@ -631,6 +630,7 @@ const reservationUpdate = async (folio, pmsId, propertyId, req) => {
           guestStatusToTemplateOnUpdate(oldStatus, status),
         );
 
+      await sendSmsOnNewPhoneNumber(existingGuest, updatedGuest, status);
       if (messageTemplate) {
         const twilioAccount =
           await twilioAccountService.getByPropertyId(propertyId);
@@ -1148,6 +1148,10 @@ const checkInUpdate = async (folio, pmsId, propertyId, req) => {
       reservationStatus: RESERVATION_STATUS.CONFIRMED,
     };
 
+    const existingGuest = await guestService.getByGuestPmsId(
+      propertyId,
+      guestPmsId,
+    );
     const { property } = await propertyService.getById(propertyId);
     // Upsert guest
     const updatedGuest = await guestService.updateByPmsId(
@@ -1174,6 +1178,11 @@ const checkInUpdate = async (folio, pmsId, propertyId, req) => {
       session,
     );
     if (updatedGuest.phoneNumber && updatedGuest.countryCode) {
+      await sendSmsOnNewPhoneNumber(
+        existingGuest,
+        updatedGuest,
+        updatedGuestStatus,
+      );
       const messageTemplate =
         await messageTemplateService.getByNameAndPropertyId(
           propertyId,
@@ -1460,6 +1469,50 @@ const roomStatusUpdate = async (roomStatusData, propertyId, req) => {
     await session.abortTransaction();
     session.endSession();
     throw e;
+  }
+};
+
+/**
+ * @description Send SMS on new phone number
+ * @param {object} existingGuest - Existing guest object
+ * @param {object} updatedGuest - Updated guest object
+ * @param {object} updatedGuestStatus - Updated guest status object
+ * @returns {Promise<void>}
+ * @throws {Error} - Error
+ */
+const sendSmsOnNewPhoneNumber = async (
+  existingGuest,
+  updatedGuest,
+  updatedGuestStatus,
+) => {
+  if (existingGuest.phoneNumber === "" && updatedGuest.phoneNumber !== "") {
+    const messageTemplate = await messageTemplateService.getByNameAndPropertyId(
+      updatedGuest.propertyId,
+      guestStatusToTemplateOnCreate(updatedGuestStatus),
+    );
+    if (messageTemplate) {
+      const twilioAccount = await twilioAccountService.getByPropertyId(
+        updatedGuest.propertyId,
+      );
+      const twilioSubClient =
+        await twilioService.getTwilioClient(twilioAccount);
+      const propertySetting = await settingService.getByPropertyId(
+        updatedGuest.propertyId,
+      );
+      const updatedMessageBody = modifyMessageTemplateBody(
+        messageTemplate,
+        updatedGuest,
+        { _id: updatedGuest.propertyId },
+        propertySetting,
+        `${process.env.MOBILE_FRONTEND_URL}/${updatedGuest._id}`,
+      );
+      await smsService.send(
+        twilioSubClient,
+        `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
+        `${updatedGuest.countryCode}${updatedGuest.phoneNumber}`,
+        `${updatedMessageBody.message}`,
+      );
+    }
   }
 };
 module.exports = {
