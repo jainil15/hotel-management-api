@@ -24,7 +24,10 @@ const chatListService = require("../services/chatList.service");
 const propertyService = require("../services/property.service");
 const houseKeepingRequestService = require("../services/houseKeepingRequest.service");
 const checkInOutRequestService = require("../services/checkInOutRequest.service");
-const { modifyMessageTemplateBody } = require("../utils/messageTemplateUpdate");
+const {
+  modifyMessageTemplateBody,
+  modifyMessageTemplateBodyForPhoneNumberChange,
+} = require("../utils/messageTemplateUpdate");
 //new
 
 const preArrivalService = require("../services/preArrival.service"); // Pre-arrival service
@@ -1563,11 +1566,10 @@ const sendSmsOnPhoneNumberChange = async (existingGuest, updatedGuest) => {
         updatedGuest.propertyId,
         updatedGuest._id,
       );
-      const updatedMessageBody = modifyMessageTemplateBody(
+      const updatedMessageBody = modifyMessageTemplateBodyForPhoneNumberChange(
         messageTemplate,
         updatedGuest,
         property,
-        propertySetting,
         `${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
       );
       await smsService.send(

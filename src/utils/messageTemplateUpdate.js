@@ -192,7 +192,31 @@ const modifyAddOnsMessageTemplateBody = (
   return messageTemplate;
 };
 
+/**
+ * Modify the message template body for phone number change
+ * @param {object} messageTemplate - The message template object
+ * @param {object} guestInfo - The guest information object
+ * @param {object} propertyInfo - The property information object
+ * @param {string} guestLink - The link for the guest
+ * @returns {object} - The modified message template
+ */
+function modifyMessageTemplateBodyForPhoneNumberChange(
+  messageTemplate,
+  guestInfo,
+  propertyInfo,
+  guestLink,
+) {
+  const { name: hotelName } = propertyInfo;
+
+  messageTemplate.message = messageTemplate.message
+    .replace("[Hotel Name]", hotelName)
+    .replace("[Guest Link]", guestLink)
+    .replace("[New Phone Number]", guestInfo.phoneNumber);
+
+  return messageTemplate;
+}
 module.exports = {
   modifyMessageTemplateBody,
   modifyAddOnsMessageTemplateBody,
+  modifyMessageTemplateBodyForPhoneNumberChange,
 };
