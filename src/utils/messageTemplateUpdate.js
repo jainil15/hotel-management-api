@@ -183,12 +183,14 @@ const modifyAddOnsMessageTemplateBody = (
   property,
   guest,
   addOn,
+  reason,
 ) => {
   console.log(property.name, addOn);
   messageTemplate.message = messageTemplate.message
     .replace("[Hotel Name]", property.name)
     .replace("[Guest Name]", `${guest.firstName} ${guest.lastName}`)
-    .replace("[Service Name]", addOn.name);
+    .replace("[Service Name]", addOn.name)
+    .replace("[Reason]", reason);
   return messageTemplate;
 };
 

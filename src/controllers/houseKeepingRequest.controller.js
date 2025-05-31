@@ -149,13 +149,13 @@ const create = async (req, res, next) => {
           propertyId,
           `AddOns ${ADD_ONS_STATUS.REQUESTED}`,
         );
-
       const { property } = await propertyService.getById(propertyId);
       const messageBody = modifyAddOnsMessageTemplateBody(
         messageTemplate,
         property,
         guest,
         { name: "House Keeping" },
+        "",
       );
 
       const sentSms = await smsService.send(
@@ -225,7 +225,7 @@ const updateStatus = async (req, res, next) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    const { requestId } = req.params;
+    const { requestId, propertyId, guestId } = req.params;
     const { requestStatus, reason } = req.body;
     const houseKeepingRequestResult =
       UpdateHouseKeepingRequestValidationSchema.safeParse({ requestStatus });
@@ -253,6 +253,64 @@ const updateStatus = async (req, res, next) => {
     }
     if (new Date(guest.checkOut) < new Date()) {
       throw new ValidationError("Guest has already checked out", {});
+    }
+    if (guest.phoneNumber && guest.countryCode) {
+      const twilioAccount =
+        await twilioAccountService.getByPropertyId(propertyId);
+      const twilioSubClient =
+        await twilioService.getTwilioClient(twilioAccount);
+      console.log(requestStatus);
+      const messageTemplate =
+        await messageTemplateService.getMessageTemplateByStatus(
+          propertyId,
+          `AddOns ${
+            requestStatus === REQUEST_STATUS.ACCEPTED
+              ? REQUEST_STATUS.ACCEPTED
+              : "Rejected"
+          }`,
+        );
+      if (!messageTemplate) {
+        throw new NotFoundError("Message template not found", {});
+      }
+      if (messageTemplate) {
+        const { property } = await propertyService.getById(propertyId);
+        const messageBody = modifyAddOnsMessageTemplateBody(
+          messageTemplate,
+          property,
+          guest,
+          { name: "House Keeping" },
+          reason || "",
+        );
+
+        const sentSms = await smsService.send(
+          twilioSubClient,
+          `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
+          `${guest.countryCode}${guest.phoneNumber}`,
+          // `Your request for ${existingAddOnsRequest.name} addon is ${requestStatus.toLowerCase()}`,
+          messageBody.message,
+        );
+        // Create the new message
+        const newMessage = await messageService.create(
+          {
+            propertyId,
+            guestId,
+            senderId: propertyId,
+            receiverId: guestId,
+            content: messageBody.message,
+            messageTriggerType: messageTriggerType.AUTOMATIC,
+            messageType: messageType.SMS,
+            messageSid: sentSms.sid,
+          },
+          session,
+        );
+        if (guest.email) {
+          sendMail(
+            guest.email,
+            "Add Ons House keeping request",
+            messageBody.message,
+          );
+        }
+      }
     }
     req.app.io
       .to(`property:${updatedHouseKeepingRequest.propertyId}`)
