@@ -6,6 +6,7 @@ const workflowService = require("../services/workflow.service");
 const messageService = require("../services/message.service");
 const chatListService = require("../services/chatList.service");
 const asiPmsService = require("../services/asiPms.service");
+const houseKeepingUtil = require("../utils/houseKeeping.util");
 const { ROOM_STATUS_CODE } = require("../constants/asi.constant");
 const {
   houseKeepingRequestMailTemplate,
@@ -23,11 +24,17 @@ const {
 } = require("../models/houseKeepingRequest.model.js");
 const { responseHandler } = require("../middlewares/response.middleware");
 const guestService = require("../services/guest.service");
-const { GUEST_CURRENT_STATUS, REQUEST_STATUS } = require("../constants/guestStatus.contant");
+const {
+  GUEST_CURRENT_STATUS,
+  REQUEST_STATUS,
+} = require("../constants/guestStatus.contant");
 const {
   messageType,
   messageTriggerType,
 } = require("../constants/message.constant.js");
+const {
+  HOUSE_KEEPING_REQUEST_TYPE,
+} = require("../constants/housekeeping.contant.js");
 
 const create = async (req, res, next) => {
   const session = await mongoose.startSession();
@@ -57,12 +64,20 @@ const create = async (req, res, next) => {
     if (type === "houseKeeping") {
       validOptions = workflow.addOnsFlow.houseKeepingAddOns.options;
     } else if (type === "upgradeRoom") {
-      validOptions =
-        (workflow.addOnsFlow.upgradeRoom &&
-          workflow.addOnsFlow.upgradeRoom.options) ||
-        [];
+      validOptions = workflow.addOnsFlow.upgradeRoom?.options || [];
     } else {
       throw new ValidationError("Invalid add-on type", {});
+    }
+    if (
+      type === HOUSE_KEEPING_REQUEST_TYPE.HOUSE_KEEPING &&
+      !houseKeepingUtil.checkOptions(
+        validationResult.data.options,
+        validOptions,
+      )
+    ) {
+      throw new ValidationError("Invalid options provided", {
+        validOptions: validOptions,
+      });
     }
     const requestOptions = validationResult.data.options;
     const guest = await guestService.getById(guestId, propertyId);
@@ -84,7 +99,7 @@ const create = async (req, res, next) => {
     if (type === "houseKeeping") {
       // Extract room number from guest (or from options if needed)
       const roomNumber = guest.roomNumber;
-      if (property.property.pmsId) {
+      if (property.property.pmsId && guest.pmsId) {
         const asiPmsResponse = await asiPmsService.changeRoomStatus(
           property.property.pmsId,
           "813D2A24-6B5D-463C-BA76-CB9369C8375F",

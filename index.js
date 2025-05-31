@@ -10,6 +10,7 @@ Connect().then(() => {
 try {
   const app = createApp();
 } catch (error) {
+  console.log(error);
   process.exit(1);
 }
 // Listener

@@ -542,11 +542,12 @@ const reservationCreate = async (folio, pmsId, propertyId, req) => {
 };
 
 /**
- * @description Create a new reservation
+ *  Create a new reservation
  * @param {object} folio - Folio object
  * @param {string} pmsId - pmsId
  * @param {string} propertyId - propertyId
  * @param {import('express').Request} req - Request
+ * @returns {object} - guest
  * @throws {Error} - Error
  */
 const reservationUpdate = async (folio, pmsId, propertyId, req) => {
@@ -631,6 +632,7 @@ const reservationUpdate = async (folio, pmsId, propertyId, req) => {
         );
 
       await sendSmsOnNewPhoneNumber(existingGuest, updatedGuest, status);
+      await sendSmsOnPhoneNumberChange(existingGuest, updatedGuest);
       if (messageTemplate) {
         const twilioAccount =
           await twilioAccountService.getByPropertyId(propertyId);
@@ -1186,6 +1188,7 @@ const checkInUpdate = async (folio, pmsId, propertyId, req) => {
         updatedGuest,
         updatedGuestStatus,
       );
+      await sendSmsOnPhoneNumberChange(existingGuest, updatedGuest);
       const messageTemplate =
         await messageTemplateService.getByNameAndPropertyId(
           propertyId,
@@ -1444,6 +1447,7 @@ const roomStatusUpdate = async (roomStatusData, propertyId, req) => {
         requestId: ["Housekeeping request not found for the given guest"],
       });
     }
+    const roomStatus = roomStatusData.StatusCode;
     console.log("Housekeeping Requests", houseKeepingRequests);
     if (
       roomStatus === ROOM_STATUS_CODE.CLEAN ||
@@ -1509,6 +1513,56 @@ const sendSmsOnNewPhoneNumber = async (
         updatedGuest._id,
       );
       console.log(property);
+      const updatedMessageBody = modifyMessageTemplateBody(
+        messageTemplate,
+        updatedGuest,
+        property,
+        propertySetting,
+        `${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
+      );
+      await smsService.send(
+        twilioSubClient,
+        `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
+        `${updatedGuest.countryCode}${updatedGuest.phoneNumber}`,
+        `${updatedMessageBody.message}`,
+      );
+    }
+  }
+};
+
+/**
+ * Sends an SMS when the phone number of a guest is changed.
+ * @param {import('../models/guest.model.js').GuestType} existingGuest - The existing guest object.
+ * @param {import('../models/guest.model.js').GuestType} updatedGuest - The updated guest object.
+ * @returns {Promise<void>} - A promise that resolves when the SMS is sent.
+ */
+const sendSmsOnPhoneNumberChange = async (existingGuest, updatedGuest) => {
+  if (
+    existingGuest.phoneNumber !== "" &&
+    updatedGuest.phoneNumber !== "" &&
+    (existingGuest.phoneNumber !== updatedGuest.phoneNumber ||
+      existingGuest.countryCode !== updatedGuest.countryCode)
+  ) {
+    const messageTemplate = await messageTemplateService.getByNameAndPropertyId(
+      updatedGuest.propertyId,
+      "PhoneNumber Changed",
+    );
+    if (messageTemplate) {
+      const twilioAccount = await twilioAccountService.getByPropertyId(
+        updatedGuest.propertyId,
+      );
+      const twilioSubClient =
+        await twilioService.getTwilioClient(twilioAccount);
+      const propertySetting = await settingService.getByPropertyId(
+        updatedGuest.propertyId,
+      );
+      const { property } = await propertyService.getById(
+        updatedGuest.propertyId,
+      );
+      const guestSession = await guestSessionService.getGuestSession(
+        updatedGuest.propertyId,
+        updatedGuest._id,
+      );
       const updatedMessageBody = modifyMessageTemplateBody(
         messageTemplate,
         updatedGuest,

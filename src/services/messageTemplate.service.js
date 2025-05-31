@@ -208,6 +208,8 @@ const updateByName = async (propertyId, name, messageTemplate, session) => {
 /**
  * Create default message templates
  * @param {string} propertyId - The property id
+ * @param {object} session - The mongoose session
+ * @returns {Promise<import('../models/messageTemplates.model').MessageTemplateType[]>} - The saved message templates
  */
 const createAddOnMessageTemplateDefaults = async (propertyId, session) => {
   const messageTemplates = [];
@@ -225,6 +227,34 @@ const createAddOnMessageTemplateDefaults = async (propertyId, session) => {
   return messageTemplates;
 };
 
+/**
+ * Create default message templates that do not exist
+ * @param {string} propertyId - The property id
+ * @param {object} session - The mongoose session
+ * @returns {Promise<import('../models/messageTemplates.model').MessageTemplateType[]>} - The updated message template
+ */
+const createDefaultsThatDoNotExist = async (propertyId, session) => {
+  const messageTemplates = await MessageTemplate.find({ propertyId });
+  const updatedMessageTemplates = [];
+
+  for (const [status, messages] of Object.entries(DEFAULT_MESSAGE_TEMPLATES)) {
+    for (const [statusValue, message] of Object.entries(messages)) {
+      if (messageTemplates.some((m) => m.name === message.name)) {
+        continue; // Skip if the message template already exists
+      }
+      const newMessageTemplate = new MessageTemplate({
+        propertyId,
+        type: MESSAGE_TEMPLATE_TYPES.DEFAULT,
+        name: `${message.name}`,
+        message: message.message,
+      });
+      updatedMessageTemplates.push(await newMessageTemplate.save({ session }));
+    }
+  }
+
+  return updatedMessageTemplates;
+};
+
 module.exports = {
   getAll,
   create,
@@ -237,4 +267,5 @@ module.exports = {
   getMessageTemplateByStatus,
   updateByName,
   createAddOnMessageTemplateDefaults,
+  createDefaultsThatDoNotExist,
 };
