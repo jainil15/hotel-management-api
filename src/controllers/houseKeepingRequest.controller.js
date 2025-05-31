@@ -310,6 +310,15 @@ const updateStatus = async (req, res, next) => {
             messageBody.message,
           );
         }
+        const updatedChatList =
+          await chatListService.updateAndIncUnreadMessages(
+            propertyId,
+            guestId,
+            {
+              latestMessage: newMessage._id,
+            },
+            session,
+          );
       }
     }
     req.app.io

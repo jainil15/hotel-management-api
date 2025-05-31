@@ -77,7 +77,7 @@ const getByPropertyId = async (propertyId) => {
     // 7. Add a computed field to check if the guest is currently checked in.
     // {
     //   $addFields: {
-    //     currentlyCheckedIn: {
+    //     currentlyCheckedIn2: {
     //       $cond: {
     //         if: {
     //           $and: [
@@ -104,8 +104,8 @@ const getByPropertyId = async (propertyId) => {
                     GUEST_CURRENT_STATUS.IN_HOUSE,
                   ],
                 },
-                { $lte: ["$guest.checkIn", "$$NOW"] },
-                { $gte: ["$guest.checkOut", "$$NOW"] },
+                { $lt: ["$guest.checkIn", "$$NOW"] },
+                { $gt: ["$guest.checkOut", "$$NOW"] },
                 {
                   $eq: [
                     "$gueststatus.reservationStatus",
@@ -123,9 +123,11 @@ const getByPropertyId = async (propertyId) => {
 
     // 8. Sort by currentlyCheckedIn (desc) and then by guest.checkIn (desc).
     {
-      $sort: { currentlyCheckedIn: -1 },
+      $sort: {
+        currentlyCheckedIn: -1,
+        "guest.checkIn": -1,
+      },
     },
-
     // 9. Group by uniquePhone to pick the best chat for each phone number.
     {
       $group: {
