@@ -80,7 +80,7 @@ const update = async (req, res, next) => {
         ? { requestStatus, reason }
         : { requestStatus };
 
-    console.warn("Payload :- ",updatePayload);
+    console.warn("Payload :- ", updatePayload);
     // Fetch the existing add-ons request
     const existingAddOnsRequest = await addOnsRequestService.getById(
       propertyId,
@@ -101,7 +101,7 @@ const update = async (req, res, next) => {
       updatePayload,
       session,
     );
-    console.log("Response :-",updatedAddOnsRequest);
+    console.log("Response :-", updatedAddOnsRequest);
     //await session.commitTransaction();
 
     //Fetch guest details

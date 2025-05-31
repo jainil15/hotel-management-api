@@ -49,6 +49,16 @@ function formatDateWithLocalTimezone(utcDateString, timeZone) {
 }
 
 // Update the modifyMessageTemplateBody function
+/**
+ * Modify the message template body based on the message type
+ * @param {object} messageTemplate - The message template object
+ * @param {object} guestInfo - The guest information object
+ * @param {object} propertyInfo - The property information object
+ * @param {object} propertySetting - The property setting object
+ * @param {string} guestLink - The link for the guest
+ * @param {string} reason - The reason for the message
+ * @returns {object} - The modified message template
+ */
 function modifyMessageTemplateBody(
   messageTemplate,
   guestInfo,
@@ -82,7 +92,7 @@ function modifyMessageTemplateBody(
       .replace("[Hotel Name]", hotelName)
       .replace("[Guest Link]", guestLink)
       .replace("[Reason]", reason)
-      .replace("[Phone Number]", guestInfo.phoneNumber);
+      .replace("[New Phone Number]", guestInfo.phoneNumber);
   } else if (messageTemplate.name === "Extend Stay Accepted") {
     const formattedTime = new Date(guestInfo.checkOut).toLocaleString("en", {
       year: "numeric",

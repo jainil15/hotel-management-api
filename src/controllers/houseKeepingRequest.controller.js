@@ -6,6 +6,10 @@ const workflowService = require("../services/workflow.service");
 const messageService = require("../services/message.service");
 const chatListService = require("../services/chatList.service");
 const asiPmsService = require("../services/asiPms.service");
+const twilioAccountService = require("../services/twilioAccount.service");
+const twilioService = require("../services/twilio.service");
+const messageTemplateService = require("../services/messageTemplate.service");
+const smsService = require("../services/sms.service");
 const houseKeepingUtil = require("../utils/houseKeeping.util");
 const { ROOM_STATUS_CODE } = require("../constants/asi.constant");
 const {
@@ -35,6 +39,9 @@ const {
 const {
   HOUSE_KEEPING_REQUEST_TYPE,
 } = require("../constants/housekeeping.contant.js");
+const {
+  modifyAddOnsMessageTemplateBody,
+} = require("../utils/messageTemplateUpdate.js");
 
 const create = async (req, res, next) => {
   const session = await mongoose.startSession();
@@ -230,6 +237,62 @@ const get = async (req, res, next) => {
       return next(e);
     }
     return next(new InternalServerError(e.message));
+  }
+};
+const sendSms = async (
+  oldGuest,
+  houseKeepingRequest,
+  requestStatus,
+  propertyId,
+  guestId,
+  session,
+) => {
+  if (oldGuest.phoneNumber && oldGuest.countryCode) {
+    const twilioAccount =
+      await twilioAccountService.getByPropertyId(propertyId);
+    const twilioSubClient = await twilioService.getTwilioClient(twilioAccount);
+    const messageTemplate =
+      await messageTemplateService.getMessageTemplateByStatus(
+        propertyId,
+        `AddOns ${requestStatus === REQUEST_STATUS.ACCEPTED ? "Accepted" : "Rejected"}`,
+      );
+
+    const { property } = await propertyService.getById(propertyId);
+    const messageBody = modifyAddOnsMessageTemplateBody(
+      messageTemplate,
+      property,
+      oldGuest,
+      houseKeepingRequest,
+    );
+
+    const sentSms = await smsService.send(
+      twilioSubClient,
+      `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
+      `${oldGuest.countryCode}${oldGuest.phoneNumber}`,
+      // `Your request for ${existingAddOnsRequest.name} addon is ${requestStatus.toLowerCase()}`,
+      messageBody.message,
+    );
+    // Create the new message
+    const newMessage = await messageService.create(
+      {
+        propertyId,
+        guestId,
+        senderId: propertyId,
+        receiverId: guestId,
+        content: messageBody.message,
+        messageTriggerType: messageTriggerType.AUTOMATIC,
+        messageType: messageType.SMS,
+        messageSid: sentSms.sid,
+      },
+      session,
+    );
+    if (oldGuest.email) {
+      sendMail(
+        oldGuest.email,
+        `Add Ons ${updatedAddOnsRequest.name} ${requestStatus}`,
+        messageBody.message,
+      );
+    }
   }
 };
 
