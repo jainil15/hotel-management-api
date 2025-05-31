@@ -201,6 +201,11 @@ const findWithStatus = async (guestFilter, statusFilter) => {
     },
     {
       $match: {
+        draft: false,
+      },
+    },
+    {
+      $match: {
         "status.currentStatus": statusFilter.currentStatus,
         "status.reservationStatus": statusFilter.reservationStatus,
       },

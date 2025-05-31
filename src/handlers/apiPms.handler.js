@@ -111,7 +111,7 @@ const bookingCreate = async (folio, pmsId, propertyId, req) => {
       checkOut: `${StayInformation.CheckOutDate}Z`,
       roomNumber: StayInformation.Room,
       confirmationNumber: FolioInformation.Number,
-      draft: false,
+      draft: true,
       pmsId: GuestInformation.GuestID,
     };
     if (number) {
@@ -171,10 +171,11 @@ const bookingCreate = async (folio, pmsId, propertyId, req) => {
 };
 
 /**
- * @description Create a new booking
+ * Create a new booking
  * @param {object} folio - Folio object
  * @param {string} pmsId - pmsId
  * @param {string} propertyId - propertyId
+ * @param {string} req - req
  * @returns {object} - guest
  * @throws {Error} - Error
  */
@@ -214,7 +215,7 @@ const bookingUpdate = async (folio, pmsId, propertyId, req) => {
       checkOut: `${StayInformation.CheckOutDate}Z`,
       roomNumber: StayInformation.Room,
       confirmationNumber: FolioInformation.Number,
-      draft: false,
+      draft: true,
       pmsId: GuestInformation.GuestID,
     };
     if (number) {
