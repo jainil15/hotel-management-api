@@ -201,7 +201,7 @@ const findWithStatus = async (guestFilter, statusFilter) => {
     },
     {
       $match: {
-        draft: false,
+        draft: true,
       },
     },
     {

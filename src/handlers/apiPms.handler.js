@@ -311,7 +311,7 @@ const bookingNoShowCancel = async (folio, pmsId, propertyId, req) => {
       checkOut: `${StayInformation.CheckOutDate}Z`,
       roomNumber: StayInformation.Room,
       confirmationNumber: FolioInformation.Number,
-      draft: false,
+      draft: true,
       pmsId: GuestInformation.GuestID,
     };
     if (number) {
