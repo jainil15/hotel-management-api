@@ -1486,6 +1486,8 @@ const roomStatusUpdate = async (roomStatusData, propertyId, req) => {
     req.app.io.to(`property:${guest.propertyId}`).emit("addOn:newAddon", {
       count: 1,
     });
+    await session.commitTransaction();
+    session.endSession();
     return roomStatus;
   } catch (e) {
     console.log(e);
