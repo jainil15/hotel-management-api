@@ -1435,7 +1435,7 @@ const roomStatusUpdate = async (roomStatusData, propertyId, req) => {
     const guest = await guestService.findGuestByGuestStatus(
       propertyId,
       {
-        roomNumber: roomStatusData.roomNumber,
+        roomNumber: roomStatusData.RoomName,
       },
       GUEST_CURRENT_STATUS.IN_HOUSE,
     );

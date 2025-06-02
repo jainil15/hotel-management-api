@@ -710,6 +710,11 @@ const findGuestByGuestStatus = async (propertyId, filter, status) => {
       },
     },
     {
+      $match: {
+        roomNumber: filter.roomNumber,
+      },
+    },
+    {
       $lookup: {
         from: "gueststatuses",
         localField: "_id",
@@ -724,9 +729,6 @@ const findGuestByGuestStatus = async (propertyId, filter, status) => {
       $match: {
         "status.currentStatus": status,
       },
-    },
-    {
-      $match: filter,
     },
   ];
   const guest = await Guest.aggregate(pipeline);
