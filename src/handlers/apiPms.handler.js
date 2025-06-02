@@ -1432,8 +1432,6 @@ const roomStatusUpdate = async (roomStatusData, propertyId, req) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    await session.commitTransaction();
-    session.endSession();
     const guest = await guestService.findGuestByGuestStatus(
       propertyId,
       {
@@ -1451,18 +1449,18 @@ const roomStatusUpdate = async (roomStatusData, propertyId, req) => {
       guestId: guest._id,
       requestStatus: REQUEST_STATUS.REQUESTED,
     });
-    if (houseKeepingRequests.length <= 0) {
-      throw new NotFoundError("Housekeeping request not found", {
-        requestId: ["Housekeeping request not found for the given guest"],
-      });
-    }
-    const roomStatus = roomStatusData.StatusCode;
     console.log(
       "Housekeeping Requests",
       houseKeepingRequests,
       guest._id,
       propertyId,
     );
+    if (houseKeepingRequests.length <= 0) {
+      throw new NotFoundError("Housekeeping request not found", {
+        requestId: ["Housekeeping request not found for the given guest"],
+      });
+    }
+    const roomStatus = roomStatusData.StatusCode;
     if (roomStatus === WEBHOOK_ROOM_STATUS_CODE.OCCUPIED_CLEAN) {
       const updatedHouseKeepingRequest =
         await houseKeepingRequestService.update(
