@@ -27,6 +27,7 @@ const checkInOutRequestService = require("../services/checkInOutRequest.service"
 const {
   modifyMessageTemplateBody,
   modifyMessageTemplateBodyForPhoneNumberChange,
+  modifyAddOnsMessageTemplateBody,
 } = require("../utils/messageTemplateUpdate");
 //new
 
@@ -64,6 +65,7 @@ const {
 } = require("../constants/guestStatus.contant");
 const { compareDate } = require("../utils/dateCompare");
 const { ROOM_STATUS_CODE } = require("../constants/asi.constant");
+const { ADD_ONS_STATUS } = require("../constants/addOns.constant.js");
 require("dotenv").config();
 
 /**
@@ -1462,13 +1464,20 @@ const roomStatusUpdate = async (roomStatusData, propertyId, req) => {
         await houseKeepingRequestService.update(
           houseKeepingRequests[0]._id,
           {
-            requestStatus: REQUEST_STATUS.COMPLETED,
+            requestStatus: ADD_ONS_STATUS.COMPLETED,
           },
           session,
         );
+      const { message, chatList } = await sendSmsAddOnsCompleted();
       req.app.io
         .to(`property:${updatedHouseKeepingRequest.propertyId}`)
         .emit("request:update", {});
+      req.app.io
+        .to(`guest:${updatedHouseKeepingRequest.guestId}`)
+        .emit("message:newMessage", { message });
+      req.app.io
+        .to(`property:${updatedHouseKeepingRequest.propertyId}`)
+        .emit("chatList:update", { chatList });
     }
     req.app.io.to(`property:${guest.propertyId}`).emit("addOn:newAddon", {
       count: 1,
@@ -1581,6 +1590,63 @@ const sendSmsOnPhoneNumberChange = async (existingGuest, updatedGuest) => {
       );
     }
   }
+};
+
+/**
+ * Sends an SMS when add-ons are completed.
+ * @param {string} propertyId - The ID of the property.
+ * @param {import('../models/guest.model.js').GuestType} guest - The guest object.
+ * @param {import('mongoose').ClientSession} session - The Mongoose session.
+ * @returns {Promise<{message: import('../models/message.model.js').MessageType, chatList: import('../models/chatList.model.js').ChatListType}>} - A promise that resolves to an object containing the message and chat list.
+ */
+const sendSmsAddOnsCompleted = async (propertyId, guest, session) => {
+  const twilioAccount = await twilioAccountService.getByPropertyId(propertyId);
+  const twilioSubClient = await twilioService.getTwilioClient(twilioAccount);
+  const messageTemplate = await messageTemplateService.getByNameAndPropertyId(
+    propertyId,
+    "AddOns Completed",
+  );
+  if (messageTemplate) {
+    const propertySetting = await settingService.getByPropertyId(propertyId);
+    const { property } = await propertyService.getById(propertyId);
+    const updatedMessageBody = modifyAddOnsMessageTemplateBody(
+      messageTemplate,
+      property,
+      guest,
+      { name: "House Keeping" },
+      "",
+    );
+    await smsService.send(
+      twilioSubClient,
+      `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
+      `${guest.countryCode}${guest.phoneNumber}`,
+      `${updatedMessageBody.message}`,
+    );
+    const newMessage = await messageService.create(
+      {
+        propertyId: propertyId,
+        guestId: guest._id,
+        senderId: propertyId,
+        receiverId: guest._id,
+        content: updatedMessageBody.message,
+        messageSid: "",
+        messageType: messageType.SMS,
+        messageTriggerType: messageTriggerType.AUTOMATIC,
+        status: "sent",
+      },
+      session,
+    );
+    const updatedChatList = await chatListService.updateAndIncUnreadMessages(
+      propertyId,
+      guest._id,
+      {
+        latestMessage: newMessage._id,
+      },
+      session,
+    );
+    return { message: newMessage, chatList: updatedChatList };
+  }
+  return { message: null, chatList: null };
 };
 module.exports = {
   bookingCreate,

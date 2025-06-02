@@ -94,6 +94,11 @@ Enjoy more time with us—explore amenities, request housekeeping, or share feed
         "Dear [Guest Name], we’re sorry, but your request for [Service Name] cannot be fulfilled at this time. Please reply back us if you need further assistance. – [Hotel Name]",
       name: "AddOns Rejected",
     },
+    [ADD_ONS_STATUS.COMPLETED]: {
+      message:
+        "Your request for [Service Name] has been successfully completed. Thank you for choosing [Hotel Name].",
+      name: "AddOns Completed",
+    },
   },
   PhoneNumber: {
     Changed: {
