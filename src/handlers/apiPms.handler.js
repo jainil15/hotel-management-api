@@ -64,7 +64,10 @@ const {
   RESERVATION_STATUS,
 } = require("../constants/guestStatus.contant");
 const { compareDate } = require("../utils/dateCompare");
-const { ROOM_STATUS_CODE } = require("../constants/asi.constant");
+const {
+  ROOM_STATUS_CODE,
+  WEBHOOK_ROOM_STATUS_CODE,
+} = require("../constants/asi.constant");
 const { ADD_ONS_STATUS } = require("../constants/addOns.constant.js");
 require("dotenv").config();
 
@@ -1448,23 +1451,24 @@ const roomStatusUpdate = async (roomStatusData, propertyId, req) => {
       guestId: guest._id,
       requestStatus: REQUEST_STATUS.REQUESTED,
     });
-    if (houseKeepingRequests.length < 0) {
+    if (houseKeepingRequests.length <= 0) {
       throw new NotFoundError("Housekeeping request not found", {
         requestId: ["Housekeeping request not found for the given guest"],
       });
     }
     const roomStatus = roomStatusData.StatusCode;
-    console.log("Housekeeping Requests", houseKeepingRequests);
-    if (
-      roomStatus === ROOM_STATUS_CODE.CLEAN ||
-      roomStatus === ROOM_STATUS_CODE.IN_HOUSE_CLEAN ||
-      roomStatus === ROOM_STATUS_CODE.READY
-    ) {
+    console.log(
+      "Housekeeping Requests",
+      houseKeepingRequests,
+      guest._id,
+      propertyId,
+    );
+    if (roomStatus === WEBHOOK_ROOM_STATUS_CODE.OCCUPIED_CLEAN) {
       const updatedHouseKeepingRequest =
         await houseKeepingRequestService.update(
           houseKeepingRequests[0]._id,
           {
-            requestStatus: ADD_ONS_STATUS.COMPLETED,
+            requestStatus: REQUEST_STATUS.COMPLETED,
           },
           session,
         );

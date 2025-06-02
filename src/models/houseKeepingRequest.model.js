@@ -3,6 +3,7 @@ const { z } = require("zod");
 const { REQUEST_STATUS } = require("../constants/guestStatus.contant");
 const Schema = mongoose.Schema;
 const logger = require("../configs/winston.config");
+const { ADD_ONS_STATUS } = require("../constants/addOns.constant");
 
 const houseKeepingRequestSchema = new Schema(
   {

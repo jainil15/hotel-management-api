@@ -6,4 +6,14 @@ const ROOM_STATUS_CODE = {
   CLEAN: "Clean",
   OUT_OF_ORDER: "OutOfOrder",
 };
-module.exports = { ROOM_STATUS_CODE };
+
+const WEBHOOK_ROOM_STATUS_CODE = {
+  VACANT_READY: "VacantReady",
+  OCCUPIED_CLEAN: "OccupiedClean",
+  OCCUPIED_DIRTY: "OccupiedDirty",
+  VACANT_DIRTY: "VacantDirty",
+  VACANT_CLEAN: "VacantClean",
+  VACANT_MAINTENANCE: "VacantMaintenance",
+  RESERVATION_READY: "ReservationReady",
+};
+module.exports = { ROOM_STATUS_CODE, WEBHOOK_ROOM_STATUS_CODE };
