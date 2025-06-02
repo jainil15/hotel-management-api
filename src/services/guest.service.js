@@ -726,7 +726,7 @@ const findGuestByGuestStatus = async (propertyId, filter, status) => {
       },
     },
     {
-      $project: filter,
+      $match: filter,
     },
   ];
   const guest = await Guest.aggregate(pipeline);
