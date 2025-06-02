@@ -1470,7 +1470,11 @@ const roomStatusUpdate = async (roomStatusData, propertyId, req) => {
           },
           session,
         );
-      const { message, chatList } = await sendSmsAddOnsCompleted();
+      const { message, chatList } = await sendSmsAddOnsCompleted(
+        propertyId,
+        guest,
+        session,
+      );
       req.app.io
         .to(`property:${updatedHouseKeepingRequest.propertyId}`)
         .emit("request:update", {});
