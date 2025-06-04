@@ -202,8 +202,23 @@ const find = async (filter) => {
  * @returns {Promise<import('../models/property.model.js').PropertyType}
  */
 const findByPmsId = async (pmsId) => {
-  const property = await Property.findOne({ pmsId: pmsId });
+  const setting = await Setting.findOne({ pmsId: pmsId });
+  if (!setting) {
+    throw new NotFoundError("Setting not found", {
+      pmsId: ["Setting not found for the given pmsId"],
+    });
+  }
+  const property = await Property.findOne({ _id: setting.propertyId });
   return property;
+};
+
+const updatePmsId = async (propertyId, pmsId, session) => {
+  const updatedProperty = await Property.findByIdAndUpdate(
+    propertyId,
+    { pmsId: pmsId },
+    { new: true, session },
+  );
+  return updatedProperty;
 };
 module.exports = {
   create,
@@ -214,4 +229,5 @@ module.exports = {
   getByEmail,
   find,
   findByPmsId,
+  updatePmsId,
 };

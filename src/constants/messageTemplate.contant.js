@@ -14,6 +14,11 @@ const DEFAULT_MESSAGE_TEMPLATES = {
 `,
       name: "Reservation Cancelled",
     },
+    [RESERVATION_STATUS.NO_SHOW]: {
+      message:
+        "We noticed you didn’t check in for your reservation at [Hotel Name]. If you need assistance or would like to rebook, please reply to this message or visit [Guest Link]. We’re here to help!",
+      name: "No Show",
+    },
   },
   "Early Check In": {
     [EARLY_CHECK_IN_STATUS.DECLINED]: {

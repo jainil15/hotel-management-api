@@ -123,7 +123,28 @@ const folioDispatcher = async (req, res, next) => {
  * @param {import('express').NextFunction} next - Next function
  * @returns {Promise<void>}
  */
-const roomStatusDispatcher = async (req, res, next) => {};
+const roomStatusDispatcher = async (req, res, next) => {
+  try {
+    const payload = req.body;
+    const propertyId = req.params.propertyId;
+    const pmsId = payload[0].ClientInformation.ClientId;
+    const roomStatuses = payload[0].RoomStatus;
+    const result = [];
+    console.log(roomStatuses);
+    for (const roomStatus of roomStatuses) {
+      result.push(
+        await pmsHandler.roomStatusUpdate(roomStatus, propertyId, req),
+      );
+    }
+    return responseHandler(res, result);
+  } catch (e) {
+    console.log(e);
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError(e.message));
+  }
+};
 module.exports = {
   folioDispatcher,
   roomStatusDispatcher,

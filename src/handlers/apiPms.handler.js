@@ -22,6 +22,7 @@ const twilioService = require("../services/twilio.service");
 const twilioAccountService = require("../services/twilioAccount.service");
 const chatListService = require("../services/chatList.service");
 const propertyService = require("../services/property.service");
+const houseKeepingRequestService = require("../services/houseKeepingRequest.service");
 const checkInOutRequestService = require("../services/checkInOutRequest.service");
 const { modifyMessageTemplateBody } = require("../utils/messageTemplateUpdate");
 //new
@@ -59,6 +60,7 @@ const {
   RESERVATION_STATUS,
 } = require("../constants/guestStatus.contant");
 const { compareDate } = require("../utils/dateCompare");
+const { ROOM_STATUS_CODE } = require("../constants/asi.constant");
 require("dotenv").config();
 
 /**
@@ -105,7 +107,7 @@ const bookingCreate = async (folio, pmsId, propertyId, req) => {
       checkIn: `${StayInformation.CheckInDate}Z`,
       checkOut: `${StayInformation.CheckOutDate}Z`,
       roomNumber: StayInformation.Room,
-      confirmationNumber: FolioInformation.CRSFolioNumber,
+      confirmationNumber: FolioInformation.Number,
       draft: false,
       pmsId: GuestInformation.GuestID,
     };
@@ -196,7 +198,7 @@ const bookingUpdate = async (folio, pmsId, propertyId, req) => {
       checkIn: `${StayInformation.CheckInDate}Z`,
       checkOut: `${StayInformation.CheckOutDate}Z`,
       roomNumber: StayInformation.Room,
-      confirmationNumber: FolioInformation.CRSFolioNumber,
+      confirmationNumber: FolioInformation.Number,
       draft: false,
       pmsId: GuestInformation.GuestID,
     };
@@ -292,7 +294,7 @@ const bookingNoShowCancel = async (folio, pmsId, propertyId, req) => {
       checkIn: `${StayInformation.CheckInDate}Z`,
       checkOut: `${StayInformation.CheckOutDate}Z`,
       roomNumber: StayInformation.Room,
-      confirmationNumber: FolioInformation.CRSFolioNumber,
+      confirmationNumber: FolioInformation.Number,
       draft: false,
       pmsId: GuestInformation.GuestID,
     };
@@ -406,7 +408,7 @@ const reservationCreate = async (folio, pmsId, propertyId, req) => {
       checkIn: `${StayInformation.CheckInDate}Z`,
       checkOut: `${StayInformation.CheckOutDate}Z`,
       roomNumber: StayInformation.Room,
-      confirmationNumber: FolioInformation.CRSFolioNumber,
+      confirmationNumber: FolioInformation.Number,
       phoneNumber: phoneNumber,
       countryCode: countryCode,
       draft: false,
@@ -578,7 +580,7 @@ const reservationUpdate = async (folio, pmsId, propertyId, req) => {
       checkIn: `${StayInformation.CheckInDate}Z`,
       checkOut: `${StayInformation.CheckOutDate}Z`,
       roomNumber: StayInformation.Room,
-      confirmationNumber: FolioInformation.CRSFolioNumber,
+      confirmationNumber: FolioInformation.Number,
       phoneNumber: phoneNumber,
       countryCode: countryCode,
       draft: false,
@@ -729,7 +731,7 @@ const reservationNoShowCancel = async (folio, pmsId, propertyId, req) => {
       checkIn: `${StayInformation.CheckInDate}Z`,
       checkOut: `${StayInformation.CheckOutDate}Z`,
       roomNumber: StayInformation.Room,
-      confirmationNumber: FolioInformation.CRSFolioNumber,
+      confirmationNumber: FolioInformation.Number,
       phoneNumber: phoneNumber,
       countryCode: countryCode,
       draft: false,
@@ -887,7 +889,7 @@ const checkInCreate = async (folio, pmsId, propertyId, req) => {
       checkIn: `${StayInformation.CheckInDate}Z`,
       checkOut: `${StayInformation.CheckOutDate}Z`,
       roomNumber: StayInformation.Room,
-      confirmationNumber: FolioInformation.CRSFolioNumber,
+      confirmationNumber: FolioInformation.Number,
       phoneNumber: phoneNumber,
       countryCode: countryCode,
       draft: false,
@@ -1120,7 +1122,7 @@ const checkInUpdate = async (folio, pmsId, propertyId, req) => {
       checkIn: `${StayInformation.CheckInDate}Z`,
       checkOut: `${StayInformation.CheckOutDate}Z`,
       roomNumber: StayInformation.Room,
-      confirmationNumber: FolioInformation.CRSFolioNumber,
+      confirmationNumber: FolioInformation.Number,
       phoneNumber: phoneNumber,
       countryCode: countryCode,
       draft: false,
@@ -1288,7 +1290,7 @@ const checkOut = async (folio, pmsId, propertyId, req) => {
       checkIn: `${StayInformation.CheckInDate}Z`,
       checkOut: `${StayInformation.CheckOutDate}Z`,
       roomNumber: StayInformation.Room,
-      confirmationNumber: FolioInformation.CRSFolioNumber,
+      confirmationNumber: FolioInformation.Number,
       phoneNumber: phoneNumber,
       countryCode: countryCode,
       draft: false,
@@ -1391,6 +1393,63 @@ const checkOut = async (folio, pmsId, propertyId, req) => {
   }
 };
 
+const roomStatusUpdate = async (roomStatusData, propertyId, req) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    await session.commitTransaction();
+    session.endSession();
+    const guest = await guestService.findGuestByGuestStatus(
+      propertyId,
+      {
+        roomNumber: roomStatusData.roomNumber,
+      },
+      GUEST_CURRENT_STATUS.IN_HOUSE,
+    );
+    if (!guest) {
+      throw new NotFoundError("Guest not found", {
+        guestId: ["Guest not found for the given room number"],
+      });
+    }
+    const houseKeepingRequests = await houseKeepingRequestService.find({
+      propertyId,
+      guestId: guest._id,
+      requestStatus: REQUEST_STATUS.REQUESTED,
+    });
+    if (houseKeepingRequests.length < 0) {
+      throw new NotFoundError("Housekeeping request not found", {
+        requestId: ["Housekeeping request not found for the given guest"],
+      });
+    }
+    console.log("Housekeeping Requests", houseKeepingRequests);
+    if (
+      roomStatus === ROOM_STATUS_CODE.CLEAN ||
+      roomStatus === ROOM_STATUS_CODE.IN_HOUSE_CLEAN ||
+      roomStatus === ROOM_STATUS_CODE.READY
+    ) {
+      const updatedHouseKeepingRequest =
+        await houseKeepingRequestService.update(
+          houseKeepingRequests[0]._id,
+          {
+            requestStatus: REQUEST_STATUS.COMPLETED,
+          },
+          session,
+        );
+      req.app.io
+        .to(`property:${updatedHouseKeepingRequest.propertyId}`)
+        .emit("request:update", {});
+    }
+    req.app.io.to(`property:${guest.propertyId}`).emit("addOn:newAddon", {
+      count: 1,
+    });
+    return roomStatus;
+  } catch (e) {
+    console.log(e);
+    await session.abortTransaction();
+    session.endSession();
+    throw e;
+  }
+};
 module.exports = {
   bookingCreate,
   bookingUpdate,
@@ -1401,4 +1460,5 @@ module.exports = {
   checkInCreate,
   checkInUpdate,
   checkOut,
+  roomStatusUpdate,
 };

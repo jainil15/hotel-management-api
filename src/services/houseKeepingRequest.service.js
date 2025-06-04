@@ -67,9 +67,20 @@ const getByGuestId = async (propertyId, guestId) => {
   return houseKeepingRequests;
 };
 
+/**
+ * Find houseKeeping requests based on a filter
+ * @param {Object} filter - The filter object
+ * @returns {Promise<import("../models/houseKeepingRequest.model.js").HouseKeepingRequestType[]>}
+ */
+const find = async (filter) => {
+  const houseKeepingRequests = await HouseKeepingRequest.find(filter);
+  return houseKeepingRequests;
+};
+
 module.exports = {
   create,
   findByPropertyId,
   update,
   getByGuestId,
+  find,
 };

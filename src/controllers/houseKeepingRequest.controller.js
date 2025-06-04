@@ -23,7 +23,7 @@ const {
 } = require("../models/houseKeepingRequest.model.js");
 const { responseHandler } = require("../middlewares/response.middleware");
 const guestService = require("../services/guest.service");
-const { GUEST_CURRENT_STATUS, REQUEST_STATUS } = require("../constants/guestStatus.contant");
+const { GUEST_CURRENT_STATUS } = require("../constants/guestStatus.contant");
 const {
   messageType,
   messageTriggerType,
@@ -35,7 +35,7 @@ const create = async (req, res, next) => {
   try {
     const { propertyId, guestId } = req.guestSession;
     const request = req.body;
-    const validationResult =
+    const houseKeepingRequestResult =
       CreateHouseKeepingRequestValidationSchema.safeParse(request);
     if (!validationResult.success) {
       throw new ValidationError("Validation Error", {
@@ -53,16 +53,12 @@ const create = async (req, res, next) => {
     if (!workflow) {
       throw new NotFoundError("Workflow not found", {});
     }
-    let validOptions = [];
-    if (type === "houseKeeping") {
-      validOptions = workflow.addOnsFlow.houseKeepingAddOns.options;
-    } else if (type === "upgradeRoom") {
-      validOptions =
-        (workflow.addOnsFlow.upgradeRoom &&
-          workflow.addOnsFlow.upgradeRoom.options) ||
-        [];
-    } else {
-      throw new ValidationError("Invalid add-on type", {});
+    const houseKeepingOptions = workflow.addOnsFlow.houseKeepingAddOns.options;
+    const houseKeepingOption = houseKeepingRequestResult.data.options;
+    for (const option of houseKeepingOption) {
+      if (!houseKeepingOptions.includes(option)) {
+        throw new ValidationError("Invalid house keeping option", {});
+      }
     }
     const requestOptions = validationResult.data.options;
     const guest = await guestService.getById(guestId, propertyId);
@@ -80,20 +76,17 @@ const create = async (req, res, next) => {
       { ...validationResult.data, requestType: type },
       session,
     );
-    // Only update PMS if this is a house keeping request
-    if (type === "houseKeeping") {
-      // Extract room number from guest (or from options if needed)
-      const roomNumber = guest.roomNumber;
-      if (property.property.pmsId) {
-        const asiPmsResponse = await asiPmsService.changeRoomStatus(
-          property.property.pmsId,
-          "813D2A24-6B5D-463C-BA76-CB9369C8375F",
-          "5T9OPcFv&jipS87^VaMfvsMLTghH209276Vcdg#mAP0^$",
-          roomNumber,
-          ROOM_STATUS_CODE.IN_HOUSE_DIRTY,
-        );
-        console.log(asiPmsResponse);
-      }
+    // TODO: Change house keeping status in pms
+    console.log(property);
+    if (property.property.pmsId) {
+      const asiPmsResponse = await asiPmsService.changeRoomStatus(
+        property.property.pmsId,
+        "813D2A24-6B5D-463C-BA76-CB9369C8375F",
+        "5T9OPcFv&jipS87^VaMfvsMLTghH209276Vcdg#mAP0^$",
+        guest.roomNumber,
+        ROOM_STATUS_CODE.IN_HOUSE_DIRTY,
+      );
+      console.log(asiPmsResponse);
     }
     const message = houseKeepingRequestMailTemplate(guest);
     sendMail(
@@ -107,9 +100,9 @@ const create = async (req, res, next) => {
         guestId: guestId,
         senderId: guestId,
         receiverId: propertyId,
-        content: `House keeping request ${validationResult.data.options !== 0 ? "(" : ""}${validationResult.data.options.join(
+        content: `House keeping request ${houseKeepingRequestResult.data.options !== 0 ? "(" : ""}${houseKeepingRequestResult.data.options.join(
           ", ",
-        )}${validationResult.data.options !== 0 ? ")" : ""} received`,
+        )}${houseKeepingRequestResult.data.options !== 0 ? ")" : ""} received`,
         messageType: messageType.REQUEST,
         messageTriggerType: messageTriggerType.AUTOMATIC,
         houseKeepingRequestId: newHouseKeepingRequest._id,

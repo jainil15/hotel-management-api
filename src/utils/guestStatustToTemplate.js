@@ -132,6 +132,9 @@ const guestStatusToTemplateOnUpdate = (oldStatus, newStatus) => {
     if (newStatus.reservationStatus === RESERVATION_STATUS.CANCELLED) {
       return "Reservation Cancelled";
     }
+    if (newStatus.reservationStatus === RESERVATION_STATUS.NO_SHOW) {
+      return "No Show";
+    }
     return "Reservation Confirmed";
   }
   if (

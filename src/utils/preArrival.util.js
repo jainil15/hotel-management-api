@@ -1,3 +1,4 @@
+const { PRE_ARRIVAL_INPUT } = require("../constants/preArrivalFlow.constant");
 const {
   CreatePreArrivalValidationSchema,
 } = require("../models/preArrival.model");
