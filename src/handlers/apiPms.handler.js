@@ -24,7 +24,11 @@ const chatListService = require("../services/chatList.service");
 const propertyService = require("../services/property.service");
 const houseKeepingRequestService = require("../services/houseKeepingRequest.service");
 const checkInOutRequestService = require("../services/checkInOutRequest.service");
-const { modifyMessageTemplateBody } = require("../utils/messageTemplateUpdate");
+const {
+  modifyMessageTemplateBody,
+  modifyMessageTemplateBodyForPhoneNumberChange,
+  modifyAddOnsMessageTemplateBody,
+} = require("../utils/messageTemplateUpdate");
 //new
 
 const preArrivalService = require("../services/preArrival.service"); // Pre-arrival service
@@ -60,7 +64,11 @@ const {
   RESERVATION_STATUS,
 } = require("../constants/guestStatus.contant");
 const { compareDate } = require("../utils/dateCompare");
-const { ROOM_STATUS_CODE } = require("../constants/asi.constant");
+const {
+  ROOM_STATUS_CODE,
+  WEBHOOK_ROOM_STATUS_CODE,
+} = require("../constants/asi.constant");
+const { ADD_ONS_STATUS } = require("../constants/addOns.constant.js");
 require("dotenv").config();
 
 /**
@@ -103,12 +111,12 @@ const bookingCreate = async (folio, pmsId, propertyId, req) => {
       firstName: GuestInformation.GuestName.FirstName,
       lastName: GuestInformation.GuestName.LastName,
       email: email,
-      source: BusinessSource.Name,
+      source: BusinessSource.Source,
       checkIn: `${StayInformation.CheckInDate}Z`,
       checkOut: `${StayInformation.CheckOutDate}Z`,
       roomNumber: StayInformation.Room,
       confirmationNumber: FolioInformation.Number,
-      draft: false,
+      draft: true,
       pmsId: GuestInformation.GuestID,
     };
     if (number) {
@@ -129,10 +137,22 @@ const bookingCreate = async (folio, pmsId, propertyId, req) => {
     };
 
     // Create guest
-    const newGuest = await guestService.create(guestData, propertyId, session);
+    // const newGuest = await guestService.create(guestData, propertyId, session);
+    const newGuest = await guestService.upsert(
+      guestPmsId,
+      guestData,
+      propertyId,
+      session,
+    );
 
     // Create guest status
-    const newGuestStatus = await guestStatusService.create(
+    // const newGuestStatus = await guestStatusService.create(
+    //   propertyId,
+    //   newGuest._id,
+    //   guestStatusData,
+    //   session,
+    // );
+    const newGuestStatus = await guestStatusService.upsert(
       propertyId,
       newGuest._id,
       guestStatusData,
@@ -156,10 +176,11 @@ const bookingCreate = async (folio, pmsId, propertyId, req) => {
 };
 
 /**
- * @description Create a new booking
+ * Create a new booking
  * @param {object} folio - Folio object
  * @param {string} pmsId - pmsId
  * @param {string} propertyId - propertyId
+ * @param {string} req - req
  * @returns {object} - guest
  * @throws {Error} - Error
  */
@@ -194,12 +215,12 @@ const bookingUpdate = async (folio, pmsId, propertyId, req) => {
       firstName: GuestInformation.GuestName.FirstName,
       lastName: GuestInformation.GuestName.LastName,
       email: email,
-      source: BusinessSource.Name,
+      source: BusinessSource.Source,
       checkIn: `${StayInformation.CheckInDate}Z`,
       checkOut: `${StayInformation.CheckOutDate}Z`,
       roomNumber: StayInformation.Room,
       confirmationNumber: FolioInformation.Number,
-      draft: false,
+      draft: true,
       pmsId: GuestInformation.GuestID,
     };
     if (number) {
@@ -290,12 +311,12 @@ const bookingNoShowCancel = async (folio, pmsId, propertyId, req) => {
       firstName: GuestInformation.GuestName.FirstName,
       lastName: GuestInformation.GuestName.LastName,
       email: email,
-      source: BusinessSource.Name,
+      source: BusinessSource.Source,
       checkIn: `${StayInformation.CheckInDate}Z`,
       checkOut: `${StayInformation.CheckOutDate}Z`,
       roomNumber: StayInformation.Room,
       confirmationNumber: FolioInformation.Number,
-      draft: false,
+      draft: true,
       pmsId: GuestInformation.GuestID,
     };
     if (number) {
@@ -404,7 +425,7 @@ const reservationCreate = async (folio, pmsId, propertyId, req) => {
       firstName: GuestInformation.GuestName.FirstName,
       lastName: GuestInformation.GuestName.LastName,
       email: email,
-      source: BusinessSource.Name,
+      source: BusinessSource.Source,
       checkIn: `${StayInformation.CheckInDate}Z`,
       checkOut: `${StayInformation.CheckOutDate}Z`,
       roomNumber: StayInformation.Room,
@@ -530,11 +551,12 @@ const reservationCreate = async (folio, pmsId, propertyId, req) => {
 };
 
 /**
- * @description Create a new reservation
+ *  Create a new reservation
  * @param {object} folio - Folio object
  * @param {string} pmsId - pmsId
  * @param {string} propertyId - propertyId
  * @param {import('express').Request} req - Request
+ * @returns {object} - guest
  * @throws {Error} - Error
  */
 const reservationUpdate = async (folio, pmsId, propertyId, req) => {
@@ -576,7 +598,7 @@ const reservationUpdate = async (folio, pmsId, propertyId, req) => {
       firstName: GuestInformation.GuestName.FirstName,
       lastName: GuestInformation.GuestName.LastName,
       email: email,
-      source: BusinessSource.Name,
+      source: BusinessSource.Source,
       checkIn: `${StayInformation.CheckInDate}Z`,
       checkOut: `${StayInformation.CheckOutDate}Z`,
       roomNumber: StayInformation.Room,
@@ -611,7 +633,6 @@ const reservationUpdate = async (folio, pmsId, propertyId, req) => {
       propertyId,
       updatedGuest._id,
     );
-
     if (updatedGuest.phoneNumber && updatedGuest.countryCode) {
       const messageTemplate =
         await messageTemplateService.getByNameAndPropertyId(
@@ -619,6 +640,8 @@ const reservationUpdate = async (folio, pmsId, propertyId, req) => {
           guestStatusToTemplateOnUpdate(oldStatus, status),
         );
 
+      await sendSmsOnNewPhoneNumber(existingGuest, updatedGuest, status);
+      await sendSmsOnPhoneNumberChange(existingGuest, updatedGuest);
       if (messageTemplate) {
         const twilioAccount =
           await twilioAccountService.getByPropertyId(propertyId);
@@ -727,7 +750,7 @@ const reservationNoShowCancel = async (folio, pmsId, propertyId, req) => {
       firstName: GuestInformation.GuestName.FirstName,
       lastName: GuestInformation.GuestName.LastName,
       email: email,
-      source: BusinessSource.Name,
+      source: BusinessSource.Source,
       checkIn: `${StayInformation.CheckInDate}Z`,
       checkOut: `${StayInformation.CheckOutDate}Z`,
       roomNumber: StayInformation.Room,
@@ -885,7 +908,7 @@ const checkInCreate = async (folio, pmsId, propertyId, req) => {
       firstName: GuestInformation.GuestName.FirstName,
       lastName: GuestInformation.GuestName.LastName,
       email: email,
-      source: BusinessSource.Name,
+      source: BusinessSource.Source,
       checkIn: `${StayInformation.CheckInDate}Z`,
       checkOut: `${StayInformation.CheckOutDate}Z`,
       roomNumber: StayInformation.Room,
@@ -997,7 +1020,7 @@ const checkInCreate = async (folio, pmsId, propertyId, req) => {
       session.endSession();
       return { ...upsertedGuest._doc, status: { ...upsertedGuestStatus._doc } };
     }
-    const guestSession = guestSessionService.getGuestSession(
+    const guestSession = await guestSessionService.getGuestSession(
       propertyId,
       upsertedGuest._id,
     );
@@ -1118,7 +1141,7 @@ const checkInUpdate = async (folio, pmsId, propertyId, req) => {
       firstName: GuestInformation.GuestName.FirstName,
       lastName: GuestInformation.GuestName.LastName,
       email: email,
-      source: BusinessSource.Name,
+      source: BusinessSource.Source,
       checkIn: `${StayInformation.CheckInDate}Z`,
       checkOut: `${StayInformation.CheckOutDate}Z`,
       roomNumber: StayInformation.Room,
@@ -1136,7 +1159,13 @@ const checkInUpdate = async (folio, pmsId, propertyId, req) => {
       reservationStatus: RESERVATION_STATUS.CONFIRMED,
     };
 
+    const existingGuest = await guestService.getByGuestPmsId(
+      propertyId,
+      guestPmsId,
+    );
+    console.log("here");
     const { property } = await propertyService.getById(propertyId);
+    console.log("here1");
     // Upsert guest
     const updatedGuest = await guestService.updateByPmsId(
       guestData,
@@ -1144,6 +1173,7 @@ const checkInUpdate = async (folio, pmsId, propertyId, req) => {
       propertyId,
       session,
     );
+    console.log("here2");
     if (!updatedGuest) {
       throw new NotFoundError("Guest not found", {
         guestId: ["Guest not found for the given id"],
@@ -1162,6 +1192,12 @@ const checkInUpdate = async (folio, pmsId, propertyId, req) => {
       session,
     );
     if (updatedGuest.phoneNumber && updatedGuest.countryCode) {
+      await sendSmsOnNewPhoneNumber(
+        existingGuest,
+        updatedGuest,
+        updatedGuestStatus,
+      );
+      await sendSmsOnPhoneNumberChange(existingGuest, updatedGuest);
       const messageTemplate =
         await messageTemplateService.getByNameAndPropertyId(
           propertyId,
@@ -1208,28 +1244,27 @@ const checkInUpdate = async (folio, pmsId, propertyId, req) => {
         );
       }
 
+      // Emit to guest list updated
       req.app.io.to(`property:${propertyId}`).emit("chatList:update", {});
 
       // Emit to guest messages updated
       req.app.io.to(`guest:${updatedGuest._id}`).emit("message:newMessage", {
         message: {},
       });
-      req.app.io.to(`property:${propertyId}`).emit("guest:guestUpdate", {
-        guest: {
-          ...updatedGuest._doc,
-          status: { ...updatedGuestStatus._doc },
-        },
-      });
-
-      await session.commitTransaction();
-      session.endSession();
-
-      // Emit to guest list updated
-      return {
+    }
+    req.app.io.to(`property:${propertyId}`).emit("guest:guestUpdate", {
+      guest: {
         ...updatedGuest._doc,
         status: { ...updatedGuestStatus._doc },
-      };
-    }
+      },
+    });
+
+    await session.commitTransaction();
+    session.endSession();
+    return {
+      ...updatedGuest._doc,
+      status: { ...updatedGuestStatus._doc },
+    };
   } catch (e) {
     console.log(e);
     await session.abortTransaction();
@@ -1286,7 +1321,7 @@ const checkOut = async (folio, pmsId, propertyId, req) => {
       firstName: GuestInformation.GuestName.FirstName,
       lastName: GuestInformation.GuestName.LastName,
       email: email,
-      source: BusinessSource.Name,
+      source: BusinessSource.Source,
       checkIn: `${StayInformation.CheckInDate}Z`,
       checkOut: `${StayInformation.CheckOutDate}Z`,
       roomNumber: StayInformation.Room,
@@ -1397,12 +1432,10 @@ const roomStatusUpdate = async (roomStatusData, propertyId, req) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    await session.commitTransaction();
-    session.endSession();
     const guest = await guestService.findGuestByGuestStatus(
       propertyId,
       {
-        roomNumber: roomStatusData.roomNumber,
+        roomNumber: roomStatusData.RoomName,
       },
       GUEST_CURRENT_STATUS.IN_HOUSE,
     );
@@ -1416,17 +1449,19 @@ const roomStatusUpdate = async (roomStatusData, propertyId, req) => {
       guestId: guest._id,
       requestStatus: REQUEST_STATUS.REQUESTED,
     });
-    if (houseKeepingRequests.length < 0) {
+    console.log(
+      "Housekeeping Requests",
+      houseKeepingRequests,
+      guest._id,
+      propertyId,
+    );
+    if (houseKeepingRequests.length <= 0) {
       throw new NotFoundError("Housekeeping request not found", {
         requestId: ["Housekeeping request not found for the given guest"],
       });
     }
-    console.log("Housekeeping Requests", houseKeepingRequests);
-    if (
-      roomStatus === ROOM_STATUS_CODE.CLEAN ||
-      roomStatus === ROOM_STATUS_CODE.IN_HOUSE_CLEAN ||
-      roomStatus === ROOM_STATUS_CODE.READY
-    ) {
+    const roomStatus = roomStatusData.StatusCode;
+    if (roomStatus === WEBHOOK_ROOM_STATUS_CODE.OCCUPIED_CLEAN) {
       const updatedHouseKeepingRequest =
         await houseKeepingRequestService.update(
           houseKeepingRequests[0]._id,
@@ -1435,13 +1470,26 @@ const roomStatusUpdate = async (roomStatusData, propertyId, req) => {
           },
           session,
         );
+      const { message, chatList } = await sendSmsAddOnsCompleted(
+        propertyId,
+        guest,
+        session,
+      );
       req.app.io
         .to(`property:${updatedHouseKeepingRequest.propertyId}`)
         .emit("request:update", {});
+      req.app.io
+        .to(`guest:${updatedHouseKeepingRequest.guestId}`)
+        .emit("message:newMessage", { message });
+      req.app.io
+        .to(`property:${updatedHouseKeepingRequest.propertyId}`)
+        .emit("chatList:update", { chatList });
     }
     req.app.io.to(`property:${guest.propertyId}`).emit("addOn:newAddon", {
       count: 1,
     });
+    await session.commitTransaction();
+    session.endSession();
     return roomStatus;
   } catch (e) {
     console.log(e);
@@ -1449,6 +1497,164 @@ const roomStatusUpdate = async (roomStatusData, propertyId, req) => {
     session.endSession();
     throw e;
   }
+};
+
+/**
+ * @description Send SMS on new phone number
+ * @param {object} existingGuest - Existing guest object
+ * @param {object} updatedGuest - Updated guest object
+ * @param {object} updatedGuestStatus - Updated guest status object
+ * @returns {Promise<void>}
+ * @throws {Error} - Error
+ */
+const sendSmsOnNewPhoneNumber = async (
+  existingGuest,
+  updatedGuest,
+  updatedGuestStatus,
+) => {
+  if (existingGuest.phoneNumber === "" && updatedGuest.phoneNumber !== "") {
+    const messageTemplate = await messageTemplateService.getByNameAndPropertyId(
+      updatedGuest.propertyId,
+      guestStatusToTemplateOnCreate(updatedGuestStatus),
+    );
+    if (messageTemplate) {
+      const twilioAccount = await twilioAccountService.getByPropertyId(
+        updatedGuest.propertyId,
+      );
+      const twilioSubClient =
+        await twilioService.getTwilioClient(twilioAccount);
+      const propertySetting = await settingService.getByPropertyId(
+        updatedGuest.propertyId,
+      );
+      const { property } = await propertyService.getById(
+        updatedGuest.propertyId,
+      );
+      const guestSession = await guestSessionService.getGuestSession(
+        updatedGuest.propertyId,
+        updatedGuest._id,
+      );
+      console.log(property);
+      const updatedMessageBody = modifyMessageTemplateBody(
+        messageTemplate,
+        updatedGuest,
+        property,
+        propertySetting,
+        `${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
+      );
+      await smsService.send(
+        twilioSubClient,
+        `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
+        `${updatedGuest.countryCode}${updatedGuest.phoneNumber}`,
+        `${updatedMessageBody.message}`,
+      );
+    }
+  }
+};
+
+/**
+ * Sends an SMS when the phone number of a guest is changed.
+ * @param {import('../models/guest.model.js').GuestType} existingGuest - The existing guest object.
+ * @param {import('../models/guest.model.js').GuestType} updatedGuest - The updated guest object.
+ * @returns {Promise<void>} - A promise that resolves when the SMS is sent.
+ */
+const sendSmsOnPhoneNumberChange = async (existingGuest, updatedGuest) => {
+  if (
+    existingGuest.phoneNumber !== "" &&
+    updatedGuest.phoneNumber !== "" &&
+    (existingGuest.phoneNumber !== updatedGuest.phoneNumber ||
+      existingGuest.countryCode !== updatedGuest.countryCode)
+  ) {
+    const messageTemplate = await messageTemplateService.getByNameAndPropertyId(
+      updatedGuest.propertyId,
+      "PhoneNumber Changed",
+    );
+    if (messageTemplate) {
+      const twilioAccount = await twilioAccountService.getByPropertyId(
+        updatedGuest.propertyId,
+      );
+      const twilioSubClient =
+        await twilioService.getTwilioClient(twilioAccount);
+      const propertySetting = await settingService.getByPropertyId(
+        updatedGuest.propertyId,
+      );
+      const { property } = await propertyService.getById(
+        updatedGuest.propertyId,
+      );
+      const guestSession = await guestSessionService.getGuestSession(
+        updatedGuest.propertyId,
+        updatedGuest._id,
+      );
+      const updatedMessageBody = modifyMessageTemplateBodyForPhoneNumberChange(
+        messageTemplate,
+        updatedGuest,
+        property,
+        `${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
+      );
+      await smsService.send(
+        twilioSubClient,
+        `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
+        `${updatedGuest.countryCode}${updatedGuest.phoneNumber}`,
+        `${updatedMessageBody.message}`,
+      );
+    }
+  }
+};
+
+/**
+ * Sends an SMS when add-ons are completed.
+ * @param {string} propertyId - The ID of the property.
+ * @param {import('../models/guest.model.js').GuestType} guest - The guest object.
+ * @param {import('mongoose').ClientSession} session - The Mongoose session.
+ * @returns {Promise<{message: import('../models/message.model.js').MessageType, chatList: import('../models/chatList.model.js').ChatListType}>} - A promise that resolves to an object containing the message and chat list.
+ */
+const sendSmsAddOnsCompleted = async (propertyId, guest, session) => {
+  const twilioAccount = await twilioAccountService.getByPropertyId(propertyId);
+  const twilioSubClient = await twilioService.getTwilioClient(twilioAccount);
+  const messageTemplate = await messageTemplateService.getByNameAndPropertyId(
+    propertyId,
+    "AddOns Completed",
+  );
+  if (messageTemplate) {
+    const propertySetting = await settingService.getByPropertyId(propertyId);
+    const { property } = await propertyService.getById(propertyId);
+    const updatedMessageBody = modifyAddOnsMessageTemplateBody(
+      messageTemplate,
+      property,
+      guest,
+      { name: "House Keeping" },
+      "",
+    );
+    await smsService.send(
+      twilioSubClient,
+      `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
+      `${guest.countryCode}${guest.phoneNumber}`,
+      `${updatedMessageBody.message}`,
+    );
+    const newMessage = await messageService.create(
+      {
+        propertyId: propertyId,
+        guestId: guest._id,
+        senderId: propertyId,
+        receiverId: guest._id,
+        content: updatedMessageBody.message,
+        messageSid: "",
+        messageType: messageType.SMS,
+        messageTriggerType: messageTriggerType.AUTOMATIC,
+        status: "sent",
+      },
+      session,
+    );
+    const updatedChatList = await chatListService.updateAndIncUnreadMessages(
+      propertyId,
+      guest._id,
+      {
+        latestMessage: newMessage._id,
+      },
+      session,
+    );
+    return { message: newMessage, chatList: updatedChatList };
+  }
+  return { message: null, chatList: null };
 };
 module.exports = {
   bookingCreate,

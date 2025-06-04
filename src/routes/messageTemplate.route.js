@@ -31,6 +31,10 @@ router.post(
 // );
 
 router.get(
+  "/:propertyId/addDefaults",
+  messageTemplateController.updateDefaults,
+);
+router.get(
   "/:propertyId",
   authenticateToken,
   checkPropertyAccess,
@@ -101,4 +105,8 @@ router.post(
 // 	messageTemplateController.createAllDefaultTemplates,
 // );
 
+/**
+ * @deprecated
+ * @description This route is deprecated and will be removed in future versions
+ */
 module.exports = router;

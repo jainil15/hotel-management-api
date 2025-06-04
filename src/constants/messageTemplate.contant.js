@@ -48,7 +48,8 @@ Enjoy more time to relax! Manage requests or explore our amenities here: [Guest 
   },
   "Current Status": {
     [GUEST_CURRENT_STATUS.RESERVED]: {
-      message: `Your reservation for [Date] at [Hotel Name] is confirmed! 🎉From requesting housekeeping to accessing the Wi-Fi password or exploring amenities, manage everything with ease here: [Guest Link].\n Need anything else? Click the link or reply to this message—we’re here to help!`,
+      message:
+        "Your reservation for [Date] at [Hotel Name] is confirmed! 🎉From requesting housekeeping to accessing the Wi-Fi password or exploring amenities, manage everything with ease here: [Guest Link].\n Need anything else? Click the link or reply to this message—we’re here to help!",
       name: "Reservation Confirmed",
     },
     [GUEST_CURRENT_STATUS.IN_HOUSE]: {
@@ -92,6 +93,18 @@ Enjoy more time with us—explore amenities, request housekeeping, or share feed
       message:
         "Dear [Guest Name], we’re sorry, but your request for [Service Name] cannot be fulfilled at this time. Please reply back us if you need further assistance. – [Hotel Name]",
       name: "AddOns Rejected",
+    },
+    [ADD_ONS_STATUS.COMPLETED]: {
+      message:
+        "Your request for [Service Name] has been successfully completed. Thank you for choosing [Hotel Name].",
+      name: "AddOns Completed",
+    },
+  },
+  PhoneNumber: {
+    Changed: {
+      message:
+        "Your phone number has been successfully changed to [New Phone Number]. If you have any questions or need further assistance, please reply to this message or visit [Guest Link].",
+      name: "PhoneNumber Changed",
     },
   },
 };

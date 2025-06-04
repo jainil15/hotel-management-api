@@ -103,7 +103,7 @@ const folioDispatcher = async (req, res, next) => {
           break;
         default:
           console.log("here");
-          throw new NotFoundError(`EventType ${EventType} not found`, {});
+          throw new NotFoundError(`EventType ${EventName} not found`, {});
       }
       return responseHandler(res, result);
     }

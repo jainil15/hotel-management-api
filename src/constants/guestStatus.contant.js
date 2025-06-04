@@ -49,6 +49,7 @@ const REQUEST_STATUS = {
   REQUESTED: "Requested",
   ACCEPTED: "Accepted",
   DECLINED: "Declined",
+  COMPLETED: "Completed",
 };
 
 const MAP_GUEST_CURRENT_STATUS_PMS = {

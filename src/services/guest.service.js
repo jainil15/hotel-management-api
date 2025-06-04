@@ -201,6 +201,11 @@ const findWithStatus = async (guestFilter, statusFilter) => {
     },
     {
       $match: {
+        draft: true,
+      },
+    },
+    {
+      $match: {
         "status.currentStatus": statusFilter.currentStatus,
         "status.reservationStatus": statusFilter.reservationStatus,
       },
@@ -652,13 +657,11 @@ const upsert = async (pmsId, guest, propertyId, session) => {
  * @returns {Promise<import('../models/guest.model').GuestType>} guest - guest object
  */
 const updateByPmsId = async (guest, pmsId, propertyId, session) => {
+  const { propertyId: _, pmsId: __, ...guestData } = guest; // Exclude propertyId from guest data
   const updatedGuest = await Guest.findOneAndUpdate(
     { pmsId: pmsId, propertyId: propertyId },
-    {
-      ...guest,
-      propertyId: propertyId,
-    },
-    { session: session, new: true },
+    { $set: { ...guest } },
+    { session: session, new: true, runValidators: true },
   );
   return updatedGuest;
 };
@@ -707,6 +710,11 @@ const findGuestByGuestStatus = async (propertyId, filter, status) => {
       },
     },
     {
+      $match: {
+        roomNumber: filter.roomNumber,
+      },
+    },
+    {
       $lookup: {
         from: "gueststatuses",
         localField: "_id",
@@ -721,9 +729,6 @@ const findGuestByGuestStatus = async (propertyId, filter, status) => {
       $match: {
         "status.currentStatus": status,
       },
-    },
-    {
-      $project: filter,
     },
   ];
   const guest = await Guest.aggregate(pipeline);

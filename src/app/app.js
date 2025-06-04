@@ -145,8 +145,8 @@ const createApp = () => {
   app.use("/dndmodeRequest", dndmodeRequestRoutes);
   app.use("/qrCodeScan", qrCodeScanRoutes);
   app.use("/analytics", analyticsRoutes);
-  app.use("/review",reviewRoutes);
-  app.use("/reply",replyRoutes);
+  app.use("/review", reviewRoutes);
+  app.use("/reply", replyRoutes);
   app.use("/asiPms", asiPmsRoutes);
   app.use("/googleAuth", googleAuthRoutes);
   app.use("/propertyToken", propertyTokenRoutes);

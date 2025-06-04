@@ -1,4 +1,5 @@
 const moment = require("moment-timezone");
+const { timezones } = require("../constants/timezone.constant");
 const names = [
   "Extend Stay Declined",
   "Check Out Time Update",
@@ -48,14 +49,40 @@ function formatDateWithLocalTimezone(utcDateString, timeZone) {
   return localMoment.format("MM/DD, hh:mm A");
 }
 
+function extractWindowsTimeZone(fullString) {
+  return fullString.split(" (")[0].trim();
+}
+
+function convertUTCToLocal(utcDateString, propertyTimeZoneString) {
+  const windowsTz = extractWindowsTimeZone(propertyTimeZoneString);
+  const ianaTz = timezones[windowsTz];
+
+  if (!ianaTz) {
+    console.warn("Unknown time zone:", windowsTz);
+    return moment.utc(utcDateString).format("MMMM DD, YYYY - h:mm A [UTC]");
+  }
+
+  return moment.utc(utcDateString).tz(ianaTz).format("MMMM DD, YYYY - h:mm A");
+}
+
 // Update the modifyMessageTemplateBody function
+/**
+ * Modify the message template body based on the message type
+ * @param {object} messageTemplate - The message template object
+ * @param {object} guestInfo - The guest information object
+ * @param {object} propertyInfo - The property information object
+ * @param {object} propertySetting - The property setting object
+ * @param {string} guestLink - The link for the guest
+ * @param {string} reason - The reason for the message
+ * @returns {object} - The modified message template
+ */
 function modifyMessageTemplateBody(
   messageTemplate,
   guestInfo,
   propertyInfo,
   propertySetting,
   guestLink,
-  reason
+  reason,
 ) {
   const { name: hotelName } = propertyInfo;
 
@@ -68,37 +95,13 @@ function modifyMessageTemplateBody(
     const time = messageTemplate.name.includes("Early")
       ? guestInfo.checkIn
       : guestInfo.checkOut;
-    // Format time as UTC
-    const formattedTime = new Date(time).toLocaleString("en", {
-      day: "2-digit",
-      month: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-      timeZone: "UTC",
-    });
-    function extractWindowsTimeZone(fullString) {
-      return fullString.split(" (")[0].trim();
-    }
-    
-    function convertUTCToLocal(utcDateString, propertyTimeZoneString) {
-      const windowsTz = extractWindowsTimeZone(propertyTimeZoneString);
-      const ianaTz = timezones[windowsTz];
-    
-      if (!ianaTz) {
-        console.warn("Unknown time zone:", windowsTz);
-        return moment.utc(utcDateString).format("MMMM DD, YYYY - h:mm A [UTC]");
-      }
-    
-      return moment.utc(utcDateString).tz(ianaTz).format("MMMM DD, YYYY - h:mm A");
-    }
     
     messageTemplate.message = messageTemplate.message
       .replace("[Time]", convertUTCToLocal(time, propertySetting.timezone))
       .replace("[Hotel Name]", hotelName)
       .replace("[Guest Link]", guestLink)
-      .replace("[Reason]", reason);
-
+      .replace("[Reason]", reason)
+      .replace("[New Phone Number]", guestInfo.phoneNumber);
   } else if (messageTemplate.name === "Extend Stay Accepted") {
     const formattedTime = new Date(guestInfo.checkOut).toLocaleString("en", {
       year: "numeric",
@@ -133,7 +136,7 @@ function modifyMessageTemplateBody(
     const formattedDate = formatDateToUTC(guestInfo.checkIn);
 
     messageTemplate.message = messageTemplate.message
-      .replace("[Date]", formattedDate + ` ${propertySetting.timezone}`)
+      .replace("[Date]", convertUTCToLocal(guestInfo.checkIn, propertySetting.timezone))
       .replace("[Hotel Name]", hotelName)
       .replace("[Guest Link]", guestLink);
   } else if (
@@ -189,17 +192,44 @@ const modifyAddOnsMessageTemplateBody = (
   property,
   guest,
   addOn,
+  reason,
 ) => {
   console.log(property.name, addOn);
   messageTemplate.message = messageTemplate.message
     .replace("[Hotel Name]", property.name)
     .replace("[Guest Name]", `${guest.firstName} ${guest.lastName}`)
     .replace("[Service Name]", addOn.name)
-    .replace("[Reason]",addOn.reason);
+    .replace("[Reason]", reason);
   return messageTemplate;
 };
+
+/**
+ * Modify the message template body for phone number change
+ * @param {object} messageTemplate - The message template object
+ * @param {object} guestInfo - The guest information object
+ * @param {object} propertyInfo - The property information object
+ * @param {string} guestLink - The link for the guest
+ * @returns {object} - The modified message template
+ */
+function modifyMessageTemplateBodyForPhoneNumberChange(
+  messageTemplate,
+  guestInfo,
+  propertyInfo,
+  guestLink,
+) {
+  const { name: hotelName } = propertyInfo;
+
+  messageTemplate.message = messageTemplate.message
+    .replace("[Hotel Name]", hotelName)
+    .replace("[Guest Link]", guestLink)
+    .replace("[New Phone Number]", guestInfo.phoneNumber);
+
+  return messageTemplate;
+}
 
 module.exports = {
   modifyMessageTemplateBody,
   modifyAddOnsMessageTemplateBody,
+  modifyMessageTemplateBodyForPhoneNumberChange,
+  convertUTCToLocal,
 };
