@@ -640,8 +640,18 @@ const reservationUpdate = async (folio, pmsId, propertyId, req) => {
           guestStatusToTemplateOnUpdate(oldStatus, status),
         );
 
-      await sendSmsOnNewPhoneNumber(existingGuest, updatedGuest, status);
-      await sendSmsOnPhoneNumberChange(existingGuest, updatedGuest);
+      let { message, chatList } = await sendSmsOnNewPhoneNumber(
+        existingGuest,
+        updatedGuest,
+        status,
+        session,
+      );
+
+      ({ message, chatList } = await sendSmsOnPhoneNumberChange(
+        existingGuest,
+        updatedGuest,
+        session,
+      ));
       if (messageTemplate) {
         const twilioAccount =
           await twilioAccountService.getByPropertyId(propertyId);
@@ -690,6 +700,7 @@ const reservationUpdate = async (folio, pmsId, propertyId, req) => {
       message: {},
     });
     req.app.io.to(`property:${propertyId}`).emit("chatList:update", {});
+
     return {
       ...updatedGuest._doc,
       status: { ...status._doc },
@@ -1196,8 +1207,9 @@ const checkInUpdate = async (folio, pmsId, propertyId, req) => {
         existingGuest,
         updatedGuest,
         updatedGuestStatus,
+        session,
       );
-      await sendSmsOnPhoneNumberChange(existingGuest, updatedGuest);
+      await sendSmsOnPhoneNumberChange(existingGuest, updatedGuest, session);
       const messageTemplate =
         await messageTemplateService.getByNameAndPropertyId(
           propertyId,
@@ -1500,17 +1512,19 @@ const roomStatusUpdate = async (roomStatusData, propertyId, req) => {
 };
 
 /**
- * @description Send SMS on new phone number
+ *  Send SMS on new phone number
  * @param {object} existingGuest - Existing guest object
  * @param {object} updatedGuest - Updated guest object
  * @param {object} updatedGuestStatus - Updated guest status object
- * @returns {Promise<void>}
+ * @param {import('mongoose').ClientSession} session - Mongoose session
+ * @returns {Promise<{message: import('../models/message.model.js').MessageType, chatList: import('../models/chatList.model.js').ChatListType}>} - A promise that resolves to an object containing the message and chat list.
  * @throws {Error} - Error
  */
 const sendSmsOnNewPhoneNumber = async (
   existingGuest,
   updatedGuest,
   updatedGuestStatus,
+  session,
 ) => {
   if (existingGuest.phoneNumber === "" && updatedGuest.phoneNumber !== "") {
     const messageTemplate = await messageTemplateService.getByNameAndPropertyId(
@@ -1541,12 +1555,36 @@ const sendSmsOnNewPhoneNumber = async (
         propertySetting,
         `${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
       );
-      await smsService.send(
+      const sentSms = await smsService.send(
         twilioSubClient,
         `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
         `${updatedGuest.countryCode}${updatedGuest.phoneNumber}`,
         `${updatedMessageBody.message}`,
       );
+      const message = await messageService.create(
+        {
+          propertyId: updatedGuest.propertyId,
+          guestId: updatedGuest._id,
+          senderId: updatedGuest.propertyId,
+          receiverId: updatedGuest._id,
+          content: updatedMessageBody.message,
+          messageSid: sentSms.sid,
+          messageType: messageType.SMS,
+          messageTriggerType: messageTriggerType.AUTOMATIC,
+          status: "sent",
+        },
+        session,
+      );
+
+      const chatList = await chatListService.updateAndIncUnreadMessages(
+        updatedGuest.propertyId,
+        updatedGuest._id,
+        {
+          latestMessage: message._id,
+        },
+        session,
+      );
+      return { message, chatList };
     }
   }
 };
@@ -1555,9 +1593,14 @@ const sendSmsOnNewPhoneNumber = async (
  * Sends an SMS when the phone number of a guest is changed.
  * @param {import('../models/guest.model.js').GuestType} existingGuest - The existing guest object.
  * @param {import('../models/guest.model.js').GuestType} updatedGuest - The updated guest object.
- * @returns {Promise<void>} - A promise that resolves when the SMS is sent.
+ * @param {import('mongoose').ClientSession} session - The Mongoose session.
+ * @returns {Promise<{message: import('../models/message.model.js').MessageType, chatList: import('../models/chatList.model.js').ChatListType}>} - A promise that resolves to an object containing the message and chat list.
  */
-const sendSmsOnPhoneNumberChange = async (existingGuest, updatedGuest) => {
+const sendSmsOnPhoneNumberChange = async (
+  existingGuest,
+  updatedGuest,
+  session,
+) => {
   if (
     existingGuest.phoneNumber !== "" &&
     updatedGuest.phoneNumber !== "" &&
@@ -1590,12 +1633,35 @@ const sendSmsOnPhoneNumberChange = async (existingGuest, updatedGuest) => {
         property,
         `${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
       );
-      await smsService.send(
+      const sentSms = await smsService.send(
         twilioSubClient,
         `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
         `${updatedGuest.countryCode}${updatedGuest.phoneNumber}`,
         `${updatedMessageBody.message}`,
       );
+      const message = await messageService.create(
+        {
+          propertyId: updatedGuest.propertyId,
+          guestId: updatedGuest._id,
+          senderId: updatedGuest.propertyId,
+          receiverId: updatedGuest._id,
+          content: updatedMessageBody.message,
+          messageSid: sentSms.sid,
+          messageType: messageType.SMS,
+          messageTriggerType: messageTriggerType.AUTOMATIC,
+          status: "sent",
+        },
+        session,
+      );
+      const chatList = await chatListService.updateAndIncUnreadMessages(
+        updatedGuest.propertyId,
+        updatedGuest._id,
+        {
+          latestMessage: message._id,
+        },
+        session,
+      );
+      return { message, chatList };
     }
   }
 };
@@ -1624,7 +1690,7 @@ const sendSmsAddOnsCompleted = async (propertyId, guest, session) => {
       { name: "House Keeping" },
       "",
     );
-    await smsService.send(
+    const sentSms = await smsService.send(
       twilioSubClient,
       `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
       `${guest.countryCode}${guest.phoneNumber}`,
@@ -1637,7 +1703,7 @@ const sendSmsAddOnsCompleted = async (propertyId, guest, session) => {
         senderId: propertyId,
         receiverId: guest._id,
         content: updatedMessageBody.message,
-        messageSid: "",
+        messageSid: sentSms.sid,
         messageType: messageType.SMS,
         messageTriggerType: messageTriggerType.AUTOMATIC,
         status: "sent",
