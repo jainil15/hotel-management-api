@@ -97,6 +97,8 @@ const getById = async (reviewId) => {
   return review;
 };
 
+const getGoogleReviews = async (locationName,accessToken) => {};
+
 module.exports = {
   create,
   getByGuestId,

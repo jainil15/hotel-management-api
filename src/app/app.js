@@ -37,6 +37,8 @@ const analyticsRoutes = require("../routes/analytics.route");
 const asiPmsRoutes = require("../routes/asiPms.route");
 const reviewRoutes = require("../routes/review.route");
 const replyRoutes = require("../routes/reply.route");
+const googleAuthRoutes = require("../routes/googleAuth.route");
+const propertyTokenRoutes = require("../routes/propertyToken.route");
 
 // Socket imports
 const guestSocket = require("../sockets/guest.socket");
@@ -146,6 +148,8 @@ const createApp = () => {
   app.use("/review", reviewRoutes);
   app.use("/reply", replyRoutes);
   app.use("/asiPms", asiPmsRoutes);
+  app.use("/googleAuth", googleAuthRoutes);
+  app.use("/propertyToken", propertyTokenRoutes);
   // Health Check
   app.get("/health", (req, res, next) => {
     return responseHandler(res, {}, 200, "Server is running");

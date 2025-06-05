@@ -1,4 +1,5 @@
 const moment = require("moment-timezone");
+const { timezones } = require("../constants/timezone.constant");
 const names = [
   "Extend Stay Declined",
   "Check Out Time Update",
@@ -48,6 +49,22 @@ function formatDateWithLocalTimezone(utcDateString, timeZone) {
   return localMoment.format("MM/DD, hh:mm A");
 }
 
+function extractWindowsTimeZone(fullString) {
+  return fullString.split(" (")[0].trim();
+}
+
+function convertUTCToLocal(utcDateString, propertyTimeZoneString) {
+  const windowsTz = extractWindowsTimeZone(propertyTimeZoneString);
+  const ianaTz = timezones[windowsTz];
+
+  if (!ianaTz) {
+    console.warn("Unknown time zone:", windowsTz);
+    return moment.utc(utcDateString).format("MMMM DD, YYYY - h:mm A [UTC]");
+  }
+
+  return moment.utc(utcDateString).tz(ianaTz).format("MMMM DD, YYYY - h:mm A");
+}
+
 // Update the modifyMessageTemplateBody function
 /**
  * Modify the message template body based on the message type
@@ -78,17 +95,9 @@ function modifyMessageTemplateBody(
     const time = messageTemplate.name.includes("Early")
       ? guestInfo.checkIn
       : guestInfo.checkOut;
-    // Format time as UTC
-    const formattedTime = new Date(time).toLocaleString("en", {
-      day: "2-digit",
-      month: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-      timeZone: "UTC",
-    });
+    
     messageTemplate.message = messageTemplate.message
-      .replace("[Time]", formattedTime + ` ${propertySetting.timezone}`)
+      .replace("[Time]", convertUTCToLocal(time, propertySetting.timezone))
       .replace("[Hotel Name]", hotelName)
       .replace("[Guest Link]", guestLink)
       .replace("[Reason]", reason)
@@ -127,7 +136,7 @@ function modifyMessageTemplateBody(
     const formattedDate = formatDateToUTC(guestInfo.checkIn);
 
     messageTemplate.message = messageTemplate.message
-      .replace("[Date]", formattedDate + ` ${propertySetting.timezone}`)
+      .replace("[Date]", convertUTCToLocal(guestInfo.checkIn, propertySetting.timezone))
       .replace("[Hotel Name]", hotelName)
       .replace("[Guest Link]", guestLink);
   } else if (
@@ -149,7 +158,7 @@ function modifyMessageTemplateBody(
       timeZone: "UTC",
     });
     messageTemplate.message = messageTemplate.message
-      .replace("[Time]", formattedTime + ` ${propertySetting.timezone}`)
+      .replace("[Time]", convertUTCToLocal(time, propertySetting.timezone))
       .replace("[Hotel Name]", hotelName)
       .replace("[Guest Link]", guestLink);
   } else if (messageTemplate.name === "Check In Time Update") {
@@ -162,7 +171,7 @@ function modifyMessageTemplateBody(
       timeZone: "UTC",
     });
     messageTemplate.message = messageTemplate.message
-      .replace("[Time]", formattedTime + ` ${propertySetting.timezone}`)
+      .replace("[Time]", convertUTCToLocal(time, propertySetting.timezone))
       .replace("[Hotel Name]", hotelName)
       .replace("[Guest Link]", guestLink);
   }
@@ -217,8 +226,10 @@ function modifyMessageTemplateBodyForPhoneNumberChange(
 
   return messageTemplate;
 }
+
 module.exports = {
   modifyMessageTemplateBody,
   modifyAddOnsMessageTemplateBody,
   modifyMessageTemplateBodyForPhoneNumberChange,
+  convertUTCToLocal,
 };
