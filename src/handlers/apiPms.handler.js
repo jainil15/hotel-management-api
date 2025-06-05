@@ -520,7 +520,6 @@ const reservationCreate = async (folio, pmsId, propertyId, req) => {
               latestMessage: newMessage._id,
             },
             session,
-            0,
           );
       }
     }
