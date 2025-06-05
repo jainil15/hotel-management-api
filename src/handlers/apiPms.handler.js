@@ -639,18 +639,14 @@ const reservationUpdate = async (folio, pmsId, propertyId, req) => {
           guestStatusToTemplateOnUpdate(oldStatus, status),
         );
 
-      let { message, chatList } = await sendSmsOnNewPhoneNumber(
+      await sendSmsOnNewPhoneNumber(
         existingGuest,
         updatedGuest,
         status,
         session,
       );
 
-      ({ message, chatList } = await sendSmsOnPhoneNumberChange(
-        existingGuest,
-        updatedGuest,
-        session,
-      ));
+      await sendSmsOnPhoneNumberChange(existingGuest, updatedGuest, session);
       if (messageTemplate) {
         const twilioAccount =
           await twilioAccountService.getByPropertyId(propertyId);
