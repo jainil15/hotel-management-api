@@ -29,6 +29,7 @@ const {
   modifyMessageTemplateBodyForPhoneNumberChange,
   modifyAddOnsMessageTemplateBody,
 } = require("../utils/messageTemplateUpdate");
+const countryFile = require("../data/country.json");
 //new
 
 const preArrivalService = require("../services/preArrival.service"); // Pre-arrival service
@@ -72,7 +73,7 @@ const { ADD_ONS_STATUS } = require("../constants/addOns.constant.js");
 require("dotenv").config();
 
 /**
- * @description Create a new booking
+ * Create a new booking
  * @param {object} folio - Folio object
  * @param {string} pmsId - pmsId
  * @param {string} propertyId - propertyId
@@ -120,14 +121,10 @@ const bookingCreate = async (folio, pmsId, propertyId, req) => {
       pmsId: GuestInformation.GuestID,
     };
     if (number) {
-      const phoneNumber = number.slice(number.length - 10);
-      let countryCode = number.slice(0, number.length - 10);
-      if (countryCode === "") {
-        countryCode = `+${getCountryCode(country)}`;
-      }
-      if (!countryCode.startsWith("+")) {
-        countryCode = `+${countryCode}`;
-      }
+      const { countryCode, phoneNumber } = await getCountryCodeAndPhoneNumber(
+        propertyId,
+        number,
+      );
       guestData.phoneNumber = phoneNumber;
       guestData.countryCode = countryCode;
     }
@@ -224,14 +221,10 @@ const bookingUpdate = async (folio, pmsId, propertyId, req) => {
       pmsId: GuestInformation.GuestID,
     };
     if (number) {
-      const phoneNumber = number.slice(number.length - 10);
-      let countryCode = number.slice(0, number.length - 10);
-      if (countryCode === "") {
-        countryCode = `+${getCountryCode(country)}`;
-      }
-      if (!countryCode.startsWith("+")) {
-        countryCode = `+${countryCode}`;
-      }
+      const { countryCode, phoneNumber } = await getCountryCodeAndPhoneNumber(
+        propertyId,
+        number,
+      );
       guestData.phoneNumber = phoneNumber;
       guestData.countryCode = countryCode;
     }
@@ -320,14 +313,10 @@ const bookingNoShowCancel = async (folio, pmsId, propertyId, req) => {
       pmsId: GuestInformation.GuestID,
     };
     if (number) {
-      const phoneNumber = number.slice(number.length - 10);
-      let countryCode = number.slice(0, number.length - 10);
-      if (countryCode === "") {
-        countryCode = `+${getCountryCode(country)}`;
-      }
-      if (!countryCode.startsWith("+")) {
-        countryCode = `+${countryCode}`;
-      }
+      const { countryCode, phoneNumber } = await getCountryCodeAndPhoneNumber(
+        propertyId,
+        number,
+      );
       guestData.phoneNumber = phoneNumber;
       guestData.countryCode = countryCode;
     }
@@ -412,14 +401,10 @@ const reservationCreate = async (folio, pmsId, propertyId, req) => {
       GuestInformation.ContactInformation.HomeEmail ||
       GuestInformation.ContactInformation.BusinessEmail ||
       GuestInformation.ContactInformation.OtherEmail;
-    const phoneNumber = number.slice(number.length - 10);
-    let countryCode = number.slice(0, number.length - 10);
-    if (countryCode === "") {
-      countryCode = `+${getCountryCode(country)}`;
-    }
-    if (!countryCode.startsWith("+")) {
-      countryCode = `+${countryCode}`;
-    }
+    const { countryCode, phoneNumber } = await getCountryCodeAndPhoneNumber(
+      propertyId,
+      number,
+    );
     const guestData = {
       propertyId: propertyId,
       firstName: GuestInformation.GuestName.FirstName,
@@ -584,14 +569,10 @@ const reservationUpdate = async (folio, pmsId, propertyId, req) => {
       GuestInformation.ContactInformation.HomeEmail ||
       GuestInformation.ContactInformation.BusinessEmail ||
       GuestInformation.ContactInformation.OtherEmail;
-    const phoneNumber = number.slice(number.length - 10);
-    let countryCode = number.slice(0, number.length - 10);
-    if (countryCode === "") {
-      countryCode = `+${getCountryCode(country)}`;
-    }
-    if (!countryCode.startsWith("+")) {
-      countryCode = `+${countryCode}`;
-    }
+    const { countryCode, phoneNumber } = await getCountryCodeAndPhoneNumber(
+      propertyId,
+      number,
+    );
     const guestData = {
       propertyId: propertyId,
       firstName: GuestInformation.GuestName.FirstName,
@@ -743,14 +724,10 @@ const reservationNoShowCancel = async (folio, pmsId, propertyId, req) => {
       GuestInformation.ContactInformation.HomeEmail ||
       GuestInformation.ContactInformation.BusinessEmail ||
       GuestInformation.ContactInformation.OtherEmail;
-    const phoneNumber = number.slice(number.length - 10);
-    let countryCode = number.slice(0, number.length - 10);
-    if (countryCode === "") {
-      countryCode = `+${getCountryCode(country)}`;
-    }
-    if (!countryCode.startsWith("+")) {
-      countryCode = `+${countryCode}`;
-    }
+    const { countryCode, phoneNumber } = await getCountryCodeAndPhoneNumber(
+      propertyId,
+      number,
+    );
     const guestData = {
       propertyId: propertyId,
       firstName: GuestInformation.GuestName.FirstName,
@@ -901,14 +878,10 @@ const checkInCreate = async (folio, pmsId, propertyId, req) => {
       GuestInformation.ContactInformation.HomeEmail ||
       GuestInformation.ContactInformation.BusinessEmail ||
       GuestInformation.ContactInformation.OtherEmail;
-    const phoneNumber = number.slice(number.length - 10);
-    let countryCode = number.slice(0, number.length - 10);
-    if (countryCode === "") {
-      countryCode = `+${getCountryCode(country)}`;
-    }
-    if (!countryCode.startsWith("+")) {
-      countryCode = `+${countryCode}`;
-    }
+    const { countryCode, phoneNumber } = await getCountryCodeAndPhoneNumber(
+      propertyId,
+      number,
+    );
     const guestData = {
       propertyId: propertyId,
       firstName: GuestInformation.GuestName.FirstName,
@@ -1134,14 +1107,10 @@ const checkInUpdate = async (folio, pmsId, propertyId, req) => {
       GuestInformation.ContactInformation.HomeEmail ||
       GuestInformation.ContactInformation.BusinessEmail ||
       GuestInformation.ContactInformation.OtherEmail;
-    const phoneNumber = number.slice(number.length - 10);
-    let countryCode = number.slice(0, number.length - 10);
-    if (countryCode === "") {
-      countryCode = `+${getCountryCode(country)}`;
-    }
-    if (!countryCode.startsWith("+")) {
-      countryCode = `+${countryCode}`;
-    }
+    const { countryCode, phoneNumber } = await getCountryCodeAndPhoneNumber(
+      propertyId,
+      number,
+    );
     const guestData = {
       propertyId: propertyId,
       firstName: GuestInformation.GuestName.FirstName,
@@ -1315,14 +1284,10 @@ const checkOut = async (folio, pmsId, propertyId, req) => {
       GuestInformation.ContactInformation.HomeEmail ||
       GuestInformation.ContactInformation.BusinessEmail ||
       GuestInformation.ContactInformation.OtherEmail;
-    const phoneNumber = number.slice(number.length - 10);
-    let countryCode = number.slice(0, number.length - 10);
-    if (countryCode === "") {
-      countryCode = `+${getCountryCode(country)}`;
-    }
-    if (!countryCode.startsWith("+")) {
-      countryCode = `+${countryCode}`;
-    }
+    const { countryCode, phoneNumber } = await getCountryCodeAndPhoneNumber(
+      propertyId,
+      number,
+    );
     const guestData = {
       propertyId: propertyId,
       firstName: GuestInformation.GuestName.FirstName,
@@ -1716,6 +1681,67 @@ const sendSmsAddOnsCompleted = async (propertyId, guest, session) => {
     return { message: newMessage, chatList: updatedChatList };
   }
   return { message: null, chatList: null };
+};
+
+const sendSmsOnCheckInOrCheckOutTimeChange = (
+  existingGuest,
+  updatedGuest,
+  session,
+) => {
+  if (
+    existingGuest.checkIn !== updatedGuest.checkIn ||
+    existingGuest.checkOut !== updatedGuest.checkOut
+  ) {
+    const messageTemplate = messageTemplateService.getByNameAndPropertyId(
+      updatedGuest.propertyId,
+      "CheckIn/CheckOut Time Changed",
+    );
+    if (messageTemplate) {
+      const twilioAccount = twilioAccountService.getByPropertyId(
+        updatedGuest.propertyId,
+      );
+      const twilioSubClient = twilioService.getTwilioClient(twilioAccount);
+      const propertySetting = settingService.getByPropertyId(
+        updatedGuest.propertyId,
+      );
+      const { property } = propertyService.getById(updatedGuest.propertyId);
+      const guestSession = guestSessionService.getGuestSession(
+        updatedGuest.propertyId,
+        updatedGuest._id,
+      );
+      const updatedMessageBody = modifyMessageTemplateBody(
+        messageTemplate,
+        updatedGuest,
+        property,
+        `${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
+      );
+      return smsService.send(
+        twilioSubClient,
+        `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
+        `${updatedGuest.countryCode}${updatedGuest.phoneNumber}`,
+        `${updatedMessageBody.message}`,
+      );
+    }
+  }
+};
+/**
+ * Get country code and phone number from a given number
+ * @param {string} propertyId - The ID of the property.
+ * @param {string} number - The phone number to extract the country code and phone number from.
+ * @returns {Promise<{countryCode: string, phoneNumber: string}>} - An object containing the country code and phone number.
+ */
+const getCountryCodeAndPhoneNumber = async (propertyId, number) => {
+  let countryCode = number.slice(0, number.length - 10).trim();
+  const phoneNumber = number.slice(number.length - 10).trim();
+  if (!countryCode || countryCode === "" || !countryCode.startsWith("+")) {
+    const { property } = await propertyService.getById(propertyId);
+    countryCode = `+${
+      countryFile.find((c) => c.name === property.country)?.phone_code
+    }`;
+    console.log("Here");
+  }
+  console.log(countryCode, phoneNumber);
+  return { countryCode, phoneNumber };
 };
 module.exports = {
   bookingCreate,
