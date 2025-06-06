@@ -30,6 +30,7 @@ const {
   modifyAddOnsMessageTemplateBody,
 } = require("../utils/messageTemplateUpdate");
 const countryFile = require("../data/country.json");
+const countryFileFull = require("../data/country_full.json");
 //new
 
 const preArrivalService = require("../services/preArrival.service"); // Pre-arrival service
@@ -112,7 +113,7 @@ const bookingCreate = async (folio, pmsId, propertyId, req) => {
       firstName: GuestInformation.GuestName.FirstName,
       lastName: GuestInformation.GuestName.LastName,
       email: email,
-      source: BusinessSource.Name,
+      source: BusinessSource.Name || BusinessSource.Category,
       checkIn: `${StayInformation.CheckInDate}Z`,
       checkOut: `${StayInformation.CheckOutDate}Z`,
       roomNumber: StayInformation.Room,
@@ -213,7 +214,7 @@ const bookingUpdate = async (folio, pmsId, propertyId, req) => {
       firstName: GuestInformation.GuestName.FirstName,
       lastName: GuestInformation.GuestName.LastName,
       email: email,
-      source: BusinessSource.Name,
+      source: BusinessSource.Name || BusinessSource.Category,
       checkIn: `${StayInformation.CheckInDate}Z`,
       checkOut: `${StayInformation.CheckOutDate}Z`,
       roomNumber: StayInformation.Room,
@@ -306,7 +307,7 @@ const bookingNoShowCancel = async (folio, pmsId, propertyId, req) => {
       firstName: GuestInformation.GuestName.FirstName,
       lastName: GuestInformation.GuestName.LastName,
       email: email,
-      source: BusinessSource.Name,
+      source: BusinessSource.Name || BusinessSource.Category,
       checkIn: `${StayInformation.CheckInDate}Z`,
       checkOut: `${StayInformation.CheckOutDate}Z`,
       roomNumber: StayInformation.Room,
@@ -414,7 +415,7 @@ const reservationCreate = async (folio, pmsId, propertyId, req) => {
       firstName: GuestInformation.GuestName.FirstName,
       lastName: GuestInformation.GuestName.LastName,
       email: email,
-      source: BusinessSource.Name,
+      source: BusinessSource.Name || BusinessSource.Category,
       checkIn: `${StayInformation.CheckInDate}Z`,
       checkOut: `${StayInformation.CheckOutDate}Z`,
       roomNumber: StayInformation.Room,
@@ -583,7 +584,7 @@ const reservationUpdate = async (folio, pmsId, propertyId, req) => {
       firstName: GuestInformation.GuestName.FirstName,
       lastName: GuestInformation.GuestName.LastName,
       email: email,
-      source: BusinessSource.Name,
+      source: BusinessSource.Name || BusinessSource.Category,
       checkIn: `${StayInformation.CheckInDate}Z`,
       checkOut: `${StayInformation.CheckOutDate}Z`,
       roomNumber: StayInformation.Room,
@@ -739,7 +740,7 @@ const reservationNoShowCancel = async (folio, pmsId, propertyId, req) => {
       firstName: GuestInformation.GuestName.FirstName,
       lastName: GuestInformation.GuestName.LastName,
       email: email,
-      source: BusinessSource.Name,
+      source: BusinessSource.Name || BusinessSource.Category,
       checkIn: `${StayInformation.CheckInDate}Z`,
       checkOut: `${StayInformation.CheckOutDate}Z`,
       roomNumber: StayInformation.Room,
@@ -894,7 +895,7 @@ const checkInCreate = async (folio, pmsId, propertyId, req) => {
       firstName: GuestInformation.GuestName.FirstName,
       lastName: GuestInformation.GuestName.LastName,
       email: email,
-      source: BusinessSource.Name,
+      source: BusinessSource.Name || BusinessSource.Category,
       checkIn: `${StayInformation.CheckInDate}Z`,
       checkOut: `${StayInformation.CheckOutDate}Z`,
       roomNumber: StayInformation.Room,
@@ -1124,7 +1125,7 @@ const checkInUpdate = async (folio, pmsId, propertyId, req) => {
       firstName: GuestInformation.GuestName.FirstName,
       lastName: GuestInformation.GuestName.LastName,
       email: email,
-      source: BusinessSource.Name,
+      source: BusinessSource.Name || BusinessSource.Category,
       checkIn: `${StayInformation.CheckInDate}Z`,
       checkOut: `${StayInformation.CheckOutDate}Z`,
       roomNumber: StayInformation.Room,
@@ -1258,7 +1259,7 @@ const checkInUpdate = async (folio, pmsId, propertyId, req) => {
 };
 
 /**
- * @description Check Out
+ * Check Out
  * @param {object} folio - folio
  * @param {string} pmsId - pmsId
  * @param {string} propertyId - propertyId
@@ -1302,7 +1303,7 @@ const checkOut = async (folio, pmsId, propertyId, req) => {
       firstName: GuestInformation.GuestName.FirstName,
       lastName: GuestInformation.GuestName.LastName,
       email: email,
-      source: BusinessSource.Name,
+      source: BusinessSource.Name || BusinessSource.Category,
       checkIn: `${StayInformation.CheckInDate}Z`,
       checkOut: `${StayInformation.CheckOutDate}Z`,
       roomNumber: StayInformation.Room,
@@ -1746,12 +1747,12 @@ const getCountryCodeAndPhoneNumber = async (propertyId, number, country) => {
   if (!countryCode || countryCode === "" || !countryCode.startsWith("+")) {
     if (country) {
       countryCode = `+${
-        countryFile.find((c) => c.name === country)?.phone_code
+        countryFileFull.find((c) => c.name === country)?.phone_code
       }`;
     } else {
       const { property } = await propertyService.getById(propertyId);
       countryCode = `+${
-        countryFile.find((c) => c.name === property.country)?.phone_code
+        countryFileFull.find((c) => c.name === property.country)?.phone_code
       }`;
     }
     console.log("Here");
