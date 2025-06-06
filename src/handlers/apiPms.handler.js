@@ -124,6 +124,7 @@ const bookingCreate = async (folio, pmsId, propertyId, req) => {
       const { countryCode, phoneNumber } = await getCountryCodeAndPhoneNumber(
         propertyId,
         number,
+        country,
       );
       guestData.phoneNumber = phoneNumber;
       guestData.countryCode = countryCode;
@@ -224,6 +225,7 @@ const bookingUpdate = async (folio, pmsId, propertyId, req) => {
       const { countryCode, phoneNumber } = await getCountryCodeAndPhoneNumber(
         propertyId,
         number,
+        country,
       );
       guestData.phoneNumber = phoneNumber;
       guestData.countryCode = countryCode;
@@ -316,6 +318,7 @@ const bookingNoShowCancel = async (folio, pmsId, propertyId, req) => {
       const { countryCode, phoneNumber } = await getCountryCodeAndPhoneNumber(
         propertyId,
         number,
+        country,
       );
       guestData.phoneNumber = phoneNumber;
       guestData.countryCode = countryCode;
@@ -404,6 +407,7 @@ const reservationCreate = async (folio, pmsId, propertyId, req) => {
     const { countryCode, phoneNumber } = await getCountryCodeAndPhoneNumber(
       propertyId,
       number,
+      country,
     );
     const guestData = {
       propertyId: propertyId,
@@ -572,6 +576,7 @@ const reservationUpdate = async (folio, pmsId, propertyId, req) => {
     const { countryCode, phoneNumber } = await getCountryCodeAndPhoneNumber(
       propertyId,
       number,
+      country,
     );
     const guestData = {
       propertyId: propertyId,
@@ -727,6 +732,7 @@ const reservationNoShowCancel = async (folio, pmsId, propertyId, req) => {
     const { countryCode, phoneNumber } = await getCountryCodeAndPhoneNumber(
       propertyId,
       number,
+      country,
     );
     const guestData = {
       propertyId: propertyId,
@@ -881,6 +887,7 @@ const checkInCreate = async (folio, pmsId, propertyId, req) => {
     const { countryCode, phoneNumber } = await getCountryCodeAndPhoneNumber(
       propertyId,
       number,
+      country,
     );
     const guestData = {
       propertyId: propertyId,
@@ -1110,6 +1117,7 @@ const checkInUpdate = async (folio, pmsId, propertyId, req) => {
     const { countryCode, phoneNumber } = await getCountryCodeAndPhoneNumber(
       propertyId,
       number,
+      country,
     );
     const guestData = {
       propertyId: propertyId,
@@ -1287,6 +1295,7 @@ const checkOut = async (folio, pmsId, propertyId, req) => {
     const { countryCode, phoneNumber } = await getCountryCodeAndPhoneNumber(
       propertyId,
       number,
+      country,
     );
     const guestData = {
       propertyId: propertyId,
@@ -1728,16 +1737,23 @@ const sendSmsOnCheckInOrCheckOutTimeChange = (
  * Get country code and phone number from a given number
  * @param {string} propertyId - The ID of the property.
  * @param {string} number - The phone number to extract the country code and phone number from.
+ * @param {string} country - Optional country name to determine the country code if not present in the number.
  * @returns {Promise<{countryCode: string, phoneNumber: string}>} - An object containing the country code and phone number.
  */
-const getCountryCodeAndPhoneNumber = async (propertyId, number) => {
+const getCountryCodeAndPhoneNumber = async (propertyId, number, country) => {
   let countryCode = number.slice(0, number.length - 10).trim();
   const phoneNumber = number.slice(number.length - 10).trim();
   if (!countryCode || countryCode === "" || !countryCode.startsWith("+")) {
-    const { property } = await propertyService.getById(propertyId);
-    countryCode = `+${
-      countryFile.find((c) => c.name === property.country)?.phone_code
-    }`;
+    if (country) {
+      countryCode = `+${
+        countryFile.find((c) => c.name === country)?.phone_code
+      }`;
+    } else {
+      const { property } = await propertyService.getById(propertyId);
+      countryCode = `+${
+        countryFile.find((c) => c.name === property.country)?.phone_code
+      }`;
+    }
     console.log("Here");
   }
   console.log(countryCode, phoneNumber);
