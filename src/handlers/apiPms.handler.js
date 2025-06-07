@@ -1693,6 +1693,32 @@ const sendSmsAddOnsCompleted = async (propertyId, guest, session) => {
   return { message: null, chatList: null };
 };
 
+/**
+ * Get country code and phone number from a given number
+ * @param {string} propertyId - The ID of the property.
+ * @param {string} number - The phone number to extract the country code and phone number from.
+ * @param {string} country - Optional country name to determine the country code if not present in the number.
+ * @returns {Promise<{countryCode: string, phoneNumber: string}>} - An object containing the country code and phone number.
+ */
+const getCountryCodeAndPhoneNumber = async (propertyId, number, country) => {
+  let countryCode = number.slice(0, number.length - 10).trim();
+  const phoneNumber = number.slice(number.length - 10).trim();
+  if (!countryCode || countryCode === "" || !countryCode.startsWith("+")) {
+    if (country) {
+      countryCode = `+${
+        countryFileFull.find((c) => c.name === country)?.phone_code
+      }`;
+    } else {
+      const { property } = await propertyService.getById(propertyId);
+      countryCode = `+${
+        countryFileFull.find((c) => c.name === property.country)?.phone_code
+      }`;
+    }
+  }
+  console.log(countryCode, phoneNumber);
+  return { countryCode, phoneNumber };
+};
+
 const sendSmsOnCheckInOrCheckOutTimeChange = (
   existingGuest,
   updatedGuest,
@@ -1734,32 +1760,7 @@ const sendSmsOnCheckInOrCheckOutTimeChange = (
     }
   }
 };
-/**
- * Get country code and phone number from a given number
- * @param {string} propertyId - The ID of the property.
- * @param {string} number - The phone number to extract the country code and phone number from.
- * @param {string} country - Optional country name to determine the country code if not present in the number.
- * @returns {Promise<{countryCode: string, phoneNumber: string}>} - An object containing the country code and phone number.
- */
-const getCountryCodeAndPhoneNumber = async (propertyId, number, country) => {
-  let countryCode = number.slice(0, number.length - 10).trim();
-  const phoneNumber = number.slice(number.length - 10).trim();
-  if (!countryCode || countryCode === "" || !countryCode.startsWith("+")) {
-    if (country) {
-      countryCode = `+${
-        countryFileFull.find((c) => c.name === country)?.phone_code
-      }`;
-    } else {
-      const { property } = await propertyService.getById(propertyId);
-      countryCode = `+${
-        countryFileFull.find((c) => c.name === property.country)?.phone_code
-      }`;
-    }
-    console.log("Here");
-  }
-  console.log(countryCode, phoneNumber);
-  return { countryCode, phoneNumber };
-};
+
 module.exports = {
   bookingCreate,
   bookingUpdate,

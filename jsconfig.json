@@ -1,0 +1,27 @@
+
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "module": "es2015",
+    "target": "es2015",
+    "jsx": "react", // If you use React/JSX in JS files
+    "allowJs": true,
+    "checkJs": false, // Set to false to avoid type-checking JS, which can sometimes crash
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true, // Essential for pure JS projects
+    "skipLibCheck": true // Often helpful for large node_modules
+  },
+  "include": [
+    "src/**/*",        // Adjust to your source folder
+    "*.js",            // Include JS files at root
+    "*.jsx"            // Include JSX files at root
+  ],
+  "exclude": [
+    "node_modules",
+    "**/node_modules/*",
+    "dist",
+    "build",
+    "*.json"
+  ]
+}
