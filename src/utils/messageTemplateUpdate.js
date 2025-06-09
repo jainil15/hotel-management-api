@@ -248,11 +248,19 @@ function modifyCheckInOutMessageTemplateBody(
 ) {
   const { name: hotelName } = propertyInfo;
 
+  const formattedCheckIn = formatDateWithLocalTimezone(
+    guestInfo.checkIn,
+    propertySetting.timezone,
+  );
+  const formattedCheckOut = formatDateWithLocalTimezone(
+    guestInfo.checkOut,
+    propertySetting.timezone,
+  );
   messageTemplate.message = messageTemplate.message
     .replace("[Hotel Name]", hotelName)
     .replace("[Guest Link]", guestLink)
-    .replace("[Check-In Time]", guestInfo.checkIn)
-    .replace("[Check-Out Time]", guestInfo.checkOut);
+    .replace("[Check-In Time]", formattedCheckIn)
+    .replace("[Check-Out Time]", formattedCheckOut);
 
   return messageTemplate;
 }
