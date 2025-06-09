@@ -251,14 +251,8 @@ function modifyCheckInOutMessageTemplateBody(
   messageTemplate.message = messageTemplate.message
     .replace("[Hotel Name]", hotelName)
     .replace("[Guest Link]", guestLink)
-    .replace(
-      "[Check-In Time]",
-      convertUTCToLocal(guestInfo.checkIn, propertySetting.timezone),
-    )
-    .replace(
-      "[Check-Out Time]",
-      convertUTCToLocal(guestInfo.checkOut, propertySetting.timezone),
-    );
+    .replace("[Check-In Time]", guestInfo.checkIn)
+    .replace("[Check-Out Time]", guestInfo.checkOut, propertySetting.timezone);
 
   return messageTemplate;
 }
