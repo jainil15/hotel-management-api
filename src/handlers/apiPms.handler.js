@@ -1766,8 +1766,10 @@ const sendSmsOnCheckInOrCheckOutTimeChange = async (
   session,
 ) => {
   if (
-    existingGuest.checkIn !== updatedGuest.checkIn ||
-    existingGuest.checkOut !== updatedGuest.checkOut
+    new Date(existingGuest.checkIn).toISOString() !==
+      new Date(updatedGuest.checkIn).toISOString() ||
+    new Date(existingGuest.checkOut).toISOString() !==
+      new Date(updatedGuest.checkOut).toISOString()
   ) {
     console.log(
       existingGuest.checkIn,

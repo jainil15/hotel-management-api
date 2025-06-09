@@ -252,7 +252,7 @@ function modifyCheckInOutMessageTemplateBody(
     .replace("[Hotel Name]", hotelName)
     .replace("[Guest Link]", guestLink)
     .replace("[Check-In Time]", guestInfo.checkIn)
-    .replace("[Check-Out Time]", guestInfo.checkOut, propertySetting.timezone);
+    .replace("[Check-Out Time]", guestInfo.checkOut);
 
   return messageTemplate;
 }
