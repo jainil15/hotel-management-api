@@ -1769,6 +1769,12 @@ const sendSmsOnCheckInOrCheckOutTimeChange = async (
     existingGuest.checkIn !== updatedGuest.checkIn ||
     existingGuest.checkOut !== updatedGuest.checkOut
   ) {
+    console.log(
+      existingGuest.checkIn,
+      updatedGuest.checkIn,
+      existingGuest.checkOut,
+      updatedGuest.checkOut,
+    );
     const messageTemplate = await messageTemplateService.getByNameAndPropertyId(
       updatedGuest.propertyId,
       "CheckInOutTime Changed",
