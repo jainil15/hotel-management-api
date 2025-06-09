@@ -1425,6 +1425,7 @@ const checkOut = async (folio, pmsId, propertyId, req) => {
 const roomStatusUpdate = async (roomStatusData, propertyId, req) => {
   const session = await mongoose.startSession();
   session.startTransaction();
+  console.log(roomStatusData);
   try {
     const guest = await guestService.findGuestByGuestStatus(
       propertyId,
