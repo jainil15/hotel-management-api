@@ -233,7 +233,6 @@ const getByPropertyId = async (propertyId) => {
 
   const time = Date.now();
   const chatList = await ChatList.aggregate(pipeline);
-  console.log(JSON.stringify(chatList));
   logger.info(`End time: ${Date.now() - time}ms`);
   return chatList[0];
 };
