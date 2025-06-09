@@ -28,6 +28,8 @@ const {
   modifyMessageTemplateBody,
   modifyMessageTemplateBodyForPhoneNumberChange,
   modifyAddOnsMessageTemplateBody,
+  convertUTCToLocal,
+  modifyCheckInOutMessageTemplateBody,
 } = require("../utils/messageTemplateUpdate");
 const countryFile = require("../data/country.json");
 const countryFileFull = require("../data/country_full.json");
@@ -634,6 +636,11 @@ const reservationUpdate = async (folio, pmsId, propertyId, req) => {
       );
 
       await sendSmsOnPhoneNumberChange(existingGuest, updatedGuest, session);
+      await sendSmsOnCheckInOrCheckOutTimeChange(
+        existingGuest,
+        updatedGuest,
+        session,
+      );
       if (messageTemplate) {
         const twilioAccount =
           await twilioAccountService.getByPropertyId(propertyId);
@@ -1183,6 +1190,11 @@ const checkInUpdate = async (folio, pmsId, propertyId, req) => {
         session,
       );
       await sendSmsOnPhoneNumberChange(existingGuest, updatedGuest, session);
+      await sendSmsOnCheckInOrCheckOutTimeChange(
+        existingGuest,
+        updatedGuest,
+        session,
+      );
       const messageTemplate =
         await messageTemplateService.getByNameAndPropertyId(
           propertyId,
@@ -1609,6 +1621,12 @@ const sendSmsOnPhoneNumberChange = async (
         `${updatedGuest.countryCode}${updatedGuest.phoneNumber}`,
         `${updatedMessageBody.message}`,
       );
+      const sentSmsToOldNumber = await smsService.send(
+        twilioSubClient,
+        `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
+        `${existingGuest.countryCode}${existingGuest.phoneNumber}`,
+        `${updatedMessageBody.message}`,
+      );
       const message = await messageService.create(
         {
           propertyId: updatedGuest.propertyId,
@@ -1623,6 +1641,21 @@ const sendSmsOnPhoneNumberChange = async (
         },
         session,
       );
+      const sentMessageToOldNumber = await messageService.create(
+        {
+          propertyId: updatedGuest.propertyId,
+          guestId: updatedGuest._id,
+          senderId: updatedGuest.propertyId,
+          receiverId: updatedGuest._id,
+          content: updatedMessageBody.message,
+          messageSid: sentSmsToOldNumber.sid,
+          messageType: messageType.SMS,
+          messageTriggerType: messageTriggerType.AUTOMATIC,
+          status: "sent",
+        },
+        session,
+      );
+
       const chatList = await chatListService.updateAndIncUnreadMessages(
         updatedGuest.propertyId,
         updatedGuest._id,
@@ -1630,6 +1663,7 @@ const sendSmsOnPhoneNumberChange = async (
           latestMessage: message._id,
         },
         session,
+        2,
       );
       return { message, chatList };
     }
@@ -1719,7 +1753,14 @@ const getCountryCodeAndPhoneNumber = async (propertyId, number, country) => {
   return { countryCode, phoneNumber };
 };
 
-const sendSmsOnCheckInOrCheckOutTimeChange = (
+/**
+ * Sends an SMS when the check-in or check-out time of a guest is changed.
+ * @param {import('../models/guest.model.js').GuestType} existingGuest - The existing guest object.
+ * @param {import('../models/guest.model.js').GuestType} updatedGuest - The updated guest object.
+ * @param {import('mongoose').ClientSession} session - The Mongoose session.
+ * @returns {Promise<{message: import('../models/message.model.js').MessageType, chatList: import('../models/chatList.model.js').ChatListType}>} - A promise that resolves to an object containing the message and chat list.
+ */
+const sendSmsOnCheckInOrCheckOutTimeChange = async (
   existingGuest,
   updatedGuest,
   session,
@@ -1728,36 +1769,61 @@ const sendSmsOnCheckInOrCheckOutTimeChange = (
     existingGuest.checkIn !== updatedGuest.checkIn ||
     existingGuest.checkOut !== updatedGuest.checkOut
   ) {
-    const messageTemplate = messageTemplateService.getByNameAndPropertyId(
+    const messageTemplate = await messageTemplateService.getByNameAndPropertyId(
       updatedGuest.propertyId,
-      "CheckIn/CheckOut Time Changed",
+      "CheckInOutTime Changed",
     );
-    if (messageTemplate) {
-      const twilioAccount = twilioAccountService.getByPropertyId(
-        updatedGuest.propertyId,
-      );
-      const twilioSubClient = twilioService.getTwilioClient(twilioAccount);
-      const propertySetting = settingService.getByPropertyId(
-        updatedGuest.propertyId,
-      );
-      const { property } = propertyService.getById(updatedGuest.propertyId);
-      const guestSession = guestSessionService.getGuestSession(
-        updatedGuest.propertyId,
-        updatedGuest._id,
-      );
-      const updatedMessageBody = modifyMessageTemplateBody(
-        messageTemplate,
-        updatedGuest,
-        property,
-        `${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
-      );
-      return smsService.send(
-        twilioSubClient,
-        `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
-        `${updatedGuest.countryCode}${updatedGuest.phoneNumber}`,
-        `${updatedMessageBody.message}`,
-      );
+    if (!messageTemplate) {
+      return { message: null, chatList: null };
     }
+    const twilioAccount = await twilioAccountService.getByPropertyId(
+      updatedGuest.propertyId,
+    );
+    const twilioSubClient = await twilioService.getTwilioClient(twilioAccount);
+    const propertySetting = await settingService.getByPropertyId(
+      updatedGuest.propertyId,
+    );
+    const { property } = await propertyService.getById(updatedGuest.propertyId);
+    const guestSession = await guestSessionService.getGuestSession(
+      updatedGuest.propertyId,
+      updatedGuest._id,
+    );
+    const updatedMessageBody = modifyCheckInOutMessageTemplateBody(
+      messageTemplate,
+      updatedGuest,
+      property,
+      propertySetting,
+      `${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
+    );
+    const sentSms = await smsService.send(
+      twilioSubClient,
+      `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
+      `${updatedGuest.countryCode}${updatedGuest.phoneNumber}`,
+      `${updatedMessageBody.message}`,
+    );
+    const message = await messageService.create(
+      {
+        propertyId: updatedGuest.propertyId,
+        guestId: updatedGuest._id,
+        senderId: updatedGuest.propertyId,
+        receiverId: updatedGuest._id,
+        content: updatedMessageBody.message,
+        messageSid: sentSms.sid,
+        messageType: messageType.SMS,
+        messageTriggerType: messageTriggerType.AUTOMATIC,
+        status: "sent",
+      },
+      session,
+    );
+    const chatList = await chatListService.updateAndIncUnreadMessages(
+      updatedGuest.propertyId,
+      updatedGuest._id,
+      {
+        latestMessage: message._id,
+      },
+      session,
+    );
+    return { message, chatList };
   }
 };
 

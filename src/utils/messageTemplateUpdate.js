@@ -95,7 +95,7 @@ function modifyMessageTemplateBody(
     const time = messageTemplate.name.includes("Early")
       ? guestInfo.checkIn
       : guestInfo.checkOut;
-    
+
     messageTemplate.message = messageTemplate.message
       .replace("[Time]", convertUTCToLocal(time, propertySetting.timezone))
       .replace("[Hotel Name]", hotelName)
@@ -136,7 +136,10 @@ function modifyMessageTemplateBody(
     const formattedDate = formatDateToUTC(guestInfo.checkIn);
 
     messageTemplate.message = messageTemplate.message
-      .replace("[Date]", convertUTCToLocal(guestInfo.checkIn, propertySetting.timezone))
+      .replace(
+        "[Date]",
+        convertUTCToLocal(guestInfo.checkIn, propertySetting.timezone),
+      )
       .replace("[Hotel Name]", hotelName)
       .replace("[Guest Link]", guestLink);
   } else if (
@@ -227,9 +230,43 @@ function modifyMessageTemplateBodyForPhoneNumberChange(
   return messageTemplate;
 }
 
+/**
+ * Modify the check-in/out message template body
+ * @param {object} messageTemplate - The message template object
+ * @param {object} guestInfo - The guest information object
+ * @param {object} propertyInfo - The property information object
+ * @param {object} propertySetting - The property setting object
+ * @param {string} guestLink - The link for the guest
+ * @returns {object} - The modified message template
+ */
+function modifyCheckInOutMessageTemplateBody(
+  messageTemplate,
+  guestInfo,
+  propertyInfo,
+  propertySetting,
+  guestLink,
+) {
+  const { name: hotelName } = propertyInfo;
+
+  messageTemplate.message = messageTemplate.message
+    .replace("[Hotel Name]", hotelName)
+    .replace("[Guest Link]", guestLink)
+    .replace(
+      "[Check-In Time]",
+      convertUTCToLocal(guestInfo.checkIn, propertySetting.timezone),
+    )
+    .replace(
+      "[Check-Out Time]",
+      convertUTCToLocal(guestInfo.checkOut, propertySetting.timezone),
+    );
+
+  return messageTemplate;
+}
+
 module.exports = {
   modifyMessageTemplateBody,
   modifyAddOnsMessageTemplateBody,
   modifyMessageTemplateBodyForPhoneNumberChange,
   convertUTCToLocal,
+  modifyCheckInOutMessageTemplateBody,
 };

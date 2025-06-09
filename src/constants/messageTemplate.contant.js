@@ -14,11 +14,6 @@ const DEFAULT_MESSAGE_TEMPLATES = {
 `,
       name: "Reservation Cancelled",
     },
-    [RESERVATION_STATUS.NO_SHOW]: {
-      message:
-        "We noticed you didn’t check in for your reservation at [Hotel Name]. If you need assistance or would like to rebook, please reply to this message or visit [Guest Link]. We’re here to help!",
-      name: "No Show",
-    },
   },
   "Early Check In": {
     [EARLY_CHECK_IN_STATUS.DECLINED]: {
@@ -105,6 +100,13 @@ Enjoy more time with us—explore amenities, request housekeeping, or share feed
       message:
         "Your phone number has been successfully changed to [New Phone Number]. If you have any questions or need further assistance, please reply to this message or visit [Guest Link].",
       name: "PhoneNumber Changed",
+    },
+  },
+  CheckInOutTime: {
+    Changed: {
+      message:
+        "Your check-in and/or check-out time has been successfully changed to [Check-In Time] and [Check-Out Time]. If you have any questions or need further assistance, please reply to this message or visit [Guest Link].",
+      name: "CheckInOutTime Changed",
     },
   },
 };
