@@ -220,7 +220,25 @@ const deleteCheckInOutRequest = async (
     guestId: guestId,
     _id: requestId,
   }).session(session);
+
   return deletedCheckInOutRequest;
+};
+const closeCheckInOutRequest = async (
+  propertyId,
+  guestId,
+  requestId,
+  session,
+) => {
+  const updatedCheckInOutRequest = await CheckInOutRequest.findOneAndUpdate(
+    {
+      propertyId: propertyId,
+      guestId: guestId,
+      _id: requestId,
+    },
+    { requestStatus: REQUEST_STATUS.CLOSED },
+    { new: true, session: session },
+  );
+  return updatedCheckInOutRequest;
 };
 module.exports = {
   create,
@@ -231,4 +249,5 @@ module.exports = {
   getByRequestType,
   updateFieldByPropertyIdAndGuestId,
   deleteCheckInOutRequest,
+  closeCheckInOutRequest,
 };

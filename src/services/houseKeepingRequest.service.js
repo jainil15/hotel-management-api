@@ -77,10 +77,26 @@ const find = async (filter) => {
   return houseKeepingRequests;
 };
 
+const closeHouseKeepingRequest = async (
+  propertyId,
+  guestId,
+  requestId,
+  session,
+) => {
+  const updatedHouseKeepingRequest =
+    await HouseKeepingRequest.findByIdAndUpdate(
+      requestId,
+      { requestStatus: REQUEST_STATUS.CLOSED },
+      { new: true, session },
+    );
+  return updatedHouseKeepingRequest;
+};
+
 module.exports = {
   create,
   findByPropertyId,
   update,
   getByGuestId,
   find,
+  closeHouseKeepingRequest,
 };

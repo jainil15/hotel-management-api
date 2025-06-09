@@ -24,6 +24,7 @@ const propertyService = require("../services/property.service");
 const checkInOutRequestService = require("../services/checkInOutRequest.service");
 const { modifyMessageTemplateBody } = require("../utils/messageTemplateUpdate");
 const { TIMEZONE } = require("../constants/timezone.constant");
+const houseKeepingRequestService = require("../services/houseKeepingRequest.service");
 
 const preArrivalService = require("../services/preArrival.service"); // Pre-arrival service
 const addOnsServices = require("../services/addOnsRequest.service"); // Add-ons service
@@ -1299,7 +1300,7 @@ const deleteAddOnsRequest = async (req, res, next) => {
       requestType === "lateCheckOut"
     ) {
       const deletedCheckInOutRequest =
-        await checkInOutRequestService.deleteCheckInOutRequest(
+        await checkInOutRequestService.closeCheckInOutRequest(
           propertyId,
           guestId,
           requestId,
@@ -1307,7 +1308,15 @@ const deleteAddOnsRequest = async (req, res, next) => {
         );
     } else if (requestType === "addOns") {
       const deletedAddOnsRequest =
-        await addOnsRequestService.deleteAddOnsRequest(
+        await addOnsRequestService.closeAddOnsRequest(
+          propertyId,
+          guestId,
+          requestId,
+          session,
+        );
+    } else if (requestType === "houseKeeping") {
+      const deletedHouseKeepingRequest =
+        await houseKeepingRequestService.closeHouseKeepingRequest(
           propertyId,
           guestId,
           requestId,
