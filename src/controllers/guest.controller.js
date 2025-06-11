@@ -977,6 +977,9 @@ const getGuestAddonsRequests = async (req, res, next) => {
     const { requestStatus } = req.query;
     const { requests, propertyAddons } =
       await guestService.getGuestAddonsRequests(propertyId, requestStatus);
+    requests.sort((a, b) => {
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    });
     return responseHandler(res, {
       requests,
       propertyAddons,
