@@ -171,6 +171,11 @@ const receive = async (req, res, next) => {
     req.app.io.to(`guest:${guest._id}`).emit("message:newMessage", {
       message: newMessage,
     });
+    req.app.io
+      .to(`guest:${guest.countryCode}${guest.phoneNumber}`)
+      .emit("message:newMessage", {
+        message: newMessage,
+      });
     return responseHandler(res, {}, 200, "Message received successfully");
   } catch (e) {
     await session.abortTransaction();
