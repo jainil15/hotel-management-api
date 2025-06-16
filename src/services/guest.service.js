@@ -57,16 +57,16 @@ const getByGuestId = async (guestId) => {
 /**
  * Get guest by id
  * @param {string} guestId - guest id
- * @param {string} propertyId - property id @returns {Promise<import('../models/guest.model').GuestType>} guest - guest object */ const getById =
-  async (guestId, propertyId) => {
-    const guest = await Guest.findOne({ _id: guestId, propertyId: propertyId });
-    if (!guest) {
-      throw new NotFoundError("Guest not found", {
-        guestId: ["Guest not found for the given id"],
-      });
-    }
-    return guest;
-  };
+ * @param {string} propertyId - property id @returns {Promise<import('../models/guest.model').GuestType>} guest - guest object */
+const getById = async (guestId, propertyId) => {
+  const guest = await Guest.findOne({ _id: guestId, propertyId: propertyId });
+  if (!guest) {
+    throw new NotFoundError("Guest not found", {
+      guestId: ["Guest not found for the given id"],
+    });
+  }
+  return guest;
+};
 /**
  * Update guest
  * @param {object} guest - guest object

@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const { ChatList } = require("../models/chatList.model");
 const logger = require("../configs/winston.config");
 const { GUEST_CURRENT_STATUS } = require("../constants/guestStatus.contant");
-
+const { Guest } = require("../models/guest.model");
 /**
  * Create a chat list for a property and guest
  * @param {string} propertyId - propertyId
@@ -312,6 +312,36 @@ const upsert = async (propertyId, guestId, session) => {
   return savedChatList;
 };
 
+const resetUnreadMessages = async (
+  countryCode,
+  phoneNumber,
+  propertyId,
+  session,
+) => {
+  const guests = await Guest.find({
+    propertyId,
+    countryCode,
+    phoneNumber,
+  }).select("_id");
+
+  const guestIds = guests.map((g) => g._id);
+
+  if (guestIds.length === 0) {
+    return { matchedCount: 0, modifiedCount: 0 }; // or throw if needed
+  }
+  const chatList = await ChatList.updateMany(
+    {
+      propertyId,
+      guestId: { $in: guestIds },
+      unreadMessages: { $gt: 0 },
+    },
+    { $set: { unreadMessages: 0 } },
+    { session },
+  );
+
+  return chatList;
+};
+
 module.exports = {
   create,
   getByPropertyId,
@@ -319,4 +349,5 @@ module.exports = {
   remove,
   updateAndIncUnreadMessages,
   upsert,
+  resetUnreadMessages,
 };

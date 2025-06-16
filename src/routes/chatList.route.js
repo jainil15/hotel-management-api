@@ -1,8 +1,8 @@
 const chatListController = require("../controllers/chatList.controller");
 const { authenticateToken } = require("../middlewares/jwt.middleware");
 const {
-	checkPropertyAccess,
-	checkPermissions,
+  checkPropertyAccess,
+  checkPermissions,
 } = require("../middlewares/propertyaccess.middleware");
 const { ROLE } = require("../constants/role.constant");
 const { responseHandler } = require("../middlewares/response.middleware");
@@ -13,32 +13,39 @@ const { default: mongoose } = require("mongoose");
 const router = require("express").Router();
 
 router.get(
-	"/:propertyId",
-	authenticateToken,
-	checkPropertyAccess,
-	checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
-	chatListController.getAllByPropertyId,
+  "/:propertyId",
+  authenticateToken,
+  checkPropertyAccess,
+  checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
+  chatListController.getAllByPropertyId,
 );
 router.put(
-	"/:propertyId/:guestId",
-	authenticateToken,
-	checkPropertyAccess,
-	checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
-	chatListController.update,
+  "/:propertyId/:guestId",
+  authenticateToken,
+  checkPropertyAccess,
+  checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
+  chatListController.update,
 );
 router.post(
-	"/:propertyId/:guestId",
-	authenticateToken,
-	checkPropertyAccess,
-	checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
-	chatListController.create,
+  "/:propertyId/:guestId",
+  authenticateToken,
+  checkPropertyAccess,
+  checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
+  chatListController.create,
 );
 router.delete(
-	"/:propertyId/:guestId",
-	authenticateToken,
-	checkPropertyAccess,
-	checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
-	chatListController.remove,
+  "/:propertyId/:guestId",
+  authenticateToken,
+  checkPropertyAccess,
+  checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
+  chatListController.remove,
+);
+router.put(
+  "/:propertyId/:guestId/resetUnreadMessages",
+  authenticateToken,
+  checkPropertyAccess,
+  checkPermissions([ROLE.ADMIN, ROLE.FRONTDESK]),
+  chatListController.resetUnreadMessages,
 );
 
 //Temp code to create chat list for all guests

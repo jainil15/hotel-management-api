@@ -133,16 +133,16 @@ const resetUnreadMessages = async (req, res, next) => {
   session.startTransaction();
   try {
     const { propertyId, guestId } = req.params;
-    const guest = await guestService.getById(guestId, session);
+    const guest = await guestService.getById(guestId, propertyId, session);
     if (!guest) {
       throw new NotFoundError("Guest not found", {
         guestId: "Invalid guest ID",
       });
     }
     const chatList = await chatListService.resetUnreadMessages(
-      propertyId,
       guest.countryCode,
       guest.phoneNumber,
+      propertyId,
       session,
     );
     req.app.io.to(`property:${propertyId}`).emit("chatList:update", {
