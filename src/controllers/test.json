@@ -11,7 +11,7 @@
         "Transaction": {
           "ID": "R-24884",
           "Type": "Reservation",
-          "EventName": "Reservation-Create"
+          "EventName": "Reservation-Update"
         },
         "FolioInformation": {
           "CreationDate": "2024-08-11T22:29:00",

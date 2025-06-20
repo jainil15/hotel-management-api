@@ -28,7 +28,11 @@ const {
   modifyMessageTemplateBody,
   modifyMessageTemplateBodyForPhoneNumberChange,
   modifyAddOnsMessageTemplateBody,
+  convertUTCToLocal,
+  modifyCheckInOutMessageTemplateBody,
 } = require("../utils/messageTemplateUpdate");
+const countryFile = require("../data/country.json");
+const countryFileFull = require("../data/country_full.json");
 //new
 
 const preArrivalService = require("../services/preArrival.service"); // Pre-arrival service
@@ -72,7 +76,7 @@ const { ADD_ONS_STATUS } = require("../constants/addOns.constant.js");
 require("dotenv").config();
 
 /**
- * @description Create a new booking
+ * Create a new booking
  * @param {object} folio - Folio object
  * @param {string} pmsId - pmsId
  * @param {string} propertyId - propertyId
@@ -111,7 +115,7 @@ const bookingCreate = async (folio, pmsId, propertyId, req) => {
       firstName: GuestInformation.GuestName.FirstName,
       lastName: GuestInformation.GuestName.LastName,
       email: email,
-      source: BusinessSource.Source,
+      source: BusinessSource.Name || BusinessSource.Category,
       checkIn: `${StayInformation.CheckInDate}Z`,
       checkOut: `${StayInformation.CheckOutDate}Z`,
       roomNumber: StayInformation.Room,
@@ -120,14 +124,11 @@ const bookingCreate = async (folio, pmsId, propertyId, req) => {
       pmsId: GuestInformation.GuestID,
     };
     if (number) {
-      const phoneNumber = number.slice(number.length - 10);
-      let countryCode = number.slice(0, number.length - 10);
-      if (countryCode === "") {
-        countryCode = `+${getCountryCode(country)}`;
-      }
-      if (!countryCode.startsWith("+")) {
-        countryCode = `+${countryCode}`;
-      }
+      const { countryCode, phoneNumber } = await getCountryCodeAndPhoneNumber(
+        propertyId,
+        number,
+        country,
+      );
       guestData.phoneNumber = phoneNumber;
       guestData.countryCode = countryCode;
     }
@@ -215,7 +216,7 @@ const bookingUpdate = async (folio, pmsId, propertyId, req) => {
       firstName: GuestInformation.GuestName.FirstName,
       lastName: GuestInformation.GuestName.LastName,
       email: email,
-      source: BusinessSource.Source,
+      source: BusinessSource.Name || BusinessSource.Category,
       checkIn: `${StayInformation.CheckInDate}Z`,
       checkOut: `${StayInformation.CheckOutDate}Z`,
       roomNumber: StayInformation.Room,
@@ -224,14 +225,11 @@ const bookingUpdate = async (folio, pmsId, propertyId, req) => {
       pmsId: GuestInformation.GuestID,
     };
     if (number) {
-      const phoneNumber = number.slice(number.length - 10);
-      let countryCode = number.slice(0, number.length - 10);
-      if (countryCode === "") {
-        countryCode = `+${getCountryCode(country)}`;
-      }
-      if (!countryCode.startsWith("+")) {
-        countryCode = `+${countryCode}`;
-      }
+      const { countryCode, phoneNumber } = await getCountryCodeAndPhoneNumber(
+        propertyId,
+        number,
+        country,
+      );
       guestData.phoneNumber = phoneNumber;
       guestData.countryCode = countryCode;
     }
@@ -311,7 +309,7 @@ const bookingNoShowCancel = async (folio, pmsId, propertyId, req) => {
       firstName: GuestInformation.GuestName.FirstName,
       lastName: GuestInformation.GuestName.LastName,
       email: email,
-      source: BusinessSource.Source,
+      source: BusinessSource.Name || BusinessSource.Category,
       checkIn: `${StayInformation.CheckInDate}Z`,
       checkOut: `${StayInformation.CheckOutDate}Z`,
       roomNumber: StayInformation.Room,
@@ -320,14 +318,11 @@ const bookingNoShowCancel = async (folio, pmsId, propertyId, req) => {
       pmsId: GuestInformation.GuestID,
     };
     if (number) {
-      const phoneNumber = number.slice(number.length - 10);
-      let countryCode = number.slice(0, number.length - 10);
-      if (countryCode === "") {
-        countryCode = `+${getCountryCode(country)}`;
-      }
-      if (!countryCode.startsWith("+")) {
-        countryCode = `+${countryCode}`;
-      }
+      const { countryCode, phoneNumber } = await getCountryCodeAndPhoneNumber(
+        propertyId,
+        number,
+        country,
+      );
       guestData.phoneNumber = phoneNumber;
       guestData.countryCode = countryCode;
     }
@@ -412,20 +407,17 @@ const reservationCreate = async (folio, pmsId, propertyId, req) => {
       GuestInformation.ContactInformation.HomeEmail ||
       GuestInformation.ContactInformation.BusinessEmail ||
       GuestInformation.ContactInformation.OtherEmail;
-    const phoneNumber = number.slice(number.length - 10);
-    let countryCode = number.slice(0, number.length - 10);
-    if (countryCode === "") {
-      countryCode = `+${getCountryCode(country)}`;
-    }
-    if (!countryCode.startsWith("+")) {
-      countryCode = `+${countryCode}`;
-    }
+    const { countryCode, phoneNumber } = await getCountryCodeAndPhoneNumber(
+      propertyId,
+      number,
+      country,
+    );
     const guestData = {
       propertyId: propertyId,
       firstName: GuestInformation.GuestName.FirstName,
       lastName: GuestInformation.GuestName.LastName,
       email: email,
-      source: BusinessSource.Source,
+      source: BusinessSource.Name || BusinessSource.Category,
       checkIn: `${StayInformation.CheckInDate}Z`,
       checkOut: `${StayInformation.CheckOutDate}Z`,
       roomNumber: StayInformation.Room,
@@ -520,7 +512,6 @@ const reservationCreate = async (folio, pmsId, propertyId, req) => {
               latestMessage: newMessage._id,
             },
             session,
-            0,
           );
       }
     }
@@ -585,20 +576,17 @@ const reservationUpdate = async (folio, pmsId, propertyId, req) => {
       GuestInformation.ContactInformation.HomeEmail ||
       GuestInformation.ContactInformation.BusinessEmail ||
       GuestInformation.ContactInformation.OtherEmail;
-    const phoneNumber = number.slice(number.length - 10);
-    let countryCode = number.slice(0, number.length - 10);
-    if (countryCode === "") {
-      countryCode = `+${getCountryCode(country)}`;
-    }
-    if (!countryCode.startsWith("+")) {
-      countryCode = `+${countryCode}`;
-    }
+    const { countryCode, phoneNumber } = await getCountryCodeAndPhoneNumber(
+      propertyId,
+      number,
+      country,
+    );
     const guestData = {
       propertyId: propertyId,
       firstName: GuestInformation.GuestName.FirstName,
       lastName: GuestInformation.GuestName.LastName,
       email: email,
-      source: BusinessSource.Source,
+      source: BusinessSource.Name || BusinessSource.Category,
       checkIn: `${StayInformation.CheckInDate}Z`,
       checkOut: `${StayInformation.CheckOutDate}Z`,
       roomNumber: StayInformation.Room,
@@ -640,8 +628,19 @@ const reservationUpdate = async (folio, pmsId, propertyId, req) => {
           guestStatusToTemplateOnUpdate(oldStatus, status),
         );
 
-      await sendSmsOnNewPhoneNumber(existingGuest, updatedGuest, status);
-      await sendSmsOnPhoneNumberChange(existingGuest, updatedGuest);
+      await sendSmsOnNewPhoneNumber(
+        existingGuest,
+        updatedGuest,
+        status,
+        session,
+      );
+
+      await sendSmsOnPhoneNumberChange(existingGuest, updatedGuest, session);
+      await sendSmsOnCheckInOrCheckOutTimeChange(
+        existingGuest,
+        updatedGuest,
+        session,
+      );
       if (messageTemplate) {
         const twilioAccount =
           await twilioAccountService.getByPropertyId(propertyId);
@@ -690,6 +689,7 @@ const reservationUpdate = async (folio, pmsId, propertyId, req) => {
       message: {},
     });
     req.app.io.to(`property:${propertyId}`).emit("chatList:update", {});
+
     return {
       ...updatedGuest._doc,
       status: { ...status._doc },
@@ -737,20 +737,17 @@ const reservationNoShowCancel = async (folio, pmsId, propertyId, req) => {
       GuestInformation.ContactInformation.HomeEmail ||
       GuestInformation.ContactInformation.BusinessEmail ||
       GuestInformation.ContactInformation.OtherEmail;
-    const phoneNumber = number.slice(number.length - 10);
-    let countryCode = number.slice(0, number.length - 10);
-    if (countryCode === "") {
-      countryCode = `+${getCountryCode(country)}`;
-    }
-    if (!countryCode.startsWith("+")) {
-      countryCode = `+${countryCode}`;
-    }
+    const { countryCode, phoneNumber } = await getCountryCodeAndPhoneNumber(
+      propertyId,
+      number,
+      country,
+    );
     const guestData = {
       propertyId: propertyId,
       firstName: GuestInformation.GuestName.FirstName,
       lastName: GuestInformation.GuestName.LastName,
       email: email,
-      source: BusinessSource.Source,
+      source: BusinessSource.Name || BusinessSource.Category,
       checkIn: `${StayInformation.CheckInDate}Z`,
       checkOut: `${StayInformation.CheckOutDate}Z`,
       roomNumber: StayInformation.Room,
@@ -895,20 +892,17 @@ const checkInCreate = async (folio, pmsId, propertyId, req) => {
       GuestInformation.ContactInformation.HomeEmail ||
       GuestInformation.ContactInformation.BusinessEmail ||
       GuestInformation.ContactInformation.OtherEmail;
-    const phoneNumber = number.slice(number.length - 10);
-    let countryCode = number.slice(0, number.length - 10);
-    if (countryCode === "") {
-      countryCode = `+${getCountryCode(country)}`;
-    }
-    if (!countryCode.startsWith("+")) {
-      countryCode = `+${countryCode}`;
-    }
+    const { countryCode, phoneNumber } = await getCountryCodeAndPhoneNumber(
+      propertyId,
+      number,
+      country,
+    );
     const guestData = {
       propertyId: propertyId,
       firstName: GuestInformation.GuestName.FirstName,
       lastName: GuestInformation.GuestName.LastName,
       email: email,
-      source: BusinessSource.Source,
+      source: BusinessSource.Name || BusinessSource.Category,
       checkIn: `${StayInformation.CheckInDate}Z`,
       checkOut: `${StayInformation.CheckOutDate}Z`,
       roomNumber: StayInformation.Room,
@@ -1128,20 +1122,17 @@ const checkInUpdate = async (folio, pmsId, propertyId, req) => {
       GuestInformation.ContactInformation.HomeEmail ||
       GuestInformation.ContactInformation.BusinessEmail ||
       GuestInformation.ContactInformation.OtherEmail;
-    const phoneNumber = number.slice(number.length - 10);
-    let countryCode = number.slice(0, number.length - 10);
-    if (countryCode === "") {
-      countryCode = `+${getCountryCode(country)}`;
-    }
-    if (!countryCode.startsWith("+")) {
-      countryCode = `+${countryCode}`;
-    }
+    const { countryCode, phoneNumber } = await getCountryCodeAndPhoneNumber(
+      propertyId,
+      number,
+      country,
+    );
     const guestData = {
       propertyId: propertyId,
       firstName: GuestInformation.GuestName.FirstName,
       lastName: GuestInformation.GuestName.LastName,
       email: email,
-      source: BusinessSource.Source,
+      source: BusinessSource.Name || BusinessSource.Category,
       checkIn: `${StayInformation.CheckInDate}Z`,
       checkOut: `${StayInformation.CheckOutDate}Z`,
       roomNumber: StayInformation.Room,
@@ -1196,8 +1187,14 @@ const checkInUpdate = async (folio, pmsId, propertyId, req) => {
         existingGuest,
         updatedGuest,
         updatedGuestStatus,
+        session,
       );
-      await sendSmsOnPhoneNumberChange(existingGuest, updatedGuest);
+      await sendSmsOnPhoneNumberChange(existingGuest, updatedGuest, session);
+      await sendSmsOnCheckInOrCheckOutTimeChange(
+        existingGuest,
+        updatedGuest,
+        session,
+      );
       const messageTemplate =
         await messageTemplateService.getByNameAndPropertyId(
           propertyId,
@@ -1274,7 +1271,7 @@ const checkInUpdate = async (folio, pmsId, propertyId, req) => {
 };
 
 /**
- * @description Check Out
+ * Check Out
  * @param {object} folio - folio
  * @param {string} pmsId - pmsId
  * @param {string} propertyId - propertyId
@@ -1308,20 +1305,17 @@ const checkOut = async (folio, pmsId, propertyId, req) => {
       GuestInformation.ContactInformation.HomeEmail ||
       GuestInformation.ContactInformation.BusinessEmail ||
       GuestInformation.ContactInformation.OtherEmail;
-    const phoneNumber = number.slice(number.length - 10);
-    let countryCode = number.slice(0, number.length - 10);
-    if (countryCode === "") {
-      countryCode = `+${getCountryCode(country)}`;
-    }
-    if (!countryCode.startsWith("+")) {
-      countryCode = `+${countryCode}`;
-    }
+    const { countryCode, phoneNumber } = await getCountryCodeAndPhoneNumber(
+      propertyId,
+      number,
+      country,
+    );
     const guestData = {
       propertyId: propertyId,
       firstName: GuestInformation.GuestName.FirstName,
       lastName: GuestInformation.GuestName.LastName,
       email: email,
-      source: BusinessSource.Source,
+      source: BusinessSource.Name || BusinessSource.Category,
       checkIn: `${StayInformation.CheckInDate}Z`,
       checkOut: `${StayInformation.CheckOutDate}Z`,
       roomNumber: StayInformation.Room,
@@ -1431,6 +1425,7 @@ const checkOut = async (folio, pmsId, propertyId, req) => {
 const roomStatusUpdate = async (roomStatusData, propertyId, req) => {
   const session = await mongoose.startSession();
   session.startTransaction();
+  console.log(roomStatusData);
   try {
     const guest = await guestService.findGuestByGuestStatus(
       propertyId,
@@ -1500,17 +1495,19 @@ const roomStatusUpdate = async (roomStatusData, propertyId, req) => {
 };
 
 /**
- * @description Send SMS on new phone number
+ *  Send SMS on new phone number
  * @param {object} existingGuest - Existing guest object
  * @param {object} updatedGuest - Updated guest object
  * @param {object} updatedGuestStatus - Updated guest status object
- * @returns {Promise<void>}
+ * @param {import('mongoose').ClientSession} session - Mongoose session
+ * @returns {Promise<{message: import('../models/message.model.js').MessageType, chatList: import('../models/chatList.model.js').ChatListType}>} - A promise that resolves to an object containing the message and chat list.
  * @throws {Error} - Error
  */
 const sendSmsOnNewPhoneNumber = async (
   existingGuest,
   updatedGuest,
   updatedGuestStatus,
+  session,
 ) => {
   if (existingGuest.phoneNumber === "" && updatedGuest.phoneNumber !== "") {
     const messageTemplate = await messageTemplateService.getByNameAndPropertyId(
@@ -1541,12 +1538,36 @@ const sendSmsOnNewPhoneNumber = async (
         propertySetting,
         `${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
       );
-      await smsService.send(
+      const sentSms = await smsService.send(
         twilioSubClient,
         `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
         `${updatedGuest.countryCode}${updatedGuest.phoneNumber}`,
         `${updatedMessageBody.message}`,
       );
+      const message = await messageService.create(
+        {
+          propertyId: updatedGuest.propertyId,
+          guestId: updatedGuest._id,
+          senderId: updatedGuest.propertyId,
+          receiverId: updatedGuest._id,
+          content: updatedMessageBody.message,
+          messageSid: sentSms.sid,
+          messageType: messageType.SMS,
+          messageTriggerType: messageTriggerType.AUTOMATIC,
+          status: "sent",
+        },
+        session,
+      );
+
+      const chatList = await chatListService.updateAndIncUnreadMessages(
+        updatedGuest.propertyId,
+        updatedGuest._id,
+        {
+          latestMessage: message._id,
+        },
+        session,
+      );
+      return { message, chatList };
     }
   }
 };
@@ -1555,9 +1576,14 @@ const sendSmsOnNewPhoneNumber = async (
  * Sends an SMS when the phone number of a guest is changed.
  * @param {import('../models/guest.model.js').GuestType} existingGuest - The existing guest object.
  * @param {import('../models/guest.model.js').GuestType} updatedGuest - The updated guest object.
- * @returns {Promise<void>} - A promise that resolves when the SMS is sent.
+ * @param {import('mongoose').ClientSession} session - The Mongoose session.
+ * @returns {Promise<{message: import('../models/message.model.js').MessageType, chatList: import('../models/chatList.model.js').ChatListType}>} - A promise that resolves to an object containing the message and chat list.
  */
-const sendSmsOnPhoneNumberChange = async (existingGuest, updatedGuest) => {
+const sendSmsOnPhoneNumberChange = async (
+  existingGuest,
+  updatedGuest,
+  session,
+) => {
   if (
     existingGuest.phoneNumber !== "" &&
     updatedGuest.phoneNumber !== "" &&
@@ -1590,12 +1616,57 @@ const sendSmsOnPhoneNumberChange = async (existingGuest, updatedGuest) => {
         property,
         `${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
       );
-      await smsService.send(
+      const sentSms = await smsService.send(
         twilioSubClient,
         `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
         `${updatedGuest.countryCode}${updatedGuest.phoneNumber}`,
         `${updatedMessageBody.message}`,
       );
+      const sentSmsToOldNumber = await smsService.send(
+        twilioSubClient,
+        `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
+        `${existingGuest.countryCode}${existingGuest.phoneNumber}`,
+        `${updatedMessageBody.message}`,
+      );
+      const message = await messageService.create(
+        {
+          propertyId: updatedGuest.propertyId,
+          guestId: updatedGuest._id,
+          senderId: updatedGuest.propertyId,
+          receiverId: updatedGuest._id,
+          content: updatedMessageBody.message,
+          messageSid: sentSms.sid,
+          messageType: messageType.SMS,
+          messageTriggerType: messageTriggerType.AUTOMATIC,
+          status: "sent",
+        },
+        session,
+      );
+      const sentMessageToOldNumber = await messageService.create(
+        {
+          propertyId: updatedGuest.propertyId,
+          guestId: updatedGuest._id,
+          senderId: updatedGuest.propertyId,
+          receiverId: updatedGuest._id,
+          content: updatedMessageBody.message,
+          messageSid: sentSmsToOldNumber.sid,
+          messageType: messageType.SMS,
+          messageTriggerType: messageTriggerType.AUTOMATIC,
+          status: "sent",
+        },
+        session,
+      );
+
+      const chatList = await chatListService.updateAndIncUnreadMessages(
+        updatedGuest.propertyId,
+        updatedGuest._id,
+        {
+          latestMessage: message._id,
+        },
+        session,
+        2,
+      );
+      return { message, chatList };
     }
   }
 };
@@ -1624,7 +1695,7 @@ const sendSmsAddOnsCompleted = async (propertyId, guest, session) => {
       { name: "House Keeping" },
       "",
     );
-    await smsService.send(
+    const sentSms = await smsService.send(
       twilioSubClient,
       `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
       `${guest.countryCode}${guest.phoneNumber}`,
@@ -1637,7 +1708,7 @@ const sendSmsAddOnsCompleted = async (propertyId, guest, session) => {
         senderId: propertyId,
         receiverId: guest._id,
         content: updatedMessageBody.message,
-        messageSid: "",
+        messageSid: sentSms.sid,
         messageType: messageType.SMS,
         messageTriggerType: messageTriggerType.AUTOMATIC,
         status: "sent",
@@ -1656,6 +1727,115 @@ const sendSmsAddOnsCompleted = async (propertyId, guest, session) => {
   }
   return { message: null, chatList: null };
 };
+
+/**
+ * Get country code and phone number from a given number
+ * @param {string} propertyId - The ID of the property.
+ * @param {string} number - The phone number to extract the country code and phone number from.
+ * @param {string} country - Optional country name to determine the country code if not present in the number.
+ * @returns {Promise<{countryCode: string, phoneNumber: string}>} - An object containing the country code and phone number.
+ */
+const getCountryCodeAndPhoneNumber = async (propertyId, number, country) => {
+  let countryCode = number.slice(0, number.length - 10).trim();
+  const phoneNumber = number.slice(number.length - 10).trim();
+  if (!countryCode || countryCode === "" || !countryCode.startsWith("+")) {
+    if (country) {
+      countryCode = `+${
+        countryFileFull.find((c) => c.name === country)?.phone_code
+      }`;
+    } else {
+      const { property } = await propertyService.getById(propertyId);
+      countryCode = `+${
+        countryFileFull.find((c) => c.name === property.country)?.phone_code
+      }`;
+    }
+  }
+  console.log(countryCode, phoneNumber);
+  return { countryCode, phoneNumber };
+};
+
+/**
+ * Sends an SMS when the check-in or check-out time of a guest is changed.
+ * @param {import('../models/guest.model.js').GuestType} existingGuest - The existing guest object.
+ * @param {import('../models/guest.model.js').GuestType} updatedGuest - The updated guest object.
+ * @param {import('mongoose').ClientSession} session - The Mongoose session.
+ * @returns {Promise<{message: import('../models/message.model.js').MessageType, chatList: import('../models/chatList.model.js').ChatListType}>} - A promise that resolves to an object containing the message and chat list.
+ */
+const sendSmsOnCheckInOrCheckOutTimeChange = async (
+  existingGuest,
+  updatedGuest,
+  session,
+) => {
+  if (
+    new Date(existingGuest.checkIn).toISOString() !==
+      new Date(updatedGuest.checkIn).toISOString() ||
+    new Date(existingGuest.checkOut).toISOString() !==
+      new Date(updatedGuest.checkOut).toISOString()
+  ) {
+    console.log(
+      existingGuest.checkIn,
+      updatedGuest.checkIn,
+      existingGuest.checkOut,
+      updatedGuest.checkOut,
+    );
+    const messageTemplate = await messageTemplateService.getByNameAndPropertyId(
+      updatedGuest.propertyId,
+      "CheckInOutTime Changed",
+    );
+    if (!messageTemplate) {
+      return { message: null, chatList: null };
+    }
+    const twilioAccount = await twilioAccountService.getByPropertyId(
+      updatedGuest.propertyId,
+    );
+    const twilioSubClient = await twilioService.getTwilioClient(twilioAccount);
+    const propertySetting = await settingService.getByPropertyId(
+      updatedGuest.propertyId,
+    );
+    const { property } = await propertyService.getById(updatedGuest.propertyId);
+    const guestSession = await guestSessionService.getGuestSession(
+      updatedGuest.propertyId,
+      updatedGuest._id,
+    );
+    const updatedMessageBody = modifyCheckInOutMessageTemplateBody(
+      messageTemplate,
+      updatedGuest,
+      property,
+      propertySetting,
+      `${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
+    );
+    const sentSms = await smsService.send(
+      twilioSubClient,
+      `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
+      `${updatedGuest.countryCode}${updatedGuest.phoneNumber}`,
+      `${updatedMessageBody.message}`,
+    );
+    const message = await messageService.create(
+      {
+        propertyId: updatedGuest.propertyId,
+        guestId: updatedGuest._id,
+        senderId: updatedGuest.propertyId,
+        receiverId: updatedGuest._id,
+        content: updatedMessageBody.message,
+        messageSid: sentSms.sid,
+        messageType: messageType.SMS,
+        messageTriggerType: messageTriggerType.AUTOMATIC,
+        status: "sent",
+      },
+      session,
+    );
+    const chatList = await chatListService.updateAndIncUnreadMessages(
+      updatedGuest.propertyId,
+      updatedGuest._id,
+      {
+        latestMessage: message._id,
+      },
+      session,
+    );
+    return { message, chatList };
+  }
+};
+
 module.exports = {
   bookingCreate,
   bookingUpdate,

@@ -206,10 +206,14 @@ const getAllByPropertyId = async (req, res, next) => {
   try {
     const { propertyId } = req.params;
     const { requestStatus } = req.query;
-    const addOnsRequests = await addOnsRequestService.getAllByPropertyId(
+    let addOnsRequests = await addOnsRequestService.getAllByPropertyId(
       propertyId,
       requestStatus,
     );
+
+    addOnsRequests = addOnsRequests.sort((a, b) => {
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    });
     return responseHandler(res, { addOnsRequests });
   } catch (e) {
     console.log(e);

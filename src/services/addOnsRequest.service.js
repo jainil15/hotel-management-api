@@ -4,6 +4,8 @@ const {
   CreateAddOnsRequestValidationSchema,
 } = require("../models/addOnsRequest.model");
 
+const { ADD_ONS_STATUS } = require("../constants/addOns.constant");
+
 /**
  * Create Add Ons Request
  * @param {string} propertyId
@@ -196,15 +198,36 @@ const getByPropertyIdAndGuestId = async (propertyId, guestId) => {
   });
   return addOnRequest;
 };
-const deleteAddOnsRequest = async (propertyId, guestId, addOnsId) => {
-  const addOnsRequest = await AddOnsRequest.deleteOne({
-    propertyId: propertyId,
-    guestId: guestId,
-    _id: addOnsId,
-  });
+const deleteAddOnsRequest = async (propertyId, guestId, addOnsId, session) => {
+  console.log("deleteAddOnsRequest", propertyId, guestId, addOnsId, session);
+  const addOnsRequest = await AddOnsRequest.updateOne(
+    {
+      propertyId: propertyId,
+      guestId: guestId,
+      _id: addOnsId,
+    },
+    {
+      $set: { requestStatus: ADD_ONS_STATUS.CLOSED },
+    },
+    { session, new: true },
+  );
   return addOnsRequest;
 };
 
+const closeAddOnsRequest = async (propertyId, guestId, addOnsId, session) => {
+  const addOnsRequest = await AddOnsRequest.updateOne(
+    {
+      propertyId: propertyId,
+      guestId: guestId,
+      _id: addOnsId,
+    },
+    {
+      $set: { requestStatus: ADD_ONS_STATUS.CLOSED },
+    },
+    { session, new: true },
+  );
+  return addOnsRequest;
+};
 module.exports = {
   create,
   update,
@@ -214,4 +237,5 @@ module.exports = {
   updateAllByGuestId,
   getByPropertyIdAndGuestId,
   deleteAddOnsRequest,
+  closeAddOnsRequest,
 };

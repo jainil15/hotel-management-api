@@ -10,6 +10,7 @@ const twilioAccountService = require("../services/twilioAccount.service");
 const twilioService = require("../services/twilio.service");
 const messageTemplateService = require("../services/messageTemplate.service");
 const smsService = require("../services/sms.service");
+const settingService = require("../services/setting.service");
 const houseKeepingUtil = require("../utils/houseKeeping.util");
 const { ROOM_STATUS_CODE } = require("../constants/asi.constant");
 const {
@@ -108,10 +109,12 @@ const create = async (req, res, next) => {
       // Extract room number from guest (or from options if needed)
       const roomNumber = guest.roomNumber;
       if (property.property.pmsId && guest.pmsId) {
+        const propertySetting =
+          await settingService.getByPropertyId(propertyId);
         const asiPmsResponse = await asiPmsService.changeRoomStatus(
           property.property.pmsId,
-          "813D2A24-6B5D-463C-BA76-CB9369C8375F",
-          "5T9OPcFv&jipS87^VaMfvsMLTghH209276Vcdg#mAP0^$",
+          propertySetting.asiApplicationId,
+          propertySetting.asiSecurityKey,
           roomNumber,
           ROOM_STATUS_CODE.IN_HOUSE_DIRTY,
         );

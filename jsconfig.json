@@ -1,0 +1,128 @@
+{
+  /**
+   * `compilerOptions` configures how JavaScript and TypeScript files are processed.
+   * Even for pure JavaScript projects, this section is crucial for `ts_ls` to provide
+   * rich language features (like auto-completion, 'go to definition', and more).
+   */
+  "compilerOptions": {
+    /**
+     * `target` specifies the JavaScript language version for emitted JavaScript code.
+     * While `ts_ls` doesn't "emit" code for JavaScript, this tells it what syntax features
+     * to expect and support. 'es2020' or 'esnext' are good choices for modern JS.
+     * For Node.js, 'es2018' or 'es2020' are typically safe.
+     */
+    "target": "es2020",
+
+    /**
+     * `module` specifies the module system to use for the emitted JavaScript code.
+     * This helps `ts_ls` understand your import/export syntax.
+     * For Node.js projects that primarily use `require()` and `module.exports`,
+     * this should be set to 'commonjs'.
+     */
+    "module": "commonjs", // <--- CHANGED for Node.js projects using require()
+
+    /**
+     * `jsx` specifies how JSX syntax is handled.
+     * Set to 'react' if you're using React with JSX in your JavaScript files (e.g., `.jsx` or `.js` files with JSX).
+     * Set to 'preserve' if your build tool handles JSX transformation.
+     */
+    "jsx": "react", // Or "preserve" or "react-jsx" depending on your setup
+
+    /**
+     * `allowJs` must be `true` for `ts_ls` to process `.js` and `.jsx` files.
+     * This is fundamental for a JavaScript project.
+     */
+    "allowJs": true,
+
+    /**
+     * `checkJs` enables semantic checks for JavaScript files.
+     * When `true`, `ts_ls` will analyze your JavaScript files as if they were TypeScript,
+     * allowing for basic type-checking and JSDoc-based type inference.
+     * Setting this to `false` can prevent crashes if your JS codebase is not well-typed or has issues
+     * that the type checker struggles with. Start with `false` if crashing persists, then enable if desired.
+     */
+    "checkJs": false, // Set to `true` for stricter checking and JSDoc support
+
+    /**
+     * `baseUrl` helps `ts_ls` resolve non-relative module imports.
+     * If you use absolute imports (e.g., `require("components/Button")`),
+     * set `baseUrl` to the root directory where these paths are relative to (e.g., "." for project root).
+     */
+    "baseUrl": ".",
+
+    /**
+     * `moduleResolution` dictates how module specifiers are resolved.
+     * 'node' is standard for Node.js environments and `require()` resolution.
+     */
+    "moduleResolution": "node", // Best for Node.js and CommonJS
+
+    /**
+     * `esModuleInterop` allows default imports from modules with no default export.
+     * While less critical for pure CommonJS, it's generally good practice to keep `true`
+     * for better compatibility with mixed module types or future-proofing.
+     */
+    "esModuleInterop": true,
+
+    /**
+     * `forceConsistentCasingInFileNames` ensures that references to files
+     * have consistent casing. This helps prevent issues on case-insensitive file systems (like macOS/Windows)
+     * when deploying to case-sensitive ones (like Linux). Set to `true`.
+     */
+    "forceConsistentCasingInFileNames": true,
+
+    /**
+     * `noEmit` ensures that `ts_ls` doesn't try to emit (compile) any output JavaScript files.
+     * This is important for JavaScript projects where a separate build tool (like Webpack or Parcel)
+     * handles compilation/transpilation, or for pure Node.js projects that run JS directly.
+     */
+    "noEmit": true,
+
+    /**
+     * `skipLibCheck` skips type checking of all declaration files (`.d.ts`).
+     * This can significantly speed up `ts_ls` and prevent crashes caused by issues
+     * within large or complex `node_modules` dependencies. Highly recommended to set to `true`.
+     */
+    "skipLibCheck": true,
+
+    /**
+     * `resolveJsonModule` allows importing `.json` files directly in your modules.
+     * Set to `true` if you use `require('./data.json')`.
+     */
+    "resolveJsonModule": true,
+
+    /**
+     * `isolatedModules` ensures that every file can be safely transpiled without relying on other files,
+     * which is good for single-file transpilation tools like Babel or esbuild.
+     * If you encounter issues, try setting this to `false`.
+     */
+    "isolatedModules": true
+  },
+
+  /**
+   * `include` specifies an array of glob patterns that define which files
+   * should be included in the project. This is crucial for `ts_ls` to know what to analyze.
+   * Adjust these paths to match your project's source code locations.
+   */
+  "include": [
+    "src/**/*",         // Include all files in the 'src' directory and its subdirectories
+    "public/**/*",      // If you have JavaScript files in a 'public' directory
+    "*.js",             // Include JavaScript files in the project root
+    "*.jsx"             // Include JSX files in the project root
+  ],
+
+  /**
+   * `exclude` specifies an array of glob patterns that define which files
+   * should be excluded from the project. This is critically important to prevent `ts_ls` from
+   * trying to parse and analyze your `node_modules` folder, which is often a major cause of crashes
+   * due to its size and complexity.
+   */
+  "exclude": [
+    "node_modules",     // Exclude the node_modules directory
+    "**/node_modules/*",// More explicit exclusion for nested cases
+    "dist",             // Exclude common build output directories
+    "build",            // Exclude common build output directories
+    ".git",             // Exclude Git version control directory
+    ".vscode",          // Exclude VS Code configuration directory
+    "tmp"               // Exclude temporary files/directories
+  ]
+}

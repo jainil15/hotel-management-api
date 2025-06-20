@@ -3,10 +3,12 @@ const {
   APIError,
   InternalServerError,
   ValidationError,
+  NotFoundError,
 } = require("../lib/CustomErrors");
 const { responseHandler } = require("../middlewares/response.middleware");
 const { UpdateChatListValidationSchema } = require("../models/chatList.model");
 const chatListService = require("../services/chatList.service");
+const guestService = require("../services/guest.service");
 /**
  * Controller for getting all chat lists by property id
  * @param {import('express').Request} req - request object
@@ -126,4 +128,44 @@ const remove = async (req, res, next) => {
   }
 };
 
-module.exports = { getAllByPropertyId, update, create, remove };
+const resetUnreadMessages = async (req, res, next) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const { propertyId, guestId } = req.params;
+    const guest = await guestService.getById(guestId, propertyId, session);
+    if (!guest) {
+      throw new NotFoundError("Guest not found", {
+        guestId: "Invalid guest ID",
+      });
+    }
+    const chatList = await chatListService.resetUnreadMessages(
+      guest.countryCode,
+      guest.phoneNumber,
+      propertyId,
+      session,
+    );
+    req.app.io.to(`property:${propertyId}`).emit("chatList:update", {
+      chatList,
+    });
+    await session.commitTransaction();
+    session.endSession();
+    return responseHandler(res, { chatList });
+  } catch (e) {
+    console.log(e);
+    await session.abortTransaction();
+    session.endSession();
+    if (e instanceof APIError) {
+      return next(e);
+    }
+    return next(new InternalServerError());
+  }
+};
+
+module.exports = {
+  getAllByPropertyId,
+  update,
+  create,
+  remove,
+  resetUnreadMessages,
+};

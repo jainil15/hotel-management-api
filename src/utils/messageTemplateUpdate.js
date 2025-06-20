@@ -238,9 +238,45 @@ function modifyMessageTemplateBodyForPhoneNumberChange(
   return messageTemplate;
 }
 
+/**
+ * Modify the check-in/out message template body
+ * @param {object} messageTemplate - The message template object
+ * @param {object} guestInfo - The guest information object
+ * @param {object} propertyInfo - The property information object
+ * @param {object} propertySetting - The property setting object
+ * @param {string} guestLink - The link for the guest
+ * @returns {object} - The modified message template
+ */
+function modifyCheckInOutMessageTemplateBody(
+  messageTemplate,
+  guestInfo,
+  propertyInfo,
+  propertySetting,
+  guestLink,
+) {
+  const { name: hotelName } = propertyInfo;
+
+  const formattedCheckIn = formatDateWithLocalTimezone(
+    guestInfo.checkIn,
+    propertySetting.timezone,
+  );
+  const formattedCheckOut = formatDateWithLocalTimezone(
+    guestInfo.checkOut,
+    propertySetting.timezone,
+  );
+  messageTemplate.message = messageTemplate.message
+    .replace("[Hotel Name]", hotelName)
+    .replace("[Guest Link]", guestLink)
+    .replace("[Check-In Time]", formattedCheckIn)
+    .replace("[Check-Out Time]", formattedCheckOut);
+
+  return messageTemplate;
+}
+
 module.exports = {
   modifyMessageTemplateBody,
   modifyAddOnsMessageTemplateBody,
   modifyMessageTemplateBodyForPhoneNumberChange,
   convertUTCToLocal,
+  modifyCheckInOutMessageTemplateBody,
 };

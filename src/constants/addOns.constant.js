@@ -3,6 +3,7 @@ const ADD_ONS_STATUS = {
   ACCEPTED: "Accepted",
   REJECTED: "Rejected",
   COMPLETED: "Completed",
+  CLOSED: "Closed",
 };
 
 module.exports = {

@@ -18,6 +18,7 @@ const propertyService = require("../services/property.service");
 const workflowService = require("../services/workflow.service");
 const setttingService = require("../services/setting.service");
 const addOnsFlowService = require("../services/addOnsFlow.service");
+const houseKeepingRequestService = require("../services/houseKeepingRequest.service");
 const checkInOutRequestService = require("../services/checkInOutRequest.service");
 const guestStatusService = require("../services/guestStatus.service");
 const twilioAccountService = require("../services/twilioAccount.service");
@@ -35,7 +36,7 @@ const chatListService = require("../services/chatList.service");
 const preArrivalService = require("../services/preArrival.service");
 const preArrivalFlowService = require("../services/preArrivalFlow.service");
 const mailUtils = require("../utils/mail.util");
-const {getAddonRequestEmail } = require("../utils/addOnEmailTemplate");
+const { getAddonRequestEmail } = require("../utils/addOnEmailTemplate");
 
 const {
   PRE_ARRIVAL_STATUS,
@@ -279,7 +280,6 @@ const createCheckInOutRequest = async (req, res, next) => {
       session,
     );
 
-
     const guest = await guestService.getByGuestId(guestId);
     const { property } = await propertyService.getById(propertyId);
     if (!guest) {
@@ -294,8 +294,12 @@ const createCheckInOutRequest = async (req, res, next) => {
     const companyName = "Onelyk";
     const propertyEmail = property.email;
     const guestName = guest.firstName + " " + guest.lastName;
-     const emailContent = getAddonRequestEmail(guestName,addOnName,companyName);
-    console.log("Property Email :- ",propertyEmail);
+    const emailContent = getAddonRequestEmail(
+      guestName,
+      addOnName,
+      companyName,
+    );
+    console.log("Property Email :- ", propertyEmail);
     const newMail = mailUtils.sendMail(
       propertyEmail,
       "Guest AddOn Request",
@@ -584,7 +588,14 @@ const getAddOnRequest = async (req, res, next) => {
     const { propertyId, guestId } = req.guestSession;
     const checkInOutRequest =
       await addOnsRequestService.getByPropertyIdAndGuestId(propertyId, guestId);
-    return responseHandler(res, checkInOutRequest);
+    const houseKeepingRequest = await houseKeepingRequestService.getByGuestId(
+      propertyId,
+      guestId,
+    );
+    return responseHandler(res, {
+      ...checkInOutRequest,
+      ...houseKeepingRequest,
+    });
   } catch (e) {
     if (e instanceof APIError) {
       return next(e);
@@ -772,8 +783,12 @@ const createAddOnsRequest = async (req, res, next) => {
     const guestName = guest.firstName + " " + guest.lastName;
     const addOnName = createdAddOnsRequest.name;
     const companyName = "Onelyk";
-    const emailContent = getAddonRequestEmail(guestName,addOnName,companyName);
-    console.log("Property Email :- ",propertyEmail);
+    const emailContent = getAddonRequestEmail(
+      guestName,
+      addOnName,
+      companyName,
+    );
+    console.log("Property Email :- ", propertyEmail);
     const newMail = mailUtils.sendMail(
       propertyEmail,
       "Guest AddOn Request",

@@ -50,6 +50,7 @@ const REQUEST_STATUS = {
   ACCEPTED: "Accepted",
   DECLINED: "Declined",
   COMPLETED: "Completed",
+  CLOSED: "Closed",
 };
 
 const MAP_GUEST_CURRENT_STATUS_PMS = {
