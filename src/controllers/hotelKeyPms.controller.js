@@ -5,11 +5,11 @@ const {
     NotFoundError,
   } = require("../lib/CustomErrors.js");
   const { responseHandler } = require("../middlewares/response.middleware.js");
-
+  const propertyService = require("../services/property.service.js");
 
   const reservationDispatcher = async (req, res, next) => {
     const payload = req.body;
-    const pmsId = payload.reservation.id;
+    const pmsId = payload.property_id;
     const property  = await propertyService.findByPmsId(pmsId);
     if(!property){
         throw new NotFoundError("Property not found");
@@ -19,9 +19,10 @@ const {
     if(type !== "reservation"){
         throw new NotFoundError("Type not found");
     }
-    const event = payload.change_events;
+    const events = payload.change_events;
     const result = [];
-    switch(event){
+    for(const event of events) {
+      switch(event){
         case "reservation_created":
             result.push(await hotelKeyPmsHandler.createReservation(payload,propertyId,req));
             break;
@@ -65,8 +66,10 @@ const {
           result.push(await hotelKeyPmsHandler.checkOutDateChanged(payload,propertyId,req));
           break;
         default:
-          throw new NotFoundError(`EventType ${EventName} not found`, {});
+          throw new NotFoundError(`EventType ${event} not found`, {});
+      }
     }
+    
     return responseHandler(res, result);
 
 

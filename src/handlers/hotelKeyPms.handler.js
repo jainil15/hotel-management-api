@@ -67,7 +67,7 @@ const createReservation = async (folio, propertyId, req) => {
     // Check if guest already exists
     const existingGuest = await guestService.findOne({
       propertyId,
-      pmsId: reservation.id,
+      pmsId: reservation.guest_info.guest_id,
     });
 
     if (existingGuest) {
@@ -96,11 +96,11 @@ const createReservation = async (folio, propertyId, req) => {
       confirmationNumber: reservation.reservation_no,
       checkIn: new Date(reservation.check_in_date),
       checkOut: new Date(reservation.check_out_date),
-      pmsId: reservation.id,
+      pmsId: reservation.guest_info.guest_id,
     };
 
     // Create new guest
-    const newGuest = await guestService.upsert(reservation.id, guestData, propertyId, { session });
+    const newGuest = await guestService.upsert(reservation.guest_info.guest_id, guestData, propertyId, { session });
 
     // Create guest status
     const guestStatusData = {
@@ -185,12 +185,7 @@ const createReservation = async (folio, propertyId, req) => {
       message: {},
     });
 
-    return responseHandler(
-      res,
-      { guest: { ...newGuest._doc, status: { ...guestStatus._doc } } },
-      201,
-      "Reservation Created",
-    );
+    return newGuest;
   } catch (error) {
     await session.abortTransaction();
     logger.error("HotelKey Reservation Error:", error);
@@ -209,7 +204,7 @@ const updateReservationGuest = async (folio,propertyId,req) => {
     const { guest_info } = reservation;
     const existingGuest = await guestService.findOne({
       propertyId,
-      pmsId: reservation.id,
+      pmsId: reservation.guest_info.guest_id,
     });
     if (!existingGuest) {
       throw new ValidationError("Guest not found", {
@@ -242,7 +237,7 @@ const updateReservationGuest = async (folio,propertyId,req) => {
         roomNumber: reservation.room_number,
         source: reservation.source,
         confirmationNumber: reservation.reservation_no,
-        pmsId: reservation.id,
+        pmsId: reservation.guest_info.guest_id,
       },
       { session },
     );
@@ -312,12 +307,7 @@ const updateReservationGuest = async (folio,propertyId,req) => {
     });
     req.app.io.to(`guest:${updatedGuest._id}`).emit("chatList:update", {});
     await session.commitTransaction();
-    return responseHandler(
-      res,
-      { guest: { ...updatedGuest._doc } },
-      200,
-      "Reservation Updated",
-    );
+    return updatedGuest;
   } catch (error) {
     await session.abortTransaction();
     logger.error("HotelKey Reservation Error:", error);
@@ -341,7 +331,7 @@ const updateReservationStatus = async (folio,propertyId,req) => {
     }
     const existingGuest = await guestService.findOne({
       propertyId,
-      pmsId: reservation.id,
+      pmsId: reservation.guest_info.guest_id,
     });
     if (!existingGuest) {
       throw new ValidationError("Guest not found", {
@@ -437,12 +427,7 @@ const updateReservationStatus = async (folio,propertyId,req) => {
 
     
     await session.commitTransaction();
-    return responseHandler(
-      res,
-      { guest: { ...existingGuest._doc, status: { ...updatedGuestStatus._doc } } },
-      200,
-      "Reservation Status Updated",
-    );
+    return updatedGuestStatus;
   } catch (error) {
     await session.abortTransaction();
     logger.error("HotelKey Reservation Error:", error);
@@ -465,7 +450,7 @@ const reservationCheckedIn = async (folio,propertyId,req) => {
     }
     const existingGuest = await guestService.findOne({
       propertyId,
-      pmsId: reservation.id,
+      pmsId: reservation.guest_info.guest_id,
     });
     if (!existingGuest) {
       throw new ValidationError("Guest not found", {
@@ -562,12 +547,7 @@ const reservationCheckedIn = async (folio,propertyId,req) => {
     });
 
     await session.commitTransaction();
-    return responseHandler(
-      res,
-      { guest: { ...existingGuest._doc, status: { ...updatedGuestStatus._doc } } },
-      200,
-      "Reservation Checked In",
-    );
+    return updatedGuest;
   } catch (error) {
     await session.abortTransaction();
     logger.error("HotelKey Reservation Error:", error);
@@ -590,7 +570,7 @@ const reservationCheckedOut = async (folio,propertyId,req) => {
     }
     const existingGuest = await guestService.findOne({
       propertyId,
-      pmsId: reservation.id,
+      pmsId: reservation.guest_info.guest_id,
     });
     if (!existingGuest) {
       throw new ValidationError("Guest not found", {
@@ -680,12 +660,7 @@ const reservationCheckedOut = async (folio,propertyId,req) => {
     });
 
     await session.commitTransaction();
-    return responseHandler(
-      res,
-      { guest: { ...existingGuest._doc, status: { ...updatedGuestStatus._doc } } },
-      200,
-      "Reservation Checked Out",
-    );
+    return updatedGuest;
   } catch (error) {
     await session.abortTransaction();
     logger.error("HotelKey Reservation Error:", error);
@@ -704,7 +679,7 @@ const additionalGuestDataChanged = async (folio,propertyId,req) => {
     const { reservation, additional_guest_info } = folio;
     const existingGuest = await guestService.findOne({
       propertyId,
-      pmsId: reservation.id,
+      pmsId: reservation.guest_info.guest_id,
     });
     if (!existingGuest) {
       throw new ValidationError("Guest not found", {
@@ -818,7 +793,7 @@ const arrivalTimeChanged = async (folio, propertyId, req) => {
     const { reservation } = folio;
     const existingGuest = await guestService.findOne({
       propertyId,
-      pmsId: reservation.id,
+      pmsId: reservation.guest_info.guest_id,
     });
     if (!existingGuest) {
       throw new ValidationError("Guest not found", {
@@ -921,7 +896,7 @@ const departureTimeChanged = async (folio,propertyId,req) => {
     const { reservation } = folio;
     const existingGuest = await guestService.findOne({
       propertyId,
-      pmsId: reservation.id,
+      pmsId: reservation.guest_info.guest_id,
     });
     if(!existingGuest) {
       throw new ValidationError("Guest not found", {
@@ -1024,7 +999,7 @@ const checkOutDateChanged = async (folio,propertyId,req) => {
     const { reservation } = folio;
     const existingGuest = await guestService.findOne({
       propertyId,
-      pmsId: reservation.id,
+      pmsId: reservation.guest_info.guest_id,
     });
     if(!existingGuest) {
       throw new ValidationError("Guest not found", {
@@ -1127,7 +1102,7 @@ const roomNumberChanged = async (folio,propertyId,req) => {
     const {reservation} = folio;
     const existingGuest = await guestService.findOne({
       propertyId,
-      pmsId: reservation.id,
+      pmsId: reservation.guest_info.guest_id,
     });
     if(!existingGuest) {
       throw new ValidationError("Guest not found", {
@@ -1160,7 +1135,7 @@ const reservationCancelled = async (folio,propertyId,req) => {
     const { reservation } = folio;
     const existingGuest = await guestService.findOne({
       propertyId,
-      pmsId: reservation.id,
+      pmsId: reservation.guest_info.guest_id,
     });
     if(!existingGuest) {
       throw new ValidationError("Guest not found", {
