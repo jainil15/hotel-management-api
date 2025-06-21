@@ -6,6 +6,7 @@ const {
   refreshAccessToken,
 } = require("../controllers/auth.controller");
 const authController = require("../controllers/auth.controller");
+const forgotPasswordController = require("../controllers/forgotPassword.controller");
 
 const { authenticateToken } = require("../middlewares/jwt.middleware");
 require("dotenv").config();
@@ -22,5 +23,7 @@ router.get(
 router.post("/refresh-token", refreshAccessToken);
 router.post("/guestLogin/:token", authController.guestLoginWithToken);
 router.get("/isLoggedIn", authenticateToken, authController.isLoggedIn);
+router.post("/forgotPassword", forgotPasswordController.forgotPassword);
+router.post("/resetPassword", forgotPasswordController.resetPassword);
 
 module.exports = router;
