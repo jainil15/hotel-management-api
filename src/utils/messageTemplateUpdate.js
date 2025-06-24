@@ -182,6 +182,9 @@ function modifyMessageTemplateBody(
       .replace("[Time]", formattedTime)
       .replace("[Hotel Name]", hotelName)
       .replace("[Guest Link]", guestLink);
+  } else if (messageTemplate.name === "Guest Data Update") {
+    messageTemplate.message = messageTemplate.message
+      .replace("[Guest Name]", `${guestInfo.firstName} ${guestInfo.lastName}`)
   }
 
   return messageTemplate;

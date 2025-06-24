@@ -39,6 +39,7 @@ const reviewRoutes = require("../routes/review.route");
 const replyRoutes = require("../routes/reply.route");
 const googleAuthRoutes = require("../routes/googleAuth.route");
 const propertyTokenRoutes = require("../routes/propertyToken.route");
+const hotelKeyPmsRoutes = require("../routes/hotelKeyPms.route");
 
 // Socket imports
 const guestSocket = require("../sockets/guest.socket");
@@ -150,6 +151,7 @@ const createApp = () => {
   app.use("/asiPms", asiPmsRoutes);
   app.use("/googleAuth", googleAuthRoutes);
   app.use("/propertyToken", propertyTokenRoutes);
+  app.use("/hotelKeyPms", hotelKeyPmsRoutes);
   // Health Check
   app.get("/health", (req, res, next) => {
     return responseHandler(res, {}, 200, "Server is running");

@@ -1,4 +1,5 @@
 const { default: mongoose } = require("mongoose");
+const { ObjectId } = require('mongodb');
 const {
   messageType,
   messageTriggerType,
@@ -13,19 +14,30 @@ const twilioService = require("../services/twilio.service");
 const twilioAccountService = require("../services/twilioAccount.service");
 const chatListService = require("../services/chatList.service");
 const propertyService = require("../services/property.service");
-const { modifyMessageTemplateBody } = require("../utils/messageTemplateUpdate");
+const houseKeepingRequestService = require("../services/houseKeepingRequest.service");
+const {
+  modifyMessageTemplateBody,
+} = require("../utils/messageTemplateUpdate");
 
 const logger = require("../configs/winston.config");
 
 const { responseHandler } = require("../middlewares/response.middleware");
-const { ValidationError } = require("../lib/CustomErrors");
+const {
+  ValidationError,
+  NotFoundError,
+} = require("../lib/CustomErrors");
 
 const {
   guestStatusToTemplateOnCreate,
 } = require("../utils/guestStatustToTemplate");
-const { GUEST_CURRENT_STATUS } = require("../constants/guestStatus.contant");
+const {
+  GUEST_CURRENT_STATUS,
+  REQUEST_STATUS,
+} = require("../constants/guestStatus.contant");
 const { countries } = require("../data/countries+iso2+code.json");
+const { ROOM_STATUS_CODE, WEBHOOK_ROOM_STATUS_CODE } = require("../constants/hotelKey.constant");
 require("dotenv").config();
+
 
 /**
  * @description Create a new booking
@@ -58,10 +70,10 @@ const createReservation = async (folio, propertyId, req) => {
     }
 
     // Check if guest already exists
-    const existingGuest = await guestService.findOne({
-      propertyId,
-      pmsId: reservation.id,
-    });
+    const existingGuest = await guestService.getByGuestPmsId(
+      new ObjectId(propertyId),
+      reservation.guest_info.guest_id,
+    );
 
     if (existingGuest) {
       throw new ValidationError("Duplicate reservation", {
@@ -84,24 +96,16 @@ const createReservation = async (folio, propertyId, req) => {
       email: guest_info.email,
       phoneNumber: guest_info.phone,
       countryCode: countryCode,
-      roomNumber:
-        reservation.booking_status === "CHECKED_IN"
-          ? reservation.room_number
-          : undefined,
+      roomNumber: reservation.booking_status === 'CHECKED_IN' ? reservation.room_number : undefined,
       source: reservation.source,
       confirmationNumber: reservation.reservation_no,
       checkIn: new Date(reservation.check_in_date),
       checkOut: new Date(reservation.check_out_date),
-      pmsId: reservation.id,
+      pmsId: reservation.guest_info.guest_id,
     };
 
     // Create new guest
-    const newGuest = await guestService.upsert(
-      reservation.id,
-      guestData,
-      propertyId,
-      { session },
-    );
+    const newGuest = await guestService.upsert(reservation.guest_info.guest_id, guestData, propertyId, session );
 
     // Create guest status
     const guestStatusData = {
@@ -110,16 +114,27 @@ const createReservation = async (folio, propertyId, req) => {
       currentStatus: mapBookingStatusToGuestStatus(reservation.booking_status),
     };
 
-    const guestStatus = await guestStatusService.create(guestStatusData, {
+    const guestStatus = await guestStatusService.create(
+      propertyId, 
+      newGuest._id, 
+      { currentStatus: mapBookingStatusToGuestStatus(reservation.booking_status) }, 
+      session 
+    );
+    
+    const guestSession = await guestSessionService.create(
+      propertyId,
+      newGuest._id,
       session,
-    });
+    );
+
     const chatList = await chatListService.create(
       propertyId,
       newGuest._id,
       session,
     );
 
-    if (newGuest.phoneNumber && newGuest.countryCode) {
+
+    if ( newGuest.phoneNumber && newGuest.countryCode) {
       const messageTemplate =
         await messageTemplateService.getByNameAndPropertyId(
           propertyId,
@@ -138,7 +153,7 @@ const createReservation = async (folio, propertyId, req) => {
           newGuest,
           property,
           propertySetting,
-          `${process.env.MOBILE_FRONTEND_URL}/${newGuest._id}`,
+          `${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
         );
         const sentMessage = await smsService.send(
           twilioSubClient,
@@ -173,6 +188,7 @@ const createReservation = async (folio, propertyId, req) => {
       }
     }
 
+
     await session.commitTransaction();
     req.app.io.to(`property:${propertyId}`).emit("guest:guestUpdate", {
       guest: { ...newGuest._doc, status: { ...guestStatus._doc } },
@@ -186,12 +202,7 @@ const createReservation = async (folio, propertyId, req) => {
       message: {},
     });
 
-    return responseHandler(
-      res,
-      { guest: { ...newGuest._doc, status: { ...guestStatus._doc } } },
-      201,
-      "Reservation Created",
-    );
+    return newGuest;
   } catch (error) {
     await session.abortTransaction();
     logger.error("HotelKey Reservation Error:", error);
@@ -201,16 +212,16 @@ const createReservation = async (folio, propertyId, req) => {
   }
 };
 
-const updateReservationGuest = async (folio, propertyId, req) => {
+const updateReservationGuest = async (folio,propertyId,req) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
     const { reservation } = folio;
     const { guest_info } = reservation;
-    const existingGuest = await guestService.findOne({
+    const existingGuest = await guestService.getByGuestPmsId({
       propertyId,
-      pmsId: reservation.id,
+      pmsId: reservation.guest_info.guest_id,
     });
     if (!existingGuest) {
       throw new ValidationError("Guest not found", {
@@ -223,7 +234,7 @@ const updateReservationGuest = async (folio, propertyId, req) => {
         )?.dialCode || "+1"
       : "+1";
 
-    const property = await propertyService.getById(propertyId);
+      const property = await propertyService.getById(propertyId);
     if (!property) {
       throw new ValidationError("Invalid property", {
         propertyId: ["Property not found"],
@@ -243,16 +254,16 @@ const updateReservationGuest = async (folio, propertyId, req) => {
         roomNumber: reservation.room_number,
         source: reservation.source,
         confirmationNumber: reservation.reservation_no,
-        pmsId: reservation.id,
+        pmsId: reservation.guest_info.guest_id,
       },
       { session },
     );
 
-    if (updatedGuest.phoneNumber && updatedGuest.countryCode) {
+    if ( updatedGuest.phoneNumber && updatedGuest.countryCode) {
       const messageTemplate =
         await messageTemplateService.getByNameAndPropertyId(
           propertyId,
-          "Guest Data Update",
+          'Guest Data Update'
         );
       //const message = `Dear ${updatedGuest.firstName} ${updatedGuest.lastName}, We wanted to inform you that your data has been successfully updated in our system. If you did not request this change, please contact the front desk immediately for assistance. Thank you for choosing Onelyk. Warm regards, Team Onelyk`;
       if (messageTemplate) {
@@ -313,12 +324,7 @@ const updateReservationGuest = async (folio, propertyId, req) => {
     });
     req.app.io.to(`guest:${updatedGuest._id}`).emit("chatList:update", {});
     await session.commitTransaction();
-    return responseHandler(
-      res,
-      { guest: { ...updatedGuest._doc } },
-      200,
-      "Reservation Updated",
-    );
+    return updatedGuest;
   } catch (error) {
     await session.abortTransaction();
     logger.error("HotelKey Reservation Error:", error);
@@ -328,7 +334,7 @@ const updateReservationGuest = async (folio, propertyId, req) => {
   }
 };
 
-const updateReservationStatus = async (folio, propertyId, req) => {
+const updateReservationStatus = async (folio,propertyId,req) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
@@ -340,9 +346,9 @@ const updateReservationStatus = async (folio, propertyId, req) => {
         propertyId: ["Not connected to any PMS"],
       });
     }
-    const existingGuest = await guestService.findOne({
+    const existingGuest = await guestService.getByGuestPmsId({
       propertyId,
-      pmsId: reservation.id,
+      pmsId: reservation.guest_info.guest_id,
     });
     if (!existingGuest) {
       throw new ValidationError("Guest not found", {
@@ -369,7 +375,7 @@ const updateReservationStatus = async (folio, propertyId, req) => {
       },
       { session },
     );
-    if (reservation.booking_status === "CHECKED_IN") {
+    if(reservation.booking_status === 'CHECKED_IN'){
       const updatedGuest = await guestService.update(
         guestId,
         {
@@ -436,18 +442,9 @@ const updateReservationStatus = async (folio, propertyId, req) => {
       message: {},
     });
 
+    
     await session.commitTransaction();
-    return responseHandler(
-      res,
-      {
-        guest: {
-          ...existingGuest._doc,
-          status: { ...updatedGuestStatus._doc },
-        },
-      },
-      200,
-      "Reservation Status Updated",
-    );
+    return updatedGuestStatus;
   } catch (error) {
     await session.abortTransaction();
     logger.error("HotelKey Reservation Error:", error);
@@ -457,20 +454,20 @@ const updateReservationStatus = async (folio, propertyId, req) => {
   }
 };
 
-const reservationCheckedIn = async (folio, propertyId, req) => {
+const reservationCheckedIn = async (folio,propertyId,req) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
     const { reservation } = folio;
-    if (!reservation.booking_status === "CHECKED_IN") {
+    if(!reservation.booking_status === 'CHECKED_IN'){
       throw new ValidationError("Reservation not checked in", {
         reservationId: ["Reservation not checked in"],
       });
     }
-    const existingGuest = await guestService.findOne({
+    const existingGuest = await guestService.getByGuestPmsId({
       propertyId,
-      pmsId: reservation.id,
+      pmsId: reservation.guest_info.guest_id,
     });
     if (!existingGuest) {
       throw new ValidationError("Guest not found", {
@@ -501,7 +498,7 @@ const reservationCheckedIn = async (folio, propertyId, req) => {
       propertyId,
       existingGuest._id,
     );
-    if (existingGuest.phoneNumber && existingGuest.countryCode) {
+    if(existingGuest.phoneNumber && existingGuest.countryCode){
       const messageTemplate =
         await messageTemplateService.getByNameAndPropertyId(
           propertyId,
@@ -551,7 +548,7 @@ const reservationCheckedIn = async (folio, propertyId, req) => {
             },
             session,
           );
-      }
+        } 
     }
     req.app.io.to(`property:${propertyId}`).emit("chatList:update", {});
     req.app.io.to(`property:${propertyId}`).emit("guest:guestUpdate", {
@@ -567,17 +564,7 @@ const reservationCheckedIn = async (folio, propertyId, req) => {
     });
 
     await session.commitTransaction();
-    return responseHandler(
-      res,
-      {
-        guest: {
-          ...existingGuest._doc,
-          status: { ...updatedGuestStatus._doc },
-        },
-      },
-      200,
-      "Reservation Checked In",
-    );
+    return updatedGuest;
   } catch (error) {
     await session.abortTransaction();
     logger.error("HotelKey Reservation Error:", error);
@@ -585,22 +572,22 @@ const reservationCheckedIn = async (folio, propertyId, req) => {
   } finally {
     session.endSession();
   }
-};
+}
 
-const reservationCheckedOut = async (folio, propertyId, req) => {
+const reservationCheckedOut = async (folio,propertyId,req) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
     const { reservation } = folio;
-    if (!reservation.booking_status === "CHECKED_OUT") {
+    if(!reservation.booking_status === 'CHECKED_OUT'){
       throw new ValidationError("Reservation not checked out", {
         reservationId: ["Reservation not checked out"],
       });
     }
-    const existingGuest = await guestService.findOne({
+    const existingGuest = await guestService.getByGuestPmsId({
       propertyId,
-      pmsId: reservation.id,
+      pmsId: reservation.guest_info.guest_id,
     });
     if (!existingGuest) {
       throw new ValidationError("Guest not found", {
@@ -624,7 +611,7 @@ const reservationCheckedOut = async (folio, propertyId, req) => {
       propertyId,
       existingGuest._id,
     );
-    if (existingGuest.phoneNumber && existingGuest.countryCode) {
+    if(existingGuest.phoneNumber && existingGuest.countryCode){
       const messageTemplate =
         await messageTemplateService.getByNameAndPropertyId(
           propertyId,
@@ -674,7 +661,7 @@ const reservationCheckedOut = async (folio, propertyId, req) => {
             },
             session,
           );
-      }
+        } 
     }
     req.app.io.to(`property:${propertyId}`).emit("chatList:update", {});
     req.app.io.to(`property:${propertyId}`).emit("guest:guestUpdate", {
@@ -690,17 +677,7 @@ const reservationCheckedOut = async (folio, propertyId, req) => {
     });
 
     await session.commitTransaction();
-    return responseHandler(
-      res,
-      {
-        guest: {
-          ...existingGuest._doc,
-          status: { ...updatedGuestStatus._doc },
-        },
-      },
-      200,
-      "Reservation Checked Out",
-    );
+    return updatedGuest;
   } catch (error) {
     await session.abortTransaction();
     logger.error("HotelKey Reservation Error:", error);
@@ -708,16 +685,18 @@ const reservationCheckedOut = async (folio, propertyId, req) => {
   } finally {
     session.endSession();
   }
-};
+}
 
-const additionalGuestDataChanged = async (folio, propertyId, req) => {
+
+
+const additionalGuestDataChanged = async (folio,propertyId,req) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
     const { reservation, additional_guest_info } = folio;
-    const existingGuest = await guestService.findOne({
+    const existingGuest = await guestService.getByGuestPmsId({
       propertyId,
-      pmsId: reservation.id,
+      pmsId: reservation.guest_info.guest_id,
     });
     if (!existingGuest) {
       throw new ValidationError("Guest not found", {
@@ -726,9 +705,7 @@ const additionalGuestDataChanged = async (folio, propertyId, req) => {
     }
     const countryCode = additional_guest_info.country
       ? countries.find(
-          (c) =>
-            c.iso2.toLowerCase() ===
-            additional_guest_info.country.toLowerCase(),
+          (c) => c.iso2.toLowerCase() === additional_guest_info.country.toLowerCase(),
         )?.dialCode || "+1"
       : "+1";
     const updatedGuest = await guestService.update(
@@ -747,11 +724,11 @@ const additionalGuestDataChanged = async (folio, propertyId, req) => {
       propertyId,
       existingGuest._id,
     );
-    if (updatedGuest.phoneNumber && updatedGuest.countryCode) {
+    if ( updatedGuest.phoneNumber && updatedGuest.countryCode) {
       const messageTemplate =
         await messageTemplateService.getByNameAndPropertyId(
           propertyId,
-          "Guest Data Update",
+          'Guest Data Update',
         );
       if (messageTemplate) {
         const twilioAccount =
@@ -824,16 +801,16 @@ const additionalGuestDataChanged = async (folio, propertyId, req) => {
   } finally {
     session.endSession();
   }
-};
+}
 
 const arrivalTimeChanged = async (folio, propertyId, req) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
     const { reservation } = folio;
-    const existingGuest = await guestService.findOne({
+    const existingGuest = await guestService.getByGuestPmsId({
       propertyId,
-      pmsId: reservation.id,
+      pmsId: reservation.guest_info.guest_id,
     });
     if (!existingGuest) {
       throw new ValidationError("Guest not found", {
@@ -852,57 +829,57 @@ const arrivalTimeChanged = async (folio, propertyId, req) => {
       existingGuest._id,
     );
     const property = await propertyService.getById(propertyId);
-    if (existingGuest.phoneNumber && existingGuest.countryCode) {
+    if(existingGuest.phoneNumber && existingGuest.countryCode){
       const messageTemplate =
         await messageTemplateService.getByNameAndPropertyId(
           propertyId,
-          "Check In Time Update",
+          'Check In Time Update',
         );
-      if (messageTemplate) {
-        const twilioAccount =
-          await twilioAccountService.getByPropertyId(propertyId);
-        const twilioSubClient =
-          await twilioService.getTwilioClient(twilioAccount);
-        const propertySetting = await settingService.getByPropertyId(
-          property._id,
-        );
-        const updatedMessageBody = modifyMessageTemplateBody(
-          messageTemplate,
-          updatedGuest,
-          property,
-          propertySetting,
-          `${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
-        );
-        const sentMessage = await smsService.send(
-          twilioSubClient,
-          `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
-          `${updatedGuest.countryCode}${updatedGuest.phoneNumber}`,
-          `${updatedMessageBody.message}`,
-        );
-        const newMessage = await messageService.create(
-          {
-            propertyId: propertyId,
-            guestId: updatedGuest._id,
-            senderId: propertyId,
-            receiverId: updatedGuest._id,
-            content: sentMessage.body,
-            messageSid: sentMessage.sid,
-            messageType: messageType.SMS,
-            messageTriggerType: messageTriggerType.AUTOMATIC,
-            status: sentMessage.status,
-          },
-          session,
-        );
-        const updatedChatList =
-          await chatListService.updateAndIncUnreadMessages(
-            propertyId,
-            updatedGuest._id,
+        if(messageTemplate){
+          const twilioAccount =
+            await twilioAccountService.getByPropertyId(propertyId);
+          const twilioSubClient =
+            await twilioService.getTwilioClient(twilioAccount);
+          const propertySetting = await settingService.getByPropertyId(
+            property._id,
+          );
+          const updatedMessageBody = modifyMessageTemplateBody(
+            messageTemplate,
+            updatedGuest,
+            property,
+            propertySetting,
+            `${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
+          );
+          const sentMessage = await smsService.send(
+            twilioSubClient,
+            `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
+            `${updatedGuest.countryCode}${updatedGuest.phoneNumber}`,
+            `${updatedMessageBody.message}`,
+          );
+          const newMessage = await messageService.create(
             {
-              latestMessage: newMessage._id,
+              propertyId: propertyId,
+              guestId: updatedGuest._id,
+              senderId: propertyId,
+              receiverId: updatedGuest._id,
+              content: sentMessage.body,
+              messageSid: sentMessage.sid,
+              messageType: messageType.SMS,
+              messageTriggerType: messageTriggerType.AUTOMATIC,
+              status: sentMessage.status,
             },
             session,
           );
-      }
+          const updatedChatList =
+            await chatListService.updateAndIncUnreadMessages(
+              propertyId,
+              updatedGuest._id,
+              {
+                latestMessage: newMessage._id,
+              },
+            session,
+          );
+        }
     }
     req.app.io.to(`property:${propertyId}`).emit("chatList:update", {});
     req.app.io.to(`property:${propertyId}`).emit("guest:guestUpdate", {
@@ -912,7 +889,7 @@ const arrivalTimeChanged = async (folio, propertyId, req) => {
       message: {},
     });
     req.app.io.to(`guest:${updatedGuest._id}`).emit("chatList:update", {});
-
+    
     await session.commitTransaction();
     return responseHandler(
       res,
@@ -927,18 +904,18 @@ const arrivalTimeChanged = async (folio, propertyId, req) => {
   } finally {
     session.endSession();
   }
-};
+}
 
-const departureTimeChanged = async (folio, propertyId, req) => {
+const departureTimeChanged = async (folio,propertyId,req) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
     const { reservation } = folio;
-    const existingGuest = await guestService.findOne({
+    const existingGuest = await guestService.getByGuestPmsId({
       propertyId,
-      pmsId: reservation.id,
+      pmsId: reservation.guest_info.guest_id,
     });
-    if (!existingGuest) {
+    if(!existingGuest) {
       throw new ValidationError("Guest not found", {
         reservationId: ["Reservation not found"],
       });
@@ -955,57 +932,57 @@ const departureTimeChanged = async (folio, propertyId, req) => {
       existingGuest._id,
     );
     const property = await propertyService.getById(propertyId);
-    if (existingGuest.phoneNumber && existingGuest.countryCode) {
+    if(existingGuest.phoneNumber && existingGuest.countryCode){
       const messageTemplate =
         await messageTemplateService.getByNameAndPropertyId(
           propertyId,
-          "Check Out Time Update",
+          'Check Out Time Update',
         );
-      if (messageTemplate) {
-        const twilioAccount =
-          await twilioAccountService.getByPropertyId(propertyId);
-        const twilioSubClient =
-          await twilioService.getTwilioClient(twilioAccount);
-        const propertySetting = await settingService.getByPropertyId(
-          property._id,
-        );
-        const updatedMessageBody = modifyMessageTemplateBody(
-          messageTemplate,
-          updatedGuest,
-          property,
-          propertySetting,
-          `${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
-        );
-        const sentMessage = await smsService.send(
-          twilioSubClient,
-          `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
-          `${updatedGuest.countryCode}${updatedGuest.phoneNumber}`,
-          `${updatedMessageBody.message}`,
-        );
-        const newMessage = await messageService.create(
-          {
-            propertyId: propertyId,
-            guestId: updatedGuest._id,
-            senderId: propertyId,
-            receiverId: updatedGuest._id,
-            content: sentMessage.body,
-            messageSid: sentMessage.sid,
-            messageType: messageType.SMS,
-            messageTriggerType: messageTriggerType.AUTOMATIC,
-            status: sentMessage.status,
-          },
-          session,
-        );
-        const updatedChatList =
-          await chatListService.updateAndIncUnreadMessages(
-            propertyId,
-            updatedGuest._id,
+        if(messageTemplate){
+          const twilioAccount =
+            await twilioAccountService.getByPropertyId(propertyId);
+          const twilioSubClient =
+            await twilioService.getTwilioClient(twilioAccount);
+          const propertySetting = await settingService.getByPropertyId(
+            property._id,
+          );
+          const updatedMessageBody = modifyMessageTemplateBody(
+            messageTemplate,
+            updatedGuest,
+            property,
+            propertySetting,
+            `${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
+          );
+          const sentMessage = await smsService.send(
+            twilioSubClient,
+            `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
+            `${updatedGuest.countryCode}${updatedGuest.phoneNumber}`,
+            `${updatedMessageBody.message}`,
+          );
+          const newMessage = await messageService.create(
             {
-              latestMessage: newMessage._id,
+              propertyId: propertyId,
+              guestId: updatedGuest._id,
+              senderId: propertyId,
+              receiverId: updatedGuest._id,
+              content: sentMessage.body,
+              messageSid: sentMessage.sid,
+              messageType: messageType.SMS,
+              messageTriggerType: messageTriggerType.AUTOMATIC,
+              status: sentMessage.status,
             },
             session,
           );
-      }
+          const updatedChatList =
+            await chatListService.updateAndIncUnreadMessages(
+              propertyId,
+              updatedGuest._id,
+              {
+                latestMessage: newMessage._id,
+              },
+            session,
+          );
+        }
     }
     req.app.io.to(`property:${propertyId}`).emit("chatList:update", {});
     req.app.io.to(`property:${propertyId}`).emit("guest:guestUpdate", {
@@ -1015,7 +992,7 @@ const departureTimeChanged = async (folio, propertyId, req) => {
       message: {},
     });
     req.app.io.to(`guest:${updatedGuest._id}`).emit("chatList:update", {});
-
+    
     await session.commitTransaction();
     return responseHandler(
       res,
@@ -1030,18 +1007,18 @@ const departureTimeChanged = async (folio, propertyId, req) => {
   } finally {
     session.endSession();
   }
-};
+}
 
-const checkOutDateChanged = async (folio, propertyId, req) => {
+const checkOutDateChanged = async (folio,propertyId,req) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
     const { reservation } = folio;
-    const existingGuest = await guestService.findOne({
+    const existingGuest = await guestService.getByGuestPmsId({
       propertyId,
-      pmsId: reservation.id,
+      pmsId: reservation.guest_info.guest_id,
     });
-    if (!existingGuest) {
+    if(!existingGuest) {
       throw new ValidationError("Guest not found", {
         reservationId: ["Reservation not found"],
       });
@@ -1058,57 +1035,57 @@ const checkOutDateChanged = async (folio, propertyId, req) => {
       existingGuest._id,
     );
     const property = await propertyService.getById(propertyId);
-    if (existingGuest.phoneNumber && existingGuest.countryCode) {
+    if(existingGuest.phoneNumber && existingGuest.countryCode){
       const messageTemplate =
         await messageTemplateService.getByNameAndPropertyId(
           propertyId,
-          "Check Out Time Update",
+          'Check Out Time Update',
         );
-      if (messageTemplate) {
-        const twilioAccount =
-          await twilioAccountService.getByPropertyId(propertyId);
-        const twilioSubClient =
-          await twilioService.getTwilioClient(twilioAccount);
-        const propertySetting = await settingService.getByPropertyId(
-          property._id,
-        );
-        const updatedMessageBody = modifyMessageTemplateBody(
-          messageTemplate,
-          updatedGuest,
-          property,
-          propertySetting,
-          `${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
-        );
-        const sentMessage = await smsService.send(
-          twilioSubClient,
-          `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
-          `${updatedGuest.countryCode}${updatedGuest.phoneNumber}`,
-          `${updatedMessageBody.message}`,
-        );
-        const newMessage = await messageService.create(
-          {
-            propertyId: propertyId,
-            guestId: updatedGuest._id,
-            senderId: propertyId,
-            receiverId: updatedGuest._id,
-            content: sentMessage.body,
-            messageSid: sentMessage.sid,
-            messageType: messageType.SMS,
-            messageTriggerType: messageTriggerType.AUTOMATIC,
-            status: sentMessage.status,
-          },
-          session,
-        );
-        const updatedChatList =
-          await chatListService.updateAndIncUnreadMessages(
-            propertyId,
-            updatedGuest._id,
+        if(messageTemplate){
+          const twilioAccount =
+            await twilioAccountService.getByPropertyId(propertyId);
+          const twilioSubClient =
+            await twilioService.getTwilioClient(twilioAccount);
+          const propertySetting = await settingService.getByPropertyId(
+            property._id,
+          );
+          const updatedMessageBody = modifyMessageTemplateBody(
+            messageTemplate,
+            updatedGuest,
+            property,
+            propertySetting,
+            `${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
+          );
+          const sentMessage = await smsService.send(
+            twilioSubClient,
+            `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
+            `${updatedGuest.countryCode}${updatedGuest.phoneNumber}`,
+            `${updatedMessageBody.message}`,
+          );
+          const newMessage = await messageService.create(
             {
-              latestMessage: newMessage._id,
+              propertyId: propertyId,
+              guestId: updatedGuest._id,
+              senderId: propertyId,
+              receiverId: updatedGuest._id,
+              content: sentMessage.body,
+              messageSid: sentMessage.sid,
+              messageType: messageType.SMS,
+              messageTriggerType: messageTriggerType.AUTOMATIC,
+              status: sentMessage.status,
             },
             session,
           );
-      }
+          const updatedChatList =
+            await chatListService.updateAndIncUnreadMessages(
+              propertyId,
+              updatedGuest._id,
+              {
+                latestMessage: newMessage._id,
+              },
+            session,
+          );
+        }
     }
     req.app.io.to(`property:${propertyId}`).emit("chatList:update", {});
     req.app.io.to(`property:${propertyId}`).emit("guest:guestUpdate", {
@@ -1118,7 +1095,7 @@ const checkOutDateChanged = async (folio, propertyId, req) => {
       message: {},
     });
     req.app.io.to(`guest:${updatedGuest._id}`).emit("chatList:update", {});
-
+    
     await session.commitTransaction();
     return responseHandler(
       res,
@@ -1133,18 +1110,18 @@ const checkOutDateChanged = async (folio, propertyId, req) => {
   } finally {
     session.endSession();
   }
-};
+}
 
-const roomNumberChanged = async (folio, propertyId, req) => {
+const roomNumberChanged = async (folio,propertyId,req) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    const { reservation } = folio;
-    const existingGuest = await guestService.findOne({
+    const {reservation} = folio;
+    const existingGuest = await guestService.getByGuestPmsId({
       propertyId,
-      pmsId: reservation.id,
+      pmsId: reservation.guest_info.guest_id,
     });
-    if (!existingGuest) {
+    if(!existingGuest) {
       throw new ValidationError("Guest not found", {
         reservationId: ["Reservation not found"],
       });
@@ -1165,18 +1142,19 @@ const roomNumberChanged = async (folio, propertyId, req) => {
   } finally {
     session.endSession();
   }
-};
+}
 
-const reservationCancelled = async (folio, propertyId, req) => {
+
+const reservationCancelled = async (folio,propertyId,req) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
     const { reservation } = folio;
-    const existingGuest = await guestService.findOne({
+    const existingGuest = await guestService.getByGuestPmsId({
       propertyId,
-      pmsId: reservation.id,
+      pmsId: reservation.guest_info.guest_id,
     });
-    if (!existingGuest) {
+    if(!existingGuest) {
       throw new ValidationError("Guest not found", {
         reservationId: ["Reservation not found"],
       });
@@ -1185,7 +1163,7 @@ const reservationCancelled = async (folio, propertyId, req) => {
       guestId: existingGuest._id,
       propertyId,
     });
-    if (!existingGuestStatus) {
+    if(!existingGuestStatus) {
       throw new ValidationError("Guest status not found", {
         reservationId: ["Reservation not found"],
       });
@@ -1206,7 +1184,7 @@ const reservationCancelled = async (folio, propertyId, req) => {
   } finally {
     session.endSession();
   }
-};
+}
 
 // const checkOutDateExtended = async (folio,propertyId,req) => {
 //   const session = await mongoose.startSession();
@@ -1218,7 +1196,7 @@ const reservationCancelled = async (folio, propertyId, req) => {
 //         reservationId: ["Reservation not checked out"],
 //       });
 //     }
-//     const existingGuest = await guestService.findOne({
+//     const existingGuest = await guestService.getByGuestPmsId({
 //       propertyId,
 //       pmsId: reservation.id,
 //     });
@@ -1243,8 +1221,73 @@ const reservationCancelled = async (folio, propertyId, req) => {
 //   } finally {
 //     session.endSession();
 //   }
-
+    
 // }
+
+const houseKeepingUpdate = async (houseKeepingData, propertyId, req) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const existingGuest = await guestService.findGuestByGuestStatus(
+      propertyId,
+      {
+        roomNumber: houseKeepingData.room
+      },
+      GUEST_CURRENT_STATUS.IN_HOUSE
+    );
+    if(!existingGuest) {
+      throw new NotFoundError("Guest not found", {
+        guestId: ["Guest not found for the given room number"],
+      });
+    }
+    const houseKeepingRequest = await houseKeepingRequestService.find({
+      propertyId,
+      guestId: existingGuest._id,
+      requestStatus: REQUEST_STATUS.REQUESTED
+    });
+    if(houseKeepingRequest.length <= 0) {
+      throw new NotFoundError("Housekeeping request not found", {
+        requestId: ["Housekeeping request not found for the given guest"],
+      });
+    }
+    const houseKeepingStatus  = houseKeepingData.action;
+    if(houseKeepingStatus === WEBHOOK_ROOM_STATUS_CODE.MARK_CLEAN) {
+      const updatedHouseKeepingRequest =
+        await houseKeepingRequestService.update(
+          houseKeepingRequests[0]._id,
+          {
+            requestStatus: REQUEST_STATUS.COMPLETED,
+          },
+          session,
+        );
+        const { message, chatList } = await sendSmsAddOnsCompleted(
+        propertyId,
+        existingGuest,
+        session,
+      );
+      req.app.io
+        .to(`property:${updatedHouseKeepingRequest.propertyId}`)
+        .emit("request:update", {});
+      req.app.io
+        .to(`guest:${updatedHouseKeepingRequest.guestId}`)
+        .emit("message:newMessage", { message });
+      req.app.io
+        .to(`property:${updatedHouseKeepingRequest.propertyId}`)
+        .emit("chatList:update", { chatList });
+    }
+    req.app.io.to(`property:${existingGuest.propertyId}`).emit("addOn:newAddon", {
+      count: 1,
+    });
+    await session.commitTransaction();
+    session.endSession();
+    return roomStatus;
+  } catch (e) {
+    console.log(e);
+    await session.abortTransaction();
+    session.endSession();
+    throw e;
+  }
+}
 
 /**
  * Maps HotelKey booking status to guest status
@@ -1262,6 +1305,57 @@ const mapBookingStatusToGuestStatus = (bookingStatus) => {
   return statusMap[bookingStatus] || GUEST_CURRENT_STATUS.RESERVED;
 };
 
+const sendSmsAddOnsCompleted = async (propertyId, guest, session) => {
+  const twilioAccount = await twilioAccountService.getByPropertyId(propertyId);
+  const twilioSubClient = await twilioService.getTwilioClient(twilioAccount);
+  const messageTemplate = await messageTemplateService.getByNameAndPropertyId(
+    propertyId,
+    "AddOns Completed",
+  );
+  if (messageTemplate) {
+    const propertySetting = await settingService.getByPropertyId(propertyId);
+    const { property } = await propertyService.getById(propertyId);
+    const updatedMessageBody = modifyAddOnsMessageTemplateBody(
+      messageTemplate,
+      property,
+      guest,
+      { name: "House Keeping" },
+      "",
+    );
+    const sentSms = await smsService.send(
+      twilioSubClient,
+      `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
+      `${guest.countryCode}${guest.phoneNumber}`,
+      `${updatedMessageBody.message}`,
+    );
+    const newMessage = await messageService.create(
+      {
+        propertyId: propertyId,
+        guestId: guest._id,
+        senderId: propertyId,
+        receiverId: guest._id,
+        content: updatedMessageBody.message,
+        messageSid: sentSms.sid,
+        messageType: messageType.SMS,
+        messageTriggerType: messageTriggerType.AUTOMATIC,
+        status: "sent",
+      },
+      session,
+    );
+    const updatedChatList = await chatListService.updateAndIncUnreadMessages(
+      propertyId,
+      guest._id,
+      {
+        latestMessage: newMessage._id,
+      },
+      session,
+    );
+    return { message: newMessage, chatList: updatedChatList };
+  }
+  return { message: null, chatList: null };
+};
+
+
 module.exports = {
   createReservation,
   updateReservationGuest,
@@ -1275,4 +1369,5 @@ module.exports = {
   departureTimeChanged,
   checkOutDateChanged,
   roomNumberChanged,
+  houseKeepingUpdate
 };
