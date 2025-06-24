@@ -9,7 +9,8 @@ const {
 
   const reservationDispatcher = async (req, res, next) => {
     const payload = req.body;
-    const pmsId = payload.property_id;
+    console.log("PayLoad - ",payload);
+    const pmsId = payload.property_code;
     const property  = await propertyService.findByPmsId(pmsId);
     if(!property){
         throw new NotFoundError("Property not found");
@@ -53,9 +54,6 @@ const {
         case "departure_time_changed":
             result.push(await hotelKeyPmsHandler.departureTimeChanged(payload,propertyId,req));
             break;
-        case "check_out_date_extended":
-          result.push(await hotelKeyPmsHandler.checkOutDateChanged(payload,propertyId,req));
-          break;
         case "room_number_changed":
           result.push(await hotelKeyPmsHandler.roomNumberChanged(payload,propertyId,req));
           break;
@@ -75,6 +73,25 @@ const {
 
   }
   const houseKeepingDispatcher = async (req, res, next) => {
+    const payload = req.body;
+    const pmsId = payload.property_code;
+    const property  = await propertyService.findByPmsId(pmsId);
+    if(!property){
+        throw new NotFoundError("Property not found");
+    }
+    const propertyId = property._id;
+    const type = payload.type;
+    if(type !== 'housekeeping') {
+      throw new NotFoundError("Type not found");
+    }
+    const result = [];
+    const events = payload.change_events;
+    for(const event of events) {
+      result.push(
+        await hotelKeyPmsHandler.houseKeepingUpdate(payload.houseKeeping,propertyId,req)
+      );
+    }
+    return responseHandler(res, result);
   }
 
   module.exports = {

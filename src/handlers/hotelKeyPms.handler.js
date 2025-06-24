@@ -1,4 +1,5 @@
 const { default: mongoose } = require("mongoose");
+const { ObjectId } = require('mongodb');
 const {
   messageType,
   messageTriggerType,
@@ -13,6 +14,7 @@ const twilioService = require("../services/twilio.service");
 const twilioAccountService = require("../services/twilioAccount.service");
 const chatListService = require("../services/chatList.service");
 const propertyService = require("../services/property.service");
+const houseKeepingRequestService = require("../services/houseKeepingRequest.service");
 const {
   modifyMessageTemplateBody,
 } = require("../utils/messageTemplateUpdate");
@@ -22,6 +24,7 @@ const logger = require("../configs/winston.config");
 const { responseHandler } = require("../middlewares/response.middleware");
 const {
   ValidationError,
+  NotFoundError,
 } = require("../lib/CustomErrors");
 
 const {
@@ -29,8 +32,10 @@ const {
 } = require("../utils/guestStatustToTemplate");
 const {
   GUEST_CURRENT_STATUS,
+  REQUEST_STATUS,
 } = require("../constants/guestStatus.contant");
 const { countries } = require("../data/countries+iso2+code.json");
+const { ROOM_STATUS_CODE, WEBHOOK_ROOM_STATUS_CODE } = require("../constants/hotelKey.constant");
 require("dotenv").config();
 
 
@@ -65,10 +70,10 @@ const createReservation = async (folio, propertyId, req) => {
     }
 
     // Check if guest already exists
-    const existingGuest = await guestService.findOne({
-      propertyId,
-      pmsId: reservation.guest_info.guest_id,
-    });
+    const existingGuest = await guestService.getByGuestPmsId(
+      new ObjectId(propertyId),
+      reservation.guest_info.guest_id,
+    );
 
     if (existingGuest) {
       throw new ValidationError("Duplicate reservation", {
@@ -100,7 +105,7 @@ const createReservation = async (folio, propertyId, req) => {
     };
 
     // Create new guest
-    const newGuest = await guestService.upsert(reservation.guest_info.guest_id, guestData, propertyId, { session });
+    const newGuest = await guestService.upsert(reservation.guest_info.guest_id, guestData, propertyId, session );
 
     // Create guest status
     const guestStatusData = {
@@ -109,7 +114,19 @@ const createReservation = async (folio, propertyId, req) => {
       currentStatus: mapBookingStatusToGuestStatus(reservation.booking_status),
     };
 
-    const guestStatus = await guestStatusService.create(guestStatusData, { session });
+    const guestStatus = await guestStatusService.create(
+      propertyId, 
+      newGuest._id, 
+      { currentStatus: mapBookingStatusToGuestStatus(reservation.booking_status) }, 
+      session 
+    );
+    
+    const guestSession = await guestSessionService.create(
+      propertyId,
+      newGuest._id,
+      session,
+    );
+
     const chatList = await chatListService.create(
       propertyId,
       newGuest._id,
@@ -136,7 +153,7 @@ const createReservation = async (folio, propertyId, req) => {
           newGuest,
           property,
           propertySetting,
-          `${process.env.MOBILE_FRONTEND_URL}/${newGuest._id}`,
+          `${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
         );
         const sentMessage = await smsService.send(
           twilioSubClient,
@@ -202,7 +219,7 @@ const updateReservationGuest = async (folio,propertyId,req) => {
   try {
     const { reservation } = folio;
     const { guest_info } = reservation;
-    const existingGuest = await guestService.findOne({
+    const existingGuest = await guestService.getByGuestPmsId({
       propertyId,
       pmsId: reservation.guest_info.guest_id,
     });
@@ -329,7 +346,7 @@ const updateReservationStatus = async (folio,propertyId,req) => {
         propertyId: ["Not connected to any PMS"],
       });
     }
-    const existingGuest = await guestService.findOne({
+    const existingGuest = await guestService.getByGuestPmsId({
       propertyId,
       pmsId: reservation.guest_info.guest_id,
     });
@@ -448,7 +465,7 @@ const reservationCheckedIn = async (folio,propertyId,req) => {
         reservationId: ["Reservation not checked in"],
       });
     }
-    const existingGuest = await guestService.findOne({
+    const existingGuest = await guestService.getByGuestPmsId({
       propertyId,
       pmsId: reservation.guest_info.guest_id,
     });
@@ -568,7 +585,7 @@ const reservationCheckedOut = async (folio,propertyId,req) => {
         reservationId: ["Reservation not checked out"],
       });
     }
-    const existingGuest = await guestService.findOne({
+    const existingGuest = await guestService.getByGuestPmsId({
       propertyId,
       pmsId: reservation.guest_info.guest_id,
     });
@@ -677,7 +694,7 @@ const additionalGuestDataChanged = async (folio,propertyId,req) => {
   session.startTransaction();
   try {
     const { reservation, additional_guest_info } = folio;
-    const existingGuest = await guestService.findOne({
+    const existingGuest = await guestService.getByGuestPmsId({
       propertyId,
       pmsId: reservation.guest_info.guest_id,
     });
@@ -791,7 +808,7 @@ const arrivalTimeChanged = async (folio, propertyId, req) => {
   session.startTransaction();
   try {
     const { reservation } = folio;
-    const existingGuest = await guestService.findOne({
+    const existingGuest = await guestService.getByGuestPmsId({
       propertyId,
       pmsId: reservation.guest_info.guest_id,
     });
@@ -894,7 +911,7 @@ const departureTimeChanged = async (folio,propertyId,req) => {
   session.startTransaction();
   try {
     const { reservation } = folio;
-    const existingGuest = await guestService.findOne({
+    const existingGuest = await guestService.getByGuestPmsId({
       propertyId,
       pmsId: reservation.guest_info.guest_id,
     });
@@ -997,7 +1014,7 @@ const checkOutDateChanged = async (folio,propertyId,req) => {
   session.startTransaction();
   try {
     const { reservation } = folio;
-    const existingGuest = await guestService.findOne({
+    const existingGuest = await guestService.getByGuestPmsId({
       propertyId,
       pmsId: reservation.guest_info.guest_id,
     });
@@ -1100,7 +1117,7 @@ const roomNumberChanged = async (folio,propertyId,req) => {
   session.startTransaction();
   try {
     const {reservation} = folio;
-    const existingGuest = await guestService.findOne({
+    const existingGuest = await guestService.getByGuestPmsId({
       propertyId,
       pmsId: reservation.guest_info.guest_id,
     });
@@ -1133,7 +1150,7 @@ const reservationCancelled = async (folio,propertyId,req) => {
   session.startTransaction();
   try {
     const { reservation } = folio;
-    const existingGuest = await guestService.findOne({
+    const existingGuest = await guestService.getByGuestPmsId({
       propertyId,
       pmsId: reservation.guest_info.guest_id,
     });
@@ -1179,7 +1196,7 @@ const reservationCancelled = async (folio,propertyId,req) => {
 //         reservationId: ["Reservation not checked out"],
 //       });
 //     }
-//     const existingGuest = await guestService.findOne({
+//     const existingGuest = await guestService.getByGuestPmsId({
 //       propertyId,
 //       pmsId: reservation.id,
 //     });
@@ -1207,6 +1224,71 @@ const reservationCancelled = async (folio,propertyId,req) => {
     
 // }
 
+const houseKeepingUpdate = async (houseKeepingData, propertyId, req) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const existingGuest = await guestService.findGuestByGuestStatus(
+      propertyId,
+      {
+        roomNumber: houseKeepingData.room
+      },
+      GUEST_CURRENT_STATUS.IN_HOUSE
+    );
+    if(!existingGuest) {
+      throw new NotFoundError("Guest not found", {
+        guestId: ["Guest not found for the given room number"],
+      });
+    }
+    const houseKeepingRequest = await houseKeepingRequestService.find({
+      propertyId,
+      guestId: existingGuest._id,
+      requestStatus: REQUEST_STATUS.REQUESTED
+    });
+    if(houseKeepingRequest.length <= 0) {
+      throw new NotFoundError("Housekeeping request not found", {
+        requestId: ["Housekeeping request not found for the given guest"],
+      });
+    }
+    const houseKeepingStatus  = houseKeepingData.action;
+    if(houseKeepingStatus === WEBHOOK_ROOM_STATUS_CODE.MARK_CLEAN) {
+      const updatedHouseKeepingRequest =
+        await houseKeepingRequestService.update(
+          houseKeepingRequests[0]._id,
+          {
+            requestStatus: REQUEST_STATUS.COMPLETED,
+          },
+          session,
+        );
+        const { message, chatList } = await sendSmsAddOnsCompleted(
+        propertyId,
+        existingGuest,
+        session,
+      );
+      req.app.io
+        .to(`property:${updatedHouseKeepingRequest.propertyId}`)
+        .emit("request:update", {});
+      req.app.io
+        .to(`guest:${updatedHouseKeepingRequest.guestId}`)
+        .emit("message:newMessage", { message });
+      req.app.io
+        .to(`property:${updatedHouseKeepingRequest.propertyId}`)
+        .emit("chatList:update", { chatList });
+    }
+    req.app.io.to(`property:${existingGuest.propertyId}`).emit("addOn:newAddon", {
+      count: 1,
+    });
+    await session.commitTransaction();
+    session.endSession();
+    return roomStatus;
+  } catch (e) {
+    console.log(e);
+    await session.abortTransaction();
+    session.endSession();
+    throw e;
+  }
+}
+
 /**
  * Maps HotelKey booking status to guest status
  * @param {string} bookingStatus
@@ -1223,6 +1305,57 @@ const mapBookingStatusToGuestStatus = (bookingStatus) => {
   return statusMap[bookingStatus] || GUEST_CURRENT_STATUS.RESERVED;
 };
 
+const sendSmsAddOnsCompleted = async (propertyId, guest, session) => {
+  const twilioAccount = await twilioAccountService.getByPropertyId(propertyId);
+  const twilioSubClient = await twilioService.getTwilioClient(twilioAccount);
+  const messageTemplate = await messageTemplateService.getByNameAndPropertyId(
+    propertyId,
+    "AddOns Completed",
+  );
+  if (messageTemplate) {
+    const propertySetting = await settingService.getByPropertyId(propertyId);
+    const { property } = await propertyService.getById(propertyId);
+    const updatedMessageBody = modifyAddOnsMessageTemplateBody(
+      messageTemplate,
+      property,
+      guest,
+      { name: "House Keeping" },
+      "",
+    );
+    const sentSms = await smsService.send(
+      twilioSubClient,
+      `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
+      `${guest.countryCode}${guest.phoneNumber}`,
+      `${updatedMessageBody.message}`,
+    );
+    const newMessage = await messageService.create(
+      {
+        propertyId: propertyId,
+        guestId: guest._id,
+        senderId: propertyId,
+        receiverId: guest._id,
+        content: updatedMessageBody.message,
+        messageSid: sentSms.sid,
+        messageType: messageType.SMS,
+        messageTriggerType: messageTriggerType.AUTOMATIC,
+        status: "sent",
+      },
+      session,
+    );
+    const updatedChatList = await chatListService.updateAndIncUnreadMessages(
+      propertyId,
+      guest._id,
+      {
+        latestMessage: newMessage._id,
+      },
+      session,
+    );
+    return { message: newMessage, chatList: updatedChatList };
+  }
+  return { message: null, chatList: null };
+};
+
+
 module.exports = {
   createReservation,
   updateReservationGuest,
@@ -1236,4 +1369,5 @@ module.exports = {
   departureTimeChanged,
   checkOutDateChanged,
   roomNumberChanged,
+  houseKeepingUpdate
 };
