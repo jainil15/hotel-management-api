@@ -40,6 +40,8 @@ const {
   guestStatusToTemplate,
   guestStatusToTemplateOnUpdate,
 } = require("../utils/guestStatustToTemplate");
+const { addOnStatusUpdateEmail } = require("../utils/addOnEmailTemplate");
+const { sendMail } = require("../utils/mail.util");
 
 /**
  * Create check in out request
@@ -263,13 +265,12 @@ const updateRequestStatus = async (req, res, next) => {
         updatePayload,
         session,
       );
-    console.warn("Updated Request :- ",updatedCheckInOutRequest);
+    console.warn("Updated Request :- ", updatedCheckInOutRequest);
     const oldGuestStatus = await guestStatusService.getByGuestId(guestId);
     const updatedGuestStatus = await guestStatusService.update(
       guestId,
       {
-        [`${updatedCheckInOutRequest.requestType}Status`]:
-          requestStatus,
+        [`${updatedCheckInOutRequest.requestType}Status`]: requestStatus,
       },
       session,
     );
@@ -287,6 +288,19 @@ const updateRequestStatus = async (req, res, next) => {
 
     console.log("updatedGuestStatusssss");
     let updatedGuest = "";
+    const guest = await guestService.getById(guestId, propertyId);
+    const { property } = await propertyService.getById(propertyId);
+    const mailTemplate = addOnStatusUpdateEmail(
+      `${guest.firstName} ${guest.lastName}`,
+      updatedCheckInOutRequest.requestType,
+      requestStatus,
+      property.name,
+    );
+    sendMail(
+      property.email,
+      `${updatedCheckInOutRequest.requestType} Request ${requestStatus}`,
+      mailTemplate,
+    );
     if (updatedCheckInOutRequest.requestStatus === REQUEST_STATUS.ACCEPTED) {
       // Map request types to their corresponding field names.
       const requestTypeToFieldMap = {
@@ -329,7 +343,6 @@ const updateRequestStatus = async (req, res, next) => {
       updatedGuestStatus,
     );
     const oldGuest = await guestService.getById(guestId, propertyId);
-    const { property } = await propertyService.getById(propertyId);
     const messageTemplate = await messageTemplateService.getByNameAndPropertyId(
       propertyId,
       messageTemplateName,
@@ -361,9 +374,9 @@ const updateRequestStatus = async (req, res, next) => {
       property,
       propertySetting,
       `${process.env.MOBILE_FRONTEND_URL}/${guestSession._id}`,
-      requestStatus === REQUEST_STATUS.DECLINED ? reason : ""
+      requestStatus === REQUEST_STATUS.DECLINED ? reason : "",
     );
-    
+
     if (oldGuest.phoneNumber && oldGuest.countryCode) {
       const twilioAccount =
         await twilioAccountService.getByPropertyId(propertyId);
@@ -375,7 +388,7 @@ const updateRequestStatus = async (req, res, next) => {
         `${oldGuest.countryCode}${oldGuest.phoneNumber}`,
         `${updatedMessageBody.message}`,
       );
-      console.log("Twilio Message :- ",twilioAccount);
+      console.log("Twilio Message :- ", twilioAccount);
 
       newMessage = await messageService.create(
         {
@@ -401,8 +414,8 @@ const updateRequestStatus = async (req, res, next) => {
       );
     }
 
-     await session.commitTransaction();
-     await session.endSession();
+    await session.commitTransaction();
+    await session.endSession();
 
     req.app.io.to(`guest:${guestId}`).emit("message:newMessage", {
       message: newMessage

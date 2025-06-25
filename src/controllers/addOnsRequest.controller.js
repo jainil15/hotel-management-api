@@ -32,6 +32,7 @@ const { default: mongoose } = require("mongoose");
 const {
   modifyAddOnsMessageTemplateBody,
 } = require("../utils/messageTemplateUpdate");
+const { addOnStatusUpdateEmail } = require("../utils/addOnEmailTemplate");
 
 /**
  * Update the status of the add ons request
@@ -155,6 +156,17 @@ const update = async (req, res, next) => {
           messageBody.message,
         );
       }
+      const mailTemplate = addOnStatusUpdateEmail(
+        `${oldGuest.firstName} ${oldGuest.lastName}`,
+        `${updatedAddOnsRequest.name}`,
+        requestStatus,
+        property.name,
+      );
+      sendMail(
+        property.email,
+        `Add On ${updatedAddOnsRequest.name} ${requestStatus}`,
+        mailTemplate,
+      );
 
       // Update the chat list
       chatList = await chatListService.update(

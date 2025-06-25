@@ -17,6 +17,7 @@ const {
   houseKeepingRequestMailTemplate,
   sendMail,
 } = require("../utils/mail.util");
+const { addOnStatusUpdateEmail } = require("../utils/addOnEmailTemplate");
 const {
   ValidationError,
   APIError,
@@ -250,6 +251,18 @@ const updateStatus = async (req, res, next) => {
     const guest = await guestService.getById(
       updatedHouseKeepingRequest.guestId,
       updatedHouseKeepingRequest.propertyId,
+    );
+    const { property } = await propertyService.getById(propertyId);
+    const mailTemplate = addOnStatusUpdateEmail(
+      `${guest.firstName} ${guest.lastName}`,
+      "House Keeping",
+      requestStatus,
+      property.name,
+    );
+    sendMail(
+      property.email,
+      `House Keeping Request ${requestStatus}`,
+      mailTemplate,
     );
     if (!guest) {
       throw new NotFoundError("Guest not found", {});
