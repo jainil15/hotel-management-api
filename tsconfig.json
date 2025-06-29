@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",                         // Modern JS features like optional chaining
+    "module": "CommonJS",                       // Required for Node.js (require/exports)
+    "rootDir": "./",                            // Root directory for your source files
+    "outDir": "./dist",                         // Output directory after compilation
+    "moduleResolution": "node",                 // Resolve modules like Node.js does
+    "esModuleInterop": true,                    // Allow default imports from CommonJS modules
+    "forceConsistentCasingInFileNames": true,   // Avoid issues on case-sensitive filesystems
+    "strict": true,                             // Enable all strict type-checking
+    "skipLibCheck": true,                       // Skip checking type definitions
+    "resolveJsonModule": true,                  // Enable importing `.json` files
+    "types": ["node", "express"],               // Auto-import Node & Express types
+    "allowJs": true,                            // So you can mix JS/TS during migration
+    "checkJs": false                            // Don't type-check `.js` files
+  },
+  "include": ["./**/*.ts", "./**/*.js"],
+  "exclude": ["node_modules", "dist"]
+}
+

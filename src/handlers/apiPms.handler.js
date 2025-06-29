@@ -1510,6 +1510,7 @@ const sendSmsOnNewPhoneNumber = async (
   session,
 ) => {
   if (existingGuest.phoneNumber === "" && updatedGuest.phoneNumber !== "") {
+    console.log("Sending SMS on new phone number");
     const messageTemplate = await messageTemplateService.getByNameAndPropertyId(
       updatedGuest.propertyId,
       guestStatusToTemplateOnCreate(updatedGuestStatus),
@@ -1847,4 +1848,7 @@ module.exports = {
   checkInUpdate,
   checkOut,
   roomStatusUpdate,
+  sendSmsOnNewPhoneNumber,
+  sendSmsOnPhoneNumberChange,
+  sendSmsOnCheckInOrCheckOutTimeChange,
 };
