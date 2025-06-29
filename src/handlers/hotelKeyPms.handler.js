@@ -16,7 +16,10 @@ const chatListService = require("../services/chatList.service");
 const propertyService = require("../services/property.service");
 const houseKeepingRequestService = require("../services/houseKeepingRequest.service");
 const guestSessionService = require("../services/guestSession.service");
-const { modifyMessageTemplateBody } = require("../utils/messageTemplateUpdate");
+const {
+  modifyMessageTemplateBody,
+  modifyAddOnsMessageTemplateBody,
+} = require("../utils/messageTemplateUpdate");
 const {
   sendSmsOnNewPhoneNumber,
   sendSmsOnPhoneNumberChange,
@@ -1268,7 +1271,7 @@ const houseKeepingUpdate = async (houseKeepingData, propertyId, req) => {
     if (houseKeepingStatus === WEBHOOK_ROOM_STATUS_CODE.MARK_CLEAN) {
       const updatedHouseKeepingRequest =
         await houseKeepingRequestService.update(
-          houseKeepingRequests[0]._id,
+          houseKeepingRequest[0]._id,
           {
             requestStatus: REQUEST_STATUS.COMPLETED,
           },
@@ -1288,15 +1291,15 @@ const houseKeepingUpdate = async (houseKeepingData, propertyId, req) => {
       req.app.io
         .to(`property:${updatedHouseKeepingRequest.propertyId}`)
         .emit("chatList:update", { chatList });
+      req.app.io
+        .to(`property:${existingGuest.propertyId}`)
+        .emit("addOn:newAddon", {
+          count: 1,
+        });
     }
-    req.app.io
-      .to(`property:${existingGuest.propertyId}`)
-      .emit("addOn:newAddon", {
-        count: 1,
-      });
     await session.commitTransaction();
     session.endSession();
-    return roomStatus;
+    return houseKeepingRequest[0];
   } catch (e) {
     console.log(e);
     await session.abortTransaction();
@@ -1590,18 +1593,16 @@ const handleUpdateGuest = async (folio, propertyId, req) => {
 
 const getGuestDetails = (folio, propertyId) => {
   const { reservation } = folio;
+  const { phoneNumber, countryCode } = getPhoneNumberAndCountryCode(
+    reservation.guest_info.phone,
+    reservation.guest_info.country,
+  );
   const guestDetails = {
     firstName: reservation.guest_info.first_name,
     lastName: reservation.guest_info.last_name,
     email: reservation.guest_info.email,
-    phoneNumber: reservation.guest_info.phone,
-    countryCode: reservation.guest_info.country
-      ? countries.find(
-          (c) =>
-            c.iso2.toLowerCase() ===
-            reservation.guest_info.country.toLowerCase(),
-        )?.dialCode || "+1"
-      : "+1",
+    phoneNumber: phoneNumber,
+    countryCode: countryCode,
     pmsId: reservation.guest_info.guest_id,
     source: reservation.source_detail.name,
     checkIn: new Date(reservation.check_in_date),
@@ -1609,6 +1610,19 @@ const getGuestDetails = (folio, propertyId) => {
     roomNumber: reservation.room_number,
     active: true,
   };
+  const { booking_status: bookingStatus } = reservation;
+  const guestStatusDetails = {
+    currentStatus: mapBookingStatusToGuestStatus(bookingStatus),
+    reservationStatus: mapReservationStatus(bookingStatus),
+  };
+  if (
+    guestDetails.phoneNumber === "" &&
+    guestStatusDetails.currentStatus === GUEST_CURRENT_STATUS.RESERVED
+  ) {
+    guestDetails.draft = true;
+  } else {
+    guestDetails.draft = false;
+  }
   return guestDetails;
 };
 
@@ -1630,6 +1644,37 @@ const getGuestStatusDetails = (folio, propertyId) => {
     reservationStatus: mapReservationStatus(bookingStatus),
   };
   return guestStatusDetails;
+};
+const getPhoneNumberAndCountryCode = (phoneNumber, country) => {
+  console.log("Phone Number:", phoneNumber);
+  if (!phoneNumber) {
+    return {
+      phoneNumber: "",
+      countryCode: "",
+    };
+  }
+  const phone = phoneNumber.slice(phoneNumber.length - 10, phoneNumber.length);
+  const cCode = phoneNumber.slice(0, phoneNumber.length - 10);
+  if (phone === "") {
+    return {
+      phoneNumber: "",
+      countryCode: "",
+    };
+  }
+  if (cCode) {
+    return {
+      phoneNumber: phone,
+      countryCode: cCode,
+    };
+  }
+  const countryCode = country
+    ? countries.find((c) => c.iso2.toLowerCase() === country.toLowerCase())
+        ?.dialCode || "+1"
+    : "+1";
+  return {
+    phoneNumber: phoneNumber,
+    countryCode: countryCode,
+  };
 };
 module.exports = {
   createReservation,
