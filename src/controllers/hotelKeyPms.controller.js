@@ -10,6 +10,7 @@ const propertyService = require("../services/property.service.js");
 
 const reservationDispatcher = async (req, res, next) => {
   try {
+    console.log(req.headers);
     const payload = req.body;
     console.log("PayLoad - ", payload);
     const pmsId = payload.property_code;
@@ -31,6 +32,7 @@ const reservationDispatcher = async (req, res, next) => {
       updatedGuest,
     });
   } catch (e) {
+    console.log(e);
     if (e instanceof APIError) {
       return next(e);
     }
@@ -62,6 +64,7 @@ const houseKeepingDispatcher = async (req, res, next) => {
       message: "Housekeeping request updated successfully",
     });
   } catch (e) {
+    console.log(e);
     if (e instanceof APIError) {
       return next(e);
     }

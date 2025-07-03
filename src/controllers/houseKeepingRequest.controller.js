@@ -45,6 +45,7 @@ const {
   modifyAddOnsMessageTemplateBody,
 } = require("../utils/messageTemplateUpdate.js");
 const { ADD_ONS_STATUS } = require("../constants/addOns.constant.js");
+const { PMS_TYPE } = require("../constants/setting.constant");
 
 const create = async (req, res, next) => {
   const session = await mongoose.startSession();
@@ -109,18 +110,8 @@ const create = async (req, res, next) => {
     if (type === "houseKeeping") {
       // Extract room number from guest (or from options if needed)
       const roomNumber = guest.roomNumber;
-      if (property.property.pmsId && guest.pmsId) {
-        const propertySetting =
-          await settingService.getByPropertyId(propertyId);
-        const asiPmsResponse = await asiPmsService.changeRoomStatus(
-          property.property.pmsId,
-          propertySetting.asiApplicationId,
-          propertySetting.asiSecurityKey,
-          roomNumber,
-          ROOM_STATUS_CODE.IN_HOUSE_DIRTY,
-        );
-        console.log(asiPmsResponse);
-      }
+      const propertySetting = await settingService.getByPropertyId(propertyId);
+      await sendPmsRequest(property, guest, propertySetting, roomNumber);
     }
     const message = houseKeepingRequestMailTemplate(guest);
     sendMail(
@@ -370,6 +361,32 @@ const get = async (req, res, next) => {
     }
     return next(new InternalServerError(e.message));
   }
+};
+const sendPmsRequest = async (property, guest, propertySetting, roomNumber) => {
+  let result;
+  if (property.property.pmsId && guest.pmsId) {
+    switch (propertySetting.pmsType) {
+      case PMS_TYPE.ASI: {
+        result = await asiPmsService.changeRoomStatus(
+          property.property.pmsId,
+          propertySetting.asiApplicationId,
+          propertySetting.asiSecurityKey,
+          roomNumber,
+          ROOM_STATUS_CODE.IN_HOUSE_DIRTY,
+        );
+        break;
+      }
+      case PMS_TYPE.HOTEL_KEY:
+        {
+        }
+        break;
+      default:
+        throw new ValidationError("Unsupported PMS type", {
+          pmsType: propertySetting.pmsType,
+        });
+    }
+  }
+  return result;
 };
 
 module.exports = {
