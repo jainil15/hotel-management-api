@@ -873,7 +873,7 @@ const reservationNoShow = async (folio, pmsId, propertyId, req) => {
       });
     }
     const guestStatusData = {
-      reservationStatus: RESERVATION_STATUS.CANCELLED,
+      reservationStatus: RESERVATION_STATUS.NO_SHOW,
     };
     const oldGuestStatus = await guestStatusService.getByGuestId(guest._id);
     const updatedGuestStatus = await guestStatusService.update(
@@ -910,7 +910,7 @@ const reservationNoShow = async (folio, pmsId, propertyId, req) => {
 };
 
 /**
- * @description Cancel/No Show reservation
+ * @description Cancel reservation
  * @param {object} folio - folio
  * @param {string} pmsId - pmsId
  * @param {string} propertyId - propertyId

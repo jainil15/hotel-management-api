@@ -34,9 +34,14 @@ const folioDispatcher = async (req, res, next) => {
             await pmsHandler.bookingUpdate(folio, pmsId, propertyId, req),
           );
           break;
-        case "Booking-NoShowCancel":
+        case "Booking-NoShow":
           result.push(
-            await pmsHandler.bookingNoShowCancel(folio, pmsId, propertyId, req),
+            await pmsHandler.bookingNoShow(folio, pmsId, propertyId, req),
+          );
+          break;
+        case "Booking-Cancel":
+          result.push(
+            await pmsHandler.bookingCancel(folio, pmsId, propertyId, req),
           );
           break;
         case "Reservation-Create":
@@ -49,14 +54,14 @@ const folioDispatcher = async (req, res, next) => {
             await pmsHandler.reservationUpdate(folio, pmsId, propertyId, req),
           );
           break;
-        case "Reservation-NoShowCancel":
+        case "Reservation-NoShow":
           result.push(
-            await pmsHandler.reservationNoShowCancel(
-              folio,
-              pmsId,
-              propertyId,
-              req,
-            ),
+            await pmsHandler.reservationNoShow(folio, pmsId, propertyId, req),
+          );
+          break;
+        case "Reservation-Cancel":
+          result.push(
+            await pmsHandler.reservationCancel(folio, pmsId, propertyId, req),
           );
           break;
         case "CheckIn-Create":
