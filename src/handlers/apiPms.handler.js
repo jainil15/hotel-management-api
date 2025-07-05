@@ -278,7 +278,7 @@ const bookingUpdate = async (folio, pmsId, propertyId, req) => {
  * @returns {object} - guest
  * @throws {Error} - Error
  */
-const bookingNoShowCancel = async (folio, pmsId, propertyId, req) => {
+const bookingCancel = async (folio, pmsId, propertyId, req) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
@@ -364,6 +364,102 @@ const bookingNoShowCancel = async (folio, pmsId, propertyId, req) => {
     req.app.io.to(`property:${propertyId}`).emit("guest:guestUpdate", {
       guest: { ...upsertedGuest._doc, status: { ...updatedGuestStatus._doc } },
     });
+    return { ...guest._doc, status: { ...updatedGuestStatus._doc } };
+  } catch (e) {
+    console.log(e);
+    await session.abortTransaction();
+    session.endSession();
+    throw e;
+  }
+};
+
+const bookingNoShow = async (folio, pmsId, propertyId, req) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const {
+      FolioInformation,
+      BusinessSource,
+      GroupInformation,
+      GuestInformation,
+      StayInformation,
+    } = folio;
+    console.log(folio, pmsId, propertyId);
+    const guestPmsId = GuestInformation.GuestID;
+    const country =
+      GuestInformation.HomeAddress.Country ||
+      GuestInformation.BusinessAddress.Country ||
+      GuestInformation.BusinessAddress.Country;
+    const email =
+      GuestInformation.ContactInformation.HomeEmail ||
+      GuestInformation.ContactInformation.BusinessEmail ||
+      GuestInformation.ContactInformation.OtherEmail;
+    const number =
+      GuestInformation.ContactInformation.HomePhone ||
+      GuestInformation.ContactInformation.BusinessPhone ||
+      GuestInformation.ContactInformation.OtherPhone ||
+      GuestInformation.ContactInformation.CellPhone;
+    const guestData = {
+      propertyId: propertyId,
+      firstName: GuestInformation.GuestName.FirstName,
+      lastName: GuestInformation.GuestName.LastName,
+      email: email,
+      source: BusinessSource.Name || BusinessSource.Category,
+      checkIn: `${StayInformation.CheckInDate}Z`,
+      checkOut: `${StayInformation.CheckOutDate}Z`,
+      roomNumber: StayInformation.Room,
+      confirmationNumber: FolioInformation.Number,
+      draft: true,
+      pmsId: GuestInformation.GuestID,
+    };
+    if (number) {
+      const { countryCode, phoneNumber } = await getCountryCodeAndPhoneNumber(
+        propertyId,
+        number,
+        country,
+      );
+      guestData.phoneNumber = phoneNumber;
+      guestData.countryCode = countryCode;
+    }
+    const guestStatusData = {
+      currentStatus: GUEST_CURRENT_STATUS.RESERVED,
+      reservationStatus: RESERVATION_STATUS.NO_SHOW,
+    };
+    const guest = await guestService.getByGuestPmsId(propertyId, guestPmsId);
+    console.log(guest);
+    if (!guest) {
+      throw new NotFoundError("Guest not found", {
+        guestId: ["Guest not found for the given id"],
+      });
+    }
+    const upsertedGuest = await guestService.upsert(
+      guestPmsId,
+      guestData,
+      propertyId,
+      session,
+    );
+    const guestStatus = await guestStatusService.getByGuestId(guest._id);
+    if (!guestStatus) {
+      throw new NotFoundError("Guest status not found", {
+        guestId: ["Guest status not found for the given id"],
+      });
+    }
+    console.log(guest._id);
+    const updatedGuestStatus = await guestStatusService.update(
+      guest._id,
+      guestStatusData,
+      session,
+    );
+
+    // Emit to guest list updated
+    await session.commitTransaction();
+    session.endSession();
+
+    // Emit to guest list updated
+    req.app.io.to(`property:${propertyId}`).emit("guest:guestUpdate", {
+      guest: { ...upsertedGuest._doc, status: { ...updatedGuestStatus._doc } },
+    });
+
     return { ...guest._doc, status: { ...updatedGuestStatus._doc } };
   } catch (e) {
     console.log(e);
@@ -703,6 +799,117 @@ const reservationUpdate = async (folio, pmsId, propertyId, req) => {
 };
 
 /**
+ * @description No Show reservation
+ * @param {object} folio - folio
+ * @param {string} pmsId - pmsId
+ * @param {string} propertyId - propertyId
+ * @param {object} req - req
+ * @returns {object} - guest object
+ * @throws {Error}
+ */
+const reservationNoShow = async (folio, pmsId, propertyId, req) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const {
+      FolioInformation,
+      BusinessSource,
+      GroupInformation,
+      GuestInformation,
+      StayInformation,
+    } = folio;
+    console.log(folio, pmsId, propertyId);
+    const guestPmsId = GuestInformation.GuestID;
+    const country =
+      GuestInformation.HomeAddress.Country ||
+      GuestInformation.BusinessAddress.Country ||
+      GuestInformation.BusinessAddress.Country;
+    const number =
+      GuestInformation.ContactInformation.HomePhone ||
+      GuestInformation.ContactInformation.BusinessPhone ||
+      GuestInformation.ContactInformation.OtherPhone ||
+      GuestInformation.ContactInformation.CellPhone;
+    const email =
+      GuestInformation.ContactInformation.HomeEmail ||
+      GuestInformation.ContactInformation.BusinessEmail ||
+      GuestInformation.ContactInformation.OtherEmail;
+    const { countryCode, phoneNumber } = await getCountryCodeAndPhoneNumber(
+      propertyId,
+      number,
+      country,
+    );
+    const guestData = {
+      propertyId: propertyId,
+      firstName: GuestInformation.GuestName.FirstName,
+      lastName: GuestInformation.GuestName.LastName,
+      email: email,
+      source: BusinessSource.Name || BusinessSource.Category,
+      checkIn: `${StayInformation.CheckInDate}Z`,
+      checkOut: `${StayInformation.CheckOutDate}Z`,
+      roomNumber: StayInformation.Room,
+      confirmationNumber: FolioInformation.Number,
+      phoneNumber: phoneNumber,
+      countryCode: countryCode,
+      draft: false,
+      pmsId: GuestInformation.GuestID,
+    };
+    const guest = await guestService.getByGuestPmsId(propertyId, guestPmsId);
+    if (!guest) {
+      throw new NotFoundError("Guest not found", {
+        guestId: ["Guest not found for the given id"],
+      });
+    }
+    const upsertedGuest = await guestService.upsert(
+      guestPmsId,
+      guestData,
+      propertyId,
+      session,
+    );
+    console.log(guest._id);
+    const guestStatus = await guestStatusService.getByGuestId(guest._id);
+    if (!guestStatus) {
+      throw new NotFoundError("Guest status not found", {
+        guestId: ["Guest status not found for the given id"],
+      });
+    }
+    const guestStatusData = {
+      reservationStatus: RESERVATION_STATUS.CANCELLED,
+    };
+    const oldGuestStatus = await guestStatusService.getByGuestId(guest._id);
+    const updatedGuestStatus = await guestStatusService.update(
+      guest._id,
+      guestStatusData,
+      session,
+    );
+    const guestSession = await guestSessionService.getGuestSession(
+      propertyId,
+      guest._id,
+    );
+    const { property } = await propertyService.getById(propertyId);
+
+    // Emit to guest list updated
+    await session.commitTransaction();
+    session.endSession();
+
+    // Emit to guest list updated
+    req.app.io.to(`property:${propertyId}`).emit("guest:guestUpdate", {
+      guest: { ...upsertedGuest._doc, status: { ...updatedGuestStatus._doc } },
+    });
+    req.app.io.to(`guest:${upsertedGuest._id}`).emit("message:newMessage", {
+      message: {},
+    });
+    // Emit to chat list updated
+    req.app.io.to(`property:${propertyId}`).emit("chatList:update", {});
+    return { ...guest._doc, status: { ...updatedGuestStatus._doc } };
+  } catch (e) {
+    console.log(e);
+    await session.abortTransaction();
+    session.endSession();
+    throw e;
+  }
+};
+
+/**
  * @description Cancel/No Show reservation
  * @param {object} folio - folio
  * @param {string} pmsId - pmsId
@@ -711,7 +918,7 @@ const reservationUpdate = async (folio, pmsId, propertyId, req) => {
  * @returns {object} - guest object
  * @throws {Error}
  */
-const reservationNoShowCancel = async (folio, pmsId, propertyId, req) => {
+const reservationCancel = async (folio, pmsId, propertyId, req) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
@@ -1736,23 +1943,15 @@ const sendSmsAddOnsCompleted = async (propertyId, guest, session) => {
  * @param {string} country - Optional country name to determine the country code if not present in the number.
  * @returns {Promise<{countryCode: string, phoneNumber: string}>} - An object containing the country code and phone number.
  */
-const getCountryCodeAndPhoneNumber = async (propertyId, number, country) => {
-  let countryCode = number.slice(0, number.length - 10).trim();
-  const phoneNumber = number.slice(number.length - 10).trim();
-  if (!countryCode || countryCode === "" || !countryCode.startsWith("+")) {
-    if (country) {
-      countryCode = `+${
-        countryFileFull.find((c) => c.name === country)?.phone_code
-      }`;
-    } else {
-      const { property } = await propertyService.getById(propertyId);
-      countryCode = `+${
-        countryFileFull.find((c) => c.name === property.country)?.phone_code
-      }`;
-    }
+const getCountryCodeAndPhoneNumber = (propertyId, number, country) => {
+  if (number.split(" ").length > 1) {
+    const [countryCode, phoneNumber] = number.split(" ");
+    return { countryCode, phoneNumber };
   }
-  console.log(countryCode, phoneNumber);
-  return { countryCode, phoneNumber };
+  return {
+    countryCode: "+1",
+    phoneNumber: number,
+  };
 };
 
 /**
@@ -1840,10 +2039,12 @@ const sendSmsOnCheckInOrCheckOutTimeChange = async (
 module.exports = {
   bookingCreate,
   bookingUpdate,
-  bookingNoShowCancel,
+  bookingNoShow,
+  bookingCancel,
   reservationCreate,
   reservationUpdate,
-  reservationNoShowCancel,
+  reservationNoShow,
+  reservationCancel,
   checkInCreate,
   checkInUpdate,
   checkOut,

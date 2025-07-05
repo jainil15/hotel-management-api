@@ -1623,18 +1623,18 @@ const getGuestDetails = (folio, propertyId) => {
     reservation.guest_info.country,
   );
   const guestDetails = {
-    firstName: reservation.guest_info.first_name,
-    lastName: reservation.guest_info.last_name,
-    email: reservation.guest_info.email,
+    firstName: reservation?.guest_info?.first_name,
+    lastName: reservation?.guest_info?.last_name,
+    email: reservation?.guest_info?.email,
     phoneNumber: phoneNumber,
     countryCode: countryCode,
-    pmsId: reservation.guest_info.guest_id,
-    source: reservation.source_detail.name,
-    checkIn: new Date(reservation.check_in_date),
-    checkOut: new Date(reservation.check_out_date),
-    roomNumber: reservation.room_number,
+    pmsId: reservation?.guest_info?.guest_id,
+    source: reservation?.source_detail?.name,
+    checkIn: new Date(reservation?.check_in_date),
+    checkOut: new Date(reservation?.check_out_date),
+    roomNumber: reservation?.room_number,
     active: true,
-    confirmationNumber: reservation.external_reference_id,
+    confirmationNumber: reservation?.external_reference_id,
   };
   const { booking_status: bookingStatus } = reservation;
   const guestStatusDetails = {
