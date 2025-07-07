@@ -12,6 +12,7 @@ const messageTemplateService = require("../services/messageTemplate.service");
 const smsService = require("../services/sms.service");
 const settingService = require("../services/setting.service");
 const houseKeepingUtil = require("../utils/houseKeeping.util");
+const hotelKeyPmsService = require("../services/hotelKeyPms.service");
 const { ROOM_STATUS_CODE } = require("../constants/asi.constant");
 const {
   houseKeepingRequestMailTemplate,
@@ -378,6 +379,7 @@ const sendPmsRequest = async (property, guest, propertySetting, roomNumber) => {
       }
       case PMS_TYPE.HOTEL_KEY:
         {
+          result = await hotelKeyPmsService.change;
         }
         break;
       default:

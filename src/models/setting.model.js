@@ -18,6 +18,10 @@ const settingSchema = new Schema(
     pmsEnabled: { type: Boolean, default: false },
     asiApplicationId: { type: String, default: null },
     asiSecurityKey: { type: String, default: null },
+    hotelKey: {
+      userName: { type: String, default: null },
+      password: { type: String, default: null },
+    },
   },
   { timestamps: true },
 );
@@ -40,6 +44,12 @@ const SettingValidationSchema = z.object({
   pmsEnabled: z.boolean().optional(),
   asiApplicationId: z.string().optional(),
   asiSecurityKey: z.string().optional(),
+  hotelKey: z
+    .object({
+      userName: z.string().optional(),
+      password: z.string().optional(),
+    })
+    .optional(),
 });
 const UpdateSettingValidationSchema = z.object({
   timezone: z.string().optional(),
@@ -68,6 +78,12 @@ const UpdateSettingValidationSchema = z.object({
   pmsEnabled: z.boolean().optional(),
   asiApplicationId: z.string().optional(),
   asiSecurityKey: z.string().optional(),
+  hotelKey: z
+    .object({
+      userName: z.string().optional(),
+      password: z.string().optional(),
+    })
+    .optional(),
 });
 /**
  * @typedef {import("mongoose").Model<Setting>} Setting
