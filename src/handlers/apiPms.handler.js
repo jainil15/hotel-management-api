@@ -96,7 +96,7 @@ const bookingCreate = async (folio, pmsId, propertyId, req) => {
       StayInformation,
     } = folio;
     console.log(folio, pmsId, propertyId);
-    const guestPmsId = GuestInformation.GuestID;
+    const guestPmsId = FolioInformation.Number;
     const country =
       GuestInformation.HomeAddress.Country ||
       GuestInformation.BusinessAddress.Country ||
@@ -121,7 +121,7 @@ const bookingCreate = async (folio, pmsId, propertyId, req) => {
       roomNumber: StayInformation.Room,
       confirmationNumber: FolioInformation.Number,
       draft: true,
-      pmsId: GuestInformation.GuestID,
+      pmsId: FolioInformation.Number,
     };
     if (number) {
       const { countryCode, phoneNumber } = await getCountryCodeAndPhoneNumber(
@@ -197,7 +197,7 @@ const bookingUpdate = async (folio, pmsId, propertyId, req) => {
       StayInformation,
     } = folio;
     console.log(folio, pmsId, propertyId);
-    const guestPmsId = GuestInformation.GuestID;
+    const guestPmsId = FolioInformation.Number;
     const country =
       GuestInformation.HomeAddress.Country ||
       GuestInformation.BusinessAddress.Country ||
@@ -222,7 +222,7 @@ const bookingUpdate = async (folio, pmsId, propertyId, req) => {
       roomNumber: StayInformation.Room,
       confirmationNumber: FolioInformation.Number,
       draft: true,
-      pmsId: GuestInformation.GuestID,
+      pmsId: FolioInformation.Number,
     };
     if (number) {
       const { countryCode, phoneNumber } = await getCountryCodeAndPhoneNumber(
@@ -290,7 +290,7 @@ const bookingCancel = async (folio, pmsId, propertyId, req) => {
       StayInformation,
     } = folio;
     console.log(folio, pmsId, propertyId);
-    const guestPmsId = GuestInformation.GuestID;
+    const guestPmsId = FolioInformation.Number;
     const country =
       GuestInformation.HomeAddress.Country ||
       GuestInformation.BusinessAddress.Country ||
@@ -315,7 +315,7 @@ const bookingCancel = async (folio, pmsId, propertyId, req) => {
       roomNumber: StayInformation.Room,
       confirmationNumber: FolioInformation.Number,
       draft: true,
-      pmsId: GuestInformation.GuestID,
+      pmsId: FolioInformation.Number,
     };
     if (number) {
       const { countryCode, phoneNumber } = await getCountryCodeAndPhoneNumber(
@@ -385,7 +385,7 @@ const bookingNoShow = async (folio, pmsId, propertyId, req) => {
       StayInformation,
     } = folio;
     console.log(folio, pmsId, propertyId);
-    const guestPmsId = GuestInformation.GuestID;
+    const guestPmsId = FolioInformation.Number;
     const country =
       GuestInformation.HomeAddress.Country ||
       GuestInformation.BusinessAddress.Country ||
@@ -410,7 +410,7 @@ const bookingNoShow = async (folio, pmsId, propertyId, req) => {
       roomNumber: StayInformation.Room,
       confirmationNumber: FolioInformation.Number,
       draft: true,
-      pmsId: GuestInformation.GuestID,
+      pmsId: FolioInformation.Number,
     };
     if (number) {
       const { countryCode, phoneNumber } = await getCountryCodeAndPhoneNumber(
@@ -489,7 +489,7 @@ const reservationCreate = async (folio, pmsId, propertyId, req) => {
       StayInformation,
     } = folio;
     console.log(folio, pmsId, propertyId);
-    const guestPmsId = GuestInformation.GuestID;
+    const guestPmsId = FolioInformation.Number;
     const country =
       GuestInformation.HomeAddress.Country ||
       GuestInformation.BusinessAddress.Country ||
@@ -521,7 +521,7 @@ const reservationCreate = async (folio, pmsId, propertyId, req) => {
       phoneNumber: phoneNumber,
       countryCode: countryCode,
       draft: false,
-      pmsId: GuestInformation.GuestID,
+      pmsId: FolioInformation.Number,
     };
     const guestStatusData = {
       currentStatus: GUEST_CURRENT_STATUS.RESERVED,
@@ -658,7 +658,7 @@ const reservationUpdate = async (folio, pmsId, propertyId, req) => {
       StayInformation,
     } = folio;
     console.log(folio, pmsId, propertyId);
-    const guestPmsId = GuestInformation.GuestID;
+    const guestPmsId = FolioInformation.Number;
     const country =
       GuestInformation.HomeAddress.Country ||
       GuestInformation.BusinessAddress.Country ||
@@ -690,7 +690,7 @@ const reservationUpdate = async (folio, pmsId, propertyId, req) => {
       phoneNumber: phoneNumber,
       countryCode: countryCode,
       draft: false,
-      pmsId: GuestInformation.GuestID,
+      pmsId: FolioInformation.Number,
     };
     const guestStatusData = {
       currentStatus: GUEST_CURRENT_STATUS.RESERVED,
@@ -819,7 +819,7 @@ const reservationNoShow = async (folio, pmsId, propertyId, req) => {
       StayInformation,
     } = folio;
     console.log(folio, pmsId, propertyId);
-    const guestPmsId = GuestInformation.GuestID;
+    const guestPmsId = FolioInformation.Number;
     const country =
       GuestInformation.HomeAddress.Country ||
       GuestInformation.BusinessAddress.Country ||
@@ -851,7 +851,7 @@ const reservationNoShow = async (folio, pmsId, propertyId, req) => {
       phoneNumber: phoneNumber,
       countryCode: countryCode,
       draft: false,
-      pmsId: GuestInformation.GuestID,
+      pmsId: FolioInformation.Number,
     };
     const guest = await guestService.getByGuestPmsId(propertyId, guestPmsId);
     if (!guest) {
@@ -930,7 +930,7 @@ const reservationCancel = async (folio, pmsId, propertyId, req) => {
       StayInformation,
     } = folio;
     console.log(folio, pmsId, propertyId);
-    const guestPmsId = GuestInformation.GuestID;
+    const guestPmsId = FolioInformation.Number;
     const country =
       GuestInformation.HomeAddress.Country ||
       GuestInformation.BusinessAddress.Country ||
@@ -962,7 +962,7 @@ const reservationCancel = async (folio, pmsId, propertyId, req) => {
       phoneNumber: phoneNumber,
       countryCode: countryCode,
       draft: false,
-      pmsId: GuestInformation.GuestID,
+      pmsId: FolioInformation.Number,
     };
     const guest = await guestService.getByGuestPmsId(propertyId, guestPmsId);
     if (!guest) {
@@ -1085,7 +1085,7 @@ const checkInCreate = async (folio, pmsId, propertyId, req) => {
       StayInformation,
     } = folio;
     console.log(folio, pmsId, propertyId);
-    const guestPmsId = GuestInformation.GuestID;
+    const guestPmsId = FolioInformation.Number;
     const country =
       GuestInformation.HomeAddress.Country ||
       GuestInformation.BusinessAddress.Country ||
@@ -1117,7 +1117,7 @@ const checkInCreate = async (folio, pmsId, propertyId, req) => {
       phoneNumber: phoneNumber,
       countryCode: countryCode,
       draft: false,
-      pmsId: GuestInformation.GuestID,
+      pmsId: FolioInformation.Number,
     };
     const guestStatusData = {
       currentStatus: GUEST_CURRENT_STATUS.IN_HOUSE,
@@ -1315,7 +1315,7 @@ const checkInUpdate = async (folio, pmsId, propertyId, req) => {
       StayInformation,
     } = folio;
     console.log(folio, pmsId, propertyId);
-    const guestPmsId = GuestInformation.GuestID;
+    const guestPmsId = FolioInformation.Number;
     const country =
       GuestInformation.HomeAddress.Country ||
       GuestInformation.BusinessAddress.Country ||
@@ -1347,7 +1347,7 @@ const checkInUpdate = async (folio, pmsId, propertyId, req) => {
       phoneNumber: phoneNumber,
       countryCode: countryCode,
       draft: false,
-      pmsId: GuestInformation.GuestID,
+      pmsId: FolioInformation.Number,
     };
     const guestStatusData = {
       currentStatus:
@@ -1498,7 +1498,7 @@ const checkOut = async (folio, pmsId, propertyId, req) => {
       StayInformation,
     } = folio;
     console.log(folio, pmsId, propertyId);
-    const guestPmsId = GuestInformation.GuestID;
+    const guestPmsId = FolioInformation.Number;
     const country =
       GuestInformation.HomeAddress.Country ||
       GuestInformation.BusinessAddress.Country ||
@@ -1530,7 +1530,7 @@ const checkOut = async (folio, pmsId, propertyId, req) => {
       phoneNumber: phoneNumber,
       countryCode: countryCode,
       draft: false,
-      pmsId: GuestInformation.GuestID,
+      pmsId: FolioInformation.Number,
     };
     const guestStatusData = {
       currentStatus: GUEST_CURRENT_STATUS.CHECKED_OUT,
