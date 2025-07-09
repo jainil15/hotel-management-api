@@ -13,7 +13,7 @@ const reservationDispatcher = async (req, res, next) => {
     console.log(req.headers);
     const payload = req.body;
     console.log("PayLoad - ", payload);
-    const pmsId = payload.property_code;
+    const pmsId = payload.property_id;
     const property = await propertyService.findByPmsId(pmsId);
     if (!property) {
       throw new NotFoundError("Property not found");
@@ -42,7 +42,7 @@ const reservationDispatcher = async (req, res, next) => {
 const houseKeepingDispatcher = async (req, res, next) => {
   try {
     const { payload } = req.body;
-    const pmsId = payload.property_code;
+    const pmsId = payload.property_id;
     const property = await propertyService.findByPmsId(pmsId);
     if (!property) {
       throw new NotFoundError("Property not found");
