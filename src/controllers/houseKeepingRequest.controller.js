@@ -372,6 +372,7 @@ const sendPmsRequest = async (property, guest, propertySetting, roomNumber) => {
           property.property.pmsId,
           propertySetting.asiApplicationId,
           propertySetting.asiSecurityKey,
+          propertySetting.asiHouseKeepingUrl,
           roomNumber,
           ROOM_STATUS_CODE.IN_HOUSE_DIRTY,
         );

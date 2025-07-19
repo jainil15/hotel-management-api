@@ -18,6 +18,7 @@ const settingSchema = new Schema(
     pmsEnabled: { type: Boolean, default: false },
     asiApplicationId: { type: String, default: null },
     asiSecurityKey: { type: String, default: null },
+    asiHouseKeepingUrl: { type: String, default: null },
     hotelKey: {
       userName: { type: String, default: null },
       password: { type: String, default: null },

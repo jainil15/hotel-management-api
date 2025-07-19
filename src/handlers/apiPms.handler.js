@@ -1697,7 +1697,6 @@ const roomStatusUpdate = async (roomStatusData, propertyId, req) => {
     console.log(e);
     await session.abortTransaction();
     session.endSession();
-    throw e;
   }
 };
 
