@@ -238,7 +238,7 @@ const updateStatus = async (req, res, next) => {
 
     const updatedHouseKeepingRequest = await houseKeepingService.update(
       requestId,
-      { updatePayload },
+      updatePayload,
     );
     const guest = await guestService.getById(
       updatedHouseKeepingRequest.guestId,
