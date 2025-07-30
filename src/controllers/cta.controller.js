@@ -157,7 +157,7 @@ const contactUs = async (req, res, next) => {
       </div>
     </body>
     </html>`;
-    const companyEmail = "ravi.parmar@onelyk.com";
+    const companyEmail = "admin@onelyk.com";
     Promise.all([
       appendRowToSheet("ContactUs", [
         firstName,
@@ -395,7 +395,7 @@ const bookDemo = async (req, res, next) => {
     </body>
     </html>`;
 
-    const companyEmail = "ravi.parmar@onelyk.com"; // Replace with your company email
+    const companyEmail = "admin@onelyk.com"; // Replace with your company email
 
     await Promise.all([
       appendRowToSheet("BookDemo", [
@@ -533,7 +533,7 @@ const requestTrial = async (req, res, next) => {
     </body>
     </html>`;
 
-    const companyEmail = "ravi.parmar@onelyk.com";
+    const companyEmail = "admin@onelyk.com";
 
     await Promise.all([
       appendRowToSheet("TrialRequest", [
