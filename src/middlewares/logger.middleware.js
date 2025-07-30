@@ -23,9 +23,9 @@ const loggerMiddleware = (req, res, next) => {
           : log;
 
       if (res.statusCode >= 400 && res.statusCode < 500) {
-        logger.warn(JSON.stringify(logBody, null, 2));
+        logger.warn(JSON.stringify(logBody));
       } else if (res.statusCode >= 500) {
-        logger.error(JSON.stringify(logBody, null, 2));
+        logger.error(JSON.stringify(logBody));
       } else {
         logger.http(log);
       }
