@@ -79,7 +79,7 @@ const prodLogger = winston.createLogger({
     new transports.File({
       filename: "logs/error.log",
       level: "error",
-      format: format.combine(format.uncolorize(), format.json()),
+      format: format.combine(format.json()),
     }),
 
     new transports.Console(),
