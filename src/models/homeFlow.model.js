@@ -56,7 +56,7 @@ const homeFlowSchema = new Schema(
           name: "Swimming Pool",
           enabled: true,
           image:
-            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/v2/Swimming-Pool.png",
+            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/v2/Swimming-pool.png",
         },
         {
           name: "Business Center",
@@ -68,7 +68,7 @@ const homeFlowSchema = new Schema(
           name: "On-Site Restaurant/Bar",
           enabled: true,
           image:
-            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/v2/On-Site-Restaurant-Bar.png",
+            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/v2/On-site-Restaurant-Bar.png",
         },
         {
           name: "Concierge Service",
@@ -80,7 +80,7 @@ const homeFlowSchema = new Schema(
           name: "Parking (Free or Paid)",
           enabled: true,
           image:
-            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/v2/Parking-Free-or-Paid.png",
+            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/v2/Parking-Free-Paid.png",
         },
         {
           name: "Air Conditioning/Heating",
@@ -98,25 +98,25 @@ const homeFlowSchema = new Schema(
           name: "Laundry Services",
           enabled: true,
           image:
-            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/v2/Laundry-Services.png",
+            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/v2/Laundry-Service.png",
         },
         {
           name: "Airport Shuttle Service",
           enabled: true,
           image:
-            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/v2/Airport-Shuttle-Service.png",
+            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/v2/Airport-shuttle-Service.png",
         },
         {
           name: "Pet-Friendly Accommodations",
           enabled: true,
           image:
-            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/v2/Pet-Friendly-Accommodations.png",
+            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/v2/Pet-Friendly.png",
         },
         {
           name: "Mini-Bar",
           enabled: true,
           image:
-            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/v2/Mini-Bar.png",
+            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/v2/Mini-bar.png",
         },
         {
           name: "Spa/Wellness Center",
@@ -128,7 +128,7 @@ const homeFlowSchema = new Schema(
           name: "Cable/Satellite TV",
           enabled: true,
           image:
-            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/v2/Cable-Satellite-TV.png",
+            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/v2/Cable-Satellite-Tv.png",
         },
         {
           name: "Luggage Storage",
@@ -152,7 +152,7 @@ const homeFlowSchema = new Schema(
           name: "Refrigrator",
           enabled: true,
           image:
-            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/v2/Refrigrator.png",
+            "https://onelyk-images-bucket.s3.amazonaws.com/amenities/v2/Refrigerator.png",
         },
       ],
     },
