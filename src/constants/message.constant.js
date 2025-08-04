@@ -2,7 +2,7 @@ const messageType = {
   SMS: "SMS",
   REQUEST: "Request",
   ADDONS_REQUEST: "Addons Request",
-  REVIEW_REPLY: "Review Reply"
+  REVIEW_REPLY: "Review Reply",
 };
 
 const messageTriggerType = {
@@ -16,6 +16,7 @@ const requestType = {
   lateCheckOut: "Late Check Out",
   customAddons: "Custom Addons",
   extendStay: "Extend Stay",
+  housekeeping: "Housekeeping",
 };
 
 module.exports = { messageType, messageTriggerType, requestType };

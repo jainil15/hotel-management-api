@@ -3,6 +3,11 @@ const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
 const { awsS3Config } = require("../configs/aws.config");
 const { AddOnsFlow } = require("../models/addOnsFlow.model");
 
+/**
+ * Get AddOnsFlow by propertyId
+ * @param {string} propertyId - Id of the
+ * @returns {Promise<import('../models/addOnsFlow.model.js').AddOnsFlowType>} - The AddOnsFlow object
+ */
 const getByPropertyId = async (propertyId) => {
   const addOnsFlow = await AddOnsFlow.findOne({
     propertyId,

@@ -47,6 +47,7 @@ const {
 } = require("../utils/messageTemplateUpdate.js");
 const { ADD_ONS_STATUS } = require("../constants/addOns.constant.js");
 const { PMS_TYPE } = require("../constants/setting.constant");
+const { sendNotification } = require("./guestApi.controller");
 
 const create = async (req, res, next) => {
   const session = await mongoose.startSession();
@@ -190,6 +191,11 @@ const create = async (req, res, next) => {
         latestMessage: newMessage._id,
       },
       session,
+    );
+    await sendNotification(
+      propertyId,
+      workflow.addOnsFlow.houseKeepingAddOns._id,
+      workflow.addOnsFlow.houseKeepingAddOns,
     );
 
     req.app.io.to(`property:${propertyId}`).emit("chatList:update", {

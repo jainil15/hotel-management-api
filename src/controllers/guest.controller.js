@@ -23,7 +23,7 @@ const chatListService = require("../services/chatList.service");
 const propertyService = require("../services/property.service");
 const checkInOutRequestService = require("../services/checkInOutRequest.service");
 const { modifyMessageTemplateBody } = require("../utils/messageTemplateUpdate");
-const { TIMEZONE } = require("../constants/timezone.constant");
+const { timezones } = require("../constants/timezone.constant");
 const houseKeepingRequestService = require("../services/houseKeepingRequest.service");
 
 const preArrivalService = require("../services/preArrival.service"); // Pre-arrival service

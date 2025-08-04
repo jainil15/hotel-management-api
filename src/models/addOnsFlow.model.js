@@ -269,6 +269,10 @@ const UpdateAddOnsFlowValidationSchema = z.object({
     .optional(),
 });
 
+/**
+ * @typedef {import("mongoose").Model<AddOnsFlow>} AddOnsFlow
+ * @typedef {typeof AddOnsFlow.schema.obj} AddOnsFlowType
+ */
 AddOnsFlow.init().then(() => {
   logger.info("Initialized AddOnsFlow Model");
 });

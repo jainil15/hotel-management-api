@@ -41,6 +41,7 @@ const googleAuthRoutes = require("../routes/googleAuth.route");
 const propertyTokenRoutes = require("../routes/propertyToken.route");
 const hotelKeyPmsRoutes = require("../routes/hotelKeyPms.route");
 const ctaRoutes = require("../routes/cta.route");
+const addOnsNotificationRoutes = require("../routes/addOnsNotification.route");
 
 // Socket imports
 const guestSocket = require("../sockets/guest.socket");
@@ -154,6 +155,7 @@ const createApp = () => {
   app.use("/propertyToken", propertyTokenRoutes);
   app.use("/hotelKeyPms", hotelKeyPmsRoutes);
   app.use("/cta", ctaRoutes);
+  app.use("/addOnsNotification", addOnsNotificationRoutes);
   // Health Check
   app.get("/health", (req, res, next) => {
     return responseHandler(res, {}, 200, "Server is running");

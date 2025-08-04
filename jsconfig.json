@@ -1,8 +1,11 @@
 {
   "compilerOptions": {
     "module": "commonjs",
-    "target": "es6",
-    "checkJs": false
+    "target": "ES2021",
+    "checkJs": false,
+    "allowJs": true,
+    "noEmit": true,
+
   },
   "exclude": [
     "node_modules",

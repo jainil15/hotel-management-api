@@ -23,6 +23,7 @@ const checkInOutRequestService = require("../services/checkInOutRequest.service"
 const guestStatusService = require("../services/guestStatus.service");
 const twilioAccountService = require("../services/twilioAccount.service");
 const smsService = require("../services/sms.service");
+const addOnsNotificationService = require("../services/addOnsNotification.service");
 const settingService = require("../services/setting.service");
 const {
   modifyMessageTemplateBody,
@@ -329,6 +330,11 @@ const createCheckInOutRequest = async (req, res, next) => {
       session,
     );
 
+    await sendNotification(
+      propertyId,
+      checkInOutRequestId,
+      newCheckInOutRequest,
+    );
     await session.commitTransaction();
     await session.endSession();
 
@@ -788,6 +794,11 @@ const createAddOnsRequest = async (req, res, next) => {
       addOnName,
       companyName,
     );
+    await sendNotification(
+      propertyId,
+      createdAddOnsRequest.addOnsId,
+      createdAddOnsRequest,
+    );
     console.log("Property Email :- ", propertyEmail);
     const newMail = mailUtils.sendMail(
       propertyEmail,
@@ -1135,6 +1146,43 @@ const getGuestByPhoneNumber = async (req, res, next) => {
   }
 };
 
+const sendNotification = async (propertyId, addOnId, addOn) => {
+  const addOnsNotification = await addOnsNotificationService.getByAddOnId(
+    propertyId,
+    addOnId,
+  );
+  console.log(addOnsNotification);
+  if (!addOnsNotification) {
+    return;
+  }
+  if (
+    addOnsNotification.enabled &&
+    addOnsNotification.phoneNumber &&
+    addOnsNotification.phoneNumber !== ""
+  ) {
+    const twilioAccount =
+      await twilioAccountService.getByPropertyId(propertyId);
+    const twilioSubClient = await twilioService.getTwilioClient(twilioAccount);
+    smsService.send(
+      twilioSubClient,
+      `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
+      `${addOnsNotification.countryCode}${addOnsNotification.phoneNumber}`,
+      `A new add on request has been made for the: ${addOn.name}.`,
+    );
+  }
+  if (
+    addOnsNotification.enabled &&
+    addOnsNotification.email &&
+    addOnsNotification.email !== ""
+  ) {
+    mailUtils.sendMail(
+      addOnsNotification.email,
+      "New Add On Request",
+      `A new add on request has been made for the: ${addOn.name}.`,
+    );
+  }
+};
+
 module.exports = {
   getGuest,
   getWorkflow,
@@ -1155,4 +1203,5 @@ module.exports = {
   createDndModeRequest,
   getdndmodeRequestStatus,
   getGuestByPhoneNumber,
+  sendNotification,
 };
