@@ -68,9 +68,8 @@ const getForUpdate = async (req, res, next) => {
         addOnId: addOn._id,
         enabled: false,
         type: addOn.name,
-        phoneNumber: "",
-        countryCode: "+1",
-        email: "",
+        phoneNumbers: [],
+        emails: [],
       });
     }
     return responseHandler(res, {

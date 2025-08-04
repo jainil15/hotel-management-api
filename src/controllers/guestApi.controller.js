@@ -72,6 +72,7 @@ const {
   CreateAddOnsRequestValidationSchema,
 } = require("../models/addOnsRequest.model");
 const { GuestStatus } = require("../models/guestStatus.model");
+const logger = require("../configs/winston.config");
 
 /**
  * Get guest
@@ -1157,29 +1158,60 @@ const sendNotification = async (propertyId, addOnId, addOn) => {
   }
   if (
     addOnsNotification.enabled &&
-    addOnsNotification.phoneNumber &&
-    addOnsNotification.phoneNumber !== ""
+    addOnsNotification.phoneNumbers &&
+    addOnsNotification.phoneNumbers.length > 0
   ) {
     const twilioAccount =
       await twilioAccountService.getByPropertyId(propertyId);
     const twilioSubClient = await twilioService.getTwilioClient(twilioAccount);
-    smsService.send(
-      twilioSubClient,
-      `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
-      `${addOnsNotification.countryCode}${addOnsNotification.phoneNumber}`,
-      `A new add on request has been made for the: ${addOn.name}.`,
-    );
+    Promise.allSettled(
+      addOnsNotification.phoneNumbers.map((phoneNumber) =>
+        smsService.send(
+          twilioSubClient,
+          `${twilioAccount.countryCode}${twilioAccount.phoneNumber}`,
+          `${phoneNumber.countryCode}${phoneNumber.phoneNumber}`,
+          `A new add on request has been made for the: ${addOn.name}.`,
+        ),
+      ),
+    ).then((results) => {
+      results.forEach((result) => {
+        if (result.status === "rejected") {
+          logger.error(
+            `Error sending SMS notification: ${JSON.stringify(result.reason)}`,
+          );
+        } else {
+          logger.info(`SMS sent successfully: ${JSON.stringify(result.value)}`);
+        }
+      });
+    });
   }
   if (
     addOnsNotification.enabled &&
-    addOnsNotification.email &&
-    addOnsNotification.email !== ""
+    addOnsNotification.emails &&
+    addOnsNotification.emails !== "" &&
+    addOnsNotification.emails.length > 0
   ) {
-    mailUtils.sendMail(
-      addOnsNotification.email,
-      "New Add On Request",
-      `A new add on request has been made for the: ${addOn.name}.`,
-    );
+    Promise.allSettled(
+      addOnsNotification.emails.map((email) =>
+        mailUtils.sendMail(
+          email,
+          "New Add On Request",
+          `A new add on request has been made for the: ${addOn.name}.`,
+        ),
+      ),
+    ).then((results) => {
+      results.forEach((result) => {
+        if (result.status === "rejected") {
+          logger.error(
+            `Error sending email notification: ${JSON.stringify(result.reason)}`,
+          );
+        } else {
+          logger.info(
+            `Email sent successfully: ${JSON.stringify(result.value)}`,
+          );
+        }
+      });
+    });
   }
 };
 

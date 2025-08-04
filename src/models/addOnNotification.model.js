@@ -19,16 +19,22 @@ const AddOnNotifictionDetails = new Schema(
       type: Boolean,
       default: true,
     },
-    email: {
-      type: String,
+    emails: {
+      type: [String],
       lowercase: true,
     },
-    phoneNumber: {
-      type: String,
-    },
-    countryCode: {
-      type: String,
-    },
+    phoneNumbers: [
+      {
+        countryCode: {
+          type: String,
+          default: null,
+        },
+        phoneNumber: {
+          type: String,
+          default: null,
+        },
+      },
+    ],
   },
   {
     timestamps: true,
@@ -52,35 +58,32 @@ const AddOnNotificationSchema = new Schema(
 const UpdateAddOnNotificationSchema = z.object({
   propertyId: z.string().optional(),
   addOnNotifications: z.array(
-    z
-      .object({
-        addOnId: z.string().optional(),
-        enabled: z.boolean().optional(),
-        email: z.string().email().optional(),
-        countryCode: z.string().optional(),
-        phoneNumber: z.string().regex(phoneregex).optional(),
-        type: z.string().optional(),
-      })
-      .superRefine((data, c) => {
-        if (data.phoneNumber && !data.countryCode) {
-          c.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: "Country code is required when phone number is provided.",
-          });
-          return false;
-        }
-        if (data.countryCode && !data.phoneNumber) {
-          c.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: "Phone number is required when country code is provided.",
-          });
-          return false;
-        }
-        return true;
-      }),
+    z.object({
+      addOnId: z.string().optional(),
+      enabled: z.boolean().optional(),
+      emails: z
+        .array(z.string().email())
+        .optional()
+        .transform((emails) => emails.map((email) => email.toLowerCase())),
+      phoneNumbers: z.array(
+        z
+          .object({
+            countryCode: z.string().optional(),
+            phoneNumber: z.string().regex(phoneregex).optional(),
+          })
+          .superRefine((value, ctx) => {
+            if (!value.countryCode && !value.phoneNumber) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "Either countryCode or phoneNumber must be provided",
+              });
+            }
+          }),
+      ),
+      type: z.string().optional(),
+    }),
   ),
 });
-
 /**
  * @typedef {import("mongoose").Model<AddOnNotifictionDetails> } AddOnNotifictionDetails
  * @typedef {typeof AddOnNotifictionDetails.schema.obj} AddOnNotifictionDetailsType
