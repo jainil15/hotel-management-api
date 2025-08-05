@@ -608,6 +608,7 @@ const reservationCreate = async (folio, pmsId, propertyId, req) => {
               latestMessage: newMessage._id,
             },
             session,
+            0,
           );
       }
     }
@@ -1773,6 +1774,7 @@ const sendSmsOnNewPhoneNumber = async (
           latestMessage: message._id,
         },
         session,
+        0,
       );
       return { message, chatList };
     }
@@ -1871,7 +1873,7 @@ const sendSmsOnPhoneNumberChange = async (
           latestMessage: message._id,
         },
         session,
-        2,
+        0,
       );
       return { message, chatList };
     }
@@ -1929,6 +1931,7 @@ const sendSmsAddOnsCompleted = async (propertyId, guest, session) => {
         latestMessage: newMessage._id,
       },
       session,
+      0,
     );
     return { message: newMessage, chatList: updatedChatList };
   }
@@ -2030,6 +2033,7 @@ const sendSmsOnCheckInOrCheckOutTimeChange = async (
         latestMessage: message._id,
       },
       session,
+      0,
     );
     return { message, chatList };
   }

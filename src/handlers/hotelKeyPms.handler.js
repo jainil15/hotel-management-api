@@ -327,6 +327,7 @@ const updateReservationGuest = async (folio, propertyId, req) => {
               latestMessage: newMessage._id,
             },
             session,
+            0,
           );
       }
     }
@@ -565,6 +566,7 @@ const reservationCheckedIn = async (folio, propertyId, req) => {
               latestMessage: newMessage._id,
             },
             session,
+            0,
           );
       }
     }
@@ -678,6 +680,7 @@ const reservationCheckedOut = async (folio, propertyId, req) => {
               latestMessage: newMessage._id,
             },
             session,
+            0,
           );
       }
     }
@@ -791,6 +794,7 @@ const additionalGuestDataChanged = async (folio, propertyId, req) => {
               latestMessage: newMessage._id,
             },
             session,
+            0,
           );
       }
     }
@@ -896,6 +900,7 @@ const arrivalTimeChanged = async (folio, propertyId, req) => {
               latestMessage: newMessage._id,
             },
             session,
+            0,
           );
       }
     }
@@ -999,6 +1004,7 @@ const departureTimeChanged = async (folio, propertyId, req) => {
               latestMessage: newMessage._id,
             },
             session,
+            0,
           );
       }
     }
@@ -1102,6 +1108,7 @@ const checkOutDateChanged = async (folio, propertyId, req) => {
               latestMessage: newMessage._id,
             },
             session,
+            0,
           );
       }
     }
@@ -1368,6 +1375,7 @@ const sendSmsAddOnsCompleted = async (propertyId, guest, session) => {
         latestMessage: newMessage._id,
       },
       session,
+      0,
     );
     return { message: newMessage, chatList: updatedChatList };
   }
@@ -1452,6 +1460,7 @@ const handleCreateGuest = async (folio, propertyId, req) => {
                 latestMessage: newMessage._id,
               },
               session,
+              0,
             );
         }
       } catch (error) {
@@ -1587,6 +1596,7 @@ const handleUpdateGuest = async (folio, propertyId, req) => {
                 latestMessage: newMessage._id,
               },
               session,
+              0,
             );
           req.app.io.to(`guest:${updatedGuest._id}`).emit("chatList:update", {
             chatList: { ...updatedChatList._doc },
