@@ -6,3 +6,4 @@ logs
 .gitignore
 .gitlab-ci.yml
 README.md
+credentials.json
