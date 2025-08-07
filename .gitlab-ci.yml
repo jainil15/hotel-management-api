@@ -1,4 +1,5 @@
 stages:
+  - download-credentials
   - create-env-file
   - build-push-image
   - deploy-to-testing
