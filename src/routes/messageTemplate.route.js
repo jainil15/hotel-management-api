@@ -100,10 +100,10 @@ router.post(
  * @deprecated
  * @description This route is deprecated and will be removed in future versions
  */
-// router.get(
-// 	"/default/create/:propertyId",
-// 	messageTemplateController.createAllDefaultTemplates,
-// );
+router.get(
+  "/default/create/:propertyId",
+  messageTemplateController.updateDefaults,
+);
 
 /**
  * @deprecated

@@ -73,6 +73,7 @@ const {
 } = require("../models/addOnsRequest.model");
 const { GuestStatus } = require("../models/guestStatus.model");
 const logger = require("../configs/winston.config");
+const { sendSmsMessageTemplate } = require("../utils/sms.util");
 
 /**
  * Get guest
@@ -795,6 +796,7 @@ const createAddOnsRequest = async (req, res, next) => {
       addOnName,
       companyName,
     );
+
     await sendNotification(
       propertyId,
       createdAddOnsRequest.addOnsId,
@@ -836,7 +838,18 @@ const createAddOnsRequest = async (req, res, next) => {
         messageBody.message,
       );
     }
-
+    if (addOnsRequest.paid) {
+      await sendSmsMessageTemplate(
+        req,
+        propertyId,
+        twilioAccount,
+        twilioSubClient,
+        guest,
+        createdAddOnsRequest,
+        "Paid AddOns Requested",
+        session,
+      );
+    }
     await session.commitTransaction();
     session.endSession();
     req.app.io.to(`property:${propertyId}`).emit("chatList:update", {

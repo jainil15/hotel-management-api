@@ -95,6 +95,14 @@ Enjoy more time with us—explore amenities, request housekeeping, or share feed
       name: "AddOns Completed",
     },
   },
+
+  "Paid Add Ons": {
+    [ADD_ONS_STATUS.REQUESTED]: {
+      message:
+        "Thank you for requesting the [Service Name] add-on. We will charge your provided credit card on file.",
+      name: "Paid AddOns Requested",
+    },
+  },
   PhoneNumber: {
     Changed: {
       message:
