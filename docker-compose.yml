@@ -12,6 +12,7 @@ services:
       - backend-network
     volumes:
       - ./logs:/app/logs
+      - ./credentials.json:/app/src/data/credentials.json:ro
 networks:
   backend-network:
     driver: bridge

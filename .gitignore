@@ -133,3 +133,4 @@ dist
 
 # Vscode
 .vscode
+credentials.json

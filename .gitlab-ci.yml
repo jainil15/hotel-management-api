@@ -16,6 +16,7 @@ create-env-file:
   script:
     - chmod +x set_env.sh
     - ./set_env.sh
+    - gl-secure-files download 
   artifacts:
     paths:
       - .env
@@ -50,7 +51,8 @@ deploy to testing:
     - chmod 600 ~/.ssh/id_rsa
 
   script:
-    - scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ./docker-compose.yml ./.env $SSH_USER@$SSH_HOST:~/$FOLDER_NAME/
+    
+    - scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ./docker-compose.yml ./.env ./credentials.json $SSH_USER@$SSH_HOST:~/$FOLDER_NAME/
     - ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa $SSH_USER@$SSH_HOST "
       cd $FOLDER_NAME &&
       sudo docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY &&
