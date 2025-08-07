@@ -8,6 +8,13 @@ variables:
   IMAGE_NAME: $CI_REGISTRY_IMAGE
   PORT: 8000
   FOLDER_NAME: "onelyk-nodejs"
+  SECURE_FILES_DOWNLOAD_PATH: "~/"
+
+download-credentials:
+  image: curlimages/curl:latest
+  stage: prepare
+  script:
+    - curl --silent "https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer" | bash
 
 create-env-file:
   environment: testing
@@ -16,7 +23,6 @@ create-env-file:
   script:
     - chmod +x set_env.sh
     - ./set_env.sh
-    - gl-secure-files download 
   artifacts:
     paths:
       - .env
