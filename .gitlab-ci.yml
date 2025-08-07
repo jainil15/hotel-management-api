@@ -21,7 +21,7 @@ create-env-file:
   artifacts:
     paths:
       - .env
-      - credentials.json
+      - .secure_files/credentials.json
     expire_in: 30 min
 
 build-image: # Build stage triggers for all push on every branch for testing
