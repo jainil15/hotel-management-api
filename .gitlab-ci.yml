@@ -13,6 +13,8 @@ create-env-file:
   environment: testing
   stage: create-env-file
   image: ubuntu:22.04
+  variables: 
+    SECURE_FILES_DOWNLOAD_PATH: "~/"
   script:
     - apt-get update && apt-get install -y curl
     - chmod +x set_env.sh
